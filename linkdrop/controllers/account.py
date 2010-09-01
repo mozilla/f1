@@ -53,6 +53,26 @@ the contacts API that uses @me/@self.
             accts = [Session.query(Account).get(id)]
         return [a.to_dict() for a in accts]
 
+    def _get_or_create_account(self, domain, userid, username):
+        user_key = session.get('userkey')
+        # Find or create an account
+        try:
+            acct = Session.query(Account).filter(and_(Account.domain==domain, Account.userid==userid)).one()
+        except NoResultFound:
+            acct = Account()
+            acct.domain = domain
+            acct.userid = userid
+            acct.username = username
+            Session.add(acct)
+
+        if user_key:
+            acct.userkey = user_key
+        else:
+            session['userkey'] = acct.userkey
+            session.save()
+
+        return acct
+
     @json_exception_response
     def oauth_start(self, *args, **kw):
         pylons = get_pylons(args)
@@ -127,19 +147,7 @@ the contacts API that uses @me/@self.
             else:
                 raise ValueError(domain) # can't obtain user information for this provider...
             # Find or create an account
-            try:
-                acct = Session.query(Account).filter(and_(Account.domain==domain, Account.userid==userid)).one()
-            except NoResultFound:
-                acct = Account()
-                acct.domain = domain
-                acct.userid = userid
-                acct.username = username
-                if user_key:
-                    acct.userkey = user_key
-                Session.add(acct)
-                
-            if not user_key:
-                session['userkey'] = acct.userkey
+            acct = self._get_or_create_account(domain, userid, username)
 
             # Update the account with the final tokens and delete the transient ones.
             acct.oauth_token = verified_token.key
@@ -229,24 +237,12 @@ the contacts API that uses @me/@self.
                     # Setup the linkdrop account.
                     facebookid = profile['id']
                     acct_proto = "facebook"
-                    user_key = session.get('userkey')
-                    # Try and find an account to use or create a new one.
-                    try:
-                        acct = Session.query(Account).filter(and_(Account.domain=="facebook.com", Account.userid==facebookid)).one()
-                    except NoResultFound:
-                        acct = Account()
-                        acct.domain = "facebook.com"
-                        acct.userid = facebookid
-                        acct.username = ""
-                        if user_key:
-                            acct.userkey = user_key
-                        else:
-                            session['userkey'] = acct.userkey
-                        Session.add(acct)
+                    
+                    acct = self._get_or_create_account("facebook.com", facebookid, "")
 
                     acct.oauth_token = access_token
                     Session.commit()
-                    session.save()
+
                     fragment = "oauth_success_" + domain
                     redirect_query = "?" + urllib.urlencode(dict(id=acct.id, name=profile['name']))
 
