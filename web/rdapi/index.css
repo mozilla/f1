@@ -1,0 +1,379 @@
+/* @font-face typography */
+
+@font-face {
+  font-family: StayPuft;
+  src: url("f/StayPuft/StayPuft.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+* {
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #fafafa;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, Sans-serif;
+  font-size: 12px;
+  position: relative;
+  background-color: #fff;
+  color: #0a0a0a;
+  line-height: 1.5;
+}
+
+b {
+    font-weight: 600;
+}
+
+a {
+    color: #006FFF;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+h1 {
+    font-weight: normal;
+    font-size: 21px;
+    margin: 0;
+    padding: 5px 10px;
+    /* border: 1px solid #884D51; */
+    background-image: -moz-linear-gradient(center top , #FF7A7A 0%, #FF5C5C 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #FF7A7A), color-stop(100%, #FF5C5C));
+    border: 1px solid #D94C4C;
+    color: #fff;
+}
+
+h1 a {
+    color: #fff;
+}
+
+h2 a {
+    color: #0a0a0a;
+}
+
+h1 a:hover,
+h2 a:hover {
+    text-decoration: none;
+}
+
+h1 a:visited {
+    color: #fff;
+}
+
+h2 a:visited {
+    color: black;
+}
+
+h3 .type {
+    font-size: smaller;
+    font-weight: normal;
+}
+
+.hidden {
+    display: none;
+}
+
+#toc {
+    -moz-column-count: 3;
+    -webkit-column-count: 3;
+    column-count: 3;
+    -moz-column-gap: 20px;
+    margin: 20px 0;
+}
+
+#toc a {
+    display: block;
+}
+
+#toc a.sectionToc {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+#toc a.methodToc {
+    font-size: 14px;
+}
+
+#toc a.methodToc:before {
+    content: "- ";
+}
+
+#toc .tocItem {
+    margin: 0 0 10px 0;
+}
+
+#listing,
+#play {
+    float: left;
+    width: 50%;
+    height: 100%;
+    padding: 10px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+#play {
+    overflow-x: auto;
+    background-color: #f2f2f2;
+    border-left: 1px solid #ccc;
+}
+
+#playInstructions {
+    font-weight: normal;
+}
+
+.method {
+    position: relative;
+    border-top: 1px solid #C6ADFF;
+    margin: 20px 0;
+}
+
+.method .try {
+    font-size: 14px;
+    font-weight: normal;
+    padding: 5px 0px;
+    position: absolute;
+    right: 0;
+    top: 0;
+    -moz-border-radius: 0 40px 40px 0;
+    -webkit-border-radius: 0 40px 40px 0;
+    border-radius: 0 40px 40px 0;
+}
+
+
+.method h2 {
+    font-weight: normal;
+    font-size: 14px;
+    margin: 0;
+    padding: 5px 10px;
+    /* border: 1px solid #884D51; */
+    background-image: -moz-linear-gradient(center top , #EDE6FF 0%, #DAC9FF 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #EDE6FF), color-stop(100%, #DAC9FF));
+    border: 1px solid #C6ADFF;
+    border-top: none;
+    -moz-border-radius: 0 0 10px 10px;
+    -webkit-border-radius: 0 0 10px 10px;
+    border-radius: 0 0 10px 10px;
+    display: table;
+}
+
+.method .section {
+    margin-left: 40px;
+}
+
+.method .section h3 {
+    margin-left: -20px;
+    margin-bottom: 0px;
+}
+
+.method .section > ul {
+    padding-left: 20px;
+    margin: 5px 0;
+}
+
+.method .section p {
+    margin: 5px 0;
+}
+
+.method .required {
+    color: red;
+}
+
+.apiCall {
+    padding: 10px ;
+    position: relative;
+    border-bottom: 1px solid #ccc;
+}
+
+.apiCall:nth-child(odd) {
+    background-color: #e6e6e6;
+}
+
+.apiCallClose {
+    position: absolute;
+    top: 10px;
+    right: 0px;
+    font-weight: bold;
+    color: #0a0a0a;
+    border: 0;
+    font-family: "helvetica neue", helvetica, arial, sans-serif;
+    font-size: 14px;
+    background-color: transparent;
+}
+
+.apiCall .apiUrlExpand {
+    position: absolute;
+    top: 15px;
+    right: 60px;
+}
+
+.apiCall h3 {
+    margin: 0;
+}
+
+.apiCall h4 {
+    margin: 10px 0 5px 0;
+}
+
+.apiCall .editApiUrl {
+    width: 50%;
+    margin-top: 4px;
+    font-weight: bold;
+    font-size: larger;
+}
+
+.apiCall .requestBody {
+    width: 100%;
+    min-height: 300px;
+}
+
+.apiCall .output {
+    margin: 10px 0;
+}
+
+.apiCall button[name=submit] {
+    margin: 10px 0;
+}
+
+.jsonResult .expander {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: xx-small;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+
+.jsonResult ol.array,
+.jsonResult ul.object {
+    list-style: none;
+}
+
+.jsonResult .prop,
+.jsonResult .brace,
+.jsonResult .bracket {
+    font-weight: bold;
+}
+
+/* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
+/* hbox and vbox classes */
+ 
+.hbox {
+	display: -webkit-box;
+	-webkit-box-orient: horizontal;
+	-webkit-box-align: stretch;
+ 
+	display: -moz-box;
+	-moz-box-orient: horizontal;
+	-moz-box-align: stretch;
+ 
+	display: box;
+	box-orient: horizontal;
+	box-align: stretch;
+}
+ 
+.hbox > * {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+	display: block;
+}
+ 
+.vbox {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-box-align: stretch;
+ 
+	display: -moz-box;
+	-moz-box-orient: vertical;
+	-moz-box-align: stretch;
+ 
+	display: box;
+	box-orient: vertical;
+	box-align: stretch;
+}
+ 
+.vbox > * {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+	display: block;
+}
+ 
+.spacer {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+ 
+.reverse {
+	-webkit-box-direction: reverse;
+	-moz-box-direction: reverse;
+	box-direction: reverse;
+}
+ 
+.boxFlex0 {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+}
+ 
+.boxFlex1, .boxFlex {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+ 
+.boxFlex2 {
+	-webkit-box-flex: 2;
+	-moz-box-flex: 2;
+	box-flex: 2;
+}
+ 
+.boxGroup1 {
+	-webkit-box-flex-group: 1;
+	-moz-box-flex-group: 1;
+	box-flex-group: 1;
+}
+ 
+.boxGroup2 {
+	-webkit-box-flex-group: 2;
+	-moz-box-flex-group: 2;
+	box-flex-group: 2;
+}
+ 
+.start {
+	-webkit-box-pack: start;
+	-moz-box-pack: start;
+	box-pack: start;
+}
+ 
+.end {
+	-webkit-box-pack: end;
+	-moz-box-pack: end;
+	box-pack: end;
+}
+ 
+.center {
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	box-pack: center;
+}
+/* END hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
