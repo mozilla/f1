@@ -1,0 +1,168 @@
+<!-- ***** BEGIN LICENSE BLOCK *****
+   - Version: MPL 1.1
+   -
+   - The contents of this file are subject to the Mozilla Public License Version
+   - 1.1 (the "License"); you may not use this file except in compliance with
+   - the License. You may obtain a copy of the License at
+   - http://www.mozilla.org/MPL/
+   -
+   - Software distributed under the License is distributed on an "AS IS" basis,
+   - WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+   - for the specific language governing rights and limitations under the
+   - License.
+   -
+   - The Original Code is Raindrop.
+   -
+   - The Initial Developer of the Original Code is
+   - Mozilla Messaging, Inc..
+   - Portions created by the Initial Developer are Copyright (C) 2009
+   - the Initial Developer. All Rights Reserved.
+   -
+   - Contributor(s):
+   - -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Links keep dropping on my head</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+
+    <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+    <script>require(["index.js"]);</script>
+    <style>
+         .hidden {
+             display: none;
+         }
+
+         .invisible {
+             visibility: hidden;
+         }
+    </style>
+</head>
+<body class="settings">
+
+    <div class="row">
+        <div class="c4 logo">
+        </div>
+    </div>
+
+    <!-- default section -->
+    <div class="section welcome hidden">
+        <div class="row">
+            <div class="c1">
+              <p>Welcome.</p>
+              <p><a href="#twitter">Create an account</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- twitter section -->
+    <div class="section twitter hidden">
+        <form id="oauthForm" action="../../api/account/oauth_start" method="GET">
+            <div class="row">
+                <div class="c1 twitterHeader">
+                    <strong>step 4:</strong> Add twitter account *
+                </div>
+                <div class="c1">
+                    <input type="hidden" name="domain" value="twitter.com">
+                    <input type="hidden" name="return_to" value="/scratch/oauth/">
+                    <div class="twitterActions">
+                        <a class="skip" href="#facebook">skip this step</a>
+                        <button>submit</button>
+                    </div>
+                    <div class="finePrint grey">
+                    *You may delete your account at any time
+                    </div>
+
+                    </div>
+                </div>
+                <div class="c1">
+                    <div class="usernameError error invisible">Please enter your Twitter name</div>
+               </div> 
+            </div>
+        </form>
+    </div>
+
+    <!-- oauth_success_twitter section -->
+    <div class="section oauth_success_twitter_com hidden">
+        <div class="row">
+            <div class="c1">
+                <h4 class="success">Success!</h4>
+                <p>Twitter properly configured</p>
+                <button class="notification" onclick="location='#facebook'">continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- oauth_failure_twitter section -->
+    <div class="section oauth_failure_twitter_com hidden">
+        <div class="row">
+            <div class="c1">
+                <h4 class="error">Error</h4>
+                <p>Twitter not properly configured</p>
+                <button class="notification" onclick="location='#twitter'">try again</button>
+                <button class="notification" onclick="location='#facebook'">continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- facebook section -->
+    <div class="section facebook hidden">
+        <form id="oauthForm" action="../../api/account/oauth_facebook" method="GET">
+            <div class="row">
+                <div class="c1 facebookHeader">
+                    <strong>step 4:</strong> Add facebook account *
+                </div>
+                <div class="c1">
+                    <input type="hidden" name="domain" value="facebook.com">
+                    <input type="hidden" name="scope" value="email,offline_access,publish_stream">
+                    <input type="hidden" name="return_to" value="/scratch/oauth/">
+                    <div class="facebookActions">
+                        <a class="skip" href="#done">skip this step</a>
+                        <button>submit</button>
+                    </div>
+                    <div class="finePrint grey">
+                    *You may delete your account at any time
+                    </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- oauth_success_facebook section -->
+    <div class="section oauth_success_facebook_com hidden">
+        <div class="row">
+            <div class="c1">
+                <h4 class="success">Success!</h4>
+                <p>Facebook properly configured</p>
+                <button class="notification" onclick="location='#done'">continue</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- oauth_failure_facebook section -->
+    <div class="section oauth_failure_facebook_com hidden">
+        <div class="row">
+            <div class="c1">
+                <h4 class="error">Error</h4>
+                <p>Facebook not properly configured</p>
+                <button class="notification" onclick="location='#facebook'">try again</button>
+                <button class="notification" onclick="location='#done'">continue</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- done section -->
+    <div class="section done hidden">
+        <div class="row">
+            <div class="c1">
+                <p>Thanks - we are done!</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

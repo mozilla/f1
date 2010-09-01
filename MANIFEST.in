@@ -1,0 +1,3 @@
+include linkdrop/config/deployment.ini_tmpl
+recursive-include linkdrop/public *
+recursive-include linkdrop/templates *

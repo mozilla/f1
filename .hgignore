@@ -1,0 +1,10 @@
+syntax:regexp
+\.egg
+\.egg-info
+\.pyc
+\.pyo
+\.swp
+linkdrop.kpf
+renv
+\.DS_Store
+development.db
