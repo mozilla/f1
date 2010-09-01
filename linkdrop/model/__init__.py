@@ -1,7 +1,7 @@
 """The application's model objects"""
 from linkdrop.model.meta import Session, Base
 from linkdrop.model.account import Account
-
+from linkdrop.model.history import History
 
 def init_model(engine):
     """Call me before using any of the tables or classes in the model"""

@@ -81,7 +81,6 @@ the contacts API that uses @me/@self.
                                                          callback_url, url_gen)
 
         # Save the request secret into the session.
-        session = request.environ['beaker.session']
         session["oauth_request_key"] = request_entity.key
         session["oauth_request_secret"] = request_entity.secret
         session.save()
@@ -111,10 +110,9 @@ the contacts API that uses @me/@self.
         oauth_verifier = request.params['oauth_verifier']
         # Get the request secret from the session.
         # Save the request secret into the session.
-        session = request.environ['beaker.session']
+        user_key = session.get('userkey')
         request_key = session.pop("oauth_request_key")
         request_secret = session.pop("oauth_request_secret")
-        session.save()
 
         if request_secret and request_key == oauth_token:
             request_token = simple_oauth.OAuthEntity(oauth_token, request_secret)
@@ -136,7 +134,12 @@ the contacts API that uses @me/@self.
                 acct.domain = domain
                 acct.userid = userid
                 acct.username = username
+                if user_key:
+                    acct.userkey = user_key
                 Session.add(acct)
+                
+            if not user_key:
+                session['userkey'] = acct.userkey
 
             # Update the account with the final tokens and delete the transient ones.
             acct.oauth_token = verified_token.key
@@ -146,6 +149,8 @@ the contacts API that uses @me/@self.
             fragment = "oauth_success_" + domain
         else:
             fragment = "oauth_failure_" + domain
+
+        session.save()
 
         # and finally redirect back to the signup page.
         loc = request.host_url + return_path + "#" + fragment.replace(".", "_")
@@ -224,6 +229,7 @@ the contacts API that uses @me/@self.
                     # Setup the linkdrop account.
                     facebookid = profile['id']
                     acct_proto = "facebook"
+                    user_key = session.get('userkey')
                     # Try and find an account to use or create a new one.
                     try:
                         acct = Session.query(Account).filter(and_(Account.domain=="facebook.com", Account.userid==facebookid)).one()
@@ -232,10 +238,15 @@ the contacts API that uses @me/@self.
                         acct.domain = "facebook.com"
                         acct.userid = facebookid
                         acct.username = ""
+                        if user_key:
+                            acct.userkey = user_key
+                        else:
+                            session['userkey'] = acct.userkey
                         Session.add(acct)
 
                     acct.oauth_token = access_token
                     Session.commit()
+                    session.save()
                     fragment = "oauth_success_" + domain
                     redirect_query = "?" + urllib.urlencode(dict(id=acct.id, name=profile['name']))
 
