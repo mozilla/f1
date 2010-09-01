@@ -13,7 +13,7 @@ import json
 import logging
 
 
-from raindrop.model.meta import Session
+from linkdrop.model.meta import Session
 
 logger=logging.getLogger(__name__)
 
