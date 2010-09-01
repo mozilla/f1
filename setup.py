@@ -31,6 +31,10 @@ setup(
     [paste.app_factory]
     main = linkdrop.config.middleware:make_app
 
+    [paste.filter_app_factory]
+    dbgp = linkdrop.debug:make_dbgp_middleware
+    profiler = linkdrop.debug:make_profile_middleware
+
     [paste.app_install]
     main = pylons.util:PylonsInstaller
     """,
