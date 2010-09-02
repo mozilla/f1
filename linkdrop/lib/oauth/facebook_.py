@@ -19,11 +19,12 @@ def extract_fb_data(data):
      
      # Setup the nick and preferred username to the last portion of the
      # FB link URL if its not their ID
-     link = data.get('link')
-     if link:
-          last = link.split('/')[-1]
-          if last != data['id']:
-               nick = last
+     # XXX - the below is bogus - links now look like: http://www.facebook.com/profile.php?id=100001556529144
+     #link = data.get('link')
+     #if link:
+     #     last = link.split('/')[-1]
+     #     if last != data['id']:
+     #          nick = last
 
      profile = {
          'providerName': 'Facebook',
