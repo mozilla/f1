@@ -20,8 +20,7 @@ def make_map(config):
 
     # CUSTOM ROUTES HERE
     map.connect('/docs', controller='docs', action="index")
-    map.connect('/account/oauth_facebook/{redirect_info}', controller='account', action="oauth_facebook")
-
+    map.connect('/send', controller='send', action="send")
 
     map.connect('/{controller}/{action}')
     map.connect('/{controller}/{action}/{id}')

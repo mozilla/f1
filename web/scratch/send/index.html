@@ -51,13 +51,14 @@
 
     <!-- send form -->
     <div class="section send">
-        <form name="messageForm" id="messageForm" action="/api/send/send" method="POST">
+        <form name="messageForm" id="messageForm" action="#">
             <div class="row">
                 <div class="c1">
                     <input name="message">
                     Send via
                     <input type="radio" name="domain" value="twitter.com">Twitter
                     <input type="radio" name="domain" value="facebook.com">Facebook
+                    <input type="radio" name="domain" value="noservice.com">No Service
 
                     <input type="hidden" name="end_point_success" value="/scratch/send/#success">
                     <input type="hidden" name="end_point_failure" value="/scratch/send/#failure">
@@ -133,10 +134,10 @@
     </div>
 
     <!-- general failure section - an error other than auth failure...-->
-    <div class="section failure hidden">
+    <div id="resultMsg" class="section failure hidden">
         <div class="row">
             <div class="c1">
-                <p>Sorry - we failed for obscure reasons...</p>
+                <p id="resultReason">Sorry - we failed for obscure reasons...</p>
             </div>
         </div>
     </div>

@@ -2,6 +2,7 @@ import logging
 import datetime
 import json
 import urllib
+import httplib2
 
 from pylons import config, request, response, session
 from pylons.controllers.util import abort, redirect
@@ -29,35 +30,40 @@ The 'send' namespace is used to send updates to our supported services.
 """
     __api_controller__ = True # for docs
 
-    def _handle_auth_failure(self, reason):
-        try:
-            redirect(request.POST['end_point_auth_failure'])
-        except KeyError:
-            abort(401, reason)
-
     @api_response
     @json_exception_response
     def send(self):
+        result = {}
+        error = None
         # If we don't have a userkey in our session we bail early with a
         # 401
         userkey = session.get('userkey')
         if not userkey:
-            self._handle_auth_failure('no session data')
+            error = {'provider': domain,
+                     'reason': "no session for that domain",
+                     'code': 401
+            }
+            return {'result': result, 'error': error}
         try:
-            domain = request.params.get('domain')
-            message = request.params['message']
+            domain = request.POST.get('domain')
+            message = request.POST['message']
         except KeyError, what:
-            raise ValueError("'%s' request param is not optional" % (what,))
+            error = {'provider': domain,
+                     'reason': "'%s' request param is not optional" % (what,),
+            }
+            return {'result': result, 'error': error}
 
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
         try:
             acct = Session.query(Account).filter_by(userkey=userkey, domain=domain).one()
         except NoResultFound:
-            self._handle_auth_failure("no account for that domain")
+            error = {'provider': domain,
+                     'reason': "no account for that domain",
+                     'code': 401
+            }
+            return {'result': result, 'error': error}
 
-        result = {}
-        error = None
         # send the item.
         if domain=="twitter.com":
             from twitter.oauth import OAuth
@@ -81,30 +87,34 @@ The 'send' namespace is used to send updates to our supported services.
                          'reason': msg,
                 }
         elif domain=="facebook.com":
-            url = "https://graph.facebook.com/me/feed"
+            url = "https://graph.facebook.com/me/feed?"+urllib.urlencode(dict(access_token=acct.oauth_token))
             body = urllib.urlencode({"message": message})
-            response = json.load(urllib.urlopen(url + 
-                urllib.urlencode(dict(access_token=acct.oauth_token)), body))
+            resp, content = httplib2.Http().request(url, 'POST', body=body)
+            response = json.loads(content)
             if 'id' in response:
                 result[domain] = response['id']
             elif 'error' in response:
-                if response['error'].get('type')=="OAuthInvalidRequestException":
-                    abort(401, "oauth token was rejected (%s)" % (response['error'],))
+                import sys; print >> sys.stderr, repr(response)
                 error = {'provider': domain,
-                         'reason': response['error'],
+                         'reason': response['error'].get('message'),
+                         'type': response['error'].get('type')
                 }
+                if response['error'].get('type')=="OAuthInvalidRequestException":
+                    # status will be 401 if we need to reauthorize
+                    error['code'] = int(resp['status'])
             else:
+                error = {'provider': domain,
+                         'reason': "unexpected facebook response: %r"% (response,)
+                }
                 log.error("unexpected facebook response: %r", response)
         else:
-            raise ValueError, "unsupported service %r" % (domain,)
+            error = {'provider': domain,
+                     'reason': "unsupported service %r" % (domain,)
+            }
 
         if error:
             assert not result
             log.info("send failure: %r", error)
-            try:
-                redirect(request.POST['end_point_failure'])
-            except KeyError:
-                pass
         else:
             # create a new record in the history table.
             assert result
@@ -116,9 +126,5 @@ The 'send' namespace is used to send updates to our supported services.
             Session.commit()
             result['linkdrop'] = history.id
             log.info("send success - linkdrop id is %s", history.id)
-            try:
-                redirect(request.POST['end_point_success'])
-            except KeyError:
-                pass
         # no redirects requests, just return the response.
         return {'result': result, 'error': error}

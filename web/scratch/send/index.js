@@ -48,19 +48,19 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
             });
         }
         if (value==="auth_failure") {
-            document.authForm.domain.value = localStorage['X-Send-Domain']
-            document.authForm.submit()
-            console.log("submitted auth form...")
+            reauthorize();
         } else if (value==="auth_success") {
-            debugger;
+            // XXX should we automatically resend?
+            var domain = localStorage['X-Send-Domain'];
+            var message = localStorage['X-Send-Message'];
             var radio = document.messageForm.domain;
             for(var i = 0; i < radio.length; i++) {
-                if(radio[i].value==localStorage['X-Send-Domain']) {
+                if(radio[i].value==domain) {
                     radio[i].checked = true;
                 }
             }
-            document.messageForm.message.value = localStorage['X-Send-Domain'];
-            document.messageForm.submit()
+            document.messageForm.message.value = message;
+            sendMessage();
         }
 
         //Animate!
@@ -70,6 +70,43 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
 
     //Set up hashchange listener
     window.addEventListener("hashchange", onHashChange, false);
+
+    function reauthorize() {
+        document.authForm.domain.value = localStorage['X-Send-Domain']
+        document.authForm.submit()
+        console.log("submitted auth form...")
+    }
+
+    function sendMessage() {
+        var domain = localStorage['X-Send-Domain'];
+        var message = localStorage['X-Send-Message'];
+        rdapi('send', {
+            type: 'POST',
+            data: {
+                domain: domain,
+                message: message
+            },
+            success: function (json) {
+                // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
+                $("#resultMsg").removeClass("hidden")
+                if (json['error'] && json['error']['reason']) {
+                    $("#resultReason").text("Error: "+json['error']['reason']);
+                    if (json['error']['code'] ==  401) {
+                        reauthorize();
+                    }
+                }
+                else {
+                    $("#resultReason").text("Message Sent");
+                    localStorage['X-Send-Domain'] = '';
+                    localStorage['X-Send-Message'] = '';
+                }
+            },
+            error: function (xhr, textStatus, err) {
+                $("#resultMsg").removeClass("hidden")
+                $("#resultReason").text("XHR Error: "+err)
+            }
+        });
+    }
 
     $(function () {
 
@@ -98,6 +135,7 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
                         localStorage['X-Send-Domain'] = radio[i].value;
                     }
                 }
+                sendMessage();
             })
             .each(function (i, node) {
                 placeholder(node);
