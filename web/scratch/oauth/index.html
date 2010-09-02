@@ -58,14 +58,14 @@
 
     <!-- twitter section -->
     <div class="section twitter hidden">
-        <form id="oauthForm" action="../../api/account/oauth_start" method="GET">
+        <form id="oauthForm" action="/api/account/authorize" method="POST">
             <div class="row">
                 <div class="c1 twitterHeader">
                     <strong>step 4:</strong> Add twitter account *
                 </div>
                 <div class="c1">
                     <input type="hidden" name="domain" value="twitter.com">
-                    <input type="hidden" name="return_to" value="/scratch/oauth/">
+                    <input type="hidden" name="end_point" value="/scratch/oauth/">
                     <div class="twitterActions">
                         <a class="skip" href="#facebook">skip this step</a>
                         <button>submit</button>
@@ -108,7 +108,7 @@
 
     <!-- facebook section -->
     <div class="section facebook hidden">
-        <form id="oauthForm" action="../../api/account/oauth_facebook" method="GET">
+        <form id="oauthForm" action="/api/account/authorize" method="POST">
             <div class="row">
                 <div class="c1 facebookHeader">
                     <strong>step 4:</strong> Add facebook account *
@@ -116,7 +116,7 @@
                 <div class="c1">
                     <input type="hidden" name="domain" value="facebook.com">
                     <input type="hidden" name="scope" value="email,offline_access,publish_stream">
-                    <input type="hidden" name="return_to" value="/scratch/oauth/">
+                    <input type="hidden" name="end_point" value="/scratch/oauth/">
                     <div class="facebookActions">
                         <a class="skip" href="#done">skip this step</a>
                         <button>submit</button>
