@@ -38,10 +38,7 @@ class UTCDateTime(TypeDecorator):
 
     def process_bind_param(self, value, engine):
         if value is not None:
-            try:
-                return value.astimezone(tzutc())
-            except ValueError:
-                print "FAILED", value
+            return value.astimezone(tzutc())
 
     def process_result_value(self, value, engine):
         if value is not None:
