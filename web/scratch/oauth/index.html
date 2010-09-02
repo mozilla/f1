@@ -65,7 +65,8 @@
                 </div>
                 <div class="c1">
                     <input type="hidden" name="domain" value="twitter.com">
-                    <input type="hidden" name="end_point" value="/scratch/oauth/">
+                    <input type="hidden" name="end_point_success" value="/scratch/oauth/#oauth_success_twitter_com">
+                    <input type="hidden" name="end_point_auth_failure" value="/scratch/oauth/#oauth_failure_twitter_com">
                     <div class="twitterActions">
                         <a class="skip" href="#facebook">skip this step</a>
                         <button>submit</button>
@@ -116,7 +117,8 @@
                 <div class="c1">
                     <input type="hidden" name="domain" value="facebook.com">
                     <input type="hidden" name="scope" value="email,offline_access,publish_stream">
-                    <input type="hidden" name="end_point" value="/scratch/oauth/">
+                    <input type="hidden" name="end_point_success" value="/scratch/oauth/#oauth_success_facebook_com">
+                    <input type="hidden" name="end_point_auth_failure" value="/scratch/oauth/#oauth_failure_facebook_com">
                     <div class="facebookActions">
                         <a class="skip" href="#done">skip this step</a>
                         <button>submit</button>

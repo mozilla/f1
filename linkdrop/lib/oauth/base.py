@@ -2,9 +2,9 @@
 
 import urlparse
 try:
-     from urlparse import parse_qs
+    from urlparse import parse_qs
 except ImportError:
-     from cgi import parse_qs
+    from cgi import parse_qs
 import json
 import httplib2
 import oauth2 as oauth
@@ -37,8 +37,9 @@ class OAuth1():
         self.sigmethod = oauth.SignatureMethod_HMAC_SHA1()
 
     def request_access(self):
-        session['end_point'] = request.POST['end_point']
-        
+        session['end_point_success'] = request.POST['end_point_success']
+        session['end_point_auth_failure'] = request.POST['end_point_auth_failure']
+
         # Create the consumer and client, make the request
         client = oauth.Client(self.consumer)
         params = {'oauth_callback': url(controller='account',
@@ -65,17 +66,16 @@ class OAuth1():
         return redirect(oauth_request.to_url())
 
     def verify(self):
-        end_point = session['end_point']
         request_token = oauth.Token.from_string(session['token'])
         verifier = request.GET.get('oauth_verifier')
         if not verifier:
-            raise Exception("Unable to get oauth verifier")
+            redirect(session['end_point_auth_failure'])
 
         request_token.set_verifier(verifier)
         client = oauth.Client(self.consumer, request_token)
         resp, content = client.request(self.access_token_url, "POST")
         if resp['status'] != '200':
-            raise Exception("Error status: %r", resp['status'])
+            redirect(session['end_point_auth_failure'])
 
         access_token = dict(urlparse.parse_qsl(content))
         return access_token
@@ -94,7 +94,8 @@ class OAuth2():
         self.app_secret = self.config.get('app_secret')
 
     def request_access(self):
-        session['end_point'] = request.POST['end_point']
+        session['end_point_success'] = request.POST['end_point_success']
+        session['end_point_auth_failure'] = request.POST['end_point_auth_failure']
         session.save()
         scope = request.POST.get('scope', '')
 
@@ -108,7 +109,7 @@ class OAuth2():
     def verify(self):
         code = request.GET.get('code')
         if not code:
-            raise Exception("No code returned")
+          redirect(session['end_point_auth_failure'])
         
         return_to = url(controller='account', action="verify",
                            qualified=True)

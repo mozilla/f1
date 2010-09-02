@@ -88,5 +88,4 @@ the contacts API that uses @me/@self.
         Session.commit()
 
         fragment = "oauth_success_" + provider
-        return redirect(session['end_point'] + "#" + fragment.replace(".", "_"))
-
+        return redirect(session['end_point_success'])
