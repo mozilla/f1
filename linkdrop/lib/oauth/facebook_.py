@@ -14,17 +14,21 @@ from linkdrop.lib.oauth.base import OAuth2
 
 # borrowed from velruse
 def extract_fb_data(data):
+     #import sys; print >> sys.stderr, data
      # Setup the normalized poco contact object
      nick = None
      
      # Setup the nick and preferred username to the last portion of the
      # FB link URL if its not their ID
-     # XXX - the below is bogus - links now look like: http://www.facebook.com/profile.php?id=100001556529144
-     #link = data.get('link')
-     #if link:
-     #     last = link.split('/')[-1]
-     #     if last != data['id']:
-     #          nick = last
+     # if a user sets up their personal link, they get a url that looks like:
+     # https://www.facebook.com/mixedpuppy, otherwise they have something
+     # like: http://www.facebook.com/profile.php?id=100001556529144
+     link = data.get('link')
+     if link:
+          link = urlparse.urlparse(link)
+          path = link.path[1:].split('/')[0]
+          if not link.query and path is not 'profile.php' and path is not data['id']:
+               nick = path
 
      profile = {
          'providerName': 'Facebook',
@@ -65,6 +69,12 @@ def extract_fb_data(data):
      
      profile['name'] = name
      
+     # facebook gives us an absolute url, these work and redirect to their CDN
+     profile['photos'] = [
+            {'type':"thumbnail", 'value':"https://graph.facebook.com/" + data['id'] + "/picture?type=square"},
+            {'type':"profile",   'value':"https://graph.facebook.com/" + data['id'] + "/picture?type=large"}
+          ]
+
      # Now strip out empty values
      for k, v in profile.items():
           if not v or (isinstance(v, list) and not v[0]):
