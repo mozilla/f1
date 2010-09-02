@@ -64,16 +64,16 @@ the contacts API that uses @me/@self.
         provider = request.POST['domain']
         session['oauth_provider'] = provider
         session.save()
-        responder = get_provider(provider)
-        return responder().request_access()
+        service = get_provider(provider)
+        return service.responder().request_access()
 
     @json_exception_response
     def verify(self, *args, **kw):
         provider = session.pop('oauth_provider')
         session.save()
-        responder = get_provider(provider)
+        service = get_provider(provider)
 
-        auth = responder()
+        auth = service.responder()
         access_key = auth.verify()
         data = auth.get_credentials(access_key)
         #import sys; print >> sys.stderr, data
