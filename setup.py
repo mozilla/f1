@@ -16,7 +16,9 @@ setup(
         "Pylons>=1.0",
         "SQLAlchemy>=0.5",
         "docutils",
-        "nose"
+        "nose",
+        "httplib2",
+        "oauth2"
     ],
     setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),
