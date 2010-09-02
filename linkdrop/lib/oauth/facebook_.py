@@ -30,7 +30,7 @@ def extract_fb_data(data):
          'identifier': 'https://graph.facebook.com/%s' % data['id'],
          'displayName': data['name'],
          'emails': [data.get('email')],
-         'verifiedEmail': data['verified'] and data.get('email'),
+         'verifiedEmail': data.get('verified') and data.get('email'),
          'gender': data.get('gender'),
          'preferredUsername': nick or data['name'],
      }
@@ -53,7 +53,7 @@ def extract_fb_data(data):
      bday = data.get('birthday')
      if bday:
           mth, day, yr = bday.split('/')
-          profile['birthday'] = '-'.join(yr, mth, day)
+          profile['birthday'] = '-'.join([yr, mth, day])
      name = {}
      pcard_map = {'first_name': 'givenName', 'last_name': 'familyName'}
      for key, val in pcard_map.items():
