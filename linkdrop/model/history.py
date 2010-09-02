@@ -14,11 +14,7 @@ class History(JsonExpandoMixin, SerializerMixin, Base):
     __table_args__ = make_table_args()
 
     id = Column(Integer, primary_key=True)
-    userkey = Column(Integer, ForeignKey(Account.userkey), index=True)
+    account_id = Column(None, ForeignKey(Account.id), index=True)
     published = Column(UTCDateTime, nullable=False)
     
-    # svckey is from the account table, a key to domain/userid/username,
-    # it might end up being a relationship
-    svckey = Column(RDUnicode(128), nullable=False)
-
-    account = relationship('Account', uselist=False)
+    account = relationship('Account')
