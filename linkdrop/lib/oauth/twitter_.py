@@ -21,7 +21,7 @@ class responder(OAuth1):
         self.access_token_url = 'https://twitter.com/oauth/access_token'
         self.authorization_url = 'https://twitter.com/oauth/authenticate'
 
-    def get_credentials(self, access_token):
+    def _get_credentials(self, access_token):
         # XXX should call twitter.api.VerifyCredentials to get the user object
         # Setup the normalized poco contact object
         username = access_token['screen_name']

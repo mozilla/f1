@@ -156,6 +156,31 @@
         </div>
     </div>
 
+    <!-- Google section -->
+    <div class="section google hidden">
+        <form id="oauthForm" action="/api/account/authorize" method="POST">
+            <div class="row">
+                <div class="c1 googleHeader">
+                    <strong>step 4:</strong> Add Google account *
+                </div>
+                <div class="c1">
+                    <input type="hidden" name="domain" value="google.com">
+                    <input type="hidden" name="scope" value="http://www.google.com/m8/feeds/">
+                    <input type="hidden" name="end_point_success" value="/scratch/oauth/#oauth_success_google_com">
+                    <input type="hidden" name="end_point_auth_failure" value="/scratch/oauth/#oauth_failure_google_com">
+                    <div class="googleActions">
+                        <a class="skip" href="#done">skip this step</a>
+                        <button>submit</button>
+                    </div>
+                    <div class="finePrint grey">
+                    *You may delete your account at any time
+                    </div>
+
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 
     <!-- done section -->
     <div class="section done hidden">

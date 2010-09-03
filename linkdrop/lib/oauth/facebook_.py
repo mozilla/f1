@@ -97,7 +97,7 @@ class responder(OAuth2):
           self.authorization_url = 'https://graph.facebook.com/oauth/authorize'
           self.access_token_url = 'https://graph.facebook.com/oauth/access_token'
 
-     def get_credentials(self, access_token):
+     def _get_credentials(self, access_token):
           fields = 'id,first_name,last_name,name,link,birthday,email,website,verified,picture,gender,timezone'
           client = httplib2.Http()
           resp, content = client.request(url(self.profile_url, access_token=access_token, fields=fields))

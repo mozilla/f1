@@ -74,17 +74,16 @@ the contacts API that uses @me/@self.
         service = get_provider(provider)
 
         auth = service.responder()
-        access_key = auth.verify()
-        data = auth.get_credentials(access_key)
-        #import sys; print >> sys.stderr, data
+        user = auth.verify()
+        import sys; print >> sys.stderr, user
         
-        account = data['profile']['accounts'][0]
+        account = user['profile']['accounts'][0]
 
         acct = self._get_or_create_account(provider, account['userid'], account['username'])
-        acct.profile = data['profile']
-        acct.oauth_token = data['oauth_token']
-        if 'oauth_token_secret' in data:
-            acct.oauth_token_secret = data['oauth_token_secret']
+        acct.profile = user['profile']
+        acct.oauth_token = user.get('oauth_token', None)
+        if 'oauth_token_secret' in user:
+            acct.oauth_token_secret = user['oauth_token_secret']
         Session.commit()
 
         fragment = "oauth_success_" + provider
