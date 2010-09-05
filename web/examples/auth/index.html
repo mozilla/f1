@@ -1,0 +1,86 @@
+<!-- ***** BEGIN LICENSE BLOCK *****
+- Version: MPL 1.1
+-
+- The contents of this file are subject to the Mozilla Public License Version
+- 1.1 (the "License"); you may not use this file except in compliance with
+- the License. You may obtain a copy of the License at
+- http://www.mozilla.org/MPL/
+-
+- Software distributed under the License is distributed on an "AS IS" basis,
+- WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+- for the specific language governing rights and limitations under the
+- License.
+-
+- The Original Code is Raindrop.
+-
+- The Initial Developer of the Original Code is
+- Mozilla Messaging, Inc..
+- Portions created by the Initial Developer are Copyright (C) 2009
+- the Initial Developer. All Rights Reserved.
+-
+- Contributor(s):
+- -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Links keep dropping on my head</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+
+    <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+    <script>require(["index.js"]);</script>
+    <style>
+         .hidden {
+             display: none;
+         }
+
+         .invisible {
+             visibility: hidden;
+         }
+	 .socialicons { list-style-type:none; display:inline;}
+	 .socialicons li {float:left; padding:4px}
+    </style>
+</head>
+<body class="settings">
+
+    <div class="authorize">
+      <p>Click on a service you want to authorize with Linkdrop</p>
+      <form id="oauthForm" action="/api/account/authorize" method="POST">
+	 <input type="hidden" name="end_point_success" value="/examples/auth/#oauth_success">
+	 <input type="hidden" name="end_point_auth_failure" value="/examples/auth/#oauth_failure">
+	 <div class="row">
+	    <ul class="socialicons">
+	    <li class="direct" title="Facebook" domain="facebook.com">
+	       <input type="image" src="/examples/images/facebook_32.png" name="domain" width="32" height="32" value="facebook.com"></li>
+	    <li class="direct" title="Twitter" domain="twitter.com">
+	       <input type="image" src="/examples/images/twitter_32.png" name="domain" width="32" height="32" value="twitter.com"></li>
+	    <li class="direct" title="Google" domain="twitter.com">
+	       <input type="image" src="/examples/images/google_32.png" name="domain" width="32" height="32" value="google.com"></li>
+	    </ul><div style="clear: both;"/>
+	 </div>
+        </form>
+    </div>
+
+    <!-- oauth_success_twitter section -->
+    <div class="section oauth_success hidden">
+        <div class="row">
+            <div class="c1">
+                <h4 class="success">Success!</h4>
+                <p>Authorization configured</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- oauth_failure_twitter section -->
+    <div class="section oauth_failure hidden">
+        <div class="row">
+            <div class="c1">
+                <h4 class="error">Error</h4>
+                <p>Authorization Failed</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+

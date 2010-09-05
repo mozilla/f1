@@ -49,11 +49,12 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
     var validHashRegExp = /^\w+$/;
 
     function onHashChange() {
-        var value = location.hash.split("#")[1],
-            start, end;
-
-        value = value || "welcome";
-
+        var value = location.hash.split("#")[1]  || "authorize"
+        show(value);
+    }
+    
+    function show(value) {
+        var start, end;
         if (validHashRegExp.test(value)) {
             $(".section").each(function (i, node) {
                 node = $(node);
@@ -87,6 +88,7 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
 
         $("#oauthForm")
             .submit(function (evt) {
+                show("authorize");
                 //First clear old errors
                 $(".error").addClass("invisible");
 

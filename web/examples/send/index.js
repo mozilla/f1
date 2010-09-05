@@ -136,6 +136,7 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
                     }
                 }
                 sendMessage();
+                return false;
             })
             .each(function (i, node) {
                 placeholder(node);

@@ -1,0 +1,204 @@
+<!-- ***** BEGIN LICENSE BLOCK *****
+- Version: MPL 1.1
+-
+- The contents of this file are subject to the Mozilla Public License Version
+- 1.1 (the "License"); you may not use this file except in compliance with
+- the License. You may obtain a copy of the License at
+- http://www.mozilla.org/MPL/
+-
+- Software distributed under the License is distributed on an "AS IS" basis,
+- WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+- for the specific language governing rights and limitations under the
+- License.
+-
+- The Original Code is Raindrop.
+-
+- The Initial Developer of the Original Code is
+- Mozilla Messaging, Inc..
+- Portions created by the Initial Developer are Copyright (C) 2009
+- the Initial Developer. All Rights Reserved.
+-
+- Contributor(s):
+- -->
+
+<!-- A hacky sample to attempt a send and handle auth failure automatically
+     then attempt a resend
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Send a message</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+
+    <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+    <script>require(["index.js"]);</script>
+    <style>
+         .hidden {
+             display: none;
+         }
+
+         .invisible {
+             visibility: hidden;
+         }
+         
+         .twitter {
+            background: url("/examples/images/twitter_32.png") no-repeat;
+         }
+         .facebook {
+            background: url("/examples/images/facebook_32.png") no-repeat;
+         }
+         .google {
+            background: url("/examples/images/google_32.png") no-repeat;
+         }
+
+#messageForm label {
+            width: 32px;
+            height: 32px;
+            display: block;
+            float: left;
+            filter:alpha(opacity=30);
+            -moz-opacity:0.3;
+            -khtml-opacity: 0.3;
+            opacity: 0.3;
+}
+#messageForm label.r_on {
+            filter:alpha(opacity=100);
+            -moz-opacity:1.0;
+            -khtml-opacity: 1.0;
+            opacity: 1.0;
+}
+#messageForm label input { position: absolute; left: -9999px; }         
+    </style>
+
+<script>
+    function setupLabel() {
+        if ($('.label_check input').length) {
+            $('.label_check').each(function(){ 
+                $(this).removeClass('c_on');
+            });
+            $('.label_check input:checked').each(function(){ 
+                $(this).parent('label').addClass('c_on');
+            });                
+        };
+        if ($('.label_radio input').length) {
+            $('.label_radio').each(function(){ 
+                $(this).removeClass('r_on');
+            });
+            $('.label_radio input:checked').each(function(){ 
+                $(this).parent('label').addClass('r_on');
+            });
+        };
+    };
+    $(document).ready(function(){
+        $('body').addClass('has-js');
+        $('.label_check, .label_radio').click(function(){
+            setupLabel();
+        });
+        setupLabel(); 
+    });
+</script>
+
+</head>
+<body class="settings">
+
+    <div class="row">
+        <div class="c4 logo">
+        </div>
+    </div>
+
+    <!-- send form -->
+    <div class="section send">
+      <p>Select the service you want to send a message to</p>
+        <form name="messageForm" id="messageForm" action="#">
+            <div class="row">
+                <div class="c1">
+                    <label class="label_radio twitter"><input type="radio" name="domain" value="twitter.com" checked="checked" /></label>
+                    <label class="label_radio facebook"><input type="radio" name="domain" value="facebook.com"></label>
+                    <label class="label_radio google"><input type="radio" name="domain" value="google.com"></label>
+                    <div style="clear:both;"/>
+                    <input name="message">
+
+                    <input type="hidden" name="end_point_success" value="/examples/send/#success">
+                    <input type="hidden" name="end_point_failure" value="/examples/send/#failure">
+                    <input type="hidden" name="end_point_auth_failure" value="/examples/send/#auth_failure">
+                    <button>send</button>
+                        
+                </div>
+                <div class="c1">
+                    <div class="usernameError error invisible">Please enter your Twitter name</div>
+               </div> 
+            </div>
+        </form>
+    </div>
+
+    <!-- send success section -->
+    <div class="section success hidden">
+        <div class="row">
+            <div class="c1">
+                <h4 class="success">Success!</h4>
+                <p>Your message was sent</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- auth failure section
+    
+    This is the end_point for when the *send* request fails auth (but not
+    when the explicit auth request fails) - when this happens we do the
+    explicit auth.
+    -->
+    <div class="section auth_failure hidden">
+        <div class="row">
+            <div class="c1">
+                <p>Authorizing...</p>
+                <!-- the js code arranges to submit the auth form below... -->
+            </div>
+        </div>
+    </div>
+
+    <div class="section auth_form hidden"> <!-- this is never made visible -->
+        <form name="authForm" id="authForm" action="/api/account/authorize" method="POST">
+            <div class="row">
+                <input type="hidden" name="domain">
+                <input type="hidden" name="end_point_success" value="/examples/send/#auth_success">
+                <input type="hidden" name="end_point_auth_failure" value="/examples/send/#final_auth_failure">
+            </div>
+        </form>
+    </div>
+
+    <!-- final auth failure section
+    This is the end_point for when the explicit auth request fails - we have
+    given up here...
+    -->
+    <div class="section final_auth_failure hidden">
+        <div class="row">
+            <div class="c1">
+                <p>Failed to authorize...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- auth success section
+    This is the end_point for when the explicit auth request succeeds - we
+    then attempt to retry the send.
+    -->
+    <div class="section auth_success hidden">
+        <div class="row">
+            <div class="c1">
+                <p>Sending...</p>
+                <!-- the JS code re-submits the send form -->
+            </div>
+        </div>
+    </div>
+
+    <!-- general failure section - an error other than auth failure...-->
+    <div id="resultMsg" class="section failure hidden">
+        <div class="row">
+            <div class="c1">
+                <p id="resultReason">Sorry - we failed for obscure reasons...</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
