@@ -71,6 +71,62 @@ var ffshare;
       this.onToolbarButtonCommand(e);
     },
 
+    getKnownServices: function() {
+      var loginMgr = Components.classes["@mozilla.org/login-manager;1"]
+                         .getService(Components.interfaces.nsILoginManager);
+
+      var logins = loginMgr.getAllLogins({});
+      var knownServices = [
+        {'hostnames': ['http://twitter.com', 'https://twitter.com'], 'name': 'Twitter'},
+        {'hostnames': ['http://mail.google.com', 'https://mail.google.com'], 'name': 'Gmail'},
+        {'hostnames': ['http://www.facebook.com', 'https://login.facebook.com'], 'name': 'Facebook'}
+      ];
+      var detectedServices = [];
+      var detectedServicesMap = {};
+      for (var i = 0; i < logins.length; i++) {
+        for (var j = 0; j < knownServices.length; j++) {
+          for (var hostnameIndex = 0; hostnameIndex < knownServices[j].hostnames.length; hostnameIndex++) {
+            if (knownServices[j].hostnames[hostnameIndex] == logins[i].hostname) {
+              var svcName = knownServices[j].name;
+              var username = logins[i].username;
+              var svcData;
+              if (! detectedServicesMap[svcName]) {
+                svcData = {'usernames': []};
+                detectedServicesMap[svcName] = svcData;
+                detectedServices.push(svcName);
+              } else {
+                svcData = detectedServicesMap[svcName];
+              }
+              var exists = false;
+              for (var ui = 0; ui < svcData.usernames.length; ui++) {
+                if (svcData.usernames[ui] == username) exists = true;
+              }
+              if (!exists)
+                svcData.usernames.push(username);
+            }
+          }
+        }
+      }
+      //if (detectedServices.length) {
+      //  var bits = [];
+      //  for (var i = 0; i < detectedServices.length; i++) {
+      //    var svcData = detectedServicesMap[detectedServices[i]];
+      //    bits.push(svcData.name + ': ' + svcData.usernames.join(', '));
+      //  }
+      //}
+      // We'll return a map of all of the known services we have found logins
+      // for, with the following structure:
+
+       //{'Gmail': {
+       //     'usernames': ['john.doe', 'jane baz']
+       //     },
+       //{'Twitter': {
+       //     'usernames': ['john.doe', 'jane baz']
+       //     },
+       //
+      return detectedServicesMap;
+    },
+
     clearHeightAnimation: function () {
       if (this.animIntervalId) {
         clearInterval(this.animIntervalId);
@@ -106,8 +162,8 @@ var ffshare;
         this.changeHeight(height);
       }), true);
 
-      iframeNode.setAttribute("src", this.shareUrl);
-
+      var url = this.shareUrl + "#services=" + encodeURIComponent(JSON.stringify(this.getKnownServices()));
+      iframeNode.setAttribute("src", url);
       parentNode.insertBefore(iframeNode, parentNode.firstChild);
     },
 
