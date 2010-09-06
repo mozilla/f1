@@ -78,9 +78,9 @@ class OAuth1():
             redirect(session['end_point_auth_failure'])
 
         access_token = dict(urlparse.parse_qsl(content))
-        return access_token
+        return self._get_credentials(access_token)
 
-    def get_credentials(self, access_token):
+    def _get_credentials(self, access_token):
         return access_token
 
 class OAuth2():
@@ -109,7 +109,7 @@ class OAuth2():
     def verify(self):
         code = request.GET.get('code')
         if not code:
-          redirect(session['end_point_auth_failure'])
+            raise Exception("No oauth code received")
         
         return_to = url(controller='account', action="verify",
                            qualified=True)
@@ -121,10 +121,10 @@ class OAuth2():
         client = httplib2.Http()
         resp, content = client.request(access_url)
         if resp['status'] != '200':
-             raise Exception("Error status: %r", resp['status'])
+            raise Exception("Error status: %r", resp['status'])
 
         access_token = parse_qs(content)['access_token'][0]
-        return access_token
+        return self._get_credentials(access_token)
 
-    def get_credentials(self, access_token):
+    def _get_credentials(self, access_token):
         return access_token

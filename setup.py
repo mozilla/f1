@@ -18,7 +18,10 @@ setup(
         "docutils",
         "nose",
         "httplib2",
-        "oauth2"
+        "oauth2",
+        "python-dateutil",
+        "python-openid",
+        "twitter",
     ],
     setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),

@@ -10,7 +10,7 @@ from pylons.decorators.util import get_pylons
 
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
-from linkdrop.lib.oauth.base import get_oauth_config
+from linkdrop.lib.oauth import get_provider
 
 from linkdrop.model.meta import Session
 from linkdrop.model import Account, History
@@ -53,6 +53,7 @@ The 'send' namespace is used to send updates to our supported services.
             }
             return {'result': result, 'error': error}
 
+        provider = get_provider(domain)
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
         try:
@@ -65,52 +66,7 @@ The 'send' namespace is used to send updates to our supported services.
             return {'result': result, 'error': error}
 
         # send the item.
-        if domain=="twitter.com":
-            from twitter.oauth import OAuth
-            from twitter.api import Twitter, TwitterHTTPError
-            oauth_config = get_oauth_config(domain)
-            auth = OAuth(token=acct.oauth_token,
-                         token_secret=acct.oauth_token_secret,
-                         consumer_key=oauth_config['consumer_key'],
-                         consumer_secret=oauth_config['consumer_secret'])
-            try:
-                api = Twitter(auth=auth)
-                status = api.statuses.update(status=message)
-                result[domain] = status['id']
-            except TwitterHTTPError, exc:
-                details = json.load(exc.e)
-                if 'error' in details:
-                    msg = details['error']
-                else:
-                    msg = str(details)
-                error = {'provider': domain,
-                         'reason': msg,
-                }
-        elif domain=="facebook.com":
-            url = "https://graph.facebook.com/me/feed?"+urllib.urlencode(dict(access_token=acct.oauth_token))
-            body = urllib.urlencode({"message": message})
-            resp, content = httplib2.Http().request(url, 'POST', body=body)
-            response = json.loads(content)
-            if 'id' in response:
-                result[domain] = response['id']
-            elif 'error' in response:
-                import sys; print >> sys.stderr, repr(response)
-                error = {'provider': domain,
-                         'reason': response['error'].get('message'),
-                         'type': response['error'].get('type')
-                }
-                if response['error'].get('type')=="OAuthInvalidRequestException":
-                    # status will be 401 if we need to reauthorize
-                    error['code'] = int(resp['status'])
-            else:
-                error = {'provider': domain,
-                         'reason': "unexpected facebook response: %r"% (response,)
-                }
-                log.error("unexpected facebook response: %r", response)
-        else:
-            error = {'provider': domain,
-                     'reason': "unsupported service %r" % (domain,)
-            }
+        result, error = provider.api(acct).sendmessage(message)
 
         if error:
             assert not result
