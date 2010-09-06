@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet href="chrome://ffshare/skin/overlay.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "chrome://ffshare/locale/overlay.dtd">
+<overlay id="ffshare-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+         xmlns:html="http://www.w3.org/1999/xhtml">
+  <script src="overlay.js"/>
+  <script src="ff-overlay.js"/>
+
+  <stringbundleset id="stringbundleset">
+    <stringbundle id="ffshare-strings" src="chrome://ffshare/locale/overlay.properties"/>
+  </stringbundleset>
+
+  <popupset id="mainPopupSet">
+    <panel id="ffshare-popup" onpopupshown="ffshare.onPopupShown()">
+      <vbox>
+
+        <description>Share this page</description>
+        <hbox>
+          <html:canvas id="ffshare-popup-thumbnail" width="240" height="180"></html:canvas>
+          <spacer flex="1"/>
+        </hbox>
+        <hbox class="row">
+          <label class="message" value="Your Message:"/>
+          <spacer flex="1"/>
+          <label class="count" id="ffshare-count" value="140"/>
+        </hbox>
+        <!--onkeyup won't pick up some paste events? -->
+        <html:textarea class="message" id="ffshare-message" onkeyup="ffshare.updateCount()"></html:textarea>
+        <hbox>
+          <spacer flex="1"/>
+          <button id="ffshare-button" type="menu-button"
+                  image="http://a1.twimg.com/a/1281738360/images/favicon.ico"
+                  label="Share"
+                  onclick="ffshare.send()">
+            <menupopup>
+              <menuitem>
+                <html:img src="http://static.ak.fbcdn.net/rsrc.php/z9Q0Q/hash/8yhim1ep.ico"/>
+                <label value="Facebook"/>
+              </menuitem>
+              <menuitem>
+                <html:img src="http://a1.twimg.com/a/1281738360/images/favicon.ico"/>
+                <label value="Twitter"/>
+              </menuitem>
+              <menuitem>
+                <html:img src="http://digg.com/favicon.ico"/>
+                <label value="Digg"/>
+              </menuitem>
+              <menuitem>
+                <label class="more" value="Others..."/>
+              </menuitem>
+            </menupopup>
+          </button>
+        </hbox>
+      </vbox>
+    </panel>
+
+    <!--  Take over the right click / context menu share option -->
+    <popup id="contentAreaContextMenu">
+      <menuitem id="context-ffshare"
+                insertbefore="context-sendlink"
+                label="&ffshareContext.label;"
+                accesskey="&ffshareContext.accesskey;"
+                oncommand="ffshare.onMenuItemCommand(event)"/>
+    </popup>
+  </popupset>
+
+  <!--  Take over the file menu share option -->
+  <menupopup id="menu_FilePopup">
+    <menuitem id="menu_sendLink" hidden="true"/>
+    <menuitem id="menu_ffshare"
+              insertbefore="menu_sendLink"
+              label="&ffshareMenu.label;"
+              accesskey="&ffshareMenu.accesskey;"
+              oncommand="ffshare.onMenuItemCommand(event)"/>
+  </menupopup>
+
+  <toolbar id="nav-bar">
+    <toolbarbutton id="ffshare-toolbar-button"
+                   insertbefore="urlbar-search-splitter"
+                   class="toolbarbutton-1 chromeclass-toolbar-additional"
+                   label="&ffshareToolbarButton.label;"
+                   tooltiptext="&ffshareToolbarButton.tooltip;"
+                   oncommand="ffshare.onToolbarButtonCommand(event)"/>
+  </toolbar>
+
+  <toolbarpalette id="BrowserToolbarPalette">
+    <toolbarbutton id="ffshare-toolbar-button"
+                   class="toolbarbutton-1 chromeclass-toolbar-additional"
+                   label="&ffshareToolbarButton.label;"
+                   tooltiptext="&ffshareToolbarButton.tooltip;"
+                   oncommand="ffshare.onToolbarButtonCommand(event)"/>
+  </toolbarpalette>
+
+
+
+</overlay>

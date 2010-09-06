@@ -1,0 +1,7 @@
+content   ffshare                 chrome/content/
+skin      ffshare   classic/1.0   chrome/skin/
+locale    ffshare   en-US         chrome/locale/en-US/
+
+
+overlay   chrome://browser/content/browser.xul   chrome://ffshare/content/ff-overlay.xul
+style chrome://global/content/customizeToolbar.xul chrome://ffshare/skin/overlay.css
