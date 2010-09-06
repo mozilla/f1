@@ -37,28 +37,57 @@
          .invisible {
              visibility: hidden;
          }
-	 .socialicons { list-style-type:none; display:inline;}
-	 .socialicons li {float:left; padding:4px}
+	 .socialicons form {float:left; padding:4px}
+	 
+         
+         button[type="submit"] {
+            width: 32px;
+            height: 32px;
+            margin: 0;
+            border: 0;
+            overflow: hidden;
+            cursor: pointer; /* hand-shaped cursor */
+            cursor: hand; /* for IE 5.x */
+            text-indent: -1000em;
+	    display: block;
+         }
+         .twitter {
+            background: transparent url("/examples/images/twitter_32.png") no-repeat center top;
+         }
+         .facebook {
+            background: transparent url("/examples/images/facebook_32.png") no-repeat center top;
+         }
+         .google {
+            background: transparent url("/examples/images/google_32.png") no-repeat center top;
+         }
+
     </style>
 </head>
 <body class="settings">
 
     <div class="authorize">
       <p>Click on a service you want to authorize with Linkdrop</p>
-      <form id="oauthForm" action="/api/account/authorize" method="POST">
+      <div class="socialicons">
+        <form id="twitterOAuth" action="/api/account/authorize" method="POST">
+	 <input type="hidden" name="domain" value="twitter.com">
 	 <input type="hidden" name="end_point_success" value="/examples/auth/#oauth_success">
 	 <input type="hidden" name="end_point_auth_failure" value="/examples/auth/#oauth_failure">
-	 <div class="row">
-	    <ul class="socialicons">
-	    <li class="direct" title="Facebook" domain="facebook.com">
-	       <input type="image" src="/examples/images/facebook_32.png" name="domain" width="32" height="32" value="facebook.com"></li>
-	    <li class="direct" title="Twitter" domain="twitter.com">
-	       <input type="image" src="/examples/images/twitter_32.png" name="domain" width="32" height="32" value="twitter.com"></li>
-	    <li class="direct" title="Google" domain="twitter.com">
-	       <input type="image" src="/examples/images/google_32.png" name="domain" width="32" height="32" value="google.com"></li>
-	    </ul><div style="clear: both;"/>
-	 </div>
+                    <button class="twitter" type="submit">send</button>
         </form>
+        <form id="fbOAuth" action="/api/account/authorize" method="POST">
+	 <input type="hidden" name="domain" value="facebook.com">
+	 <input type="hidden" name="end_point_success" value="/examples/auth/#oauth_success">
+	 <input type="hidden" name="end_point_auth_failure" value="/examples/auth/#oauth_failure">
+                    <button class="facebook" type="submit">send</button>
+        </form>
+        <form id="gOAuth" action="/api/account/authorize" method="POST">
+	 <input type="hidden" name="domain" value="google.com">
+	 <input type="hidden" name="end_point_success" value="/examples/auth/#oauth_success">
+	 <input type="hidden" name="end_point_auth_failure" value="/examples/auth/#oauth_failure">
+                    <button class="google" type="submit">send</button>
+        </form>
+      </div>
+      <div style="clear: both"/>
     </div>
 
     <!-- oauth_success_twitter section -->
