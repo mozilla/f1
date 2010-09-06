@@ -24,6 +24,7 @@ Make a config file as follows::
 
 Tweak the config file as appropriate and then setup the application::
 
+    *skip this step for now*
     paster setup-app config.ini
 
 Running ``linkdrop``:
