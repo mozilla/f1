@@ -19,38 +19,45 @@
     <li class="settings"><a class="icon settings" href="#settings"><span class="name">settings</span></a></li>
   </ul>
 
+
   <div id="twitter">
-    <div class="entry">
+    <div class="entry" style="float:left">
+        <form name="twitterSend" class="messageForm" action="#">
+        <input type="hidden" name="domain" value="twitter.com" />
       <table>
         <tbody>
           <tr>
             <td class="user">
-              <span class="avatar"><img class="avatar" src="http://a2.twimg.com/profile_images/225518742/full-headshot_normal.jpg"></span>
-              <span class="username">clarkbw</span>
+              <span class="avatar"><img class="avatar"></span>
+              <span class="username"></span>
             </td>
             <td class="thumb">
               <div class="thumb"><img class="thumb"/></div>
             </td>
             <td class="message">
-              <textarea class="message"></textarea>
+              <textarea class="message" name="message"></textarea>
             </td>
             <td class="button">
-              <div><button>share</button></div>
+              <div><button type="submit">share</button></div>
             </td>
           </tr>
         </tbody>
       </table>
+        </form>
     </div>
+    <div id="resultReason">&nbsp;</div>
   </div>
 
   <div id="facebook">
     <div class="entry">
+        <form name="facebookSend" class="messageForm" action="#">
+        <input type="hidden" name="domain" value="facebook.com" />
       <table>
         <tbody>
           <tr>
             <td class="user">
-              <span class="avatar"><img class="avatar" src="http://profile.ak.fbcdn.net/hprofile-ak-snc4/hs626.snc3/27454_21602578_2499_q.jpg"></span>
-              <span class="username">Bryan Clark</span>
+              <span class="avatar"><img class="avatar"></span>
+              <span class="username"></span>
             </td>
             <td class="thumb">
               <div class="thumb"><img class="thumb"/></div>
@@ -66,7 +73,7 @@
               <input id="title" type="text" value="title"/>
             </td>
             <td class="message">
-              <textarea class="message"></textarea>
+              <textarea class="message" name="message"></textarea>
             </td>
             <td class="button">
               <div><button>share</button></div>
@@ -74,6 +81,7 @@
           </tr>
         </tbody>
       </table>
+        </form>
     </div>
   </div>
 

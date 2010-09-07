@@ -26,8 +26,8 @@
 "use strict";
 
 require.def("send",
-        ["require", "jquery", "blade/fn", "rdapi", "blade/url"],
-function (require,   $,        fn,         rdapi,   url) {
+        ["require", "jquery", "blade/fn", "rdapi", "blade/url", "placeholder"],
+function (require,   $,        fn,         rdapi,   url,         placeholder) {
 
     var svcOptions = {
             'twitter': true,
@@ -97,5 +97,74 @@ function (require,   $,        fn,         rdapi,   url) {
         if (options.title) {
             $('#title, #subject').val(options.title);
         }
+    });
+    
+
+    function reauthorize() {
+        var domain = localStorage['X-Send-Domain'];
+        var win = window.open("http://127.0.0.1:5000/send/auth.html?domain="+domain,
+                            "Firefox Share OAuth",
+                            "dialog=yes, modal=yes, width=800, height=480");
+    }
+
+    function sendMessage() {
+        var domain = localStorage['X-Send-Domain'];
+        var message = localStorage['X-Send-Message'];
+        rdapi('send', {
+            type: 'POST',
+            data: {
+                domain: domain,
+                message: message
+            },
+            success: function (json) {
+                // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
+                if (json['error'] && json['error']['reason']) {
+                    $("#resultReason").text("Error: "+json['error']['reason']);
+                    var code = json['error']['code'];
+                    if (code ==  401 || code == 400) {
+                        reauthorize();
+                    }
+                }
+                else {
+                    $("#resultReason").text("Message Sent");
+                    localStorage['X-Send-Domain'] = '';
+                    localStorage['X-Send-Message'] = '';
+                }
+            },
+            error: function (xhr, textStatus, err) {
+                $("#resultReason").text("XHR Error: "+err)
+            }
+        });
+    }
+    window.sendMessage = sendMessage;
+
+    $(function () {
+
+        $(".messageForm")
+            .submit(function (evt) {
+                //First clear old errors
+                $(".error").addClass("invisible");
+
+                var form = evt.target;
+    
+                //Make sure all form elements are trimmed and username exists.
+                $.each(form.elements, function (i, node) {
+                    var trimmed = node.value.trim();
+                    
+                    if (node.getAttribute("placeholder") === trimmed) {
+                        trimmed = "";
+                    }
+
+                    node.value = trimmed;
+                });
+   
+                localStorage['X-Send-Message'] = form.message.value;
+                localStorage['X-Send-Domain'] = form.domain.value;
+                sendMessage();
+                return false;
+            })
+            .each(function (i, node) {
+                placeholder(node);
+            });
     });
 });
