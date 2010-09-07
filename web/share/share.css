@@ -94,6 +94,28 @@ ul.nav li a.icon.gmail {
   background-image: url("http://andychung.ca/demos/share/i/gmail_w.png");
 }
 
+ul.nav li.debug {
+  position: absolute;
+  right: 72px;
+  top: 0;
+  width: 60px;
+  text-align: center;
+}
+
+ul.nav li.debug span.name {
+  display: block;
+  padding: 0;
+  text-align: center;
+  font-weight: normal;
+  color: #fff;
+}
+
+ul.nav li.debug a.icon {
+  width: auto;
+}
+
+
+
 ul.nav li.settings a.icon {
   width: auto;
 }
