@@ -41,8 +41,6 @@ function (require,   $,        fn,         rdapi,   url) {
         }
     }
 
-    console.log(options);
-
     //TODO: Call linkdrop account API first, to see if that works.
     
     //Try twitter API if have a twitter name
