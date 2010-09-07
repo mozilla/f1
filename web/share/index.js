@@ -83,8 +83,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
             selection = '#settings',
             services = options.services,
             param,
-            thumbDivNode = $('#facebook div.thumb')[0],
-            thumbImgDom = $('#facebook img.thumb');
+            thumbDivNode = $('div.thumb')[0],
+            thumbImgDom = $('img.thumb');
 
         //Set up debug thing, can go away later if need be.
         $('#debugButton').click(function (evt) {
@@ -121,7 +121,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
 
         //For the title in facebook/subject in email, set it to the page title
         if (options.title) {
-            $('#title, #subject').val(options.title);
+            $('.title').text(options.title);
         }
 
         //Remember the thumbnail preview size for later, to adjust the image
@@ -134,9 +134,10 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         if (options.previews && options.previews.length) {
             //TODO: set up all the image previews.
             thumbImgDom.attr('src', options.previews[0]);
+        } else {
+            thumbImgDom.attr('src', options.thumbnail);
         }
     });
-    
 
     function reauthorize() {
         var domain = localStorage['X-Send-Domain'];

@@ -74,6 +74,15 @@ var ffshare;
     },
 
     getKnownServices: function () {
+      // Returns a map of all of the known services we have found logins
+      // for, with the following structure:
+       //{'gmail': {
+       //     'usernames': ['john.doe', 'jane baz']
+       //     },
+       //{'twitter': {
+       //     'usernames': ['john.doe', 'jane baz']
+       //     },
+       //
       var loginMgr = Components.classes["@mozilla.org/login-manager;1"]
                          .getService(Components.interfaces.nsILoginManager),
           logins = loginMgr.getAllLogins({}),
@@ -111,30 +120,13 @@ var ffshare;
           }
         }
       }
-      //if (detectedServices.length) {
-      //  var bits = [];
-      //  for (var i = 0; i < detectedServices.length; i++) {
-      //    var svcData = detectedServicesMap[detectedServices[i]];
-      //    bits.push(svcData.name + ': ' + svcData.usernames.join(', '));
-      //  }
-      //}
-      // We'll return a map of all of the known services we have found logins
-      // for, with the following structure:
-
-       //{'Gmail': {
-       //     'usernames': ['john.doe', 'jane baz']
-       //     },
-       //{'Twitter': {
-       //     'usernames': ['john.doe', 'jane baz']
-       //     },
-       //
       return detectedServicesMap;
     },
 
     hide: function () {
       this.changeHeight(0, fn.bind(this, function () {
-        this.shareFrame.parentNode.removeChild(this.shareFrame);
-        this.shareFrame = null;
+          this.shareFrame.parentNode.removeChild(this.shareFrame);
+          this.shareFrame = null;
       }));
     },
   
@@ -174,6 +166,11 @@ var ffshare;
         canonicalUrl: this.getCanonicalURL(),
         previews: this.previews()
       };
+      
+      if (! options.previews.length) {
+        // then we need to make our own thumbnail
+        options['thumbnail'] = this.getThumbnailData();
+      }
 
       url = this.shareUrl +
                 '#options=' + encodeURIComponent(JSON.stringify(options));
@@ -248,11 +245,32 @@ var ffshare;
       return '';
     },
 
-    //Previous version of this code as thumbnails() at:
-    //http://hg.mozilla.org/users/clarkbw_gnome.org/firefox-share/raw-file/d2ad48e27576/src/chrome/content/overlay.js
+    getThumbnailData: function() {
+      var canvas = gBrowser.contentDocument.createElement("canvas"); // where?
+      var tab = getBrowser().selectedTab;
+      var win = tab.linkedBrowser.contentWindow;
+      var aspectRatio = canvas.width / canvas.height;
+      var w = win.innerWidth + win.scrollMaxX;
+      var h = Math.max(win.innerHeight, w/aspectRatio);
+
+      if (w > 10000) w = 10000;
+      if (h > 10000) h = 10000;
+
+      var canvasW = canvas.width;
+      var canvasH = canvas.height;
+      var ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvasW, canvasH);
+      ctx.save();
+
+      var scale = canvasH/h;
+      ctx.scale(scale, scale);
+      ctx.drawWindow(win, 0, 0, w, h, "rgb(255,255,255)");
+      ctx.restore();
+      return canvas.toDataURL("image/png", "");
+    },
+
     previews: function () {
-      // XXX Look for rel="image_src" and use those if they're available
-      // (requires prefetching)
+      // Look for rel="image_src" and use those if they're available
       // see e.g. http://about.digg.com/thumbnails
 
       var links = gBrowser.contentDocument.getElementsByTagName("link"),
