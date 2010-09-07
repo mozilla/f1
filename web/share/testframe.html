@@ -29,10 +29,9 @@
                     shareUrl = 'index.html';
     
                 accountForm.bind('submit', function (evt) {
-                    var accountJson = JSON.parse(accountForm.find('textarea').val());
+                    var options = JSON.parse(accountForm.find('textarea').val());
                     iframeNode.src = shareUrl +
-                        '#services=' + encodeURIComponent(JSON.stringify(accountJson)) +
-                        '&url=' + $('#shareUrl').val();
+                        '#options=' + encodeURIComponent(JSON.stringify(options));
                     iframeNode.contentWindow.location.reload(true);
                     evt.preventDefault();
                 });
@@ -45,14 +44,16 @@
 
 <hr>
     <form id="accountForm" action="#">
-        Share URL: <input type="text" id="shareUrl" value="http://mozilla.com">
 <br>
-    Send accounts:
+    Options:
         <textarea>
 {
-    "twitter": {
-        "usernames": ["mozmotest"]
-    },
+    "url": "http://mozilla.com",
+    "services": {
+        "twitter": {
+            "usernames": ["mozmotest"]
+        }
+    }
 }
         </textarea>
         <button>Update</button>
