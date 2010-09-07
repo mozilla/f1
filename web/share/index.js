@@ -80,7 +80,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
             if (photo) {
                 serviceDom.find('.avatar').attr('src', photo);
             }
-            serviceDom.find('td.user').removeClass('inactive');
+            serviceDom.find('div.user').removeClass('inactive');
         });
     }
 
