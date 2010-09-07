@@ -96,18 +96,38 @@ ul.nav li a.icon {
 }
 
 ul.nav li a.icon.twitter {
-  background-image: url("http://andychung.ca/demos/share/i/twitter_w.png");
+  background-image: url("../../../../../web/share/i/twitter_w.png");
 }
 
 ul.nav li a.icon.facebook {
-  background-image: url("http://andychung.ca/demos/share/i/facebook_w.png");
+  background-image: url("../../../../../web/share/i/facebook_w.png");
 }
 
 ul.nav li a.icon.gmail {
-  background-image: url("http://andychung.ca/demos/share/i/gmail_w.png");
+  background-image: url("../../../../../web/share/i/gmail_w.png");
 }
 
-ul.nav li.settings a.icon {
+ul.nav li a.icon.settings {
+  background-image: url("../skin/i/settings.png");
+}
+
+ul.nav li.debug {
+  position: absolute;
+  right: 46px;
+  top: 0;
+  width: 60px;
+  text-align: center;
+}
+
+ul.nav li.debug span.name {
+  display: block;
+  padding: 0;
+  text-align: center;
+  font-weight: normal;
+  color: #fff;
+}
+
+ul.nav li.debug a.icon {
   width: auto;
 }
 
@@ -129,11 +149,7 @@ ul.nav li.settings.ui-tabs-selected span.name {
 }
 
 ul.nav li.settings span.name {
-  display: block;
-  padding: 0;
-  text-align: center;
-  font-weight: normal;
-  color: #fff;
+  display: none;
 }
 
 ul.nav li.ui-tabs-selected {
@@ -168,22 +184,24 @@ ul.nav span.name {
   padding-left: 24px;
 }
 
+ul.nav li.ui-tabs-selected.settings {
+  width: 16px;
+}
+
 ul.nav li.ui-tabs-selected.settings span.name {
-  padding: 0;
-  color: #444;
-  font-weight: normal;
+  display: none;
 }
 
 ul.nav li.ui-tabs-selected a.twitter {
-  background-image: url("http://andychung.ca/demos/share/i/twitter_b.png");
+  background-image: url("../../../../../web/share/i/twitter_b.png");
 }
 
 ul.nav li.ui-tabs-selected a.facebook {
-  background-image: url("http://andychung.ca/demos/share/i/facebook_b.png");
+  background-image: url("../../../../../web/share/i/facebook_b.png");
 }
 
 ul.nav li.ui-tabs-selected a.gmail {
-  background-image: url("http://andychung.ca/demos/share/i/gmail_b.png");
+  background-image: url("../../../../../web/share/i/gmail_b.png");
 }
 
 ul.nav li.ui-tabs-selected a {
@@ -215,9 +233,21 @@ td.button {
   vertical-align: bottom;
 }
 
-.username {
+div.user {
+  font-size: small;
+  width: 140px;
+  overflow: hidden;
+}
+
+div.user.inactive {
+  opacity: 0.5;
+  background: -moz-repeating-linear-gradient(top left -45deg, #aaa, #aaa 5px, #fff 5px, #fff 10px) #aaa no-repeat fixed;
+  -moz-border-radius: 1%;
+  cursor: pointer;
+}
+
+div.user .username {
   color: #444;
-  font-size: large;
   font-weight: bold;
 }
 
