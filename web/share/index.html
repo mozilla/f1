@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
+  <link rel="stylesheet" type="text/css" href="share.css">
+
+  <script type="text/javascript">
+  $(document).ready(function() {
+    $("#tabs").tabs({ fx: { opacity: 'toggle', duration: 200 } });
+  });
+  </script>
+
+  <style>
+    .ui-tabs .ui-tabs-hide { display: none; }
+  </style>
+
+
+</head>
+<body>
+
+<div id="tabs" class="tabs-left">
+
+  <ul class="nav">
+    <li><a class="icon twitter" href="#twitter"><span class="name">Twitter</span></a></li>
+    <li><a class="icon facebook" href="#facebook"><span class="name">Facebook</span></a></li>
+    <li><a class="icon gmail" href="#gmail"><span class="name">GMail</span></a></li>
+    <li class="settings"><a class="icon settings" href="#settings"><span class="name">settings</span></a></li>
+  </ul>
+
+  <div id="twitter">
+    <div class="entry">
+      <table>
+        <tbody>
+          <tr>
+            <td class="user">
+              <span class="avatar"><img class="avatar" src="http://a2.twimg.com/profile_images/225518742/full-headshot_normal.jpg"></span>
+              <span class="username">clarkbw</span>
+            </td>
+            <td class="thumb">
+              <div class="thumb"><img class="thumb"/></div>
+            </td>
+            <td class="message">
+              <textarea class="message"></textarea>
+            </td>
+            <td class="button">
+              <div><button>share</button></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="facebook">
+    <div class="entry">
+      <table>
+        <tbody>
+          <tr>
+            <td class="user">
+              <span class="avatar"><img class="avatar" src="http://profile.ak.fbcdn.net/hprofile-ak-snc4/hs626.snc3/27454_21602578_2499_q.jpg"></span>
+              <span class="username">Bryan Clark</span>
+            </td>
+            <td class="thumb">
+              <div class="thumb"><img class="thumb"/></div>
+              <table class="thumbs">
+                <tr>
+                <td><span class="arrow left">&lt;</span></td>
+                <td class="text">thumbnail</td>
+                <td><span class="arrow right">&gt;</span></td>
+                </tr>
+              </table>
+            </td>
+            <td class="message">
+              <input id="title" type="text" value="title"/>
+            </td>
+            <td class="message">
+              <textarea class="message"></textarea>
+            </td>
+            <td class="button">
+              <div><button>share</button></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="gmail">
+    <div class="entry">
+      <table>
+        <tbody>
+          <tr>
+            <td class="user">
+              <span class="avatar"><img class="avatar" src="http://profile.ak.fbcdn.net/hprofile-ak-snc4/hs626.snc3/27454_21602578_2499_q.jpg"></span>
+              <span class="username">clarkbw@gmail.com</span>
+            </td>
+            <td class="thumb">
+              <div class="thumb"><img class="thumb"/></div>
+            </td>
+            <td class="message">
+              <div><input id="to" type="text" value="to"/></div>
+              <div><input id="subject" type="text" value="subject"/></div>
+            </td>
+            <td class="message">
+              <div><textarea class="message"></textarea></div>
+            </td>
+            <td class="button">
+              <div><button>share</button></div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="settings">
+    <div class="entry">
+      <div>
+        <button>Add Twitter</button>
+        <button>Add Facebook</button>
+      </div>
+      <div>
+        <button>Add GMail</button>
+        <button>Add FFound</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+
+</html>

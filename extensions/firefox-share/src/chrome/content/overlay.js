@@ -58,7 +58,7 @@ var ffshare;
 
   ffshare = {
     frameAnimationTime: 300,
-    shareUrl: 'http://127.0.0.1:5000/send/',
+    shareUrl: 'http://127.0.0.1:5000/share/',
     shareFrame: null,
 
     onLoad: function () {
