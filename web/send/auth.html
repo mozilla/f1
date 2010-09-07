@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Firefox Share OAuthorization</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+
+    <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+    <style>
+         .hidden {
+             display: none;
+         }
+
+         .invisible {
+             visibility: hidden;
+         }
+    </style>
+    <script>
+      require.def("oauth",
+	      ["require", "jquery", "blade/url"],
+      function (require,   $,        url) {
+	 var target = window.location.href.split('#')[1];
+	 if (target) {
+	   window.opener.sendMessage();
+	   window.close();
+	 }
+	 var search = window.location.href.split('?')[1];
+	 if (search) {
+	     search = search.split('#')[0];
+	     var args = url.queryToObject(search);
+	     if (args['domain']) {
+		 $("#domain").attr("value", args['domain']);
+		 document.authForm.submit();
+	     }
+	 }
+      });
+    </script>
+</head>
+<body class="settings">
+
+    <div class="authorize hidden">
+        <form name="authForm" action="/api/account/authorize" method="POST">
+	 <input type="hidden" name="domain" id="domain" value="">
+	 <input type="hidden" name="end_point_success" value="/send/auth.html#oauth_success">
+	 <input type="hidden" name="end_point_auth_failure" value="/send/auth.html#oauth_failure">
+         <button type="submit">send</button>
+        </form>
+
+      </div>
+      <div style="clear: both"/>
+    </div>
+
+    <!-- oauth_success_twitter section -->
+    <div class="section oauth_success hidden">
+        <div class="row">
+            <div class="c1">
+                <h4 class="success">Success!</h4>
+                <p>Authorization configured</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- oauth_failure_twitter section -->
+    <div class="section oauth_failure hidden">
+        <div class="row">
+            <div class="c1">
+                <h4 class="error">Error</h4>
+                <p>Authorization Failed</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
