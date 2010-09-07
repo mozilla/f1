@@ -1,7 +1,7 @@
 'use strict';
 /*jslint indent: 2 */
 /*global document: false, setInterval: false, clearInterval: false,
-  Application: false, gBrowser: false, window: false */
+  Application: false, gBrowser: false, window: false, Components: false */
 
 /*
  TODO
@@ -71,7 +71,7 @@ var ffshare;
       this.onToolbarButtonCommand(e);
     },
 
-    getKnownServices: function() {
+    getKnownServices: function () {
       var loginMgr = Components.classes["@mozilla.org/login-manager;1"]
                          .getService(Components.interfaces.nsILoginManager);
 
@@ -127,15 +127,7 @@ var ffshare;
       return detectedServicesMap;
     },
 
-    clearHeightAnimation: function () {
-      if (this.animIntervalId) {
-        clearInterval(this.animIntervalId);
-        this.animIntervalId = 0;
-      }
-    },
-
     hide: function () {
-      this.clearHeightAnimation();
       this.changeHeight(0, fn.bind(this, function () {
         this.shareFrame.parentNode.removeChild(this.shareFrame);
         this.shareFrame = null;
@@ -143,9 +135,6 @@ var ffshare;
     },
   
     show: function () {
-      //Cancel previous height animation if in play.
-      this.clearHeightAnimation();
-  
       //Create the iframe.
       var tab = gBrowser.selectedTab,
           parentNode = tab.linkedBrowser.parentNode,
@@ -154,8 +143,19 @@ var ffshare;
       //Remember iframe node for later.
       this.shareFrame = iframeNode;
 
+      iframeNode.className = 'ffshare-frame';
       iframeNode.style.width = '100%';
       iframeNode.style.height = 0;
+      //Make sure it can go all the way to zero.
+      iframeNode.style.minHeight = 0;
+
+      //Figure out if CSS transitions can be used
+      if ('MozTransition' in iframeNode.style) {
+        this.useCssTransition = true;
+        iframeNode.addEventListener("transitionend", fn.bind(this, 'onTransitionEnd'), true);
+      } else {
+        this.useCssTransition = false;
+      }
 
       iframeNode.addEventListener('load', fn.bind(this, function (evt) {
         var height = evt.target.documentElement.getBoundingClientRect().height;
@@ -168,32 +168,22 @@ var ffshare;
     },
 
     changeHeight: function (height, onEnd) {
-      var currentHeight = parseInt(this.shareFrame.style.height, 10),
-          diff = height - currentHeight,
-          pxPerMs = diff / this.frameAnimationTime,
-          startTime = (new Date()).getTime();
-  
-      this.animIntervalId = setInterval(fn.bind(this, function () {
-        var msDiff = (new Date()).getTime() - startTime,
-            newHeight = currentHeight + (msDiff * pxPerMs);
-  
-        //Make sure height stays within limits.
-        if (diff < 0 && newHeight < height) {
-          newHeight = height;
-        } else if (diff >= 0 && newHeight >= height) {
-          newHeight = height;
-        }
 
-        this.shareFrame.style.height = newHeight + 'px';
+      if (this.useCssTransition) {
+        this.onHeightEnd = onEnd;
+      }
+      
+      this.shareFrame.style.height = height + 'px';
 
-        if (newHeight === height) {
-          clearInterval(this.animIntervalId);
-          this.animIntervalId = 0;
-          if (onEnd) {
-            onEnd();
-          }
-        }
-      }), 15);
+      if (!this.useCssTransition && onEnd) {
+        onEnd();
+      }
+    },
+
+    onTransitionEnd: function (evt) {
+      if (this.onHeightEnd) {
+        this.onHeightEnd();
+      }
     },
 
     onToolbarButtonCommand: function (e) {

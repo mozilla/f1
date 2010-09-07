@@ -1,3 +1,7 @@
+.ffshare-frame {
+    -moz-transition: height 0.2s ease-in;
+}
+
 #ffshare-popup {
   -moz-appearance: none;
   -moz-window-shadow: none;
