@@ -32,7 +32,7 @@
                     var accountJson = JSON.parse(accountForm.find('textarea').val());
                     iframeNode.src = shareUrl +
                         '#services=' + encodeURIComponent(JSON.stringify(accountJson)) +
-                        '&url=' + $('shareUrl').val();
+                        '&url=' + $('#shareUrl').val();
                     iframeNode.contentWindow.location.reload(true);
                     evt.preventDefault();
                 });
@@ -50,10 +50,10 @@
     Send accounts:
         <textarea>
 {
-    "Twitter": {
+    "twitter": {
         "usernames": ["jeanreilly"]
     },
-    "Facebook": {
+    "facebook": {
         "usernames": ["jn.reilly@gmail.com"]
     }
 }

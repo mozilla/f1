@@ -29,24 +29,36 @@ require.def("send",
         ["require", "jquery", "blade/fn", "rdapi", "blade/url"],
 function (require,   $,        fn,         rdapi,   url) {
 
-    var hash = location.href.split('#')[1],
+    var svcOptions = {
+            'twitter': true,
+            'facebook': true,
+            'gmail': true
+        },
+        hash = location.href.split('#')[1],
         options = {
-            services: {}
-        };
+            services: null
+        },
+        twitter, userName;
 
     if (hash) {
         options = url.queryToObject(hash);
         if (options.services) {
             options.services = JSON.parse(options.services);
         }
+        if (options.previews) {
+            options.previews = JSON.parse(options.previews);
+        }
+        if (!options.title) {
+            options.title = options.url;
+        }
     }
 
     //TODO: Call linkdrop account API first, to see if that works.
-    
+
     //Try twitter API if have a twitter name
-    var twitter = options.services.Twitter;
+    twitter = options.services && options.services.Twitter;
     if (twitter && twitter.usernames) {
-        var userName = twitter.usernames[0];
+        userName = twitter.usernames[0];
         $.getJSON('http://api.twitter.com/1/users/show.json?callback=?&screen_name=' +
                   encodeURIComponent(userName), function (json) {
             $('#twitter')
@@ -55,9 +67,35 @@ function (require,   $,        fn,         rdapi,   url) {
         });
     }
 
-    $(document).ready(function() {
-        $("#tabs").tabs({ fx: { opacity: 'toggle', duration: 200 } });
+    $(function () {
+        var tabDom = $("#tabs"),
+            selection = '#settings',
+            services = options.services,
+            param;
 
-        $('.message').val(location.href);
+        //Set up tabs.
+        tabDom.tabs({ fx: { opacity: 'toggle', duration: 200 } });
+
+        //Choose a tab to show. Use the first service found in services.
+        //Warning: this is not completely reliable given a for..in loop
+        //over an object, which does not guarantee key order across browsers.
+        if (services) {
+            for (param in services) {
+                if (param in svcOptions) {
+                    selection = '#' + param;
+                }
+            }
+        }
+        tabDom.tabs('select', selection);
+
+        //Set up the URL in all the message containers
+        if (options.url) {
+            $('.message').val(options.url);
+        }
+
+        //For the title in facebook, set it to the page title
+        if (options.title) {
+            $('#title, #subject').val(options.title);
+        }
     });
 });
