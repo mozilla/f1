@@ -33,11 +33,9 @@ the contacts API that uses @me/@self.
     @api_response
     @json_exception_response
     def get(self, id=None):
-        if id is None:
-            accts = Session.query(Account).all()
-        else:
-            accts = [Session.query(Account).get(id)]
-        return [a.to_dict() for a in accts]
+        userkey = session['userkey']
+        accts = Session.query(Account).filter(Account.userkey==userkey).all()
+        return [a.profile for a in accts]
 
     def _get_or_create_account(self, domain, userid, username):
         user_key = session.get('userkey')
