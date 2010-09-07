@@ -134,7 +134,6 @@ class api():
             result = api.account.verify_credentials()
             result[domain] = result['id']
         except TwitterHTTPError, exc:
-            import sys; print >> sys.stderr, repr(exc)
             details = "TwitterHTTPError %d" % (exc.e.code)
             if exc.e.code != 404:
                 details = json.load(exc.e)
