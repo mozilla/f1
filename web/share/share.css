@@ -43,6 +43,7 @@ a {
     width: 300px;
 }
 
+
 #tabs {
   height: 128px;
   overflow: hidden;
@@ -166,15 +167,8 @@ td.user {
 }
 
 td.thumb {
-  width: 140px;
+  width: 200px;
   padding: 0 10px;
-  text-align: center;
-  vertical-align: bottom;
-  display: none;
-}
-
-#facebook td.thumb {
-  display: table-cell;
 }
 
 td.message {
@@ -183,7 +177,7 @@ td.message {
 }
 
 td.button {
-  padding: 7px 20px;
+  padding: 1px 20px;
   vertical-align: bottom;
 }
 
@@ -193,21 +187,31 @@ td.button {
   font-weight: bold;
 }
 
+td.image {
+  width: 90px;
+}
+
 div.thumb {
-  margin: 0 auto;
   border: 1px dashed #aaa;
   height: 70px;
   width: 90px;
 }
 
-.thumbs {
-  width: 100px;
-  font-size: xx-small;
-  margin: 0 auto;
+.thumb .title,
+.thumb .description {
+  padding: 0 3px;
 }
 
-.thumbs .text {
-  text-align: center;
+.thumb .title {
+  color: #3B5998;
+  text-decoration: underline;
+  font-size: large;
+  cursor: pointer;
+}
+
+.thumb .description {
+  color: #808080;
+  font-size: small;
 }
 
 .entry {
@@ -216,7 +220,6 @@ div.thumb {
 
 button {
   padding: 2px 15px;
-  margin: 0 1px 0 0;
   font-family: "helvetica neue", helvetica, arial, sans-serif;
   font-size: 12px;
   line-height:24px;
@@ -233,10 +236,12 @@ textarea, input[type="text"] {
   font-size:14px;
   line-height:24px;
   padding: 3px;
-  margin: 7px;
+  margin: 0 7px;
   width: 100%;
 }
 
 input[type="text"] {
   height: 28px;
+  margin-top: 3px;
+  margin-bottom: 3px;
 }
