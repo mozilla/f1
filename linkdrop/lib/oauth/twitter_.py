@@ -72,5 +72,6 @@ class api():
                 msg = str(details)
             error = {'provider': domain,
                      'reason': msg,
+                     'code': exc.e.code
             }
         return result, error
