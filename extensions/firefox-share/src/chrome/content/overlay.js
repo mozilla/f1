@@ -59,7 +59,8 @@ var ffshare;
 
   ffshare = {
     frameAnimationTime: 300,
-    shareUrl: 'http://linkdrop.mozillamessaging.com/share/',
+    shareUrl: 'http://127.0.0.1:5000/share/',
+    //shareUrl: 'http://linkdrop.mozillamessaging.com/share/',
     shareFrame: null,
 
     onLoad: function () {
@@ -142,7 +143,7 @@ var ffshare;
       var tab = gBrowser.selectedTab,
           parentNode = tab.linkedBrowser.parentNode,
           iframeNode = document.createElement("iframe"),
-          url;
+          url, options;
 
       //Remember iframe node for later.
       this.shareFrame = iframeNode;
@@ -166,12 +167,16 @@ var ffshare;
         this.changeHeight(height);
       }), true);
 
+      options = {
+        services: this.getKnownServices(),
+        title: this.getPageTitle(),
+        url: gBrowser.currentURI.spec,
+        canonicalUrl: this.getCanonicalURL(),
+        previews: this.previews()
+      };
+
       url = this.shareUrl +
-                '#services=' + encodeURIComponent(JSON.stringify(this.getKnownServices())) +
-                '&title=' + encodeURIComponent(this.getPageTitle()) +
-                '&url=' + encodeURIComponent(gBrowser.currentURI.spec) +
-                '&canonicalUrl=' + encodeURIComponent(this.getCanonicalURL()) +
-                '&previews=' + encodeURIComponent(JSON.stringify(this.previews()));
+                '#options=' + encodeURIComponent(JSON.stringify(options));
 
       iframeNode.setAttribute("src", url);
       parentNode.insertBefore(iframeNode, parentNode.firstChild);

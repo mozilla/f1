@@ -35,18 +35,29 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
             'gmail': true
         },
         hash = location.href.split('#')[1],
+        urlArgs,
         options = {
             services: null
         },
-        twitter, userName;
+        twitter, userName,
+        previewWidth = 90, previewHeight = 70;
+
+    function resizePreview(evt) {
+        var imgNode = evt.target,
+            width = imgNode.width,
+            height = imgNode.height;
+
+        if (height > width) {
+            imgNode.height = previewHeight;
+        } else {
+            imgNode.width = previewWidth;
+        }
+    }
 
     if (hash) {
-        options = url.queryToObject(hash);
-        if (options.services) {
-            options.services = JSON.parse(options.services);
-        }
-        if (options.previews) {
-            options.previews = JSON.parse(options.previews);
+        urlArgs = url.queryToObject(hash);
+        if (urlArgs.options) {
+            options = JSON.parse(urlArgs.options);
         }
         if (!options.title) {
             options.title = options.url;
@@ -56,7 +67,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
     //TODO: Call linkdrop account API first, to see if that works.
 
     //Try twitter API if have a twitter name
-    twitter = options.services && options.services.Twitter;
+    twitter = options.services && options.services.twitter;
     if (twitter && twitter.usernames) {
         userName = twitter.usernames[0];
         $.getJSON('http://api.twitter.com/1/users/show.json?callback=?&screen_name=' +
@@ -71,7 +82,14 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         var tabDom = $("#tabs"),
             selection = '#settings',
             services = options.services,
-            param;
+            param,
+            thumbDivNode = $('#facebook div.thumb')[0],
+            thumbImgDom = $('#facebook img.thumb');
+
+        //Set up debug thing, can go away later if need be.
+        $('#debugButton').click(function (evt) {
+            $('#debug').val(JSON.stringify(options));
+        });
 
         //Set up tabs.
         tabDom.tabs({ fx: { opacity: 'toggle', duration: 200 } });
@@ -90,12 +108,32 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
 
         //Set up the URL in all the message containers
         if (options.url) {
-            $('.message').val(options.url);
+            $('textarea.message').each(function (i, node) {
+                var dom = $(node);
+                //If the message containder prefers canonical URLs then use them.
+                if (dom.hasClass('canonical')) {
+                    dom.val(options.canonicalUrl || options.url);
+                } else {
+                    dom.val(options.url);
+                }
+            });
         }
 
-        //For the title in facebook, set it to the page title
+        //For the title in facebook/subject in email, set it to the page title
         if (options.title) {
             $('#title, #subject').val(options.title);
+        }
+
+        //Remember the thumbnail preview size for later, to adjust the image
+        //to fit within the size.
+        //previewWidth = parseInt(thumbDivNode.style.width, 10);
+        //previewHeight = parseInt(thumbDivNode.style.height, 10);
+        thumbImgDom.bind('load', resizePreview);
+
+        //Set preview image for facebook
+        if (options.previews && options.previews.length) {
+            //TODO: set up all the image previews.
+            thumbImgDom.attr('src', options.previews[0]);
         }
     });
     
