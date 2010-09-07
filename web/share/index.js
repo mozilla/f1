@@ -71,9 +71,9 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
     function updateAccountDisplay(service, account) {
         $(function () {
             var name = account.displayName,
-                photo = account.photos[0].value,
+                photo = account.photos && account.photos[0] && account.photos[0].value,
                 serviceDom = $('#' + service);
-            
+
             if (name) {
                 serviceDom.find('.username').text(name);
             }
@@ -87,47 +87,49 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
     function updateAccounts(accounts) {
         var services = options.services,
             userAccounts = {}, twitter, selection, param;
-        if ((!accounts || !accounts.length) && !services) {
-            return;
-        }
 
-        //Figure out what accounts we do have
-        accounts.forEach(function (account) {
-            var name = account.accounts[0].domain;
-            if (name) {
-                name = name.split('.');
-                name = name[name.length - 2];
-                userAccounts[name] = account;
-            }
-        });
-
-        if (userAccounts.twitter) {
-            updateAccountDisplay('twitter', userAccounts.twitter);
-        } else {
-            //Try twitter API if have a twitter name
-            twitter = getServiceUserName('twitter');
-            if (twitter) {
-                $.getJSON('http://api.twitter.com/1/users/show.json?callback=?&screen_name=' +
-                          encodeURIComponent(twitter), function (json) {
-                    $(function () {
-                        $('#twitter')
-                            .find('img.avatar').attr('src', json.profile_image_url).end()
-                            .find('.username').text(json.name);
+        if ((accounts && accounts.length) || services) {
+            //Figure out what accounts we do have
+            accounts.forEach(function (account) {
+                var name = account.accounts[0].domain;
+                if (name) {
+                    name = name.split('.');
+                    name = name[name.length - 2];
+                    if (name === 'google') {
+                        name = 'gmail';
+                    }
+                    userAccounts[name] = account;
+                }
+            });
+    
+            if (userAccounts.twitter) {
+                updateAccountDisplay('twitter', userAccounts.twitter);
+            } else {
+                //Try twitter API if have a twitter name
+                twitter = getServiceUserName('twitter');
+                if (twitter) {
+                    $.getJSON('http://api.twitter.com/1/users/show.json?callback=?&screen_name=' +
+                              encodeURIComponent(twitter), function (json) {
+                        $(function () {
+                            $('#twitter')
+                                .find('img.avatar').attr('src', json.profile_image_url).end()
+                                .find('.username').text(json.name);
+                        });
                     });
-                });
+                }
             }
-        }
-
-        if (userAccounts.facebook) {
-            updateAccountDisplay('facebook', userAccounts.facebook);
-        } else {
-            updateServiceDisplayName('facebook');
-        }
-
-        if (userAccounts.gmail) {
-            updateAccountDisplay('gmail', userAccounts.gmail);
-        } else {
-            updateServiceDisplayName('gmail');
+    
+            if (userAccounts.facebook) {
+                updateAccountDisplay('facebook', userAccounts.facebook);
+            } else {
+                updateServiceDisplayName('facebook');
+            }
+    
+            if (userAccounts.gmail) {
+                updateAccountDisplay('gmail', userAccounts.gmail);
+            } else {
+                updateServiceDisplayName('gmail');
+            }
         }
 
         //Choose a tab to show. Use the first service found in services.
@@ -137,6 +139,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
             for (param in services) {
                 if (param in svcOptions) {
                     selection = '#' + param;
+                    break;
                 }
             }
         }
@@ -144,6 +147,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
             for (param in userAccounts) {
                 if (param in svcOptions) {
                     selection = '#' + param;
+                    break;
                 }
             }
         }
