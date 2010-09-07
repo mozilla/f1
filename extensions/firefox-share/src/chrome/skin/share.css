@@ -158,7 +158,7 @@ td.user {
 }
 
 td.thumb {
-  width: 200px;
+  width: 220px;
   padding: 0 10px;
 }
 
@@ -196,13 +196,13 @@ div.thumb {
 .thumb .title {
   color: #3B5998;
   text-decoration: underline;
-  font-size: large;
+  font-size: small;
   cursor: pointer;
 }
 
 .thumb .description {
   color: #808080;
-  font-size: small;
+  font-size: x-small;
 }
 
 .entry {
