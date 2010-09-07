@@ -15,7 +15,12 @@ var ffshare;
   var slice = Array.prototype.slice,
       ostring = Object.prototype.toString, fn;
 
+  var dbConn = Cc["@mozilla.org/browser/nav-history-service;1"].
+    getService(Ci.nsPIPlacesDatabase).
+    DBConnection;
+
   fn = {
+
     /**
      * Determines if the input a function.
      * @param {Object} it whatever you want to test to see if it is a function.
@@ -101,12 +106,13 @@ var ffshare;
               svcName = knownServices[j].name;
               username = logins[i].username;
               if (! detectedServicesMap[svcName]) {
-                svcData = {'usernames': []};
+                svcData = {'usernames': [], 'frecency': 0};
                 detectedServicesMap[svcName] = svcData;
                 detectedServices.push(svcName);
               } else {
                 svcData = detectedServicesMap[svcName];
               }
+              svcData['frecency'] += this.getFrecencyForURI(knownServices[j].hostnames[hostnameIndex]);
               exists = false;
               for (ui = 0; ui < svcData.usernames.length; ui++) {
                 if (svcData.usernames[ui] === username) {
@@ -121,6 +127,29 @@ var ffshare;
         }
       }
       return detectedServicesMap;
+    },
+
+    /**
+     * Returns the frecency of a URI.
+     *
+     * XXX: should move to async as places moves to async.
+     *
+     * @param  aURI
+     *         the URI of a place
+     * @return the frecency of aURI
+     */
+    getFrecencyForURI: function(url) {
+      var ios = Cc["@mozilla.org/network/io-service;1"].
+             getService(Ci.nsIIOService);
+      var uri = ios.newURI(url, null, null);
+      var sql = "SELECT frecency FROM moz_places WHERE url = :url LIMIT 1";
+      var stmt = dbConn.createStatement(sql);
+      stmt.params.url = uri.spec;
+      var retval = stmt.executeStep();
+      if (retval == false) return 0;
+      var frecency = stmt.getInt32(0);
+      stmt.finalize();
+      return frecency;
     },
 
     hide: function () {
