@@ -182,6 +182,10 @@ table {
   width: 100%;
 }
 
+td.user.inactive .username {
+    opacity: 0.2;
+}
+
 td.user {
   width: 140px;
   padding-right: 10px;

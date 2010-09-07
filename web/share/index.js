@@ -39,7 +39,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         options = {
             services: null
         },
-        twitter, userName,
+        userName, tabDom,
         previewWidth = 90, previewHeight = 70;
 
     function resizePreview(evt) {
@@ -54,45 +54,81 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         }
     }
 
-    if (hash) {
-        urlArgs = url.queryToObject(hash);
-        if (urlArgs.options) {
-            options = JSON.parse(urlArgs.options);
-        }
-        if (!options.title) {
-            options.title = options.url;
+    function getServiceUserName(serviceName) {
+        var service = options.services && options.services[serviceName];
+        return (service && service.usernames && service.usernames[0]) || null;
+    }
+    
+    function updateServiceDisplayName(service) {
+        var userName = getServiceUserName(service);
+        if (userName) {
+            $(function () {
+                $('#' + service).find('.username').text(userName);
+            });
         }
     }
 
-    //TODO: Call linkdrop account API first, to see if that works.
-
-    //Try twitter API if have a twitter name
-    twitter = options.services && options.services.twitter;
-    if (twitter && twitter.usernames) {
-        userName = twitter.usernames[0];
-        $.getJSON('http://api.twitter.com/1/users/show.json?callback=?&screen_name=' +
-                  encodeURIComponent(userName), function (json) {
-            $('#twitter')
-                .find('img.avatar').attr('src', json.profile_image_url).end()
-                .find('.username').html(json.name);
+    function updateAccountDisplay(service, account) {
+        $(function () {
+            var name = account.displayName,
+                photo = account.photos[0].value,
+                serviceDom = $('#' + service);
+            
+            if (name) {
+                serviceDom.find('.username').text(name);
+            }
+            if (photo) {
+                serviceDom.find('.avatar').attr('src', photo);
+            }
+            serviceDom.find('td.user').removeClass('inactive');
         });
     }
 
-    $(function () {
-        var tabDom = $("#tabs"),
-            selection = '#settings',
-            services = options.services,
-            param,
-            thumbDivNode = $('div.thumb')[0],
-            thumbImgDom = $('img.thumb');
+    function updateAccounts(accounts) {
+        var services = options.services,
+            userAccounts = {}, twitter, selection, param;
+        if ((!accounts || !accounts.length) && !services) {
+            return;
+        }
 
-        //Set up debug thing, can go away later if need be.
-        $('#debugButton').click(function (evt) {
-            $('#debug').val(JSON.stringify(options));
+        //Figure out what accounts we do have
+        accounts.forEach(function (account) {
+            var name = account.accounts[0].domain;
+            if (name) {
+                name = name.split('.');
+                name = name[name.length - 2];
+                userAccounts[name] = account;
+            }
         });
 
-        //Set up tabs.
-        tabDom.tabs({ fx: { opacity: 'toggle', duration: 200 } });
+        if (userAccounts.twitter) {
+            updateAccountDisplay('twitter', userAccounts.twitter);
+        } else {
+            //Try twitter API if have a twitter name
+            twitter = getServiceUserName('twitter');
+            if (twitter) {
+                $.getJSON('http://api.twitter.com/1/users/show.json?callback=?&screen_name=' +
+                          encodeURIComponent(twitter), function (json) {
+                    $(function () {
+                        $('#twitter')
+                            .find('img.avatar').attr('src', json.profile_image_url).end()
+                            .find('.username').text(json.name);
+                    });
+                });
+            }
+        }
+
+        if (userAccounts.facebook) {
+            updateAccountDisplay('facebook', userAccounts.facebook);
+        } else {
+            updateServiceDisplayName('facebook');
+        }
+
+        if (userAccounts.gmail) {
+            updateAccountDisplay('gmail', userAccounts.gmail);
+        } else {
+            updateServiceDisplayName('gmail');
+        }
 
         //Choose a tab to show. Use the first service found in services.
         //Warning: this is not completely reliable given a for..in loop
@@ -104,7 +140,51 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
                 }
             }
         }
+        if (!selection) {
+            for (param in userAccounts) {
+                if (param in svcOptions) {
+                    selection = '#' + param;
+                }
+            }
+        }
+        if (!selection) {
+            selection = '#settings';
+        }
         tabDom.tabs('select', selection);
+    }
+
+    if (hash) {
+        urlArgs = url.queryToObject(hash);
+        if (urlArgs.options) {
+            options = JSON.parse(urlArgs.options);
+        }
+        if (!options.title) {
+            options.title = options.url;
+        }
+    }
+
+    //TODO: Call linkdrop account API first, to see if that works.
+    rdapi('account/get', {
+        success: function (json) {
+            if (json.error) {
+                json = [];
+            }
+            updateAccounts(json);
+        }
+    });
+
+    $(function () {
+        var services = options.services,
+            param,
+            thumbDivNode = $('div.thumb')[0],
+            thumbImgDom = $('img.thumb');
+
+        //Debug info on the data that was received.
+        $('#debugOutput').val(JSON.stringify(options));
+
+        //Set up tabs.
+        tabDom = $("#tabs");
+        tabDom.tabs({ fx: { opacity: 'toggle', duration: 200 } });
 
         //Set up the URL in all the message containers
         if (options.url) {
