@@ -35,6 +35,10 @@ a {
   outline: none;
 }
 
+.ui-tabs .ui-tabs-hide {
+    display: none;
+}
+
 #tabs {
   height: 128px;
   overflow: hidden;

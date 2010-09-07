@@ -8,3 +8,7 @@
   width: 22px;
   height: 22px;
 }
+
+.ffshare-frame {
+  -moz-transition: height 0.2s ease-in;
+}
