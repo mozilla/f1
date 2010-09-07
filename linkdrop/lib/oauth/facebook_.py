@@ -127,14 +127,13 @@ class api():
           elif 'error' in response:
               error = {'provider': domain,
                        'reason': response['error'].get('message'),
-                       'type': response['error'].get('type')
+                       'type': response['error'].get('type'),
+                       'code': int(resp['status']) 
               }
-              if response['error'].get('type')=="OAuthInvalidRequestException":
-                  # status will be 401 if we need to reauthorize
-                  error['code'] = int(resp['status'])
           else:
               error = {'provider': domain,
-                       'reason': "unexpected facebook response: %r"% (response,)
+                       'reason': "unexpected facebook response: %r"% (response,),
+                       'code': int(resp['status']) 
               }
               log.error("unexpected facebook response: %r", response)
           return result, error
