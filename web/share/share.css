@@ -54,6 +54,11 @@ a {
   border-bottom: 1px solid #ff5959;
 }
 
+.tab {
+  padding: 7px;
+  white-space: nowrap;
+}
+
 ul.nav {
   background-color: #ff5959;
   display: block;
@@ -172,81 +177,73 @@ ul.nav li.ui-tabs-selected a {
   color: #0a0a0a;
 }
 
-table {
-  width: 100%;
-}
-
-td.user.inactive .username {
-    opacity: 0.2;
-}
-
-td.user {
-  width: 140px;
-  padding-right: 10px;
-  white-space: nowrap;
-}
-
-td.thumb {
-  width: 220px;
-  padding: 0 10px;
-}
-
-td.message {
-  width: 300px;
-  padding: 0 10px;
-}
-
-td.button {
-  padding: 1px 20px;
-  vertical-align: bottom;
-}
-
-div.user {
-  font-size: small;
-  width: 140px;
+.col {
+  display: inline-block;
+  margin: 0 10px;
   overflow: hidden;
 }
 
-div.user.inactive {
+.col.user {
+  width: 140px;
+  margin-left: 0;
+  white-space: nowrap;
+}
+
+.col.thumb {
+  width: 220px;
+}
+
+.col.addressing {
+  width: 220px;
+}
+
+.col.message {
+  width: 300px;
+}
+
+.col.button {
+  vertical-align: bottom;
+}
+
+.user.inactive {
   opacity: 0.5;
   background: -moz-repeating-linear-gradient(top left -45deg, #aaa, #aaa 5px, #fff 5px, #fff 10px) #aaa no-repeat fixed;
+  -moz-border-radius: 1%;
   cursor: pointer;
 }
 
-.username {
+div.user .username {
   color: #444;
+  font-size: small;
   font-weight: bold;
 }
 
-td.image {
-  width: 90px;
+div.image,
+div.meta {
+  display: inline-block;
+  overflow: hidden;
 }
 
-div.thumb {
-  border: 1px dashed #aaa;
+div.image {
   height: 70px;
   width: 90px;
+  border: 1px dashed #aaa;
 }
 
-.thumb .title,
-.thumb .description {
+.meta {
   padding: 0 3px;
 }
 
-.thumb .title {
+.meta .title {
   color: #3B5998;
   text-decoration: underline;
   font-size: small;
   cursor: pointer;
 }
 
-.thumb .description {
+.meta .description {
   color: #808080;
   font-size: x-small;
-}
-
-.entry {
-  padding: 7px;
 }
 
 button {
@@ -257,6 +254,7 @@ button {
   background-image: -moz-linear-gradient(top,#fafafa 0%,#e6e6e6 100%);
   border: 1px solid #fff;
   outline: 1px solid #bebebe;
+  margin: 1px;
 }
 
 textarea, input[type="text"] {
@@ -267,12 +265,12 @@ textarea, input[type="text"] {
   font-size:14px;
   line-height:24px;
   padding: 3px;
-  margin: 0 7px;
-  width: 100%;
+  width: 300px;
 }
 
 input[type="text"] {
   height: 28px;
+  width: 220px;
   margin-top: 3px;
   margin-bottom: 3px;
 }
