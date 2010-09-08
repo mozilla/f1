@@ -25,7 +25,7 @@ class SerializerMixin(object):
                 val = getattr(self, prop.key)
                 if val:
                     if isinstance(val, datetime):
-                        val = val.isoformat().split('.')[0]+'Z'
+                        val = val.isoformat().split('.')[0].replace('+00:00','')+'Z'
     
                     if prop.key == 'json_attributes':
                         propdict.update(json.loads(val))
