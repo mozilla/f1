@@ -39,8 +39,8 @@ require.def("placeholder", ["jquery"], function ($) {
             trimmed = input.value.trim();
 
         if (!trimmed || trimmed === placeholder) {
-            $(input).addClass("placeholder");
             if (missingNative) {
+                $(input).addClass("placeholder");
                 input.value = placeholder;
                 if (placeholder === "password" && input.type === "password") {
                     input.type = "text";
