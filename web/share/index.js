@@ -72,7 +72,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
                 // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
                 if (json.error && json.error.reason) {
                     var code = json.error.code;
-                    if (code ===  401 || code === 400 || code === 530) {
+                    // XXX need to find out what error codes everyone uses
+                    if (code == 400 || code ==  401 || code == 403 || code >= 530) {
                         showStatus('statusAuth');
                     } else {
                         showStatus('statusError', json.error.reason);

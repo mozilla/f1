@@ -30,6 +30,7 @@ class OAuth1():
         self.access_token_url = self.config.get('access')
         self.authorization_url = self.config.get('authorize')
         self.version = int(self.config.get('version', '1'))
+        self.scope = self.config.get('scope', None)
         assert self.version == 1
         self.consumer_key = self.config.get('consumer_key')
         self.consumer_secret = self.config.get('consumer_secret')
@@ -45,6 +46,8 @@ class OAuth1():
         params = {'oauth_callback': url(controller='account',
                                         action="verify",
                                         qualified=True)}
+        if self.scope:
+            params[ 'scope': self.scope ]
         
         # We go through some shennanigans here to specify a callback url
         oauth_request = oauth.Request.from_consumer_and_token(self.consumer,
@@ -92,17 +95,17 @@ class OAuth2():
         assert self.version == 2
         self.app_id = self.config.get('app_id')
         self.app_secret = self.config.get('app_secret')
+        self.scope = self.config.get('scope', None)
 
     def request_access(self):
         session['end_point_success'] = request.POST['end_point_success']
         session['end_point_auth_failure'] = request.POST['end_point_auth_failure']
         session.save()
-        scope = request.POST.get('scope', '')
 
         return_to = url(controller='account', action="verify",
                            qualified=True)
 
-        loc = url(self.authorization_url, client_id=self.app_id, scope=scope,
+        loc = url(self.authorization_url, client_id=self.app_id, scope=self.scope,
                        redirect_uri=return_to)
         return redirect(loc)
 

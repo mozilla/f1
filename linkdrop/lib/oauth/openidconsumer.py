@@ -177,6 +177,7 @@ class OpenIDResponder():
         elif store==u"sql":
             # TODO: This does not work as we need a connection, not a string
             self.openid_store = sqlstore.SQLStore(sql_connstring, sql_associations_table, sql_connstring)
+        self.scope = self.config.get('scope', None)
 
 
     def _lookup_identifier(self, identifier):

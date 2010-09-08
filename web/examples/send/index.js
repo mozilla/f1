@@ -94,7 +94,7 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
                 if (json['error'] && json['error']['reason']) {
                     $("#resultReason").text("Error: "+json['error']['reason']);
                     var code = json['error']['code']
-                    if (code ==  401 || code == 403 || code == 530) {
+                    if (code == 400 || code ==  401 || code == 403 || code >= 530) {
                         reauthorize();
                     }
                 }
