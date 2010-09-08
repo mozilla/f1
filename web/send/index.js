@@ -91,7 +91,7 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
                 $("#resultMsg").removeClass("hidden")
                 if (json['error'] && json['error']['reason']) {
                     $("#resultReason").text("Error: "+json['error']['reason']);
-                    if (json['error']['code'] ==  401) {
+                    if (json['error']['code'] ==  401 || json['error']['code'] ==  403 ) {
                         reauthorize();
                     }
                 }

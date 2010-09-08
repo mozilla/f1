@@ -152,7 +152,38 @@ var ffshare;
       return frecency;
     },
 
+  QueryInterface: function(aIID) {
+    if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
+        aIID.equals(Components.interfaces.nsIWebProgressListener2)  ||
+        aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
+        aIID.equals(Components.interfaces.nsISupports))
+      return this;
+    throw Components.results.NS_NOINTERFACE;
+  },
+
+    registerListener: function() {
+      //var tab = gBrowser.selectedTab,
+      //    linkedBrowser = tab.linkedBrowser;
+      this.shareFrame.webProgress.addProgressListener(this, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+    },
+    
+    unregisterListener: function(listener) {
+      this.shareFrame.webProgress.removeProgressListener(this);
+    },
+
+    onLocationChange: function(/*in nsIWebProgress*/ aWebProgress,
+                          /*in nsIRequest*/ aRequest,
+                          /*in nsIURI*/ aLocation) {
+      var hashIndex = aLocation.spec.indexOf("#");
+      if (hashIndex != -1) {
+        var tail = aLocation.spec.slice(hashIndex+1, aLocation.spec.length)
+        if (tail == "!close") 
+          this.hide();
+      }
+    },
+
     hide: function () {
+      this.unregisterListener();
       this.changeHeight(0, fn.bind(this, function () {
           this.shareFrame.parentNode.removeChild(this.shareFrame);
           this.shareFrame = null;
@@ -163,7 +194,7 @@ var ffshare;
       //Create the iframe.
       var tab = gBrowser.selectedTab,
           parentNode = tab.linkedBrowser.parentNode,
-          iframeNode = document.createElement("iframe"),
+          iframeNode = document.createElement("browser"),
           url, options;
 
       //Remember iframe node for later.
@@ -204,8 +235,10 @@ var ffshare;
       url = this.shareUrl +
                 '#options=' + encodeURIComponent(JSON.stringify(options));
 
+      iframeNode.setAttribute("type", "content");
       iframeNode.setAttribute("src", url);
       parentNode.insertBefore(iframeNode, parentNode.firstChild);
+      this.registerListener();
     },
 
     changeHeight: function (height, onEnd) {

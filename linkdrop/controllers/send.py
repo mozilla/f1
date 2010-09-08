@@ -38,18 +38,18 @@ The 'send' namespace is used to send updates to our supported services.
         # If we don't have a userkey in our session we bail early with a
         # 401
         userkey = session.get('userkey')
-        if not userkey:
-            error = {'provider': domain,
-                     'reason': "no session for that domain",
-                     'code': 401
-            }
-            return {'result': result, 'error': error}
         try:
             domain = request.POST.get('domain')
             message = request.POST['message']
         except KeyError, what:
             error = {'provider': domain,
                      'reason': "'%s' request param is not optional" % (what,),
+            }
+            return {'result': result, 'error': error}
+        if not userkey:
+            error = {'provider': domain,
+                     'reason': "no session for that domain",
+                     'code': 401
             }
             return {'result': result, 'error': error}
 

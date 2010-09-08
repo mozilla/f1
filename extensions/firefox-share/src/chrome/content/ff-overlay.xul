@@ -3,8 +3,7 @@
 <!DOCTYPE overlay SYSTEM "chrome://ffshare/locale/overlay.dtd">
 <overlay id="ffshare-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:html="http://www.w3.org/1999/xhtml">
-  <script src="overlay.js"/>
-  <script src="ff-overlay.js"/>
+  <script type="application/javascript;version=1.8" src="overlay.js"></script>
 
   <stringbundleset id="stringbundleset">
     <stringbundle id="ffshare-strings" src="chrome://ffshare/locale/overlay.properties"/>
