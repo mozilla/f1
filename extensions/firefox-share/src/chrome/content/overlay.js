@@ -144,9 +144,17 @@ var ffshare;
                          .getService(Components.interfaces.nsILoginManager),
           logins = loginMgr.getAllLogins({}),
           knownServices = [
-        {'hostnames': ['http://twitter.com', 'https://twitter.com'], 'name': 'twitter'},
-        {'hostnames': ['http://mail.google.com', 'https://mail.google.com'], 'name': 'gmail'},
-        {'hostnames': ['http://www.facebook.com', 'https://login.facebook.com'], 'name': 'facebook'}
+        {'hostnames': [['http://twitter.com', true],
+                       ['https://twitter.com', true]
+                       ], 'name': 'twitter'},
+        {'hostnames': [['http://mail.google.com', true],
+                       ['https://mail.google.com', true],
+                       ['http://www.google.com', false],
+                       ['https://www.google.com', false],
+                       ], 'name': 'gmail'},
+        {'hostnames': [['http://www.facebook.com', true],
+                       ['https://login.facebook.com', true]
+                       ], 'name': 'facebook'}
       ],
           detectedServices = [],
           detectedServicesMap = {},
@@ -154,9 +162,11 @@ var ffshare;
       for (i = 0; i < logins.length; i++) {
         for (j = 0; j < knownServices.length; j++) {
           for (hostnameIndex = 0; hostnameIndex < knownServices[j].hostnames.length; hostnameIndex++) {
-            if (knownServices[j].hostnames[hostnameIndex] === logins[i].hostname) {
-              svcName = knownServices[j].name;
-              username = logins[i].username;
+            var svcUrl, countsTowardsFrecency = knownServices[j].hostnames[hostnameIndex];
+            if (svcUrl === logins[i].hostname) {
+              var svcName = knownServices[j].name;
+              var svcData;
+              var username = logins[i].username;
               if (! detectedServicesMap[svcName]) {
                 svcData = {'usernames': [], 'frecency': 0};
                 detectedServicesMap[svcName] = svcData;
@@ -164,7 +174,8 @@ var ffshare;
               } else {
                 svcData = detectedServicesMap[svcName];
               }
-              svcData['frecency'] += this.getFrecencyForURI(knownServices[j].hostnames[hostnameIndex]);
+              if (countsTowardsFrecency) // should count frecency for this domain
+                svcData['frecency'] += this.getFrecencyForURI(svcUrl);
               exists = false;
               for (ui = 0; ui < svcData.usernames.length; ui++) {
                 if (svcData.usernames[ui] === username) {
