@@ -77,7 +77,8 @@ The 'send' namespace is used to send updates to our supported services.
             history = History()
             history.account = acct
             history.published = UTCDateTime.now()
-            history.message = message
+            for key, val in request.POST.items():
+                setattr(history, key, val)
             Session.add(history)
             Session.commit()
             result['linkdrop'] = history.id
