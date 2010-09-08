@@ -73,6 +73,8 @@
   </div>
 
   <div id="gmail" class="tab">
+    <form name="googleSend" class="messageForm" action="#">
+      <input type="hidden" name="domain" value="google.com" />
     <div class="user inactive col">
       <span class="avatar"><img class="avatar" src="i/face2.png"></span>
       <span class="username">Gmail User</span>
@@ -85,15 +87,16 @@
       </div>
     </div>
     <div class="addressing col">
-      <div><input id="to" type="text" value="to"/></div>
-      <div><input id="subject" type="text" value="subject"/></div>
+      <div><input name="to" type="text" value="to"/></div>
+      <div><input name="subject" type="text" value="subject"/></div>
     </div>
     <div class="message col">
-      <textarea class="message"></textarea>
+      <textarea class="message" name="message"></textarea>
     </div>
     <div class="button col">
       <button>share</button>
     </div>
+    </form>
   </div>
 
   <div id="debug" class="tab">

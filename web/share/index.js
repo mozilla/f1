@@ -238,21 +238,27 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
     function sendMessage() {
         var domain = localStorage['X-Send-Domain'];
         var message = localStorage['X-Send-Message'];
+        var to = localStorage['X-Send-To'];
+        var subject = localStorage['X-Send-Subject'];
         rdapi('send', {
             type: 'POST',
             data: {
                 domain: domain,
-                message: message
+                message: message,
+                to: to,
+                subject: subject
             },
             success: function (json) {
                 // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
                 if (json['error'] && json['error']['reason']) {
                     $("#resultReason").text("Error: "+json['error']['reason']);
                     var code = json['error']['code'];
-                    if (code ==  401 || code == 400) {
+                    if (code ==  401 || code == 400 || code == 530) {
                         reauthorize();
                     }
                 }
+                else if (json['error'])
+                    $("#resultReason").text("Error: "+json['error']['reason']);
                 else {
                     $("#resultReason").text("Message Sent");
                     $('#tabs').addClass('hidden');
@@ -290,6 +296,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
    
                 localStorage['X-Send-Message'] = form.message.value;
                 localStorage['X-Send-Domain'] = form.domain.value;
+                localStorage['X-Send-To'] = form.to.value;
+                localStorage['X-Send-Subject'] = form.subject.value;
                 sendMessage();
                 return false;
             })
