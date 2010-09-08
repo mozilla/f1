@@ -129,6 +129,10 @@ ul.nav li a.icon.gmail {
   background-image: url("i/gmail_w.png");
 }
 
+ul.nav li a.icon.debug {
+  background-image: url("i/bug.png");
+}
+
 ul.nav li a.icon.settings {
   background-image: url("i/settings.png");
 }
@@ -158,24 +162,6 @@ ul.nav .user-info span.avatar {
 ul.nav .user-info img.avatar {
   max-width: 22px;
   height: 22px;
-}
-
-/* === DEBUG TAB === */
-
-ul.nav li.debug {
-  width: 60px;
-  text-align: center;
-}
-
-ul.nav li.debug span.name {
-  display: block;
-  padding: 0;
-  text-align: center;
-  color: #fff;
-}
-
-ul.nav li.debug a.icon {
-  width: auto;
 }
 
 /* === SETTINGS TAB === */
@@ -224,13 +210,6 @@ ul.nav li.ui-tabs-selected a.facebook {
 
 ul.nav li.ui-tabs-selected a.gmail {
   background-image: url("i/gmail_b.png");
-}
-
-/* === DEBUG TAB === */
-
-ul.nav li.ui-tabs-selected.debug span.name {
-  padding-left: 0;
-  color: #0a0a0a;
 }
 
 /* === TAB PANELS === */
