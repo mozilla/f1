@@ -324,7 +324,11 @@ div.status {
   position: relative;
   width: 100%;
   padding: 10px;
-  background-color: #ff5959;
+  background-position: top center;
+  background-repeat: repeat;
+  background-color: #444;
+  background-image: url("i/background.gif");
+  -moz-box-shadow: 0 -2px 3px rgba(0,0,0,0.25) inset;
   color: white;
 }
 
