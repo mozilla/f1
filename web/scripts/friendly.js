@@ -38,7 +38,6 @@ require.def("friendly", function () {
                         "additional" : date.toLocaleTimeString(),
                         "utc" : date.toUTCString(),
                         "locale" : date.toLocaleString() };
-    
             /* some kind of error */
             if (day_diff < 0) {
                 dObj.friendly = "in the future";

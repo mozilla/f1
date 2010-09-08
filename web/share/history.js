@@ -53,6 +53,9 @@ function (require,   $,        fn,         rdapi,   jig) {
                 $(".body").each(function() {
                   $(this).html(linkify($(this).text()));
                 });
+                $(".username").each(function() {
+                  $(this).html(linkify($(this).text()));
+                });
            }
         }
     });
