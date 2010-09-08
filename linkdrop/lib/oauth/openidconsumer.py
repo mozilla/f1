@@ -309,7 +309,7 @@ class OpenIDResponder():
             if oauth and 'request_token' in oauth:
                 access_token = self._get_access_token(oauth['request_token'])
                 if access_token:
-                    result_data['oauth_token'] = access_token
+                    result_data.update(access_token)
                     
             return self._get_credentials(result_data)
         else:
