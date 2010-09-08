@@ -173,7 +173,8 @@ ul.nav li.ui-tabs-selected a.settings {
   background-image: url("i/settings_b.png");
 }
 
-ul.nav li.ui-tabs-selected a {
+ul.nav li.ui-tabs-selected a,
+ul.nav li.ui-tabs-selected a .name {
   color: #0a0a0a;
 }
 
