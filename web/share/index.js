@@ -53,12 +53,16 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
                             "dialog=yes, modal=yes, width=800, height=480");
     }
 
-    window.authDone = function () {
-        if (authDone) {
-            authDone();
-            authDone = null;
+    //Handle communication from the auth window, when it completes.
+    window.addEventListener("message", function (evt) {
+        //TODO: ideally lock down the domain check on evt.origin.
+        if (evt.data === 'authDone') {
+            if (authDone) {
+                authDone();
+                authDone = null;
+            }
         }
-    };
+    }, false);  
 
     function sendMessage() {
         rdapi('send', {
@@ -254,6 +258,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
 
         //Debug info on the data that was received.
         $('#debugOutput').val(JSON.stringify(options));
+        $('#debugCurrentLocation').val(location.href);
 
         //Hook up button for share history
         $('#shareHistoryButton').click(function (evt) {
