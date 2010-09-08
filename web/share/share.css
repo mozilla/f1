@@ -280,6 +280,11 @@ input[type="text"] {
   margin-bottom: 3px;
 }
 
+input[type="text"].placeholder,
+input[type="password"].placeholder {
+  color: #888;
+}
+
 div.status {
   position: relative;
   width: 100%;
