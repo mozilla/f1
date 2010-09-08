@@ -25,14 +25,11 @@ body {
   max-height: 128px;
   overflow: hidden;
   background-color: #fff;
-  background-image: -moz-linear-gradient(bottom, #ff5959 0%, #fff 2%, #fff 100%);
-  background-position: bottom center;
-  background-repeat: no-repeat;
 }
 
 body.status {
-    height: 37px;
-    max-height: 37px;
+  height: 37px;
+  max-height: 37px;
 }
 
 a {
@@ -41,22 +38,24 @@ a {
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
 .ui-tabs .ui-tabs-hide {
-    display: none;
+  display: none;
 }
 
 #debug {
-    width: 300px;
+  width: 300px;
 }
 
 
 #tabs {
   height: 128px;
+  -moz-box-shadow: 0 -5px 5px -3px #ddd inset;
   overflow: hidden;
-  border-bottom: 1px solid #ff5959;
+  border-bottom: 1px ridge #e6e6e6;
+  background-color: #f2f2f2;
 }
 
 .tab {
@@ -265,7 +264,7 @@ button {
 
 textarea, input[type="text"] {
   -moz-box-shadow:0 1px 2px #CCCCCC inset;
-  background-image:-moz-linear-gradient(center top , #FFFFFF 0%, #F2F2F2 100%);
+  background-image:-moz-linear-gradient(center top , #FFFFFF 0%, #FAFAFA 100%);
   border:1px solid #BEBEBE;
   font-family:"helvetica neue",helvetica,arial,sans-serif;
   font-size:14px;
