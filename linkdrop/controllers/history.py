@@ -19,7 +19,7 @@ class HistoryController(BaseController):
     def get(self):
         userkey = session['userkey']
         stmt = Session.query(Account.id).filter(Account.userkey==userkey).subquery()
-        data = Session.query(History, Account.domain, Account.username).filter(History.account_id.in_(stmt)).all()
+        data = Session.query(History, Account.domain, Account.username).filter(Account.id == History.account_id).filter(History.account_id.in_(stmt)).all()
         res = []
         for h, d, u in data:
             r = h.to_dict()
