@@ -10,6 +10,11 @@
 </head>
 <body>
 
+<div id="statusSent" class="status hidden">
+    Message Sent!
+    <button id="shareHistoryButton">View Share History</button>
+</div>
+
 <div id="tabs" class="tabs-left">
 
   <ul class="nav">
@@ -133,6 +138,8 @@
   <div id="debug">
     <div class="entry">
         <button onclick="location = '#!close'">Close</button>
+        <button onclick="$('#tabs').addClass('hidden');$('#statusSent').removeClass('hidden');">Show sent status</button>
+        
         <textarea id="debugOutput"></textarea>
     </div>
   </div>

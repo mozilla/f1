@@ -186,6 +186,11 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         //Debug info on the data that was received.
         $('#debugOutput').val(JSON.stringify(options));
 
+        //Hook up button for share history
+        $('#shareHistoryButton').click(function (evt) {
+            window.open('history.html');
+        })
+
         //Set up tabs.
         tabDom = $("#tabs");
         tabDom.tabs({ fx: { opacity: 'toggle', duration: 200 } });
@@ -250,6 +255,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
                 }
                 else {
                     $("#resultReason").text("Message Sent");
+                    $('#tabs').addClass('hidden');
+                    $('#statusSent').removeClass('hidden');
                     localStorage['X-Send-Domain'] = '';
                     localStorage['X-Send-Message'] = '';
                 }

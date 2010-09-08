@@ -35,6 +35,10 @@ a {
   outline: none;
 }
 
+.hidden {
+    display: none;
+}
+
 .ui-tabs .ui-tabs-hide {
     display: none;
 }
@@ -271,4 +275,18 @@ input[type="text"] {
   height: 28px;
   margin-top: 3px;
   margin-bottom: 3px;
+}
+
+.status {
+  position: relative;
+  width: 100%;
+  padding: 10px;
+  background-color: #ff5959;
+  color: white;
+}
+
+#shareHistoryButton {
+  position: absolute;
+  right: 10px;
+  top: 6px;
 }
