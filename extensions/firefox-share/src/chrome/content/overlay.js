@@ -356,6 +356,8 @@ var ffshare;
 
     getThumbnailData: function() {
       var canvas = gBrowser.contentDocument.createElement("canvas"); // where?
+      canvas.setAttribute('width', '90');
+      canvas.setAttribute('height', '70');
       var tab = getBrowser().selectedTab;
       var win = tab.linkedBrowser.contentWindow;
       var aspectRatio = canvas.width / canvas.height;

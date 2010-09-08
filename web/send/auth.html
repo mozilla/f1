@@ -15,24 +15,25 @@
          }
     </style>
     <script>
-      require.def("oauth",
-	      ["require", "jquery", "blade/url"],
-      function (require,   $,        url) {
-	 var target = window.location.href.split('#')[1];
-	 if (target) {
-	   window.opener.authDone();
-	   window.close();
-	 }
-	 var search = window.location.href.split('?')[1];
-	 if (search) {
-	     search = search.split('#')[0];
-	     var args = url.queryToObject(search);
-	     if (args['domain']) {
-		 $("#domain").attr("value", args['domain']);
-		 document.authForm.submit();
-	     }
-	 }
-      });
+        require(["require", "jquery", "blade/url"],
+        function (require,   $,        url) {
+            var target = window.location.href.split('#')[1];
+            if (target) {
+                //TODO: ideally lock down the domain be location.hostname, but
+                //a problem for 127 addresses?
+              window.opener.postMessage('authDone', '*');
+              window.close();
+            }
+            var search = window.location.href.split('?')[1];
+            if (search) {
+                search = search.split('#')[0];
+                var args = url.queryToObject(search);
+                if (args['domain']) {
+                    $("#domain").attr("value", args['domain']);
+                    document.authForm.submit();
+                }
+            }
+        });
     </script>
 </head>
 <body class="settings">

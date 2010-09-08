@@ -5,16 +5,44 @@
 #
 [DEFAULT]
 debug = true
-email_to = you@yourdomain.com
+# Uncomment and replace with the address which should receive any error reports
+#email_to = you@yourdomain.com
 smtp_server = localhost
 error_email_from = paste@localhost
+
+# Register with twitter at http://dev.twitter.com/apps/new
+oauth.twitter.com.consumer_key = FILL_ME_IN
+oauth.twitter.com.consumer_secret = FILL_ME_IN
+
+# Register with facebook at http://developers.facebook.com/setup/
+oauth.facebook.com.app_id = FILL_ME_IN
+oauth.facebook.com.app_secret = FILL_ME_IN
+oauth.facebook.com.scope = publish_stream
+
+# Register with Google at https://www.google.com/accounts/ManageDomains
+oauth.google.com.consumer_key = FILL_ME_IN
+oauth.google.com.consumer_secret = FILL_ME_IN
+oauth.google.com.scope = https://mail.google.com/ http://www.google.com/m8/feeds/
+
+
+[composite:main]
+use = egg:Paste#urlmap
+/ = home
+/api = api
 
 [server:main]
 use = egg:Paste#http
 host = 0.0.0.0
 port = 5000
 
-[app:main]
+
+[app:home]
+use = egg:Paste#static
+document_root = %(here)s/web
+
+[app:api]
+#use: config:api.ini
+
 use = egg:linkdrop
 full_stack = true
 static_files = true
@@ -38,10 +66,9 @@ sqlalchemy.url = sqlite:///production.db
 # execute malicious code after an exception is raised.
 set debug = false
 
-
 # Logging configuration
 [loggers]
-keys = root
+keys = root, routes, linkdrop, sqlalchemy
 
 [handlers]
 keys = console
@@ -53,6 +80,25 @@ keys = generic
 level = INFO
 handlers = console
 
+[logger_routes]
+level = INFO
+handlers =
+qualname = routes.middleware
+# "level = DEBUG" logs the route matched and routing variables.
+
+[logger_linkdrop]
+level = DEBUG
+handlers =
+qualname = linkdrop
+
+[logger_sqlalchemy]
+level = INFO
+handlers =
+qualname = sqlalchemy.engine
+# "level = INFO" logs SQL queries.
+# "level = DEBUG" logs SQL queries and results.
+# "level = WARN" logs neither.  (Recommended for production systems.)
+
 [handler_console]
 class = StreamHandler
 args = (sys.stderr,)
@@ -60,4 +106,5 @@ level = NOTSET
 formatter = generic
 
 [formatter_generic]
-format = %(asctime)s %(levelname)-5.5s [%(name)s] [%(threadName)s] %(message)s
+format = %(asctime)s,%(msecs)03d %(levelname)-5.5s [%(name)s] [%(threadName)s] %(message)s
+datefmt = %H:%M:%S

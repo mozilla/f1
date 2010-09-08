@@ -56,7 +56,7 @@ class responder(OpenIDResponder):
             ax_request.add(ax.AttrInfo(attributes[attr], required=True))
         authrequest.addExtension(ax_request)
         
-        oauth_request = OAuthRequest(consumer=self.consumer_key, scope=request.POST.get('scope', 'https://mail.google.com/ http://www.google.com/m8/feeds/'))
+        oauth_request = OAuthRequest(consumer=self.consumer_key, scope=self.scope or 'http://www.google.com/m8/feeds/')
         authrequest.addExtension(oauth_request)
         
         if 'popup_mode' in request.POST:

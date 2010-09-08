@@ -53,12 +53,16 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
                             "dialog=yes, modal=yes, width=800, height=480");
     }
 
-    window.authDone = function () {
-        if (authDone) {
-            authDone();
-            authDone = null;
+    //Handle communication from the auth window, when it completes.
+    window.addEventListener("message", function (evt) {
+        //TODO: ideally lock down the domain check on evt.origin.
+        if (evt.data === 'authDone') {
+            if (authDone) {
+                authDone();
+                authDone = null;
+            }
         }
-    };
+    }, false);  
 
     function sendMessage() {
         rdapi('send', {
@@ -68,7 +72,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
                 // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
                 if (json.error && json.error.reason) {
                     var code = json.error.code;
-                    if (code ===  401 || code === 400 || code === 530) {
+                    // XXX need to find out what error codes everyone uses
+                    if (code == 400 || code ==  401 || code == 403 || code >= 530) {
                         showStatus('statusAuth');
                     } else {
                         showStatus('statusError', json.error.reason);
@@ -254,6 +259,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
 
         //Debug info on the data that was received.
         $('#debugOutput').val(JSON.stringify(options));
+        $('#debugCurrentLocation').val(location.href);
 
         //Hook up button for share history
         $('#shareHistoryButton').click(function (evt) {
