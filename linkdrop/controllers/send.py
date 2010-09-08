@@ -66,7 +66,7 @@ The 'send' namespace is used to send updates to our supported services.
             return {'result': result, 'error': error}
 
         # send the item.
-        result, error = provider.api(acct).sendmessage(message)
+        result, error = provider.api(acct).sendmessage(message, request.POST)
 
         if error:
             assert not result
