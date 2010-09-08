@@ -91,9 +91,9 @@ var ffshare;
         }
       }
     }
-  },
+  };
 
-  navProgressListener = {
+  var navProgressListener = {
     // detect navigational events for the tab, so we can close
 
     QueryInterface: function(aIID) {
@@ -112,7 +112,7 @@ var ffshare;
       // XXX refine to be tolerant of #-appending
       ffshare.hide();
     }
-  },
+  };
 
   ffshare = {
     frameAnimationTime: 300,
@@ -382,5 +382,4 @@ var ffshare;
   };
 
   window.addEventListener("load", ffshare.onLoad, false);
-
 }());

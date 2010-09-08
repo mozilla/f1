@@ -257,6 +257,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         //Hook up button for share history
         $('#shareHistoryButton').click(function (evt) {
             window.open('history.html');
+            location = '#!close';
         });
         $('#statusAuthButton, #statusErrorButton').click(function (evt) {
            cancelStatus(); 
