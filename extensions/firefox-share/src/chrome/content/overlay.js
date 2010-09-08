@@ -217,16 +217,17 @@ var ffshare;
 
     registerListener: function() {
       this.shareFrame.webProgress.addProgressListener(iframeProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
-      gBrowser.selectedTab.linkedBrowser.webProgress.addProgressListener(navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+      this.tab.linkedBrowser.webProgress.addProgressListener(navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
     },
     
     unregisterListener: function(listener) {
       this.shareFrame.webProgress.removeProgressListener(iframeProgressListener);
-      gBrowser.selectedTab.linkedBrowser.webProgress.removeProgressListener(navProgressListener);
+      this.tab.linkedBrowser.webProgress.removeProgressListener(navProgressListener);
     },
 
     hide: function () {
       this.unregisterListener();
+      this.tab = null;
       this.changeHeight(0, fn.bind(this, function () {
           this.shareFrame.parentNode.removeChild(this.shareFrame);
           this.shareFrame = null;
@@ -242,6 +243,7 @@ var ffshare;
 
       //Remember iframe node for later.
       this.shareFrame = iframeNode;
+      this.tab = tab;
 
       iframeNode.className = 'ffshare-frame';
       iframeNode.style.width = '100%';
