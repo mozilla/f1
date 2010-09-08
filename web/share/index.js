@@ -39,7 +39,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         options = {
             services: null
         },
-        tabDom,
+        tabDom, bodyDom,
         previewWidth = 90, previewHeight = 70;
 
     function reauthorize(callback, domain) {
@@ -73,16 +73,36 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
                 else if (json.error) {
                     $("#resultReason").text("Error: " + json.error.reason);
                 } else {
-                    $("#resultReason").text("Message Sent");
-                    $('#tabs').addClass('hidden');
-                    $('#statusSent').removeClass('hidden');
-                    sendData = {};
+                    showStatus('statusSent', true);
                 }
             },
             error: function (xhr, textStatus, err) {
                 $("#resultReason").text("XHR Error: " + err);
             }
         });
+    }
+
+    function showStatus(statusId, shouldClose) {
+        tabDom.addClass('hidden');
+        $('.status').addClass('hidden');
+        $('#' + statusId).removeClass('hidden');
+        bodyDom.addClass('status');
+        location = '#!resize';
+
+        if (shouldClose) {
+            setTimeout(function () {
+                location = '#!close';
+            }, 4000);
+        }
+    }
+    //Make it globally visible for debug purposes
+    window.showStatus = showStatus;
+
+    function cancelStatus() {
+        $('.status').addClass('hidden');
+        tabDom.removeClass('hidden');
+        bodyDom.removeClass('status');
+        location = '#!resize';
     }
 
     function resizePreview(evt) {
@@ -223,6 +243,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
     $(function () {
         var thumbDivNode = $('div.thumb')[0],
             thumbImgDom = $('img.thumb');
+
+        bodyDom = $('body');
 
         //Debug info on the data that was received.
         $('#debugOutput').val(JSON.stringify(options));

@@ -30,6 +30,11 @@ body {
   background-repeat: no-repeat;
 }
 
+body.status {
+    height: 37px;
+    max-height: 37px;
+}
+
 a {
   text-decoration: none;
   outline: none;
@@ -276,7 +281,7 @@ input[type="text"] {
   margin-bottom: 3px;
 }
 
-.status {
+div.status {
   position: relative;
   width: 100%;
   padding: 10px;

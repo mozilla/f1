@@ -19,6 +19,10 @@ var ffshare;
     getService(Ci.nsPIPlacesDatabase).
     DBConnection;
 
+  function log(msg) {
+    Application.console.log(msg);
+  }
+
   fn = {
 
     /**
@@ -81,13 +85,12 @@ var ffshare;
         var tail = aLocation.spec.slice(hashIndex+1, aLocation.spec.length)
         // XXX jrburke goes here.
         if (tail == "!close") {
-          this.hide();
-        } else if (tail === "!resize") {
-          
+          ffshare.hide();
+        } else if (tail == "!resize") {
+          ffshare.matchIframeContentHeight();
         }
       }
-    },
-
+    }
   },
 
   navProgressListener = {
@@ -244,10 +247,7 @@ var ffshare;
         this.useCssTransition = false;
       }
 
-      iframeNode.addEventListener('load', fn.bind(this, function (evt) {
-        var height = evt.target.documentElement.getBoundingClientRect().height;
-        this.changeHeight(height);
-      }), true);
+      iframeNode.addEventListener('load', fn.bind(this, 'matchIframeContentHeight'), true);
 
       options = {
         services: this.getKnownServices(),
@@ -282,6 +282,11 @@ var ffshare;
       if (!this.useCssTransition && onEnd) {
         onEnd();
       }
+    },
+
+    matchIframeContentHeight: function () {
+      var height = this.shareFrame.contentDocument.documentElement.getBoundingClientRect().height;
+      this.changeHeight(height);
     },
 
     onTransitionEnd: function (evt) {

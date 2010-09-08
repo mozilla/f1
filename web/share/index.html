@@ -101,7 +101,7 @@
   <div id="debug" class="tab">
     <div class="col">
         <button onclick="location = '#!close'">Close</button>
-        <button onclick="$('#tabs').addClass('hidden');$('#statusSent').removeClass('hidden');">Show sent status</button>
+        <button onclick="window.showStatus('statusSent', true)">Show sent status</button>
     </div>
     <div class="col">
         <textarea  id="debugOutput"></textarea>
