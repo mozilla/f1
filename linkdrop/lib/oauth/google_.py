@@ -8,6 +8,9 @@ import urlparse
 
 from openid.extensions import ax
 import oauth2 as oauth
+#from oauth2.clients.smtp import SMTP
+import smtplib
+import base64
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -16,6 +19,7 @@ from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
 from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attributes, attributes
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
+from linkdrop.lib.oauth.base import get_oauth_config
 
 GOOGLE_OAUTH = 'https://www.google.com/accounts/OAuthGetAccessToken'
 
@@ -52,7 +56,7 @@ class responder(OpenIDResponder):
             ax_request.add(ax.AttrInfo(attributes[attr], required=True))
         authrequest.addExtension(ax_request)
         
-        oauth_request = OAuthRequest(consumer=self.consumer_key, scope=request.POST.get('scope', 'http://www.google.com/m8/feeds/'))
+        oauth_request = OAuthRequest(consumer=self.consumer_key, scope=request.POST.get('scope', 'https://mail.google.com/ http://www.google.com/m8/feeds/'))
         authrequest.addExtension(oauth_request)
         
         if 'popup_mode' in request.POST:
@@ -71,7 +75,6 @@ class responder(OpenIDResponder):
         resp, content = client.request(GOOGLE_OAUTH, "POST")
         if resp['status'] != '200':
             return None
-
         return dict(urlparse.parse_qsl(content))
 
     def _get_credentials(self, result_data):
@@ -94,3 +97,82 @@ class responder(OpenIDResponder):
                    'username': username }
         profile['accounts'] = [account]
         return result_data
+
+# XXX right now, python-oauth2 does not raise the exception if there is an error,
+# this is copied from oauth2.clients.smtp and fixed
+class SMTP(smtplib.SMTP):
+    """SMTP wrapper for smtplib.SMTP that implements XOAUTH."""
+
+    def authenticate(self, url, consumer, token):
+        if consumer is not None and not isinstance(consumer, oauth.Consumer):
+            raise ValueError("Invalid consumer.")
+
+        if token is not None and not isinstance(token, oauth.Token):
+            raise ValueError("Invalid token.")
+
+        xoauth_string = oauth.build_xoauth_string(url, consumer, token)
+        code, resp = self.docmd('AUTH', 'XOAUTH %s' % base64.b64encode(xoauth_string))
+        if code >= 500:
+            raise smtplib.SMTPResponseException(code, resp)
+        return code, resp
+
+
+class api():
+    def __init__(self, account):
+        self.host = "smtp.gmail.com"
+        self.port = 587
+        self.config = get_oauth_config(domain)
+        self.account = account
+        self.oauth_token = oauth.Token(key=account.oauth_token, secret=account.oauth_token_secret)
+        self.consumer_key = self.config.get('consumer_key')
+        self.consumer_secret = self.config.get('consumer_secret')
+        self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
+         
+    def rawcall(self, url, body):
+        raise Exception("NOT IMPLEMENTED")
+
+    def sendmessage(self, message, options={}):
+        result = error = None
+        from_ = self.account.profile.get('verifiedEmail')
+        url = "https://mail.google.com/mail/b/%s/smtp/" % from_
+        to_ = options['to']
+        server = SMTP(self.host, self.port)
+        server.set_debuglevel(True)
+        
+        subject = options.get('subject')
+        
+        # XXX TODO: fix headers, etc
+        body = """To: %s
+From: %s
+Subject: %s
+
+%s
+""" % (to_, from_, subject, message)
+        try:
+            try:
+                try:
+                    server.starttls()
+                except smtplib.SMTPException:
+                    logger.info("smtp server does not support TLS")
+                try:
+                    server.ehlo_or_helo_if_needed()
+                    server.authenticate(url, self.consumer, self.oauth_token)
+                    server.sendmail(from_, to_, body)
+                except ValueError, e:
+                    error = {"provider": self.host,
+                             "reason": "%s: %s" % (exc.smtp_code, exc.smtp_error),
+                             "code": exc.smtp_code
+                            }
+            finally:
+                server.quit()
+        except smtplib.SMTPResponseException, exc:
+            error={"provider": self.host,
+                   "reason": "%s: %s" % (exc.smtp_code, exc.smtp_error),
+                   "code": exc.smtp_code
+                   }
+        if error is None:
+            result = {"status": "message sent"}
+        return result, error
+
+
+
