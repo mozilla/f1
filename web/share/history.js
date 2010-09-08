@@ -47,9 +47,9 @@ function (require,   $,        fn,         rdapi,   jig) {
     rdapi('history/get', {
         success: function (json) {
             if (json.error) {
-                $('#content').append(jig('#error', json.error));
+                $('#notifications').append(jig('#error', json.error));
             } else {
-                $('#content').append(jig('#history', json));
+                $('#statuses').append(jig('#history', json));
                 $(".body").each(function() {
                   $(this).html(linkify($(this).text()));
                 });

@@ -11,13 +11,13 @@
 </head>
 <body>
 <h2>What you've shared</h2>
+    <div id="notifications"></div>
     <ol id="statuses">
-        <div id="content"></div>
     </ol>
 
     <div id="error" class="template">There was an error: {message}</div>
 
-    <div id="history" class="template">
+    <li id="history" class="template status">
         {. medium getMedium(domain)}
         <div class="icon {medium}"></div>
         <div class="message status">
@@ -27,6 +27,6 @@
                 <div class="date earliest">{date}</div>
             </div>
         </div>
-    </div>
+    </li>
 </body>
 </html>

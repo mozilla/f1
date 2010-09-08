@@ -36,7 +36,7 @@ ol {
   background-color: #fff;
 }
 .status {
-  display: inline-block;
+  display: list-item;
   width: 530px;
   border-bottom: 1px solid #ddd;
   padding: 0.5em;
