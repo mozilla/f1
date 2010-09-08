@@ -111,10 +111,9 @@ ul.nav li a.icon.settings {
   background-image: url("i/settings_w.png");
 }
 
+/* === DEBUG === */
+
 ul.nav li.debug {
-  position: absolute;
-  right: 53px; /* 10 + 36 + 7 */
-  top: 0;
   width: 60px;
   text-align: center;
 }
@@ -151,6 +150,16 @@ ul.nav li span.name {
 ul.nav li.ui-tabs-selected span.name {
   display: block;
   padding-left: 24px;
+}
+
+/* === DEBUG === */
+
+ul.nav li.ui-tabs-selected.debug {
+  width: 60px;
+}
+
+ul.nav li.ui-tabs-selected.debug span.name {
+  padding-left: 0;
 }
 
 ul.nav li.ui-tabs-selected.settings {
