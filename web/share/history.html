@@ -10,14 +10,23 @@
   <script>require(["history.js"]);</script>
 </head>
 <body>
-    <h1>Share History</h1>
-    <div id="content"></div>
+<h2>What you've shared</h2>
+    <ol id="statuses">
+        <div id="content"></div>
+    </ol>
 
     <div id="error" class="template">There was an error: {message}</div>
 
     <div id="history" class="template">
-        <!-- this div should repeat for every history entry -->
-        <div class="name">${username}</div>
+        {. medium getMedium(domain)}
+        <div class="icon {medium}"></div>
+        <div class="message status">
+            <span class="username">@{username}</span>: <div class="body">{message}</div>
+            {. date friendlyDate(published)}
+            <div class="topic meta">
+                <div class="date earliest">{date}</div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

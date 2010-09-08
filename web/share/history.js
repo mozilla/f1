@@ -25,9 +25,24 @@
 /*global require: false, location: true, window: false, alert: false */
 "use strict";
 
+var linkify = function(text) {
+  // linkify full urls
+  text = text.replace(/http(s)?:\S+/g, '<a class="link" href="$&" target="_blank">$&</a>');
+  // linkify twitter usernames
+  text = text.replace(/\@(\w+)/g, '<a class="username" type="twitter" title="twitter.com/$1" href="http://twitter.com/$1" target="_blank">@$1</a>');
+  // linkify twitter hash tags
+  return text.replace(/\#(\w+)/g, "<a class='tag' type='twitter' title='search twitter.com for tag #$1' href='http://search.twitter.com/search?q=%23$1' target='_blank'>#$1</a>");
+}
+
 require.def("history",
         ["require", "jquery", "blade/fn", "rdapi", "blade/jig"],
 function (require,   $,        fn,         rdapi,   jig) {
+
+    jig.addFn({getMedium: function(domain) {
+        if (domain == 'twitter.com') return 'twitter';
+        if (domain == 'facebook.com') return 'facebook';
+        if (domain == 'google.com') return 'google';
+        }});
 
     rdapi('history/get', {
         success: function (json) {
@@ -35,7 +50,10 @@ function (require,   $,        fn,         rdapi,   jig) {
                 $('#content').append(jig('#error', json.error));
             } else {
                 $('#content').append(jig('#history', json));
-            }
+                $(".body").each(function() {
+                  $(this).html(linkify($(this).text()));
+                });
+           }
         }
     });
 });
