@@ -116,8 +116,8 @@ var ffshare;
 
   ffshare = {
     frameAnimationTime: 300,
-    shareUrl: 'http://127.0.0.1:5000/share/',
-    //shareUrl: 'http://linkdrop.mozillamessaging.com/share/',
+    // You may want to set the pref to 'http://127.0.0.1:5000/share/' for local dev.
+    shareUrl: Application.prefs.getValue("linkdrop.share_url", 'http://linkdrop.mozillamessaging.com/share/'),
     shareFrame: null,
 
     onLoad: function () {
