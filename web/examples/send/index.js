@@ -84,14 +84,17 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
             type: 'POST',
             data: {
                 domain: domain,
-                message: message
+                message: message,
+                to: localStorage['X-Send-To'],
+                subject: localStorage['X-Send-Subject']
             },
             success: function (json) {
                 // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
                 $("#resultMsg").removeClass("hidden")
                 if (json['error'] && json['error']['reason']) {
                     $("#resultReason").text("Error: "+json['error']['reason']);
-                    if (json['error']['code'] ==  401) {
+                    var code = json['error']['code']
+                    if (code ==  401 || code == 403 || code == 530) {
                         reauthorize();
                     }
                 }
@@ -99,6 +102,8 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
                     $("#resultReason").text("Message Sent");
                     localStorage['X-Send-Domain'] = '';
                     localStorage['X-Send-Message'] = '';
+                    localStorage['X-Send-To'] = '';
+                    localStorage['X-Send-Subject'] = '';
                 }
             },
             error: function (xhr, textStatus, err) {
@@ -128,6 +133,8 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
                     node.value = trimmed;
                 });
    
+                localStorage['X-Send-To'] = form.to.value;
+                localStorage['X-Send-Subject'] = form.subject.value;
                 localStorage['X-Send-Message'] = form.message.value;
                 var radio = form.domain;
                 for(var i = 0; i < radio.length; i++) {
