@@ -312,7 +312,10 @@ div.image {
 
 .meta .description {
   color: #808080;
-  font-size: x-small;
+  white-space: normal;
+  font-size: 10px;
+  line-height: 14px;
+  height: 42px;
 }
 
 button {

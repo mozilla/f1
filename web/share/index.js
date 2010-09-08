@@ -317,6 +317,11 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
             $('.title').text(options.title);
         }
 
+        //For pages with built in descriptions add that to the meta information
+        if (options.description) {
+            $('.description').text(options.description);
+        }
+
         //Remember the thumbnail preview size for later, to adjust the image
         //to fit within the size.
         //previewWidth = parseInt(thumbDivNode.style.width, 10);

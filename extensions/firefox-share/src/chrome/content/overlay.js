@@ -264,6 +264,7 @@ var ffshare;
       options = {
         services: this.getKnownServices(),
         title: this.getPageTitle(),
+        description : this.getPageDescription(),
         url: gBrowser.currentURI.spec,
         canonicalUrl: this.getCanonicalURL(),
         previews: this.previews()
@@ -322,6 +323,19 @@ var ffshare;
       } else {
         return '';
       }
+    },
+
+    getPageDescription: function () {
+      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta'),
+        content = null;
+      for (var i = 0; i < metaNodes.length; i++) {
+        if ("description" == metaNodes[i].getAttribute("name")) {
+          content = metaNodes[i].getAttribute("content");
+          if (content)
+            return content;
+        }
+      }
+      return "";
     },
 
     getCanonicalURL: function () {
