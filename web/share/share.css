@@ -293,3 +293,18 @@ div.status {
   right: 10px;
   top: 6px;
 }
+
+.col.videoText,
+.col.explainText {
+    width: 210px;
+    white-space: normal;
+}
+
+.col.videoText a {
+    color: #a0a0a0;
+}
+
+img.video {
+    width: 112px;
+    height: 63px;
+}
