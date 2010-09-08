@@ -15,7 +15,7 @@ from linkdrop.lib.oauth import get_provider
 from linkdrop.model.meta import Session
 from linkdrop.model import Account, History
 from linkdrop.model.types import UTCDateTime
-from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
 log = logging.getLogger(__name__)
 
@@ -40,6 +40,8 @@ The 'send' namespace is used to send updates to our supported services.
         userkey = session.get('userkey')
         try:
             domain = request.POST.get('domain')
+            username = request.POST.get('username')
+            userid = request.POST.get('userid')
             message = request.POST['message']
         except KeyError, what:
             error = {'provider': domain,
@@ -57,7 +59,18 @@ The 'send' namespace is used to send updates to our supported services.
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
         try:
-            acct = Session.query(Account).filter_by(userkey=userkey, domain=domain).one()
+            q = Session.query(Account).filter(Account.userkey==userkey).filter(Account.domain==domain)
+            if username:
+                q = q.filter(Account.username==username)
+            if userid:
+                q = q.filter(Account.userid==userid)
+            acct = q.one()
+        except MultipleResultsFound:
+            error = {'provider': domain,
+                     'reason': "Multiple accounts for %s were found, username or id required" % domain,
+                     'code': 409
+            }
+            return {'result': result, 'error': error}
         except NoResultFound:
             error = {'provider': domain,
                      'reason': "no account for that domain",
