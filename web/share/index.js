@@ -276,6 +276,10 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         //Set up tabs.
         tabDom = $("#tabs");
         tabDom.tabs({ fx: { opacity: 'toggle', duration: 200 } });
+        tabDom.bind("tabsselect", function(event, ui) {
+          $(".user-info img.avatar").attr("src", $(ui.panel).find("div.user img.avatar").attr("src"));
+          $(".user-info .username").text($(ui.panel).find("div.user .username").text());
+        });
 
         //Set up the URL in all the message containers
         if (options.url) {
