@@ -62,6 +62,53 @@ var ffshare;
     }
   };
 
+  iframeProgressListener = {
+    // detect communication from the iframe via location setting
+    QueryInterface: function(aIID) {
+      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
+          aIID.equals(Components.interfaces.nsIWebProgressListener2)  ||
+          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
+          aIID.equals(Components.interfaces.nsISupports))
+        return this;
+      throw Components.results.NS_NOINTERFACE;
+    },
+
+    onLocationChange: function(/*in nsIWebProgress*/ aWebProgress,
+                          /*in nsIRequest*/ aRequest,
+                          /*in nsIURI*/ aLocation) {
+      var hashIndex = aLocation.spec.indexOf("#");
+      if (hashIndex != -1) {
+        var tail = aLocation.spec.slice(hashIndex+1, aLocation.spec.length)
+        // XXX jrburke goes here.
+        if (tail == "!close") 
+          this.hide();
+      }
+    },
+
+  },
+
+  navProgressListener = {
+    // detect navigational events for the tab, so we can close
+
+    QueryInterface: function(aIID) {
+      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
+          aIID.equals(Components.interfaces.nsIWebProgressListener2)  ||
+          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
+          aIID.equals(Components.interfaces.nsISupports))
+        return this;
+      throw Components.results.NS_NOINTERFACE;
+    },
+
+    onLocationChange: function(/*in nsIWebProgress*/ aWebProgress,
+                          /*in nsIRequest*/ aRequest,
+                          /*in nsIURI*/ aLocation) {
+      // For now, any navigation causes collapsing.
+      // XXX refine to be tolerant of #-appending
+      ffshare.hide();
+    },
+
+  },
+
   ffshare = {
     frameAnimationTime: 300,
     shareUrl: 'http://127.0.0.1:5000/share/',
@@ -152,34 +199,14 @@ var ffshare;
       return frecency;
     },
 
-  QueryInterface: function(aIID) {
-    if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-        aIID.equals(Components.interfaces.nsIWebProgressListener2)  ||
-        aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-        aIID.equals(Components.interfaces.nsISupports))
-      return this;
-    throw Components.results.NS_NOINTERFACE;
-  },
-
     registerListener: function() {
-      //var tab = gBrowser.selectedTab,
-      //    linkedBrowser = tab.linkedBrowser;
-      this.shareFrame.webProgress.addProgressListener(this, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+      this.shareFrame.webProgress.addProgressListener(iframeProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+      gBrowser.selectedTab.linkedBrowser.webProgress.addProgressListener(navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
     },
     
     unregisterListener: function(listener) {
-      this.shareFrame.webProgress.removeProgressListener(this);
-    },
-
-    onLocationChange: function(/*in nsIWebProgress*/ aWebProgress,
-                          /*in nsIRequest*/ aRequest,
-                          /*in nsIURI*/ aLocation) {
-      var hashIndex = aLocation.spec.indexOf("#");
-      if (hashIndex != -1) {
-        var tail = aLocation.spec.slice(hashIndex+1, aLocation.spec.length)
-        if (tail == "!close") 
-          this.hide();
-      }
+      this.shareFrame.webProgress.removeProgressListener(iframeProgressListener);
+      gBrowser.selectedTab.linkedBrowser.webProgress.removeProgressListener(navProgressListener);
     },
 
     hide: function () {
