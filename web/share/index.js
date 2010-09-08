@@ -43,7 +43,9 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         previewWidth = 90, previewHeight = 70;
 
     function reauthorize(callback, domain) {
-        authDone = callback;
+        if (callback){
+            authDone = callback;
+        }
         var win = window.open("http://127.0.0.1:5000/send/auth.html?domain=" +
                               (domain || sendData.domain),
                             "Firefox Share OAuth",
@@ -64,42 +66,45 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
             success: function (json) {
                 // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
                 if (json.error && json.error.reason) {
-                    $("#resultReason").text("Error: " + json.error.reason);
                     var code = json.error.code;
                     if (code ===  401 || code === 400 || code === 530) {
-                        reauthorize(sendMessage);
+                        showStatus('statusAuth');
+                    } else {
+                        showStatus('statusError', json.error.reason);
                     }
                 }
                 else if (json.error) {
-                    $("#resultReason").text("Error: " + json.error.reason);
+                    showStatus('statusError', json.error.reason);
                 } else {
-                    showStatus('statusSent', true);
+                    showStatus('statusShared', true);
                 }
             },
             error: function (xhr, textStatus, err) {
-                $("#resultReason").text("XHR Error: " + err);
+                showStatus('statusError', err);
             }
         });
     }
 
-    function showStatus(statusId, shouldClose) {
+    function showStatus(statusId, shouldCloseOrMessage) {
         tabDom.addClass('hidden');
-        $('.status').addClass('hidden');
+        $('div.status').addClass('hidden');
         $('#' + statusId).removeClass('hidden');
         bodyDom.addClass('status');
         location = '#!resize';
 
-        if (shouldClose) {
+        if (shouldCloseOrMessage === true) {
             setTimeout(function () {
                 location = '#!close';
             }, 4000);
+        } else if (shouldCloseOrMessage) {
+            $('#' + statusId + 'Message').text(shouldCloseOrMessage);
         }
     }
     //Make it globally visible for debug purposes
     window.showStatus = showStatus;
 
     function cancelStatus() {
-        $('.status').addClass('hidden');
+        $('div.status').addClass('hidden');
         tabDom.removeClass('hidden');
         bodyDom.removeClass('status');
         location = '#!resize';
@@ -252,6 +257,12 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         //Hook up button for share history
         $('#shareHistoryButton').click(function (evt) {
             window.open('history.html');
+        });
+        $('#statusAuthButton, #statusErrorButton').click(function (evt) {
+           cancelStatus(); 
+        });
+        $('#authOkButton').click(function (evt) {
+            reauthorize(sendMessage);
         });
 
         //Set up tabs.

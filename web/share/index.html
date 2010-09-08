@@ -9,9 +9,23 @@
 </head>
 <body>
 
-<div id="statusSent" class="status hidden">
-    Message Sent!
-    <button id="shareHistoryButton">View Share History</button>
+<div id="statusSharing" class="status hidden">
+    Sharing...
+</div>
+
+<div id="statusAuth" class="status hidden">
+    Need to authenticate. <button id="authOkButton">OK</button>
+    <button id="statusAuthButton" class="statusButton">Cancel</button>
+</div>
+
+<div id="statusError" class="status hidden">
+    Linkdrop just vomited. <span id="statusErrorMessage"></span>
+    <button id="statusErrorButton" class="statusButton">OK</button>
+</div>
+
+<div id="statusShared" class="status hidden">
+    Message Shared!
+    <button id="shareHistoryButton" class="statusButton">View Share History</button>
 </div>
 
 <div id="tabs" class="tabs-left">
@@ -101,7 +115,9 @@
   <div id="debug" class="tab">
     <div class="col">
         <button onclick="location = '#!close'">Close</button>
-        <button onclick="window.showStatus('statusSent', true)">Show sent status</button>
+        <button onclick="window.showStatus('statusSharing', true)">Show Sharing</button>
+        <button onclick="window.showStatus('statusError', true)">Show Error</button>
+        <button onclick="window.showStatus('statusShared', true)">Show Shared</button>
     </div>
     <div class="col">
         <textarea  id="debugOutput"></textarea>
@@ -110,11 +126,11 @@
 
   <div id="settings" class="tab">
     <div class="col">
-      <button class="auth" data-domain="twitter">Add Twitter</button>
-      <button class="auth" data-domain="facebook">Add Facebook</button>
+      <button class="auth" data-domain="twitter.com">Add Twitter</button>
+      <button class="auth" data-domain="facebook.com">Add Facebook</button>
     </div>
     <div class="col">
-      <button class="auth" data-domain="gmail">Add Gmail</button>
+      <button class="auth" data-domain="google.com">Add Gmail</button>
       <button class="auth" data-domain="ffound" disabled>Add FFound</button>
     </div>
   </div>

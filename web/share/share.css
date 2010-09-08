@@ -289,7 +289,7 @@ div.status {
   color: white;
 }
 
-#shareHistoryButton {
+.statusButton {
   position: absolute;
   right: 10px;
   top: 6px;
