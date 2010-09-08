@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <link rel="stylesheet" type="text/css" href="share.css">
 
   <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
   <script>require(["index.js"]);</script>
-
-  <link rel="stylesheet" type="text/css" href="share.css">
 </head>
 <body>
 
@@ -100,8 +99,13 @@
   </div>
 
   <div id="debug" class="tab">
-    <button onclick="location = '#!close'">Close</button>
-    <button onclick="$('#tabs').addClass('hidden');$('#statusSent').removeClass('hidden');">Show sent status</button>
+    <div class="col">
+        <button onclick="location = '#!close'">Close</button>
+        <button onclick="$('#tabs').addClass('hidden');$('#statusSent').removeClass('hidden');">Show sent status</button>
+    </div>
+    <div class="col">
+        <textarea  id="debugOutput"></textarea>
+    </div>
   </div>
 
   <div id="settings" class="tab">

@@ -2,9 +2,22 @@
 <html>
 <head>
     <title>Share History</title>
+
+  <link rel="stylesheet" type="text/css" href="history.css">
+
+  <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+  <script>require(["history.js"]);</script>
 </head>
 <body>
     <h1>Share History</h1>
-    <p>TODO</p>
+    <div id="content"></div>
+
+    <div id="error" class="template">There was an error: {message}</div>
+
+    <div id="history" class="template">
+        <!-- this div should repeat for every history entry -->
+        <div class="name">${username}</div>
+    </div>
 </body>
 </html>

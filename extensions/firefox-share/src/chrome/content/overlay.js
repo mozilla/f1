@@ -80,8 +80,11 @@ var ffshare;
       if (hashIndex != -1) {
         var tail = aLocation.spec.slice(hashIndex+1, aLocation.spec.length)
         // XXX jrburke goes here.
-        if (tail == "!close") 
+        if (tail == "!close") {
           this.hide();
+        } else if (tail === "!resize") {
+          
+        }
       }
     },
 
