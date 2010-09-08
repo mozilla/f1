@@ -41,14 +41,9 @@ a {
   display: none;
 }
 
-.ui-tabs .ui-tabs-hide {
-  display: none;
-}
-
 #debug {
   width: 300px;
 }
-
 
 #tabs {
   height: 128px;
@@ -58,32 +53,53 @@ a {
   background-color: #f2f2f2;
 }
 
-.tab {
-  padding: 7px;
-  white-space: nowrap;
-}
+/* === TABS === */
 
 ul.nav {
-  background-color: #ff5959;
+  background-position: top center;
+  background-repeat: repeat;
+  background-color: #444;
+  background-image: url("i/background.gif");
+  -moz-box-shadow: 0 -2px 3px rgba(0,0,0,0.25) inset;
   display: block;
   width: 100%;
+  padding: 5px 0 0 10px;
 }
 
 ul.nav li {
   width: 36px;
   display: inline-block;
   list-style-type: none;
-  background-color: #ff7979;
-  border-top: 1px solid transparent;
-  border-bottom: 1px solid transparent;
-  margin: 5px 0 0 3px;
+  background-color: #444;
   font-size: 12px;
   line-height: 24px;
   -moz-border-radius: 5px 5px 0 0;
+  -moz-box-shadow: 0 -2px 3px rgba(0, 0, 0, 0.45);
 }
 
-ul.nav li a {
-  color: #fff;
+ul.nav li:hover {
+  background-color: #555;
+}
+
+ul.nav li:nth-child(n+2) {
+  margin-left: -5px;
+}
+
+ul.nav li:nth-child(1) {
+  z-index: 3;
+}
+
+ul.nav li:nth-child(2) {
+  z-index: 2;
+}
+
+ul.nav li:nth-child(3) {
+  z-index: 1;
+}
+
+ul.nav li a.icon,
+ul.nav li span.name {
+  opacity: 0.5;
 }
 
 ul.nav li a.icon {
@@ -95,23 +111,29 @@ ul.nav li a.icon {
   display: block;
 }
 
+ul.nav li span.name {
+  display: none;
+  font-weight: bold;
+  color: #444;
+}
+
 ul.nav li a.icon.twitter {
-  background-image: url("http://andychung.ca/demos/share/i/twitter_w.png");
+  background-image: url("i/twitter_w.png");
 }
 
 ul.nav li a.icon.facebook {
-  background-image: url("http://andychung.ca/demos/share/i/facebook_w.png");
+  background-image: url("i/facebook_w.png");
 }
 
 ul.nav li a.icon.gmail {
-  background-image: url("http://andychung.ca/demos/share/i/gmail_w.png");
+  background-image: url("i/gmail_w.png");
 }
 
 ul.nav li a.icon.settings {
-  background-image: url("i/settings_w.png");
+  background-image: url("i/settings.png");
 }
 
-/* === DEBUG === */
+/* === DEBUG TAB === */
 
 ul.nav li.debug {
   width: 60px;
@@ -122,7 +144,6 @@ ul.nav li.debug span.name {
   display: block;
   padding: 0;
   text-align: center;
-  font-weight: normal;
   color: #fff;
 }
 
@@ -130,44 +151,40 @@ ul.nav li.debug a.icon {
   width: auto;
 }
 
+/* === SETTINGS TAB === */
+
 ul.nav li.settings {
   position: absolute;
-  right: 7px;
-  top: 0;
+  right: 0;
+  bottom: 3px;
 }
+
+ul.nav li.settings,
+ul.nav li.settings.ui-tabs-selected  {
+  background-color: transparent;
+  background-image: none;
+  -moz-box-shadow: none;
+  width: 36px;
+}
+
+/* === TAB SELECTED === */
 
 ul.nav li.ui-tabs-selected {
   background-color: #fff;
+  background-image: -moz-linear-gradient(top, #fff 0%, #f2f2f2 100%);
   width: 128px;
+  -moz-box-shadow: 0 -4px 5px rgba(0, 0, 0, 0.45);
+  z-index: 100;
 }
 
-ul.nav li span.name {
-  display: none;
-  font-weight: bold;
-  color: #444;
+ul.nav li.ui-tabs-selected a.icon,
+ul.nav li.ui-tabs-selected span.name {
+  opacity: 1;
 }
 
 ul.nav li.ui-tabs-selected span.name {
   display: block;
   padding-left: 24px;
-}
-
-/* === DEBUG === */
-
-ul.nav li.ui-tabs-selected.debug {
-  width: 60px;
-}
-
-ul.nav li.ui-tabs-selected.debug span.name {
-  padding-left: 0;
-}
-
-ul.nav li.ui-tabs-selected.settings {
-  width: 36px;
-}
-
-ul.nav li.ui-tabs-selected.settings span.name {
-  display: none;
 }
 
 ul.nav li.ui-tabs-selected a.twitter {
@@ -182,13 +199,22 @@ ul.nav li.ui-tabs-selected a.gmail {
   background-image: url("i/gmail_b.png");
 }
 
-ul.nav li.ui-tabs-selected a.settings {
-  background-image: url("i/settings_b.png");
+/* === DEBUG TAB === */
+
+ul.nav li.ui-tabs-selected.debug span.name {
+  padding-left: 0;
+  color: #0a0a0a;
 }
 
-ul.nav li.ui-tabs-selected a,
-ul.nav li.ui-tabs-selected a .name {
-  color: #0a0a0a;
+/* === TAB PANELS === */
+
+.ui-tabs-panel {
+  padding: 7px;
+  white-space: nowrap;
+}
+
+.ui-tabs .ui-tabs-hide {
+  display: none;
 }
 
 .col {
