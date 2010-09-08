@@ -46,7 +46,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         if (callback){
             authDone = callback;
         }
-        var win = window.open("http://127.0.0.1:5000/send/auth.html?domain=" +
+        var url = location.protocol+"//"+location.host+"/send/auth.html";
+        var win = window.open(url + "?domain=" +
                               (domain || sendData.domain),
                             "Firefox Share OAuth",
                             "dialog=yes, modal=yes, width=800, height=480");
