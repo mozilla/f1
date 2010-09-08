@@ -132,7 +132,26 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         var service = options.services && options.services[serviceName];
         return (service && service.usernames && service.usernames[0]) || null;
     }
-    
+
+    function updateUserTab(evt, ui) {
+        var imageUrl = '',
+            userName = '',
+            id = ui.panel.id,
+            userInfoDom = $(".user-info");
+
+        if (id !== 'debug' && id !== 'settings') {
+            imageUrl = $(ui.panel).find("div.user img.avatar").attr("src");
+            userName = $(ui.panel).find("div.user .username").text();
+        }
+        $(".user-info img.avatar").attr("src", imageUrl);
+        if (!imageUrl) {
+            userInfoDom.hide();
+        } else {
+            userInfoDom.show();
+        }
+        $(".user-info .username").text(userName);
+    }
+
     function updateServiceDisplayName(service) {
         var userName = getServiceUserName(service);
         if (userName) {
@@ -229,6 +248,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
             selection = '#settings';
         }
         tabDom.tabs('select', selection);
+        //TODO: HACK, clean this up later.
+        updateUserTab(null, {panel: $(selection)[0]});
     }
 
     if (hash) {
@@ -276,10 +297,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         //Set up tabs.
         tabDom = $("#tabs");
         tabDom.tabs({ fx: { opacity: 'toggle', duration: 200 } });
-        tabDom.bind("tabsselect", function(event, ui) {
-          $(".user-info img.avatar").attr("src", $(ui.panel).find("div.user img.avatar").attr("src"));
-          $(".user-info .username").text($(ui.panel).find("div.user .username").text());
-        });
+        tabDom.bind("tabsselect", updateUserTab);
 
         //Set up the URL in all the message containers
         if (options.url) {
