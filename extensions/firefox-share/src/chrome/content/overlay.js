@@ -162,7 +162,7 @@ var ffshare;
       for (i = 0; i < logins.length; i++) {
         for (j = 0; j < knownServices.length; j++) {
           for (hostnameIndex = 0; hostnameIndex < knownServices[j].hostnames.length; hostnameIndex++) {
-            var svcUrl, countsTowardsFrecency = knownServices[j].hostnames[hostnameIndex];
+            var [svcUrl, countsTowardsFrecency] = knownServices[j].hostnames[hostnameIndex];
             if (svcUrl === logins[i].hostname) {
               var svcName = knownServices[j].name;
               var svcData;
