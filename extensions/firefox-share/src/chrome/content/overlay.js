@@ -66,7 +66,7 @@ var ffshare;
     }
   };
 
-  iframeProgressListener = {
+  var iframeProgressListener = {
     // detect communication from the iframe via location setting
     QueryInterface: function(aIID) {
       if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
@@ -111,8 +111,7 @@ var ffshare;
       // For now, any navigation causes collapsing.
       // XXX refine to be tolerant of #-appending
       ffshare.hide();
-    },
-
+    }
   },
 
   ffshare = {
