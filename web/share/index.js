@@ -35,12 +35,55 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
             'gmail': true
         },
         hash = location.href.split('#')[1],
-        urlArgs,
+        urlArgs, sendData, authDone,
         options = {
             services: null
         },
-        userName, tabDom,
+        tabDom,
         previewWidth = 90, previewHeight = 70;
+
+    function reauthorize(callback, domain) {
+        authDone = callback;
+        var win = window.open("http://127.0.0.1:5000/send/auth.html?domain=" +
+                              (domain || sendData.domain),
+                            "Firefox Share OAuth",
+                            "dialog=yes, modal=yes, width=800, height=480");
+    }
+
+    window.authDone = function () {
+        if (authDone) {
+            authDone();
+            authDone = null;
+        }
+    };
+
+    function sendMessage() {
+        rdapi('send', {
+            type: 'POST',
+            data: sendData,
+            success: function (json) {
+                // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
+                if (json.error && json.error.reason) {
+                    $("#resultReason").text("Error: " + json.error.reason);
+                    var code = json.error.code;
+                    if (code ===  401 || code === 400 || code === 530) {
+                        reauthorize(sendMessage);
+                    }
+                }
+                else if (json.error) {
+                    $("#resultReason").text("Error: " + json.error.reason);
+                } else {
+                    $("#resultReason").text("Message Sent");
+                    $('#tabs').addClass('hidden');
+                    $('#statusSent').removeClass('hidden');
+                    sendData = {};
+                }
+            },
+            error: function (xhr, textStatus, err) {
+                $("#resultReason").text("XHR Error: " + err);
+            }
+        });
+    }
 
     function resizePreview(evt) {
         var imgNode = evt.target,
@@ -178,9 +221,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
     });
 
     $(function () {
-        var services = options.services,
-            param,
-            thumbDivNode = $('div.thumb')[0],
+        var thumbDivNode = $('div.thumb')[0],
             thumbImgDom = $('img.thumb');
 
         //Debug info on the data that was received.
@@ -189,7 +230,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         //Hook up button for share history
         $('#shareHistoryButton').click(function (evt) {
             window.open('history.html');
-        })
+        });
 
         //Set up tabs.
         tabDom = $("#tabs");
@@ -226,55 +267,18 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         } else {
             thumbImgDom.attr('src', options.thumbnail);
         }
-    });
 
-    function reauthorize() {
-        var domain = localStorage['X-Send-Domain'];
-        var win = window.open("http://127.0.0.1:5000/send/auth.html?domain="+domain,
-                            "Firefox Share OAuth",
-                            "dialog=yes, modal=yes, width=800, height=480");
-    }
+        //Handle button click for services in the settings.
+        $('#settings').delegate('.auth', 'click', function (evt) {
+            var node = evt.target,
+                domain = node.getAttribute('data-domain');
 
-    function sendMessage() {
-        var domain = localStorage['X-Send-Domain'];
-        var message = localStorage['X-Send-Message'];
-        var to = localStorage['X-Send-To'];
-        var subject = localStorage['X-Send-Subject'];
-        rdapi('send', {
-            type: 'POST',
-            data: {
-                domain: domain,
-                message: message,
-                to: to,
-                subject: subject
-            },
-            success: function (json) {
-                // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
-                if (json['error'] && json['error']['reason']) {
-                    $("#resultReason").text("Error: "+json['error']['reason']);
-                    var code = json['error']['code'];
-                    if (code ==  401 || code == 400 || code == 530) {
-                        reauthorize();
-                    }
-                }
-                else if (json['error'])
-                    $("#resultReason").text("Error: "+json['error']['reason']);
-                else {
-                    $("#resultReason").text("Message Sent");
-                    $('#tabs').addClass('hidden');
-                    $('#statusSent').removeClass('hidden');
-                    localStorage['X-Send-Domain'] = '';
-                    localStorage['X-Send-Message'] = '';
-                }
-            },
-            error: function (xhr, textStatus, err) {
-                $("#resultReason").text("XHR Error: "+err)
-            }
+            reauthorize(function () {
+                //After reauthorize, just reload the page, let the account
+                //fetching do its work.
+                location.reload();
+            }, domain);
         });
-    }
-    window.sendMessage = sendMessage;
-
-    $(function () {
 
         $(".messageForm")
             .submit(function (evt) {
@@ -293,11 +297,14 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
 
                     node.value = trimmed;
                 });
-   
-                localStorage['X-Send-Message'] = form.message.value;
-                localStorage['X-Send-Domain'] = form.domain.value;
-                localStorage['X-Send-To'] = form.to.value;
-                localStorage['X-Send-Subject'] = form.subject.value;
+
+                sendData = {
+                    domain: (form.domain && form.domain.value) || '',
+                    message: (form.message && form.message.value) || '',
+                    to: (form.to && form.to.value) || '',
+                    subject: (form.subject && form.subject.value) || ''
+                };
+
                 sendMessage();
                 return false;
             })
@@ -305,4 +312,5 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
                 placeholder(node);
             });
     });
+
 });

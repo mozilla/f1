@@ -20,7 +20,7 @@
       function (require,   $,        url) {
 	 var target = window.location.href.split('#')[1];
 	 if (target) {
-	   window.opener.sendMessage();
+	   window.opener.authDone();
 	   window.close();
 	 }
 	 var search = window.location.href.split('?')[1];
