@@ -136,12 +136,14 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
     function updateUserTab(evt, ui) {
         var imageUrl = '',
             userName = '',
+            inactive = true,
             id = ui.panel.id,
             userInfoDom = $(".user-info");
 
         if (id !== 'debug' && id !== 'settings') {
             imageUrl = $(ui.panel).find("div.user img.avatar").attr("src");
             userName = $(ui.panel).find("div.user .username").text();
+            inactive = $(ui.panel).find("div.user").hasClass("inactive");
         }
         $(".user-info img.avatar").attr("src", imageUrl);
         if (!imageUrl) {
@@ -149,6 +151,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         } else {
             userInfoDom.show();
         }
+        $(".user-info .status").toggleClass("inactive", inactive);
         $(".user-info .username").text(userName);
     }
 

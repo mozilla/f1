@@ -147,6 +147,19 @@ ul.nav .user-info {
   vertical-align: middle;
 }
 
+ul.nav .user-info .status {
+  display: inline-block;
+  -moz-border-radius: 100px;
+  width: 8px;
+  height: 8px;
+  vertical-align: middle;
+  background-image: -moz-radial-gradient(center, circle cover, #68DC15 10%, #1c851c 90%, #444 100%);
+}
+
+ul.nav .user-info .status.inactive {
+  background-image: -moz-radial-gradient(center, circle cover, #FF7C7C 10%, #c60000 90%, #444 100%);
+}
+
 ul.nav .user-info .username {
   color: #efefef;
   font-size: small;
