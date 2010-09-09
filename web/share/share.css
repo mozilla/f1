@@ -130,7 +130,7 @@ ul.nav li a.icon.gmail {
 }
 
 ul.nav li a.icon.debug {
-  background-image: url("i/bug.png");
+  background-image: url("i/bug_w.png");
 }
 
 ul.nav li a.icon.settings {
@@ -210,6 +210,10 @@ ul.nav li.ui-tabs-selected a.facebook {
 
 ul.nav li.ui-tabs-selected a.gmail {
   background-image: url("i/gmail_b.png");
+}
+
+ul.nav li.ui-tabs-selected a.debug {
+  background-image: url("i/bug_b.png");
 }
 
 /* === TAB PANELS === */
