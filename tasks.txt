@@ -1,0 +1,29 @@
+# NEXT TWO WEEKS
+
+## Bigger Tasks
+
+* User testing - Bryan/Andy to prep, all to help out
+* Map out security concerns and fix them
+
+## Specific Changes
+
+* Tag FF bookmarks with share data so they are picked up in sync.
+* Chrome to phone
+* Access to history? Forgot what this means
+* UI to allow disconnecting accounts? May just be a link in the settings panel
+  that takes user to a full web page that lists how they can log out of different
+  services.
+* If browser goes to about:config (non-web pages), do not show the share UI, or show a "not allowed" UI.
+* Use url shortener. Use bitly possibly for now, look at t.co implications
+* Expand facebook share to include all options that Facebook supports, like previews.
+
+## James
+
+* Change extension to start reveal animation right away instead of waiting for iframe onload
+* 140 count for twitter
+
+
+# OTHER TASKS
+
+* Switch to async/queue-based send API
+* Use google contacts API to enable gmail tab autocomplete for To: address
