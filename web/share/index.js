@@ -26,8 +26,8 @@
 "use strict";
 
 require.def("send",
-        ["require", "jquery", "blade/fn", "rdapi", "blade/url", "placeholder"],
-function (require,   $,        fn,         rdapi,   url,         placeholder) {
+        ["require", "jquery", "blade/fn", "rdapi", "blade/url", "placeholder", "TextCounter"],
+function (require,   $,        fn,         rdapi,   url,         placeholder,   TextCounter) {
 
     var svcOptions = {
             'twitter': true,
@@ -39,7 +39,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
         options = {
             services: null
         },
-        tabDom, bodyDom,
+        tabDom, bodyDom, twitterCounter,
         previewWidth = 90, previewHeight = 70;
 
     function reauthorize(callback, domain) {
@@ -339,6 +339,9 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
             thumbImgDom.attr('src', options.thumbnail);
         }
 
+        //Set up twitter text counter
+        twitterCounter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 140);
+
         //Handle button click for services in the settings.
         $('#settings').delegate('.auth', 'click', function (evt) {
             var node = evt.target,
@@ -357,6 +360,11 @@ function (require,   $,        fn,         rdapi,   url,         placeholder) {
                 $(".error").addClass("invisible");
 
                 var form = evt.target;
+
+                //If twitter and message is bigger than allowed, do not submit.
+                if (form.domain.value === 'twitter.com' && twitterCounter.isOver()) {
+                    return false;
+                }
     
                 //Make sure all form elements are trimmed and username exists.
                 $.each(form.elements, function (i, node) {

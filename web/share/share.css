@@ -270,6 +270,16 @@ ul.nav li.ui-tabs-selected a.debug {
   vertical-align: bottom;
 }
 
+.col.button.twitterCounter {
+  vertical-align: top;
+}
+
+#twitter .counter {
+    height: 17px;
+    margin-bottom: 29px;
+    text-align: center;
+}
+
 .user.inactive {
   opacity: 0.5;
   background: -moz-repeating-linear-gradient(top left -45deg, #aaa, #aaa 5px, #fff 5px, #fff 10px) #aaa no-repeat fixed;
@@ -379,4 +389,8 @@ div.status {
 img.video {
     width: 112px;
     height: 63px;
+}
+
+.TextCountOver {
+    color: red;
 }

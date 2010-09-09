@@ -8,7 +8,7 @@
 
 'use strict';
 
-require.def('blade/object', function () {
+require.def('blade/object', ['blade/fn'], function (fn) {
 
     var empty = {},
 
@@ -35,6 +35,7 @@ require.def('blade/object', function () {
          * @returns {Function} a constructor function.
          */
         object = function (base, mixins, objPropertyFunc) {
+            base |= {};
             var constructor,
 
                 //Create the parent and its parentFunc calling wrapper.
@@ -51,7 +52,7 @@ require.def('blade/object', function () {
                 //priority over the parent's properties.
                 proto = object.create(parent);
 
-            object.mixin(proto, objPropertyFunc(parentFunc), true);
+            object.mixin(proto, (fn.is(objPropertyFunc) ? objPropertyFunc(parentFunc) : objPropertyFunc), true);
 
             //Create the constructor function. Calls init if it is defined
             //on the prototype (proto)

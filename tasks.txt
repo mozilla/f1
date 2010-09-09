@@ -16,11 +16,12 @@
 * If browser goes to about:config (non-web pages), do not show the share UI, or show a "not allowed" UI.
 * Use url shortener. Use bitly possibly for now, look at t.co implications
 * Expand facebook share to include all options that Facebook supports, like previews.
+* Include X-Frame-Options: SAMEORIGIN as an HTTP header to help avoid clickjacking:
+  https://developer.mozilla.org/en/The_X-FRAME-OPTIONS_response_header
 
 ## James
 
 * Change extension to start reveal animation right away instead of waiting for iframe onload
-* 140 count for twitter
 
 
 # OTHER TASKS
