@@ -18,14 +18,16 @@
 body {
   font-size: 14px;
   font-family: "helvetica neue", helvetica, arial, sans-serif;
-  height: 128px;
   max-height: 128px;
   overflow: hidden;
   background-color: #fff;
   background-position: bottom center;
   background-repeat: no-repeat;
-  border-bottom: 1px solid #e6e6e6;
   background-color: #fff;
+}
+
+button::-moz-focus-inner { 
+  border: 0; 
 }
 
 a {
@@ -34,8 +36,8 @@ a {
 }
 
 #tabs {
-  -moz-box-shadow: 0 -5px 5px -3px #ddd inset;
-  height: 124px;
+  -moz-box-shadow: 0 -5px 2px -4px #DDDDDD inset;
+  height: 125px;
   overflow: hidden;
   border-bottom: 1px solid #ccc;
   background-color: #f2f2f2;
@@ -43,14 +45,39 @@ a {
 
 ul.nav {
   background-image: url("i/background.gif");
-  -moz-box-shadow: 0 -2px 3px rgba(0,0,0,0.25) inset;
+  -moz-box-shadow: 0 -2px 3px rgba(0,0,0,0.5) inset;
   display: block;
   width: 100%;
   padding: 0 10px;
 }
 
+ul.nav .username {
+  height: 24px;
+  font-size: 12px;
+  color: #fff;
+  font-weight: bold;
+  line-height: 24px;
+  position: absolute;
+  right: 35px;
+  top: 6px;
+}
+
+ul.nav .username img {
+  border: 1px solid #fff;
+  width: 23px;
+  height: 23px;
+  margin-left: 5px;
+}
+
+ul.nav .navWrap {
+  width: 960px;
+  position: relative;
+  left: 50%;
+  margin-left:-480px;
+}
+
 ul.nav li {
-  width: 128px;
+  width: auto;
   display: inline-block;
   float: left;
   list-style-type: none;
@@ -59,7 +86,7 @@ ul.nav li {
   font-size: 12px;
   line-height: 24px;
   -moz-border-radius: 5px 5px 0 0;
-  -moz-box-shadow: 0 -2px 3px rgba(0, 0, 0, 0.45);
+  -moz-box-shadow: 0 -2px 2px rgba(0, 0, 0, 0.45);
 }
 
 ul.nav li:hover {
@@ -71,7 +98,7 @@ ul.nav li:nth-child(n+2) {
 }
 
 ul.nav li:nth-child(1) {
-  z-index: 3;
+  z-index: 1;
 }
 
 ul.nav li:nth-child(2) {
@@ -109,6 +136,7 @@ ul.nav li a.icon.gmail {
 
 ul.nav li a.icon.settings {
   background-image: url("../skin/i/settings.png");
+  background-position: top left;
 }
 
 ul.nav li.debug {
@@ -131,8 +159,17 @@ ul.nav li.debug a.icon {
   width: auto;
 }
 
+ul.nav li span.name {
+  display: none;
+}
+
+ul.nav li.ui-tabs-selected span.name {
+  display: block;
+}
+
+
 ul.nav li.settings,
-ul.nav li.settings.ui-tabs-selected  {
+ul.nav li.settings.ui-tabs-selected {
   position: absolute;
   background-color: transparent;
   background-image: none;
@@ -156,7 +193,6 @@ ul.nav li.ui-tabs-selected {
   background-color: #fff;
   background-image: -moz-linear-gradient(top, #fff 0%, #f2f2f2 100%);
   width: 128px;
-  -moz-box-shadow: 0 -4px 5px rgba(0, 0, 0, 0.45);
   z-index: 100;
 }
 
@@ -256,14 +292,23 @@ td.image {
 }
 
 div.thumb {
-  border: 1px dashed #aaa;
-  height: 70px;
+  border: 1px solid #aaa;
+  background-color: #fff;
+  height: 71px;
   width: 90px;
+  display: inline-block;
 }
 
-.thumb .title,
-.thumb .description {
-  padding: 0 3px;
+ul.info {
+  display: inline-block;
+  width: 150px;
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+.info .description {
+  color: #666;
+  font-size: 10px;
 }
 
 .thumb .title {
@@ -278,37 +323,201 @@ div.thumb {
   font-size: x-small;
 }
 
-.entry {
-  padding: 7px;
-}
-
 button {
   padding: 2px 15px;
   font-family: "helvetica neue", helvetica, arial, sans-serif;
   font-size: 12px;
   line-height:24px;
   background-image: -moz-linear-gradient(top,#fafafa 0%,#e6e6e6 100%);
-  border: 1px solid #fff;
-  outline: 1px solid #bebebe;
+  border: 1px solid #bebebe;
+  -moz-box-shadow: 0 0 0 1px #fff inset;
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  border: 1px solid #999;
+}
+
+button:active {
+  -moz-box-shadow: 0 0 0 1px rgba(255,255,255,0.35) inset, 0 0 3px rgba(0,0,0,0.75) inset;
 }
 
 textarea, input[type="text"] {
-  -moz-box-shadow:0 1px 2px #CCCCCC inset;
-  background-image:-moz-linear-gradient(center top , #FFFFFF 0%, #F2F2F2 100%);
-  border:1px solid #BEBEBE;
-  font-family:"helvetica neue",helvetica,arial,sans-serif;
-  font-size:14px;
-  line-height:24px;
+  -moz-box-shadow: 0 1px 2px #CCCCCC inset;
+  background-image: -moz-linear-gradient(center top , #FFFFFF 0%, #F2F2F2 100%);
+  border: 1px solid #BEBEBE;
+  font-family: "helvetica neue",helvetica,arial,sans-serif;
+  font-size: 14px;
+  line-height: 24px;
   padding: 3px;
-  margin: 0 7px;
+  margin: 0;
   width: 100%;
 }
 
-input[type="text"] {
-  height: 28px;
-  margin-top: 3px;
-  margin-bottom: 3px;
+.inputs {
+  margin: 0 10px 0 0;
 }
+
+input[type="text"] {
+  height: 30px;
+  width: 234px;
+  display: block;
+}
+
+input[type="text"]#to {
+  margin-bottom: 11px;
+}
+
+.entry {
+  padding: 10px;
+  width: 962px;
+  left: 50%;
+  margin-left: -481px;
+  position: relative;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  min-height: 70px;
+}
+
+.entry .urlConfirmation {
+  padding: 1px 5px;
+  -moz-border-radius: 10px;
+  background-image: -moz-linear-gradient(top, #fafafa 0%, #e6e6e6 100%);
+  border: 1px solid #bebebe;
+  color: green;
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  z-index: 1;
+  color: green;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.entry .urlConfirmation span {
+  color: #333;
+}
+
+#settings .entry ul li {
+  display: inline-block;
+  float: left;
+}
+
+#settings .entry ul li button {
+  margin: 0 10px 0 0;
+  width: 128px;
+}
+
+.entry h1 {
+  margin: 0 0 10px 0;
+}
+
+/* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
+/* hbox and vbox classes */
+ 
+.hbox {
+	display: -webkit-box;
+	-webkit-box-orient: horizontal;
+	-webkit-box-align: stretch;
+ 
+	display: -moz-box;
+	-moz-box-orient: horizontal;
+	-moz-box-align: stretch;
+ 
+	display: box;
+	box-orient: horizontal;
+	box-align: stretch;
+}
+ 
+.hbox > * {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+	display: block;
+}
+ 
+.vbox {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-box-align: stretch;
+ 
+	display: -moz-box;
+	-moz-box-orient: vertical;
+	-moz-box-align: stretch;
+ 
+	display: box;
+	box-orient: vertical;
+	box-align: stretch;
+}
+ 
+.vbox > * {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+	display: block;
+}
+ 
+.spacer {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+ 
+.reverse {
+	-webkit-box-direction: reverse;
+	-moz-box-direction: reverse;
+	box-direction: reverse;
+}
+ 
+.boxFlex0 {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+}
+ 
+.boxFlex1, .boxFlex {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+ 
+.boxFlex2 {
+	-webkit-box-flex: 2;
+	-moz-box-flex: 2;
+	box-flex: 2;
+}
+ 
+.boxGroup1 {
+	-webkit-box-flex-group: 1;
+	-moz-box-flex-group: 1;
+	box-flex-group: 1;
+}
+ 
+.boxGroup2 {
+	-webkit-box-flex-group: 2;
+	-moz-box-flex-group: 2;
+	box-flex-group: 2;
+}
+ 
+.start {
+	-webkit-box-pack: start;
+	-moz-box-pack: start;
+	box-pack: start;
+}
+ 
+.end {
+	-webkit-box-pack: end;
+	-moz-box-pack: end;
+	box-pack: end;
+}
+ 
+.center {
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	box-pack: center;
+}
+/* END hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
 
 /* clearfix */
 

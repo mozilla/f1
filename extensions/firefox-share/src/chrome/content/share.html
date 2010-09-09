@@ -24,125 +24,62 @@
 <div id="tabs" class="tabs-left">
 
   <ul class="nav clearfix">
-    <li><a class="icon twitter" href="#twitter"><span class="name">Twitter</span></a></li>
-    <li><a class="icon facebook" href="#facebook"><span class="name">Facebook</span></a></li>
-    <li><a class="icon gmail" href="#gmail"><span class="name">GMail</span></a></li>
-    <li class="settings"><a class="icon settings" href="#settings"><span class="name"><img src="../skin/i/settings.png"></span></a></li>
+    <div class="navWrap">
+      <li><a class="icon twitter" href="#twitter"><span class="name">Twitter</span></a></li>
+      <li><a class="icon facebook" href="#facebook"><span class="name">Facebook</span></a></li>
+      <li><a class="icon gmail" href="#gmail"><span class="name">Gmail</span></a></li>
+      <li class="settings"><a class="icon settings" href="#settings"><span class="name"><img src="../skin/i/settings.png"></span></a></li>
+      <div class="username">@clarkbw <img src="../skin/i/bryanAvatar.jpg"></div>
+    </div>
   </ul>
 
   <div id="twitter">
-    <div class="entry">
-      <table>
-        <tbody>
-          <tr>
-            <td class="user">
-              <div class="user inactive">
-                <span class="avatar"><img class="avatar" src="http://a2.twimg.com/profile_images/225518742/full-headshot_normal.jpg"></span>
-                <span class="username">clarkbw</span>
-              </div>
-            </td>
-            <td class="thumb">
-              <table class="thumb">
-                <tr>
-                  <td class="image"><div class="thumb"><img class="thumb"/></div></td>
-                  <td class="meta">
-                    <div class="title">page title</div>
-                    <div class="description">page description</div>
-                  </td>
-              </table>
-            </td>
-            <td class="message">
-              <textarea class="message"></textarea>
-            </td>
-            <td class="button">
-              <div><button>share</button></div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="entry hbox">
+      <div class="boxFlex">
+        <textarea class="message"></textarea>
+        <span class="urlConfirmation"><span>re-insert link</span></span>
+      </div>
+      <button>share</button>
     </div>
   </div>
 
   <div id="facebook">
-    <div class="entry">
-      <table>
-        <tbody>
-          <tr>
-            <td class="user">
-              <div class="user inactive">
-                <span class="avatar"><img class="avatar" src="http://profile.ak.fbcdn.net/hprofile-ak-snc4/hs626.snc3/27454_21602578_2499_q.jpg"></span>
-                <span class="username">Bryan Clark</span>
-              </div>
-            </td>
-            <td class="thumb">
-              <table class="thumb">
-                <tr>
-                  <td class="image"><div class="thumb"><img class="thumb"/></div></td>
-                  <td>
-                    <div class="title">page title</div>
-                    <div class="description">page description</div>
-                  </td>
-              </table>
-            </td>
-            <td class="message">
-              <textarea class="message"></textarea>
-            </td>
-            <td class="button">
-              <div><button>share</button></div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="entry hbox">
+      <div class="thumbnail">
+        <div class="thumb"></div>
+        <ul class="info">
+          <li class="title">Title</li>
+          <li class="description">Description</li>
+        </ul>
+      </div>
+      <textarea class="message boxFlex"></textarea>
+      <button>share</button>
     </div>
   </div>
 
   <div id="gmail">
-    <div class="entry">
-      <table>
-        <tbody>
-          <tr>
-            <td class="user">
-              <div class="user inactive">
-                <span class="avatar"><img class="avatar" src="http://profile.ak.fbcdn.net/hprofile-ak-snc4/hs626.snc3/27454_21602578_2499_q.jpg"></span>
-                <span class="username">clarkbw@gmail.com</span>
-              </div>
-            </td>
-            <td class="thumb">
-              <table class="thumb">
-                <tr>
-                  <td class="image"><div class="thumb"><img class="thumb"/></div></td>
-                  <td>
-                    <div class="title">page title</div>
-                    <div class="description">page description</div>
-                  </td>
-              </table>
-            </td>
-            <td class="message">
-              <div><input id="to" type="text" value="to"/></div>
-              <div><input id="subject" type="text" value="subject"/></div>
-            </td>
-            <td class="message">
-              <div><textarea class="message"></textarea></div>
-            </td>
-            <td class="button">
-              <div><button>share</button></div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <div class="entry hbox">
+      <div class="inputs">
+        <input id="to" type="text" value="to"/>
+        <input id="subject" type="text" value="subject"/>
+      </div>
+      <div class="boxFlex">
+        <textarea class="message"></textarea>
+        <span class="urlConfirmation"><span>re-insert link</span></span>
+      </div>
+      <button>share</button>
     </div>
   </div>
 
   <div id="settings">
     <div class="entry">
-      <div>
-        <button>Add Twitter</button>
-        <button>Add Facebook</button>
-      </div>
-      <div>
-        <button>Add GMail</button>
-        <button>Add FFound</button>
-      </div>
+      <h1>Settings</h1>
+      <ul>
+        <li><button>Add Twitter</button></li>
+        <li><button>Add Facebook</button></li>
+        <li><button>Add GMail</button></li>
+        <li><button>Add FFFFound</button></li>
+      </ul>
     </div>
   </div>
 
