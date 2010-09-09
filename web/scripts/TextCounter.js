@@ -16,7 +16,7 @@ function ($,        object,         fn) {
         },
 
         checkCount: function () {
-            var count = this.limit - this.dom[0].value.trim().length;
+            var count = this.limit - this.dom[0].value.length;
             if (count < 0) {
                 this.countDom.addClass("TextCountOver");
             } else {
