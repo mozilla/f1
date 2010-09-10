@@ -326,11 +326,10 @@ var ffshare;
     },
 
     getPageDescription: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta'),
-        content = null;
+      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
       for (var i = 0; i < metaNodes.length; i++) {
         if ("description" == metaNodes[i].getAttribute("name")) {
-          content = metaNodes[i].getAttribute("content");
+          var content = metaNodes[i].getAttribute("content");
           if (content)
             return content;
         }
