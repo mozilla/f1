@@ -287,7 +287,7 @@ ul.nav li.ui-tabs-selected a.debug {
 #twitter .counter {
   position: absolute;
   bottom: 3px;
-  right: 3px;
+  right: 20px;
   color: #777;
   font-weight: bold;
 }
