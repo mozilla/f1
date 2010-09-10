@@ -144,6 +144,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
             imageUrl = $(ui.panel).find("div.user img.avatar").attr("src");
             userName = $(ui.panel).find("div.user .username").text();
             inactive = $(ui.panel).find("div.user").hasClass("inactive");
+            domain   = $(ui.panel).find("div.user input[type='hidden'][name='domain']").val()
         }
         $(".user-info img.avatar").attr("src", imageUrl);
         if (!imageUrl) {
@@ -153,6 +154,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
         }
         $(".user-info .status").toggleClass("inactive", inactive);
         $(".user-info .username").text(userName);
+        $(".user-info").attr("data-domain", domain);
     }
 
     function updateServiceDisplayName(service) {
@@ -350,6 +352,17 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
         $('#settings').delegate('.auth', 'click', function (evt) {
             var node = evt.target,
                 domain = node.getAttribute('data-domain');
+
+            reauthorize(function () {
+                //After reauthorize, just reload the page, let the account
+                //fetching do its work.
+                location.reload();
+            }, domain);
+        });
+
+        //Handle login click for user information area.
+        $('ul.nav').delegate('.user-info', 'click', function (evt) {
+            var domain = $(this).attr('data-domain');
 
             reauthorize(function () {
                 //After reauthorize, just reload the page, let the account

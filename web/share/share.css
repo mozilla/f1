@@ -148,6 +148,7 @@ ul.nav .user-info {
   bottom: 4px;
   text-align: right;
   vertical-align: middle;
+  cursor: pointer;
 }
 
 ul.nav .user-info .status {
