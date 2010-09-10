@@ -137,6 +137,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
         var imageUrl = '',
             userName = '',
             inactive = true,
+            domain = '',
             id = ui.panel.id,
             userInfoDom = $(".user-info");
 
