@@ -243,6 +243,7 @@ ul.nav li.ui-tabs-selected a.debug {
   border-right: 1px solid #ccc;
   overflow: hidden;
   -moz-box-sizing: padding-box;
+  height: 97px; /* 128 - (24 + 7) */
 }
 
 .ui-tabs .ui-tabs-hide {
@@ -283,9 +284,15 @@ ul.nav li.ui-tabs-selected a.debug {
 }
 
 #twitter .counter {
-    height: 17px;
-    margin-bottom: 29px;
-    text-align: center;
+  position: absolute;
+  bottom: 3px;
+  right: 3px;
+  color: #777;
+  font-weight: bold;
+}
+
+.TextCountOver {
+    color: red !important;
 }
 
 .user.inactive {
@@ -321,6 +328,7 @@ div.image img {
 
 .meta {
   padding: 0 3px;
+  width: 126px; /* 220 - 94 */
 }
 
 .meta .title {
@@ -352,6 +360,7 @@ button {
   border: 1px solid #fff;
   outline: 1px solid #bebebe;
   margin: 1px;
+  height: 72px;
 }
 
 textarea, input[type="text"] {
@@ -362,7 +371,9 @@ textarea, input[type="text"] {
   font-size:14px;
   line-height:24px;
   padding: 3px;
+  margin: 1px 0;
   width: 100%;
+  height: 72px;
 }
 
 input[type="text"] {
@@ -408,8 +419,4 @@ div.status {
 img.video {
     width: 112px;
     height: 63px;
-}
-
-.TextCountOver {
-    color: red;
 }
