@@ -264,12 +264,6 @@ ul.nav li.ui-tabs-selected a.debug {
 
 .col.thumb {
   width: 220px;
-  /* XXX hide this for so we can test out the new look */
-  display: none;
-}
-
-#facebook .col.thumb {
-  display: inline-block;
 }
 
 .col.addressing {
@@ -278,10 +272,6 @@ ul.nav li.ui-tabs-selected a.debug {
 
 .col.message {
   width: 540px;
-}
-
-#twitter .col.message {
-  width: 780px;
 }
 
 .col.button {
@@ -318,10 +308,15 @@ div.meta {
 }
 
 div.image {
+  height: 74px;
+  width: 94px;
+  text-align: center;
+}
+
+div.image img {
   height: 70px;
-  width: 90px;
-  border: 1px solid #aaa;
-  background-color: #fff;
+  max-width: 90px;
+  -moz-box-shadow: 1px 1px 3px #555;
 }
 
 .meta {
@@ -337,7 +332,15 @@ div.image {
   white-space: normal;
   font-size: 10px;
   line-height: 14px;
-  height: 42px;
+  height: 28px;  /* 2 lines worth */
+  overflow: hidden;
+}
+
+.meta .url,
+.meta .curl {
+  font-size: 10px;
+  text-decoration: underline;
+  display: block;
 }
 
 button {

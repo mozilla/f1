@@ -315,6 +315,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
                     dom.val(options.url);
                 }
             });
+            $(".meta .url").text(options.url);
+            $(".meta .curl").text(options.canonicalUrl);
         }
 
         //For the title in facebook/subject in email, set it to the page title
