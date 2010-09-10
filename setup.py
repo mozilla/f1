@@ -39,6 +39,7 @@ setup(
     main = linkdrop.config.middleware:make_app
 
     [paste.filter_app_factory]
+    csrf = linkdrop.csrf:make_csrf_filter_app
     dbgp = linkdrop.debug:make_dbgp_middleware
     profiler = linkdrop.debug:make_profile_middleware
 

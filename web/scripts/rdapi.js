@@ -8,7 +8,7 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
 
     var rdapi,
         csrfHeader = 'X-CSRF',
-        csrfRegExp = /linkdrop=([^\; ]+)/,
+        csrfRegExp = /csrf=([^\; ]+)/,
         contacts = {},
         jigFunctions = {
             contact: function (identity) {
