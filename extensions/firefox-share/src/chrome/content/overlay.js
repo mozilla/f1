@@ -317,12 +317,19 @@ var ffshare;
     },
 
     getPageTitle: function () {
+      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
       var titleNode = gBrowser.contentDocument.getElementsByTagName('title')[0];
+      for (var i = 0; i < metaNodes.length; i++) {
+        if ("title" == metaNodes[i].getAttribute("name")) {
+          var content = metaNodes[i].getAttribute("content");
+          if (content)
+            return content;
+        }
+      }
       if (titleNode) {
         return titleNode.firstChild.nodeValue;
-      } else {
-        return '';
       }
+      return '';
     },
 
     getPageDescription: function () {
