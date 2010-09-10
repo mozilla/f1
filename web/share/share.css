@@ -360,6 +360,9 @@ button {
   border: 1px solid #fff;
   outline: 1px solid #bebebe;
   margin: 1px;
+}
+
+.ui-tabs-panel button {
   height: 72px;
 }
 
