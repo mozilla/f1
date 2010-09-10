@@ -39,7 +39,8 @@ beaker.session.secret = somesecret
 [filter-app:csrf]
 use = egg:linkdrop#csrf
 # allow access to account api's for oauth, which will not have csrf token
-csrf.unprotected_path = /account
+# be sure to use the FULL path
+csrf.unprotected_path = /api/account
 next = sessioned
 
 [composite:sessioned]
