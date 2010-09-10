@@ -32,13 +32,14 @@ the contacts API that uses @me/@self.
     # for testing...
     @api_response
     @json_exception_response
-    def get(self, id=None):
-        userkey = session['userkey']
-        accts = Session.query(Account).filter(Account.userkey==userkey).all()
+    def get(self, domain=None):
+        keys = session.get('account_keys', '').split(',')
+        import sys; print >> sys.stderr, keys
+        accts = Session.query(Account).filter(Account.key.in_(keys)).all()
         return [a.profile for a in accts]
 
     def _get_or_create_account(self, domain, userid, username):
-        user_key = session.get('userkey')
+        keys = session.get('account_keys', '').split(',')
         # Find or create an account
         try:
             acct = Session.query(Account).filter(and_(Account.domain==domain, Account.userid==userid)).one()
@@ -48,16 +49,13 @@ the contacts API that uses @me/@self.
             acct.userid = userid
             acct.username = username
             Session.add(acct)
-
-        if user_key:
-            acct.userkey = user_key
-        else:
-            session['userkey'] = acct.userkey
+        if acct.key not in keys:
+            keys.append(acct.key)
+            session['account_keys'] = ','.join(keys)
             session.save()
-
         return acct
 
-    @json_exception_response
+    # this is not a rest api
     def authorize(self, *args, **kw):
         provider = request.POST['domain']
         session['oauth_provider'] = provider
@@ -65,7 +63,7 @@ the contacts API that uses @me/@self.
         service = get_provider(provider)
         return service.responder().request_access()
 
-    @json_exception_response
+    # this is not a rest api
     def verify(self, *args, **kw):
         provider = session.pop('oauth_provider')
         session.save()
@@ -73,7 +71,6 @@ the contacts API that uses @me/@self.
 
         auth = service.responder()
         user = auth.verify()
-        import sys; print >> sys.stderr, user
         
         account = user['profile']['accounts'][0]
 

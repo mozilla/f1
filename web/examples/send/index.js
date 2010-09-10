@@ -30,7 +30,7 @@ require.def("send",
 function (require,   $,        fn,         rdapi,   placeholder,   url) {
 
     var validHashRegExp = /^\w+$/;
-
+    var sendData;
     function onHashChange() {
         var value = location.hash.split("#")[1],
             start, end;
@@ -51,15 +51,17 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
             reauthorize();
         } else if (value==="auth_success") {
             // XXX should we automatically resend?
-            var domain = localStorage['X-Send-Domain'];
-            var message = localStorage['X-Send-Message'];
+            var domain = sendData.domain;
             var radio = document.messageForm.domain;
             for(var i = 0; i < radio.length; i++) {
                 if(radio[i].value==domain) {
                     radio[i].checked = true;
                 }
             }
-            document.messageForm.message.value = message;
+            document.messageForm.username.value = sendData.username;
+            document.messageForm.to.value = sendData.to;
+            document.messageForm.subject.value = sendData.subject;
+            document.messageForm.message.value = sendData.message;
             sendMessage();
         }
 
@@ -72,45 +74,42 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
     window.addEventListener("hashchange", onHashChange, false);
 
     function reauthorize() {
-        document.authForm.domain.value = localStorage['X-Send-Domain']
+        document.authForm.domain.value = sendData.domain;
         document.authForm.submit()
         console.log("submitted auth form...")
     }
 
     function sendMessage() {
-        var domain = localStorage['X-Send-Domain'];
-        var message = localStorage['X-Send-Message'];
         rdapi('send', {
             type: 'POST',
-            data: {
-                domain: domain,
-                message: message,
-                to: localStorage['X-Send-To'],
-                subject: localStorage['X-Send-Subject']
-            },
+            data: sendData,
             success: function (json) {
                 // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
-                $("#resultMsg").removeClass("hidden")
-                if (json['error'] && json['error']['reason']) {
-                    $("#resultReason").text("Error: "+json['error']['reason']);
-                    var code = json['error']['code']
+                if (json.error && json.error.reason) {
+                    var code = json.error.code;
+                    // XXX need to find out what error codes everyone uses
                     if (code == 400 || code ==  401 || code == 403 || code >= 530) {
                         reauthorize();
+                        showStatus('statusAuth');
+                    } else {
+                        showStatus('statusError', json.error.reason);
                     }
                 }
-                else {
-                    $("#resultReason").text("Message Sent");
-                    localStorage['X-Send-Domain'] = '';
-                    localStorage['X-Send-Message'] = '';
-                    localStorage['X-Send-To'] = '';
-                    localStorage['X-Send-Subject'] = '';
+                else if (json.error) {
+                    showStatus('statusError', json.error.reason);
+                } else {
+                    showStatus('statusShared', "Message Sent");
                 }
             },
             error: function (xhr, textStatus, err) {
-                $("#resultMsg").removeClass("hidden")
-                $("#resultReason").text("XHR Error: "+err)
+                showStatus('statusError', err);
             }
         });
+    }
+
+    function showStatus(statusId, shouldCloseOrMessage) {
+        $("#resultMsg").removeClass("hidden")
+        $("#resultReason").text("Error: "+shouldCloseOrMessage);
     }
 
     $(function () {
@@ -132,16 +131,23 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
 
                     node.value = trimmed;
                 });
-   
-                localStorage['X-Send-To'] = form.to.value;
-                localStorage['X-Send-Subject'] = form.subject.value;
-                localStorage['X-Send-Message'] = form.message.value;
+
                 var radio = form.domain;
+                var domain = '';
                 for(var i = 0; i < radio.length; i++) {
                     if(radio[i].checked) {
-                        localStorage['X-Send-Domain'] = radio[i].value;
+                        domain = radio[i].value;
+                        break;
                     }
                 }
+                sendData = {
+                    domain: domain,
+                    message: (form.message && form.message.value) || '',
+                    to: (form.to && form.to.value) || '',
+                    subject: (form.subject && form.subject.value) || '',
+                    username: (form.username && form.username.value) || ''
+                };
+
                 sendMessage();
                 return false;
             })

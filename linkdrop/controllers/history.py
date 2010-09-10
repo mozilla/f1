@@ -17,8 +17,8 @@ class HistoryController(BaseController):
     @api_response
     @json_exception_response
     def get(self):
-        userkey = session['userkey']
-        stmt = Session.query(Account.id).filter(Account.userkey==userkey).subquery()
+        keys = session.get('account_keys', '').split(',')
+        stmt = Session.query(Account.id).filter(Account.key.in_(keys)).subquery()
         data = Session.query(History, Account.domain, Account.username).filter(
             Account.id == History.account_id).\
             filter(History.account_id.in_(stmt)).\

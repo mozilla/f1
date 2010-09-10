@@ -14,7 +14,7 @@ class Account(JsonExpandoMixin, SerializerMixin, Base):
 
     id = Column(Integer, primary_key=True)
 
-    userkey = Column(RDUnicode(128), index=True)
+    key = Column(RDUnicode(128), index=True)
     # The external account identity information
     domain = Column(RDUnicode(128), nullable=False)
     username = Column(RDUnicode(128), nullable=False)
@@ -22,5 +22,5 @@ class Account(JsonExpandoMixin, SerializerMixin, Base):
 
     def __init__(self):
         # can be overridden later, but always have a default for new accounts
-        self.userkey = str(uuid1())
+        self.key = str(uuid1())
 

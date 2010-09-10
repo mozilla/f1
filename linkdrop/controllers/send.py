@@ -35,22 +35,22 @@ The 'send' namespace is used to send updates to our supported services.
     def send(self):
         result = {}
         error = None
-        # If we don't have a userkey in our session we bail early with a
+        # If we don't have a key in our session we bail early with a
         # 401
-        userkey = session.get('userkey')
-        try:
-            domain = request.POST.get('domain')
-            username = request.POST.get('username')
-            userid = request.POST.get('userid')
-            message = request.POST['message']
-        except KeyError, what:
-            error = {'provider': domain,
-                     'reason': "'%s' request param is not optional" % (what,),
+        domain = request.POST.get('domain')
+        message = request.POST.get('message')
+        username = request.POST.get('username')
+        userid = request.POST.get('userid')
+        if not domain or not message:
+            error = {
+                'reason': "'domain' and 'message' request params are not optional",
+                'code': 409
             }
             return {'result': result, 'error': error}
-        if not userkey:
+        keys = session.get('account_keys', '').split(',')
+        if not keys:
             error = {'provider': domain,
-                     'reason': "no session for that domain",
+                     'reason': "no user session exists, auth required",
                      'code': 401
             }
             return {'result': result, 'error': error}
@@ -59,7 +59,7 @@ The 'send' namespace is used to send updates to our supported services.
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
         try:
-            q = Session.query(Account).filter(Account.userkey==userkey).filter(Account.domain==domain)
+            q = Session.query(Account).filter(Account.key.in_(keys)).filter(Account.domain==domain)
             if username:
                 q = q.filter(Account.username==username)
             if userid:
@@ -67,13 +67,13 @@ The 'send' namespace is used to send updates to our supported services.
             acct = q.one()
         except MultipleResultsFound:
             error = {'provider': domain,
-                     'reason': "Multiple accounts for %s were found, username or id required" % domain,
+                     'reason': "Multiple accounts for %s were found, username or userid required" % domain,
                      'code': 409
             }
             return {'result': result, 'error': error}
         except NoResultFound:
             error = {'provider': domain,
-                     'reason': "no account for that domain",
+                     'reason': "no user account for that domain",
                      'code': 401
             }
             return {'result': result, 'error': error}
