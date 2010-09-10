@@ -34,7 +34,7 @@ port = 5000
 use = egg:Beaker#beaker_session
 next = csrf
 beaker.session.key = linkdrop
-beaker.session.secret = somesecret
+beaker.session.secret = ${app_instance_secret}
 
 [filter-app:csrf]
 use = egg:linkdrop#csrf
