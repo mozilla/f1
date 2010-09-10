@@ -309,6 +309,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
                 //If the message containder prefers canonical URLs then use them.
                 if (dom.hasClass('canonical')) {
                     dom.val(options.canonicalUrl || options.url);
+                } else if (dom.hasClass('nourl')) {
+                    return true;
                 } else {
                     dom.val(options.url);
                 }

@@ -24,7 +24,8 @@ body {
   height: 128px;
   max-height: 128px;
   overflow: hidden;
-  background-color: #fff;
+  border-bottom: 1px solid #ccc;
+  background-color: #f2f2f2;
 }
 
 body.status {
@@ -41,29 +42,31 @@ a {
   display: none;
 }
 
-#debug {
-  width: 300px;
-}
-
 #tabs {
   height: 128px;
-  -moz-box-shadow: 0 -5px 5px -3px #ddd inset;
+  -moz-box-shadow: 0 -5px 2px -4px #DDDDDD inset;
+  border-bottom: 1px solid #ccc;
   overflow: hidden;
-  border-bottom: 1px ridge #e6e6e6;
-  background-color: #f2f2f2;
 }
 
-/* === TABS === */
-
-ul.nav {
+.wrap {
+  overflow: hidden;
   background-position: top center;
   background-repeat: repeat;
   background-color: #444;
   background-image: url("i/background.gif");
   -moz-box-shadow: 0 -2px 3px rgba(0,0,0,0.25) inset;
-  display: block;
   width: 100%;
-  padding: 5px 0 0 10px;
+}
+
+/* === TABS === */
+
+ul.nav {
+  display: block;
+  width: 960px;
+  margin: 0 auto;
+  padding: 7px 0 0 0;
+  -moz-box-sizing: padding-box;
 }
 
 ul.nav li {
@@ -141,8 +144,8 @@ ul.nav li a.icon.settings {
 
 ul.nav .user-info {
   position: absolute;
-  right: 46px; /* 10 + 36 */
-  bottom: 2px;
+  right: 41px; /* 5 + 36 */
+  bottom: 4px;
   text-align: right;
   vertical-align: middle;
 }
@@ -234,6 +237,12 @@ ul.nav li.ui-tabs-selected a.debug {
 .ui-tabs-panel {
   padding: 7px;
   white-space: nowrap;
+  width: 960px;
+  margin: 0 auto;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  overflow: hidden;
+  -moz-box-sizing: padding-box;
 }
 
 .ui-tabs .ui-tabs-hide {
@@ -250,12 +259,17 @@ ul.nav li.ui-tabs-selected a.debug {
   width: 140px;
   margin-left: 0;
   white-space: nowrap;
-  /* XXX hide this for now */
   display: none;
 }
 
 .col.thumb {
   width: 220px;
+  /* XXX hide this for so we can test out the new look */
+  display: none;
+}
+
+#facebook .col.thumb {
+  display: inline-block;
 }
 
 .col.addressing {
@@ -263,7 +277,11 @@ ul.nav li.ui-tabs-selected a.debug {
 }
 
 .col.message {
-  width: 300px;
+  width: 540px;
+}
+
+#twitter .col.message {
+  width: 780px;
 }
 
 .col.button {
@@ -302,7 +320,8 @@ div.meta {
 div.image {
   height: 70px;
   width: 90px;
-  border: 1px dashed #aaa;
+  border: 1px solid #aaa;
+  background-color: #fff;
 }
 
 .meta {
@@ -310,14 +329,11 @@ div.image {
 }
 
 .meta .title {
-  color: #3B5998;
-  text-decoration: underline;
   font-size: small;
-  cursor: pointer;
 }
 
 .meta .description {
-  color: #808080;
+  color: #666;
   white-space: normal;
   font-size: 10px;
   line-height: 14px;
@@ -343,7 +359,7 @@ textarea, input[type="text"] {
   font-size:14px;
   line-height:24px;
   padding: 3px;
-  width: 300px;
+  width: 100%;
 }
 
 input[type="text"] {
