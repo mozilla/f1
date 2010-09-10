@@ -44,12 +44,10 @@ class CsrfMiddleware(object):
             csrf_token = session['csrf'] = str(random.getrandbits(128))
             session.save()
 
-        import sys; print >> sys.stderr, request.path_info
         if request.method == 'POST':
             # check to see if we want to process the post at all
             if (self.unprotected_path is not None
                 and request.path_info.startswith(self.unprotected_path)):
-                import sys; print >> sys.stderr, "unprotected path!"
                 resp = request.get_response(self.app)
                 resp.set_cookie('csrf', csrf_token, expires=3600)
                 return resp(environ, start_response)
