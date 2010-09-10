@@ -1,4 +1,4 @@
-/*jslint plusplus: false, nomen: false*/
+/*jslint plusplus: false, nomen: false, regexp: false */
 /*global require: false, document: false, hex_md5: false, localStorage: false, console: false */
 "use strict";
 
@@ -7,7 +7,8 @@ require.def('rdapi',
 function (require,   $,        object,         jig,         friendly,   isoDate) {
 
     var rdapi,
-        userTokenHeader = 'X-Raindrop-Token',
+        csrfHeader = 'X-CSRF',
+        csrfRegExp = /linkdrop=([^\; ]+)/,
         contacts = {},
         jigFunctions = {
             contact: function (identity) {
@@ -76,6 +77,11 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
         return options;
     }
 
+    function getCsrfToken() {
+        var token = csrfRegExp.exec(document.cookie);
+        return token && token[1] ? token[1] : null;
+    }
+
     function ajax(url, options) {
         options.url = config.baseUrl + config.apiPath + url;
 
@@ -89,17 +95,12 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
         });
 
         var oldSuccess = options.success,
-            userToken = localStorage[userTokenHeader];
+            csrfToken = getCsrfToken();
 
         //Intercept any success calls to get a hold of contacts from
         //any API call that returns them. Also be sure to remember any
         //user token
         options.success = function (json, textStatus, xhr) {
-            //If user token passed back, hold on to it.
-            var headerToken = xhr.getResponseHeader(userTokenHeader) || '';
-            if (headerToken)
-                localStorage[userTokenHeader] = headerToken;
-
             if (json.contacts) {
                 object.mixin(contacts, json.contacts, true);
             }
@@ -110,9 +111,9 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
             }
         };
 
-        if (userToken) {
+        if (csrfToken) {
             options.beforeSend = function (xhr) {
-                xhr.setRequestHeader(userTokenHeader, userToken);
+                xhr.setRequestHeader(csrfHeader, csrfToken);
             };
         }
 
