@@ -33,8 +33,6 @@ class CsrfMiddleware(object):
     def __init__(self, app, config):
         self.app = app
         self.unprotected_path = config.get('csrf.unprotected_path')
-        import sys; print >> sys.stderr, self.unprotected_path
-        
 
     def __call__(self, environ, start_response):
         request = Request(environ)
