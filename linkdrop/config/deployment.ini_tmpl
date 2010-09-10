@@ -25,16 +25,27 @@ oauth.google.com.consumer_secret = FILL_ME_IN
 oauth.google.com.scope = https://mail.google.com/ http://www.google.com/m8/feeds/
 
 
-[composite:main]
-use = egg:Paste#urlmap
-/ = home
-/api = api
-
 [server:main]
 use = egg:Paste#http
 host = 0.0.0.0
 port = 5000
 
+[filter-app:main]
+use = egg:Beaker#beaker_session
+next = csrf
+beaker.session.key = linkdrop
+beaker.session.secret = somesecret
+
+[filter-app:csrf]
+use = egg:linkdrop#csrf
+# allow access to account api's for oauth, which will not have csrf token
+csrf.unprotected_path = /account
+next = sessioned
+
+[composite:sessioned]
+use = egg:Paste#urlmap
+/ = home
+/api = api
 
 [app:home]
 use = egg:Paste#static
