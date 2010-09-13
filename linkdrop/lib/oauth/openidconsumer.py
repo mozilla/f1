@@ -178,7 +178,7 @@ class OpenIDResponder():
             # TODO: This does not work as we need a connection, not a string
             self.openid_store = sqlstore.SQLStore(sql_connstring, sql_associations_table, sql_connstring)
         self.scope = self.config.get('scope', None)
-
+        self.return_to_query = {}
 
     def _lookup_identifier(self, identifier):
         """Extension point for inherited classes that want to change or set
@@ -248,7 +248,7 @@ class OpenIDResponder():
         self._update_authrequest(authrequest)
 
         return_to = url(controller='account', action="verify",
-                           qualified=True)
+                           qualified=True, **self.return_to_query)
 
         # Ensure our session is saved for the id to persist
         session['openid_session'] = openid_session
@@ -257,7 +257,6 @@ class OpenIDResponder():
         redirect_url = authrequest.redirectURL(realm=request.application_url, 
                                                return_to=return_to, 
                                                immediate=False)
-        return redirect(redirect_url)
         
         # OpenID 2.0 lets Providers request POST instead of redirect, this
         # checks for such a request.
@@ -267,10 +266,8 @@ class OpenIDResponder():
                                                    immediate=False)
             return redirect(redirect_url)
         else:
-            # XXX this will likely fail for now
-            html = authrequest.htmlMarkup(realm=request.application_url, return_to=return_to, 
+            return authrequest.htmlMarkup(realm=request.application_url, return_to=return_to, 
                                           immediate=False)
-            return response(body=html)
     
     def verify(self):
         """Handle incoming redirect from OpenID Provider"""
@@ -286,13 +283,16 @@ class OpenIDResponder():
         oidconsumer = consumer.Consumer(openid_session, self.openid_store)
         return_to = url(controller='account', action="verify",
                            qualified=True)
-
-        info = oidconsumer.complete(request.params, return_to)
+        params={}
+        # these sometimes come in as unicode, which later causes compare failures
+        for k,v in request.params.items():
+            params[k]=str(v)
+        info = oidconsumer.complete(params, return_to)
         
         if info.status == consumer.FAILURE:
-            raise Exception("consumer failure")
+            raise Exception("consumer failure: "+info.message)
         elif info.status == consumer.CANCEL:
-            raise Exception("consumer canceled")
+            raise Exception("consumer canceled: "+info.message)
         elif info.status == consumer.SUCCESS:
             openid_identity = info.identity_url
             if info.endpoint.canonicalID:
