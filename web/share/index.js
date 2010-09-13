@@ -22,7 +22,7 @@
  * */
 
 /*jslint plusplus: false */
-/*global require: false, location: true, window: false, alert: false */
+/*global require: false, location: true, window: false, alert: false, setTimeout: false */
 "use strict";
 
 require.def("send",
@@ -43,11 +43,11 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
         previewWidth = 90, previewHeight = 70;
 
     function reauthorize(callback, domain) {
-        if (callback){
+        if (callback) {
             authDone = callback;
         }
-        var url = location.protocol+"//"+location.host+"/send/auth.html";
-        var win = window.open(url + "?domain=" +
+        var url = location.protocol + "//" + location.host + "/send/auth.html";
+        window.open(url + "?domain=" +
                               (domain || sendData.domain),
                             "Firefox Share OAuth",
                             "dialog=yes, modal=yes, width=800, height=480");
@@ -63,33 +63,6 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
             }
         }
     }, false);  
-
-    function sendMessage() {
-        rdapi('send', {
-            type: 'POST',
-            data: sendData,
-            success: function (json) {
-                // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
-                if (json.error && json.error.reason) {
-                    var code = json.error.code;
-                    // XXX need to find out what error codes everyone uses
-                    if (code == 400 || code ==  401 || code == 403 || code >= 530) {
-                        showStatus('statusAuth');
-                    } else {
-                        showStatus('statusError', json.error.reason);
-                    }
-                }
-                else if (json.error) {
-                    showStatus('statusError', json.error.reason);
-                } else {
-                    showStatus('statusShared', true);
-                }
-            },
-            error: function (xhr, textStatus, err) {
-                showStatus('statusError', err);
-            }
-        });
-    }
 
     function showStatus(statusId, shouldCloseOrMessage) {
         tabDom.addClass('hidden');
@@ -114,6 +87,33 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
         tabDom.removeClass('hidden');
         bodyDom.removeClass('status');
         location = '#!resize';
+    }
+
+    function sendMessage() {
+        rdapi('send', {
+            type: 'POST',
+            data: sendData,
+            success: function (json) {
+                // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
+                if (json.error && json.error.reason) {
+                    var code = json.error.code;
+                    // XXX need to find out what error codes everyone uses
+                    if (code === 400 || code ===  401 || code === 403 || code >= 530) {
+                        showStatus('statusAuth');
+                    } else {
+                        showStatus('statusError', json.error.reason);
+                    }
+                }
+                else if (json.error) {
+                    showStatus('statusError', json.error.reason);
+                } else {
+                    showStatus('statusShared', true);
+                }
+            },
+            error: function (xhr, textStatus, err) {
+                showStatus('statusError', err);
+            }
+        });
     }
 
     function resizePreview(evt) {
@@ -279,8 +279,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
     });
 
     $(function () {
-        var thumbDivNode = $('div.thumb')[0],
-            thumbImgDom = $('img.thumb');
+        var thumbImgDom = $('img.thumb');
 
         bodyDom = $('body');
 
@@ -294,7 +293,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
             location = '#!close';
         });
         $('#statusAuthButton, #statusErrorButton').click(function (evt) {
-           cancelStatus(); 
+            cancelStatus(); 
         });
         $('#authOkButton').click(function (evt) {
             reauthorize(sendMessage);
@@ -317,6 +316,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
                 } else {
                     dom.val(options.url);
                 }
+                return undefined;
             });
             $(".meta .url").text(options.url);
             $(".meta .curl").text(options.canonicalUrl);
@@ -377,7 +377,8 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
                 //First clear old errors
                 $(".error").addClass("invisible");
 
-                var form = evt.target;
+                var form = evt.target,
+                    picture;
 
                 //If twitter and message is bigger than allowed, do not submit.
                 if (form.domain.value === 'twitter.com' && twitterCounter.isOver()) {
@@ -397,10 +398,37 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
 
                 sendData = {
                     domain: (form.domain && form.domain.value) || '',
-                    message: (form.message && form.message.value) || '',
-                    to: (form.to && form.to.value) || '',
-                    subject: (form.subject && form.subject.value) || ''
+                    message: (form.message && form.message.value) || ''
                 };
+
+                if (form.to) {
+                    sendData.to = (form.to && form.to.value) || '';
+                }
+                if (form.subject) {
+                    sendData.subject = (form.subject && form.subject.value) || '';
+                }
+
+                //Add extra stuff for facebook
+                if (sendData.domain === 'facebook.com') {
+                    //TODO: try sending data urls via options.thumbnail if no
+                    //previews?
+                    picture = options.previews && options.previews[0];
+                    if (picture) {
+                        sendData.picture = picture;
+                    }
+
+                    if (options.url) {
+                        sendData.link = options.url;
+                    }
+
+                    if (options.title) {
+                        sendData.name = options.title;
+                    }
+
+                    if (options.description) {
+                        sendData.caption = options.description;
+                    }
+                }
 
                 sendMessage();
                 return false;

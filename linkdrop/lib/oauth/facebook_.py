@@ -8,12 +8,32 @@ except ImportError:
 import json
 import httplib2
 import urllib
+import random
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from linkdrop.lib.oauth.base import OAuth2
 
 domain = 'facebook.com'
+
+
+# this function is a derivative of:
+# http://code.activestate.com/recipes/146306-http-client-to-post-using-multipartform-data/
+## {{{ http://code.activestate.com/recipes/146306/ (r1)
+def encode_multipart_formdata(body):
+    BOUNDARY = '----------$_BOUNDARY_' + str(random.random) + '_$'
+    CRLF = '\r\n'
+    L = []
+    for key in body:
+        L.append('--' + BOUNDARY)
+        L.append('Content-Disposition: form-data; name="%s"' % key)
+        L.append('')
+        L.append(body[key])
+    L.append('--' + BOUNDARY + '--')
+    L.append('')
+    body = CRLF.join(L)
+    content_type = 'multipart/form-data; boundary=%s' % BOUNDARY
+    return content_type, body
 
 # borrowed from velruse
 def extract_fb_data(data):
@@ -118,7 +138,14 @@ class api():
           
      def rawcall(self, url, body):
           url = url +"?"+urllib.urlencode(dict(access_token=self.access_token))
-          resp, content = httplib2.Http().request(url, 'POST', body=urllib.urlencode(body))
+
+          content_type, body = encode_multipart_formdata(body)
+          headers = {
+               'Content-type': content_type,
+               'Content-Length': str(len(body))
+          }
+          resp, content = httplib2.Http().request(url, 'POST', headers=headers, body=body)
+
           response = json.loads(content)
           result = error = None
           if 'id' in response:
@@ -136,13 +163,19 @@ class api():
                        'code': int(resp['status']) 
               }
               log.error("unexpected facebook response: %r", response)
+
           return result, error
 
      def sendmessage(self, message, options={}):
           url = "https://graph.facebook.com/me/feed"
           body = {
-               "message": message
+               "message": options['message']
           }
+
+          for arg in ['link', 'name', 'description', 'picture']:
+               if arg in options:
+                    body[arg] = options[arg]
+
           return self.rawcall(url, body)
 
 

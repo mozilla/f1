@@ -3,7 +3,6 @@
 ## Bigger Tasks
 
 * User testing - Bryan/Andy to prep, all to help out
-* Map out security concerns and fix them
 
 ## Specific Changes
 
@@ -15,7 +14,7 @@
   services.
 * If browser goes to about:config (non-web pages), do not show the share UI, or show a "not allowed" UI.
 * Use url shortener. Use bitly possibly for now, look at t.co implications
-* Expand facebook share to include all options that Facebook supports, like previews.
+* use https for the linkdrop site
 
 ## James
 
