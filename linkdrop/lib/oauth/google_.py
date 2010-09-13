@@ -49,8 +49,7 @@ class responder(OpenIDResponder):
         parameter that indicates what Google Apps should have access requested.
         
         """
-        request_attributes = request.POST.get('ax_attributes',
-                                           ['country', 'email', 'first_name', 'last_name', 'language'])
+        request_attributes = request.POST.get('ax_attributes', ax_attributes.keys())
         ax_request = ax.FetchRequest()
         for attr in request_attributes:
             ax_request.add(ax.AttrInfo(attributes[attr], required=True))
