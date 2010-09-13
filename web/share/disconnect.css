@@ -1,0 +1,56 @@
+@import url(share.css);
+
+body {
+    max-width: 500px;
+    margin: 20px auto;
+    border: 0;
+    max-height: inherit;
+    overflow: auto;
+}
+
+h1 {
+    font-size: 130%;
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 110%;
+    font-weight: bold;
+}
+
+li {
+    margin-top: 20px;
+}
+
+li > div {
+    margin: 5px 0;
+}
+
+.domainHeader {
+    margin-top: 40px;
+    border-top: 1px solid #CCCCCC;
+    overflow: hidden;
+}
+
+.domainHeader h2 {
+    width: 200px;
+    float: left;
+}
+
+.domainLink {
+    width: 300px;
+    float: right;
+    text-align: right;
+}
+
+.imageContainer,
+.name {
+    width: 97px;
+    text-align: center;
+}
+
+.accountImage {
+    -moz-box-shadow: 1px 1px 3px #555555;
+    width: 48px;
+    height: 48px;
+}
