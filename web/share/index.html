@@ -47,26 +47,26 @@
 
   <div id="twitter">
     <form name="twitterSend" class="messageForm" action="#">
+      <div class="user inactive col" data-domain="twitter.com">
       <input type="hidden" name="domain" value="twitter.com" />
-      <div class="user inactive col">
         <span class="avatar"><img class="avatar" src="i/face2.png"></span>
         <span class="username">Twitter User</span>
       </div>
       <div class="thumb col">
         <div class="image"><img class="thumb"/></div>
         <div class="meta">
-          <div class="title">page title</div>
-          <div class="description">page description</div>
+          <div class="title"></div>
+          <div class="description"></div>
           <a title="The link for this page" class="url"></a>
           <a title="A smaller, shorter link to use for Twitter" class="curl"></a>
         </div>
       </div>
-      <div class="message col">
+      <div class="message col twitterCounter">
         <textarea class="message canonical" name="message"></textarea>
-      </div>
-      <div class="button col twitterCounter">
         <div class="counter"></div>
-        <div><button type="submit">share</button></div>
+      </div>
+      <div class="button col">
+        <button type="submit">share</button>
       </div>
     </form>
     <div id="resultReason">&nbsp;</div>
@@ -74,16 +74,16 @@
 
   <div id="facebook">
     <form name="facebookSend" class="messageForm" action="#">
-      <input type="hidden" name="domain" value="facebook.com" />
       <div class="user inactive col">
+        <input type="hidden" name="domain" value="facebook.com" />
         <span class="avatar"><img class="avatar" src="i/face2.png"></span>
         <span class="username">Facebook User</span>
       </div>
       <div class="thumb col">
         <div class="image"><img class="thumb"/></div>
         <div class="meta">
-          <div class="title">page title</div>
-          <div class="description">page description</div>
+          <div class="title"></div>
+          <div class="description"></div>
           <div class="url"></div>
         </div>
       </div>
@@ -91,15 +91,15 @@
         <textarea class="message nourl" name="message"></textarea>
       </div>
       <div class="button col">
-        <div><button>share</button></div>
+        <button type="submit">share</button>
       </div>
     </form>
   </div>
 
   <div id="gmail">
     <form name="googleSend" class="messageForm" action="#">
-      <input type="hidden" name="domain" value="google.com" />
     <div class="user inactive col">
+      <input type="hidden" name="domain" value="google.com" />
       <span class="avatar"><img class="avatar" src="i/face2.png"></span>
       <span class="username">Gmail User</span>
     </div>

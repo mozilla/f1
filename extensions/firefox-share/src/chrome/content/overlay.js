@@ -265,6 +265,7 @@ var ffshare;
         services: this.getKnownServices(),
         title: this.getPageTitle(),
         description : this.getPageDescription(),
+        medium : this.getPageMedium(),
         url: gBrowser.currentURI.spec,
         canonicalUrl: this.getCanonicalURL(),
         previews: this.previews()
@@ -317,18 +318,39 @@ var ffshare;
     },
 
     getPageTitle: function () {
+      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
       var titleNode = gBrowser.contentDocument.getElementsByTagName('title')[0];
+      for (var i = 0; i < metaNodes.length; i++) {
+        if ("title" == metaNodes[i].getAttribute("name")) {
+          var content = metaNodes[i].getAttribute("content");
+          if (content)
+            return content;
+        }
+      }
       if (titleNode) {
         return titleNode.firstChild.nodeValue;
-      } else {
-        return '';
       }
+      return '';
     },
 
     getPageDescription: function () {
       var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
       for (var i = 0; i < metaNodes.length; i++) {
         if ("description" == metaNodes[i].getAttribute("name")) {
+          var content = metaNodes[i].getAttribute("content");
+          if (content)
+            return content;
+        }
+      }
+      return "";
+    },
+
+    // According to Facebook - (only the first 3 are interesting)
+    // Valid values for medium_type are audio, image, video, news, blog, and mult.
+    getPageMedium: function() {
+      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
+      for (var i = 0; i < metaNodes.length; i++) {
+        if ("medium" == metaNodes[i].getAttribute("name")) {
           var content = metaNodes[i].getAttribute("content");
           if (content)
             return content;
