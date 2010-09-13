@@ -145,7 +145,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
             imageUrl = $(ui.panel).find("div.user img.avatar").attr("src");
             userName = $(ui.panel).find("div.user .username").text();
             inactive = $(ui.panel).find("div.user").hasClass("inactive");
-            domain   = $(ui.panel).find("div.user input[type='hidden'][name='domain']").val()
+            domain   = $(ui.panel).find("div.user input[type='hidden'][name='domain']").val();
         }
         $(".user-info img.avatar").attr("src", imageUrl);
         if (!imageUrl) {
@@ -170,6 +170,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
     function updateAccountDisplay(service, account) {
         $(function () {
             var name = account.displayName,
+                svcAccount = account.accounts[0],
                 photo = account.photos && account.photos[0] && account.photos[0].value,
                 serviceDom = $('#' + service);
 
@@ -179,6 +180,9 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
             if (photo) {
                 serviceDom.find('.avatar').attr('src', photo);
             }
+
+            serviceDom.find('input[name="userid"]').val(svcAccount.userid);
+            serviceDom.find('input[name="username"]').val(svcAccount.username);
             serviceDom.find('div.user').removeClass('inactive');
         });
     }
@@ -279,7 +283,9 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
     });
 
     $(function () {
-        var thumbImgDom = $('img.thumb');
+        var thumbImgDom = $('img.thumb'),
+            facebookDom = $('#facebook'),
+            picture;
 
         bodyDom = $('body');
 
@@ -320,6 +326,26 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
             });
             $(".meta .url").text(options.url);
             $(".meta .curl").text(options.canonicalUrl);
+        }
+
+        //Set up hidden form fields for facebook
+        //TODO: try sending data urls via options.thumbnail if no
+        //previews?
+        picture = options.previews && options.previews[0];
+        if (picture) {
+            facebookDom.find('[name="picture"]').val(picture);
+        }
+
+        if (options.url) {
+            facebookDom.find('[name="link"]').val(options.url);
+        }
+
+        if (options.title) {
+            facebookDom.find('[name="name"]').val(options.title);
+        }
+
+        if (options.description) {
+            facebookDom.find('[name="caption"]').val(options.description);
         }
 
         //For the title in facebook/subject in email, set it to the page title
@@ -377,58 +403,29 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
                 //First clear old errors
                 $(".error").addClass("invisible");
 
-                var form = evt.target,
-                    picture;
+                var form = evt.target;
 
                 //If twitter and message is bigger than allowed, do not submit.
                 if (form.domain.value === 'twitter.com' && twitterCounter.isOver()) {
                     return false;
                 }
-    
+
                 //Make sure all form elements are trimmed and username exists.
+                //Then collect the form values into the data object.
+                sendData = {};
                 $.each(form.elements, function (i, node) {
                     var trimmed = node.value.trim();
-                    
+
                     if (node.getAttribute("placeholder") === trimmed) {
                         trimmed = "";
                     }
 
                     node.value = trimmed;
+
+                    if (node.value) {
+                        sendData[node.name] = node.value;
+                    }
                 });
-
-                sendData = {
-                    domain: (form.domain && form.domain.value) || '',
-                    message: (form.message && form.message.value) || ''
-                };
-
-                if (form.to) {
-                    sendData.to = (form.to && form.to.value) || '';
-                }
-                if (form.subject) {
-                    sendData.subject = (form.subject && form.subject.value) || '';
-                }
-
-                //Add extra stuff for facebook
-                if (sendData.domain === 'facebook.com') {
-                    //TODO: try sending data urls via options.thumbnail if no
-                    //previews?
-                    picture = options.previews && options.previews[0];
-                    if (picture) {
-                        sendData.picture = picture;
-                    }
-
-                    if (options.url) {
-                        sendData.link = options.url;
-                    }
-
-                    if (options.title) {
-                        sendData.name = options.title;
-                    }
-
-                    if (options.description) {
-                        sendData.caption = options.description;
-                    }
-                }
 
                 sendMessage();
                 return false;
