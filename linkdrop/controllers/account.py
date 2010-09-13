@@ -70,16 +70,21 @@ the contacts API that uses @me/@self.
         service = get_provider(provider)
 
         auth = service.responder()
-        user = auth.verify()
-        
-        account = user['profile']['accounts'][0]
-
-        acct = self._get_or_create_account(provider, account['userid'], account['username'])
-        acct.profile = user['profile']
-        acct.oauth_token = user.get('oauth_token', None)
-        if 'oauth_token_secret' in user:
-            acct.oauth_token_secret = user['oauth_token_secret']
-        Session.commit()
-
-        fragment = "oauth_success_" + provider
-        return redirect(session['end_point_success'])
+        try:
+            user = auth.verify()
+            
+            account = user['profile']['accounts'][0]
+    
+            acct = self._get_or_create_account(provider, account['userid'], account['username'])
+            acct.profile = user['profile']
+            acct.oauth_token = user.get('oauth_token', None)
+            if 'oauth_token_secret' in user:
+                acct.oauth_token_secret = user['oauth_token_secret']
+            Session.commit()
+    
+            fragment = "oauth_success_" + provider
+            return redirect(session['end_point_success'])
+        except Exception, e:
+            err = urllib.urlencode([('error',str(e))])
+            url = session['end_point_auth_failure'].split('#')
+            return redirect('%s?%s#%s' % (url[0], err, url[1]))

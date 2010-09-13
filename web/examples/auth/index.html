@@ -60,7 +60,9 @@
          .google {
             background: transparent url("/examples/images/google_32.png") no-repeat center top;
          }
-
+         .yahoo {
+            background: transparent url("/examples/images/yahoo_32.png") no-repeat center top;
+         }
     </style>
 </head>
 <body class="settings">
@@ -85,6 +87,12 @@
 	 <input type="hidden" name="end_point_success" value="/examples/auth/#oauth_success">
 	 <input type="hidden" name="end_point_auth_failure" value="/examples/auth/#oauth_failure">
                     <button class="google" type="submit">send</button>
+        </form>
+        <form id="gOAuth" action="/api/account/authorize" method="POST">
+	 <input type="hidden" name="domain" value="yahoo.com">
+	 <input type="hidden" name="end_point_success" value="/examples/auth/#oauth_success">
+	 <input type="hidden" name="end_point_auth_failure" value="/examples/auth/#oauth_failure">
+                    <button class="yahoo" type="submit">send</button>
         </form>
       </div>
       <div style="clear: both"/>
