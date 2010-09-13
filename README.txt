@@ -55,6 +55,10 @@ Install ``linkdrop``:
 
     python setup.py develop
 
+Start the server:
+
+    paster serve --reload development.ini
+
 Then visit: http://127.0.0.1:5000/ for an index of api examples
 
 
