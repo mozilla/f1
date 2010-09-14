@@ -47,6 +47,7 @@ class CsrfMiddleware(object):
             if (self.unprotected_path is not None
                 and request.path_info.startswith(self.unprotected_path)):
                 resp = request.get_response(self.app)
+                resp.headers['X-Frame-Options'] = 'SAMEORIGIN'
                 resp.set_cookie('csrf', csrf_token, expires=3600)
                 return resp(environ, start_response)
 
@@ -65,6 +66,8 @@ class CsrfMiddleware(object):
 
         if resp.status_int != 200:
             return resp(environ, start_response)
+
+        resp.headers['X-Frame-Options'] = 'SAMEORIGIN'
         resp.set_cookie('csrf', csrf_token, expires=3600)
 
         if resp.content_type.split(';')[0] in _HTML_TYPES:
