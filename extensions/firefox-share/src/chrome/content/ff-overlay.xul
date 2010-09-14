@@ -19,6 +19,35 @@
               oncommand="ffshare.onMenuItemCommand(event)"/>
   </menupopup>
 
+  <hbox id="urlbar-icons">
+    <image insertbefore="star-button"
+           id="share-indicator"
+           src="http://www.mozilla.org/favicon.ico"
+           class="urlbar-icon"
+           onclick="ffshare.whoFrom()"
+           width="16"
+           height="16"
+           style="margin-left: 3px;visibility: collapse;"/>
+  </hbox>
+
+  <popupset id="mainPopupSet">
+    <panel id="ffshare-popup" onpopupshown="ffshare.onPopupShown()">
+      <vbox>
+
+        <description>This page was shared with you by your friend:</description>
+        <description id="friend"></description>
+        <hbox class="row">
+          <label class="message" value="Your Message:"/>
+          <spacer flex="1"/>
+          <label class="count" id="ffshare-count" value="140"/>
+        </hbox>
+        <!--onkeyup won't pick up some paste events? -->
+        <html:textarea class="message" id="ffshare-message" onkeyup="ffshare.updateCount()"></html:textarea>
+      </vbox>
+    </panel>
+  </popupset>
+
+
   <toolbar id="nav-bar">
     <toolbarbutton id="ffshare-toolbar-button"
                    insertbefore="urlbar-search-splitter"

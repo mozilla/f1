@@ -29,5 +29,8 @@ class HistoryController(BaseController):
             r = h.to_dict()
             r['domain'] = d
             r['username'] = u
+            r['userid'] = Account.id
+            import sys
+            print >>sys.stderr, r
             res.append(r)
         return res

@@ -312,17 +312,27 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
 
         //Set up the URL in all the message containers
         if (options.url) {
-            $('textarea.message').each(function (i, node) {
-                var dom = $(node);
-                //If the message containder prefers canonical URLs then use them.
-                if (dom.hasClass('canonical')) {
-                    dom.val(options.canonicalUrl || options.url);
-                } else if (dom.hasClass('nourl')) {
-                    return true;
-                } else {
-                    dom.val(options.url);
+            alert("got options.url")
+            rdapi('links/shorten', {
+                type: 'POST',
+                data: {
+                    'url': options.canonicalUrl || options.url,
+               },
+                success: function(json) {
+                    options.shortUrl = json.result.short_url;
+                    $('textarea.message').each(function (i, node) {
+                        var dom = $(node);
+                        //If the message containder doesn't want URLs then respect that.
+                        if (dom.hasClass('nourl')) {
+                            return true;
+                        } else {
+                            dom.val(options.shortUrl);
+                        }
+                        return undefined;
+                    });
+                },
+                error: function(json) {
                 }
-                return undefined;
             });
             $(".meta .url").text(options.url);
             $(".meta .curl").text(options.canonicalUrl);
@@ -426,6 +436,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
                         sendData[node.name] = node.value;
                     }
                 });
+                sendData['shorturl'] = options.shortUrl;
 
                 sendMessage();
                 return false;

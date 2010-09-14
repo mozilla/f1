@@ -20,7 +20,7 @@ var ffshare;
     DBConnection;
 
   function log(msg) {
-    Application.console.log(msg);
+    Application.console.log('.'+msg); // avoid clearing on empty log
   }
 
   fn = {
@@ -93,6 +93,81 @@ var ffshare;
     }
   };
 
+  var httpObserver = {
+    
+    started: true,
+    found: false,
+    // 
+    observe: function(subject, topic, data) {
+      try {
+        var channel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
+      } catch (e) {
+        return;
+      }
+      if (channel) {
+        var shortenedBy = null;
+        shortenedBy = channel.getResponseHeader("x-shortened-by");
+        if (shortenedBy) {
+          //Application.console.log('found x-shortened-by');
+          ffshare.friend = shortenedBy;
+          this.found = true;
+        }
+      }
+    },
+
+    onLocationChange: function(/*in nsIWebProgress*/ aWebProgress,
+                          /*in nsIRequest*/ aRequest,
+                          /*in nsIURI*/ aLocation) {
+    },
+    onStatusChange: function(/*in nsIWebProgress*/ aWebProgress,
+                          /*in nsIRequest*/ aRequest,
+                          /*in nsIURI*/ aLocation) {
+    },
+    onProgressChange: function(/*in nsIWebProgress*/ aWebProgress,
+                          /*in nsIRequest*/ aRequest,
+                          /*in nsIURI*/ aLocation) {
+    },
+    onSecurityChange: function(/*in nsIWebProgress*/ aWebProgress,
+                          /*in nsIRequest*/ aRequest,
+                          /*in nsIURI*/ aLocation) {
+    },
+
+    onStateChange: function(aWebProgress, aRequest, aStateFlags, aStatus) {
+    // maybe can just use onLocationChange, but I don't think so?
+    var flags = Components.interfaces.nsIWebProgressListener;
+    var orange = document.getElementById('share-indicator')
+    if (aStateFlags & flags.STATE_IS_DOCUMENT) {
+      if (aStateFlags & flags.STATE_START) {
+        //Application.console.log("DOC START");
+        //Application.console.log("hiding on docstart");
+        this.started = true;
+        orange.style.visibility = 'collapse';
+      } else if (aStateFlags & flags.STATE_STOP) {
+        //Application.console.log("DOC STOP: ");
+        this.started = false;
+        if (this.found) {
+          //Application.console.log('showing');
+          orange.style.visibility = 'visible';
+        } else {
+          //Application.console.log('hiding');
+          //orange.style.visibility = 'collapse';
+        }
+        this.found = false;
+      }
+    }
+  },
+
+  QueryInterface: function(iid) {
+    if (iid.equals(Components.interfaces.nsIObserver) ||
+        iid.equals(Components.interfaces.nsIWebProgressListener) ||
+        iid.equals(Components.interfaces.nsISupportsWeakReference) ||
+        iid.equals(Components.interfaces.nsISupports))
+      return this;
+    throw Components.results.NS_NOINTERFACE;
+  }
+
+  };
+
   var navProgressListener = {
     // detect navigational events for the tab, so we can close
 
@@ -115,6 +190,22 @@ var ffshare;
   };
 
   ffshare = {
+
+    whoFrom: function() {
+      var popup = document.getElementById("ffshare-popup");
+      var orange = document.getElementById("share-indicator");
+      var friend = document.getElementById("friend");
+      friend.value = this.friend;
+      popup.hidden = false;
+      var rect = orange.getBoundingClientRect();
+      popup.openPopup(null,null,rect.left - 10, rect.top + rect.height);
+      popup.popupBoxObject.setConsumeRollupEvent(Ci.nsIPopupBoxObject.ROLLUP_CONSUME);
+
+    },
+    onPopupShown: function() {
+      Application.console.log("shownPOPUP!");
+    },
+
     frameAnimationTime: 300,
     // You may want to set the pref to 'http://127.0.0.1:5000/share/' for local dev.
     shareUrl: Application.prefs.getValue("linkdrop.share_url", 'http://linkdrop.mozillamessaging.com/share/'),
@@ -124,6 +215,17 @@ var ffshare;
       // initialization code
       this.initialized = true;
       this.strings = document.getElementById("ffshare-strings");
+      var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
+      observerService.addObserver(httpObserver, "http-on-examine-response", false);
+      var flags = Components.interfaces.nsIWebProgress;
+      gBrowser.selectedTab.linkedBrowser.addProgressListener(httpObserver, flags.STATE_DOCUMENT);
+    },
+
+    onUnload: function () {
+      // initialization code
+      var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
+      observerService.removeObserver(httpObserver, "http-on-examine-response");
+      gBrowser.selectedTab.linkedBrowser.removeProgressListener(httpObserver);
     },
 
     onMenuItemCommand: function (e) {
@@ -432,4 +534,5 @@ var ffshare;
   };
 
   window.addEventListener("load", ffshare.onLoad, false);
+  window.addEventListener("unload", ffshare.onUnload, false);
 }());

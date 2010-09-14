@@ -1,0 +1,132 @@
+<!-- ***** BEGIN LICENSE BLOCK *****
+- Version: MPL 1.1
+-
+- The contents of this file are subject to the Mozilla Public License Version
+- 1.1 (the "License"); you may not use this file except in compliance with
+- the License. You may obtain a copy of the License at
+- http://www.mozilla.org/MPL/
+-
+- Software distributed under the License is distributed on an "AS IS" basis,
+- WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+- for the specific language governing rights and limitations under the
+- License.
+-
+- The Original Code is Raindrop.
+-
+- The Initial Developer of the Original Code is
+- Mozilla Messaging, Inc..
+- Portions created by the Initial Developer are Copyright (C) 2009
+- the Initial Developer. All Rights Reserved.
+-
+- Contributor(s):
+- -->
+
+<!-- A hacky sample to attempt a send and handle auth failure automatically
+     then attempt a resend
+-->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shorten a link</title>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+
+    <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+    <script>require(["index.js"]);</script>
+    <style>
+         .hidden {
+             display: none;
+         }
+
+         .invisible {
+             visibility: hidden;
+         }
+         
+#messageForm label {
+            width: 32px;
+            height: 32px;
+            display: block;
+            float: left;
+            filter:alpha(opacity=30);
+            -moz-opacity:0.3;
+            -khtml-opacity: 0.3;
+            opacity: 0.3;
+}
+#messageForm label.r_on {
+            filter:alpha(opacity=100);
+            -moz-opacity:1.0;
+            -khtml-opacity: 1.0;
+            opacity: 1.0;
+}
+#messageForm label input { position: absolute; left: -9999px; }         
+    </style>
+
+<script>
+    function setupLabel() {
+        if ($('.label_check input').length) {
+            $('.label_check').each(function(){ 
+                $(this).removeClass('c_on');
+            });
+            $('.label_check input:checked').each(function(){ 
+                $(this).parent('label').addClass('c_on');
+            });                
+        };
+        if ($('.label_radio input').length) {
+            $('.label_radio').each(function(){ 
+                $(this).removeClass('r_on');
+            });
+            $('.label_radio input:checked').each(function(){ 
+                $(this).parent('label').addClass('r_on');
+            });
+        };
+    };
+    $(document).ready(function(){
+        $('body').addClass('has-js');
+        $('.label_check, .label_radio').click(function(){
+            setupLabel();
+        });
+        setupLabel(); 
+    });
+</script>
+
+</head>
+<body class="settings">
+
+    <div class="row">
+        <div class="c4 logo">
+        </div>
+    </div>
+
+    <!-- shorten form -->
+    <div class="shorten">
+      <p>Enter a link</p>
+        <form name="messageForm" id="messageForm" action="#">
+            <div class="row">
+                <div class="c1">
+                    <div style="clear:both;"/>
+                    URL: <input name="url">
+
+                    <input type="hidden" name="end_point_success" value="/examples/shorten/#success">
+                    <input type="hidden" name="end_point_failure" value="/examples/shorten/#failure">
+                    <input type="hidden" name="end_point_auth_failure" value="/examples/shorten/#auth_failure">
+                    <button>shorten</button>
+                        
+                </div>
+                <div class="c1">
+                    <div class="usernameError error invisible">Please enter your Twitter name</div>
+               </div> 
+            </div>
+        </form>
+    </div>
+
+    <!-- send success section -->
+    <div class="section success hidden">
+        <div class="row">
+            <div class="c1">
+                <h4 class="success">Success!</h4>
+                <p id="short"></p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

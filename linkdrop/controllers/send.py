@@ -2,6 +2,7 @@ import logging
 import datetime
 import json
 import urllib
+import sys
 import httplib2
 
 from pylons import config, request, response, session
@@ -11,6 +12,7 @@ from pylons.decorators.util import get_pylons
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
 from linkdrop.lib.oauth import get_provider
+from linkdrop.lib.links import sign_link
 
 from linkdrop.model.meta import Session
 from linkdrop.model import Account, History
@@ -40,7 +42,12 @@ The 'send' namespace is used to send updates to our supported services.
         domain = request.POST.get('domain')
         message = request.POST.get('message')
         username = request.POST.get('username')
+        shorturl = request.POST.get('shorturl')
         userid = request.POST.get('userid')
+        print "domain", domain
+        print "userid", userid
+        print "shorturl", shorturl
+        to = request.POST.get('to')
         if not domain or not message:
             error = {
                 'reason': "'domain' and 'message' request params are not optional",
@@ -65,6 +72,7 @@ The 'send' namespace is used to send updates to our supported services.
             if userid:
                 q = q.filter(Account.userid==userid)
             acct = q.one()
+            print >> sys.stderr, acct.to_dict()
         except MultipleResultsFound:
             error = {'provider': domain,
                      'reason': "Multiple accounts for %s were found, username or userid required" % domain,
@@ -93,8 +101,14 @@ The 'send' namespace is used to send updates to our supported services.
             for key, val in request.POST.items():
                 setattr(history, key, val)
             Session.add(history)
+            print "ABOUT TO SIGN!"
+            link = sign_link(shorturl, acct.username)
             Session.commit()
             result['linkdrop'] = history.id
+            result['shorturl'] = shorturl
+            result['from'] = userid
+            result['to'] = to
+            print >> sys.stderr, result
             log.info("send success - linkdrop id is %s", history.id)
         # no redirects requests, just return the response.
         return {'result': result, 'error': error}

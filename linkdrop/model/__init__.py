@@ -2,6 +2,7 @@
 from linkdrop.model.meta import Session, Base
 from linkdrop.model.account import Account
 from linkdrop.model.history import History
+from linkdrop.model.links import Link
 
 def init_model(engine):
     """Call me before using any of the tables or classes in the model"""
