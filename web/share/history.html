@@ -19,9 +19,11 @@
 
     <li id="history" class="template status">
         {. medium getMedium(domain)}
+        {. who getWho(username, domain)}
         <div class="icon {medium}"></div>
         <div class="message status">
-            <span class="username">@{username}</span>: <div class="body">{message}</div>
+            <span class="username">{who}</span>:
+            <div class="body">{message}</div>
             {. date friendlyDate(published)}
             <div class="topic meta">
                 <div class="date earliest">{date}</div>

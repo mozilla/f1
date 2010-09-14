@@ -25,9 +25,10 @@
 /*global require: false, location: true, window: false, alert: false */
 "use strict";
 
-var linkify = function(text) {
+var linkify = function(text, doUrls) {
   // linkify full urls
-  text = text.replace(/http(s)?:\S+/g, '<a class="link" href="$&" target="_blank">$&</a>');
+  if (doUrls)
+      text = text.replace(/http(s)?:\S+/g, '<a class="link" href="$&" target="_blank">$&</a>');
   // linkify twitter usernames
   text = text.replace(/\@(\w+)/g, '<a class="username" type="twitter" title="twitter.com/$1" href="http://twitter.com/$1" target="_blank">@$1</a>');
   // linkify twitter hash tags
@@ -44,17 +45,25 @@ function (require,   $,        fn,         rdapi,   jig) {
         if (domain == 'google.com') return 'google';
         }});
 
+    jig.addFn({getWho: function(username, userid, domain) {
+        if (domain == 'twitter.com') return '@' + username;
+        if (domain == 'facebook.com') return '<a class="username" type="facebook" href="http://www.facebook.com/profile.php?id=' + userid + '">'+username+"</a>";
+        if (domain == 'google.com') return 'google';
+        return "foo";
+        }});
+
     rdapi('history/get', {
         success: function (json) {
             if (json.error) {
                 $('#notifications').append(jig('#error', json.error));
             } else {
-                $('#statuses').append(jig('#history', json));
+                var stuff = jig('#history', json);
+                $('#statuses').append(stuff);
                 $(".body").each(function() {
-                  $(this).html(linkify($(this).text()));
+                  $(this).html(linkify($(this).text(), true));
                 });
                 $(".username").each(function() {
-                  $(this).html(linkify($(this).text()));
+                  $(this).html(linkify($(this).text(), false));
                 });
            }
         }
