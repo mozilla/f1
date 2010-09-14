@@ -312,7 +312,6 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
 
         //Set up the URL in all the message containers
         if (options.url) {
-            alert("got options.url")
             rdapi('links/shorten', {
                 type: 'POST',
                 data: {
