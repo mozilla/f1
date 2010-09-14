@@ -346,7 +346,7 @@ div.image img {
 }
 
 .meta .url,
-.meta .curl {
+.meta .surl {
   font-size: 10px;
   text-decoration: underline;
   display: block;
