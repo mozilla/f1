@@ -24,6 +24,16 @@ oauth.google.com.consumer_key = FILL_ME_IN
 oauth.google.com.consumer_secret = FILL_ME_IN
 oauth.google.com.scope = https://mail.google.com/ http://www.google.com/m8/feeds/
 
+# Register with Yahoo! at https://developer.apps.yahoo.com/projects
+# Yahoo scope is embeded in the consumer_key and is selected at registration time
+# You will need to setup an application with Yahoo on a domain where you can
+# upload an html file in order to verify the application.  once verified,
+# also set verified = 1
+oauth.yahoo.com.consumer_key = FILL_ME_IN
+oauth.yahoo.com.consumer_secret = FILL_ME_IN
+oauth.yahoo.com.app_id = FILL_ME_IN
+# set to true if you have completed domain verification with Yahoo
+oauth.yahoo.com.verified = 0
 
 [server:main]
 use = egg:Paste#http
