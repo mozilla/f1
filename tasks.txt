@@ -2,26 +2,65 @@
 
 ## Bigger Tasks
 
-* User testing - Bryan/Andy to prep, all to help out
+### First user test pass
 
-## Specific Changes
+Goals:
+
+* Is this faster/easier/better for you to share links?
+  * Is oauth an issue?
+  * sharing is easier/better
+  * is it simple or understandable?
+
+Tasks:
+
+* Start Page for the add-on
+  * Video explaining it
+  * Link to to install extension (host locally for now)
+
+* First experience clicking on the share button
+
+
+* hide email, and debug tabs
+
+* Settings tab should reflect accounts signed in, and link to account page
+
+* Change the sharing flow:
+  * Change "need auth" screen
+  * Change retry screen
+  * Change error screen
+  * Provide specialized positive feedback on first share
+  * Provide positive feedback experience for every share
+  
+* Share UI
+  * Shorten links for twitter.
+
+* Account settings page:
+  * List possible services (twitter/facebook for testing)
+  * Show list of accounts that Linkdrop knows about, which ones are active,
+    a way to sign in/out for each one.
+  * Explain how to revoke Linkdrop from their service
+  * For sign out:
+    * Navigate to signout URL for the particular host in a browser window, to
+      clear their browser cookies for that site
+    * Call new Linkdrop API to remove that account from Linkdrop session.
+
+
+## Smaller Changes
 
 * Tag FF bookmarks with share data so they are picked up in sync.
 * Chrome to phone
 * Give another way to access history page outside of the "shared!" status.
-* UI to allow disconnecting accounts? May just be a link in the settings panel
-  that takes user to a full web page that lists how they can log out of different
-  services.
 * If browser goes to about:config (non-web pages), do not show the share UI, or show a "not allowed" UI.
-* Use url shortener. Use bitly possibly for now, look at t.co implications
 * use https for the linkdrop site
-
-## James
-
-* Change extension to start reveal animation right away instead of waiting for iframe onload
+* Change extension to start reveal animation right away instead of waiting for iframe onload. Difficult,
+  since animating while the browser component loads means the animation is choppy. Perhaps put in a placeholder
+  xul element and have the browser page load in the background, then swap them once the page loads. Or,
+  pre-seed the browser cache with the page, by requesting it after first install?
 
 
 # OTHER TASKS
 
+* Set up testing/benchmarking
+  * Set up a mock service that we can use for testing send API?
 * Switch to async/queue-based send API
 * Use google contacts API to enable gmail tab autocomplete for To: address
