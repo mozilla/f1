@@ -3,12 +3,6 @@
 /*global document: false, setInterval: false, clearInterval: false,
   Application: false, gBrowser: false, window: false, Components: false */
 
-/*
- TODO
- - if user navigates away from page, then should auto-close the share pane.
- - Detect if the user already uses some services and pass them to the iframe.
-*/
-
 var ffshare;
 (function () {
 
@@ -18,6 +12,50 @@ var ffshare;
   var dbConn = Cc["@mozilla.org/browser/nav-history-service;1"].
     getService(Ci.nsPIPlacesDatabase).
     DBConnection;
+
+  var queryToObject = function (/*String*/ str) {
+    // summary:
+    //        Create an object representing a de-serialized query section of a
+    //        URL. Query keys with multiple values are returned in an array.
+    //
+    // example:
+    //        This string:
+    //
+    //    |        "foo=bar&foo=baz&thinger=%20spaces%20=blah&zonk=blarg&"
+    //
+    //        results in this object structure:
+    //
+    //    |        {
+    //    |            foo: [ "bar", "baz" ],
+    //    |            thinger: " spaces =blah",
+    //    |            zonk: "blarg"
+    //    |        }
+    //
+    //        Note that spaces and other urlencoded entities are correctly
+    //        handled.
+    var ret = {},
+        qp = str.split('&'),
+        dec = decodeURIComponent,
+        parts, name, val;
+
+    qp.forEach(function (item) {
+        if (item.length) {
+            parts = item.split('=');
+            name = dec(parts.shift());
+            val = dec(parts.join('='));
+            if (typeof ret[name] === 'string') {
+                ret[name] = [ret[name]];
+            }
+
+            if (ostring.call(ret[name]) === '[object Array]') {
+                ret[name].push(val);
+            } else {
+                ret[name] = val;
+            }
+        }
+    });
+    return ret;
+  };
 
   function log(msg) {
     Application.console.log('.'+msg); // avoid clearing on empty log
@@ -84,18 +122,27 @@ var ffshare;
       if (hashIndex != -1) {
         var tail = aLocation.spec.slice(hashIndex+1, aLocation.spec.length);
         if (tail.indexOf("!success") === 0) {
-          //TODO: parse out interesting things in the URL, it will be of format
-          //!success:domain=x&userid=y&username=z, where values are encodeURIComponent()-ized
           ffshare.hide();
-          // Assume share was succesful XXX
+
+          // XXX Should probably have a pref to disable auto-tagging & auto-bookmarking
+          var bits = tail.slice("!success:".length, tail.length);
+          var retvals = queryToObject(bits);
+          var tags = ['shared', 'linkdrop'];
+          if (retvals.domain == 'twitter.com') {
+            tags.push("twitter");
+          }
+          if (retvals.domain == 'facebook.com') {
+            tags.push("facebook");
+          }
+
           var ios = Cc["@mozilla.org/network/io-service;1"].
                  getService(Ci.nsIIOService);
           var nsiuri = ios.newURI(gBrowser.currentURI.spec, null, null);
           var bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
                       .getService(Components.interfaces.nsINavBookmarksService);
-          bmsvc.insertBookmark(bmsvc.bookmarksMenuFolder, nsiuri, bmsvc.DEFAULT_INDEX, "");
+          bmsvc.insertBookmark(bmsvc.unfiledBookmarksFolder, nsiuri, bmsvc.DEFAULT_INDEX, ffshare.getPageTitle().trim());
 
-          PlacesUtils.tagging.tagURI(nsiuri, ["shared"]);
+          PlacesUtils.tagging.tagURI(nsiuri, tags);
         } else if (tail == "!resize") {
           ffshare.matchIframeContentHeight();
         }
@@ -441,11 +488,11 @@ var ffshare;
         if ("title" == metaNodes[i].getAttribute("name")) {
           var content = metaNodes[i].getAttribute("content");
           if (content)
-            return content;
+            return content.trim();
         }
       }
       if (titleNode) {
-        return titleNode.firstChild.nodeValue;
+        return titleNode.firstChild.nodeValue.trim();
       }
       return '';
     },
