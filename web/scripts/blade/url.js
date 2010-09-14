@@ -8,10 +8,52 @@
 
 'use strict';
 
-require.def('blade/url', function () {
+require.def('blade/url', ['blade/array'], function (array) {
     var ostring = Object.prototype.toString;
 
     return {
+        objectToQuery: function (/*Object*/ map) {
+            //    summary:
+            //        takes a name/value mapping object and returns a string representing
+            //        a URL-encoded version of that object.
+            //    example:
+            //        this object:
+            //
+            //        |    { 
+            //        |        blah: "blah",
+            //        |        multi: [
+            //        |            "thud",
+            //        |            "thonk"
+            //        |        ]
+            //        |    };
+            //
+            //    yields the following query string:
+            //    
+            //    |    "blah=blah&multi=thud&multi=thonk"
+    
+            // FIXME: need to implement encodeAscii!!
+            var enc = encodeURIComponent,
+                pairs = [],
+                backstop = {},
+                name, value, assign, i;
+            for (name in map) {
+                if (map.hasOwnProperty(name)) {
+                    value = map[name];
+                    if (value !== backstop[name]) {
+                        assign = enc(name) + "=";
+                        if (array.is(value)) {
+                            for (i = 0; i < value.length; i++) {
+                                pairs.push(assign + enc(value[i]));
+                            }
+                        } else {
+                            pairs.push(assign + enc(value));
+                        }
+                    }
+                }
+            }
+            return pairs.join("&"); // String
+        },
+
         queryToObject: function (/*String*/ str) {
             // summary:
             //        Create an object representing a de-serialized query section of a

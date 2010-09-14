@@ -82,9 +82,10 @@ var ffshare;
                           /*in nsIURI*/ aLocation) {
       var hashIndex = aLocation.spec.indexOf("#");
       if (hashIndex != -1) {
-        var tail = aLocation.spec.slice(hashIndex+1, aLocation.spec.length)
-        // XXX jrburke goes here.
-        if (tail == "!close") {
+        var tail = aLocation.spec.slice(hashIndex+1, aLocation.spec.length);
+        if (tail.indexOf("!success") === 0) {
+          //TODO: parse out interesting things in the URL, it will be of format
+          //!success:domain=x&userid=y&username=z, where values are encodeURIComponent()-ized
           ffshare.hide();
           // Assume share was succesful XXX
           var ios = Cc["@mozilla.org/network/io-service;1"].

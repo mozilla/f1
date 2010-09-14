@@ -44,6 +44,8 @@ Tasks:
       clear their browser cookies for that site
     * Call new Linkdrop API to remove that account from Linkdrop session.
 
+* Bugs
+  * Twitter: if api send gets 403 duplicate, then we show need to authenticate instead of duplicate.
 
 ## Smaller Changes
 

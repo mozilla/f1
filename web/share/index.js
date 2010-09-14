@@ -73,7 +73,11 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
 
         if (shouldCloseOrMessage === true) {
             setTimeout(function () {
-                location = '#!close';
+                location = '#!success:' + url.objectToQuery({
+                    domain: sendData.domain,
+                    username: sendData.username,
+                    userid: sendData.userid
+                });
             }, 4000);
         } else if (shouldCloseOrMessage) {
             $('#' + statusId + 'Message').text(shouldCloseOrMessage);
@@ -315,22 +319,24 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
             rdapi('links/shorten', {
                 type: 'POST',
                 data: {
-                    'url': options.canonicalUrl || options.url,
-               },
-                success: function(json) {
-                    options.shortUrl = json.result.short_url;
-                    $('textarea.message').each(function (i, node) {
-                        var dom = $(node);
-                        //If the message containder doesn't want URLs then respect that.
-                        if (dom.hasClass('nourl')) {
-                            return true;
-                        } else {
-                            dom.val(options.shortUrl);
-                        }
-                        return undefined;
+                    'url': options.canonicalUrl || options.url
+                },
+                success: function (json) {
+                    $(function () {
+                        options.shortUrl = json.result.short_url;
+                        $('textarea.message').each(function (i, node) {
+                            var dom = $(node);
+                            //If the message containder doesn't want URLs then respect that.
+                            if (dom.hasClass('nourl')) {
+                                return true;
+                            } else {
+                                dom.val(options.shortUrl);
+                            }
+                            return undefined;
+                        });
                     });
                 },
-                error: function(json) {
+                error: function (json) {
                 }
             });
             $(".meta .url").text(options.url);
@@ -435,7 +441,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
                         sendData[node.name] = node.value;
                     }
                 });
-                sendData['shorturl'] = options.shortUrl;
+                sendData.shorturl = options.shortUrl;
 
                 sendMessage();
                 return false;
