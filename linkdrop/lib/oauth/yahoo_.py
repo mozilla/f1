@@ -2,6 +2,8 @@ import urlparse
 
 from openid.extensions import ax
 import oauth2 as oauth
+import httplib2
+import json
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -71,3 +73,86 @@ class responder(OpenIDResponder):
                    'username': username }
         profile['accounts'] = [account]
         return result_data
+
+
+class api():
+    endpoints = {
+        "mail":"http://mail.yahooapis.com/ws/mail/v1.1/jsonrpc"
+    }
+
+    def __init__(self, account):
+        self.config = get_oauth_config(domain)
+        self.account = account
+        self.oauth_token = oauth.Token(key=account.oauth_token, secret=account.oauth_token_secret)
+        self.consumer_key = self.config.get('consumer_key')
+        self.consumer_secret = self.config.get('consumer_secret')
+        self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
+        self.sigmethod = oauth.SignatureMethod_HMAC_SHA1()
+         
+    def rawcall(self, url, method, args):
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        # simple jsonrpc call
+        postdata = json.dumps({"method": method, 'params': args, 'id':'jsonrpc'})
+        postdata = postdata.encode("utf-8")
+
+        oauth_request = oauth.Request.from_consumer_and_token(self.consumer,
+                                                              token=self.oauth_token,
+                                                              http_method='POST',
+                                                              http_url=url)
+        oauth_request.sign_request(self.sigmethod, self.consumer, self.oauth_token)
+        headers.update(oauth_request.to_header())
+
+        resp, content = httplib2.Http().request(url, 'POST', headers=headers, body=postdata)
+        print resp, content
+        response = json.loads(content)
+        result = error = None
+        if 'id' in response:
+            # this is a good thing
+            error = response['error']
+            if error:
+                error = {
+                    'reason': response['error'].get('message'),
+                    'code': int(resp['status']),
+                    'detail': response['error']
+                }
+            return response['result'], error
+        elif 'error' in response:
+            error = {'provider': domain,
+                     'reason': response['error'].get('description'),
+                     'code': int(resp['status']) 
+            }
+        else:
+            error = {'provider': domain,
+                     'reason': "unexpected yahoo response: %r"% (response,),
+                     'code': int(resp['status']) 
+            }
+            log.error("unexpected yahoo response: %r", response)
+
+        return result, error
+
+    def sendmessage(self, message, options={}):
+        result = error = None
+        from_ = self.account.profile.get('verifiedEmail')
+        to_ = options['to']
+        subject = options.get('subject')
+
+        params = [{
+                "message":
+                    {"subject":subject,
+                     "from":{"email":from_},
+                     "to":[{"email":to_}],
+                     "body":{"data": message,
+                             "type":"text",
+                             "subtype":"plain",
+                             "charset":"us-ascii"
+                             }
+                    },
+                 "savecopy":1
+                }]
+
+        return self.rawcall(self.endpoints['mail'], 'SendMessage', params)
+
+
