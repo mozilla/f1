@@ -106,7 +106,11 @@ var ffshare;
       }
       if (channel) {
         var shortenedBy = null;
-        shortenedBy = channel.getResponseHeader("x-shortened-by");
+        try {
+          shortenedBy = channel.getResponseHeader("x-shortened-by");
+        } catch (e) {
+          // not really a channel I guess?
+        }
         if (shortenedBy) {
           //Application.console.log('found x-shortened-by');
           ffshare.friend = shortenedBy;
