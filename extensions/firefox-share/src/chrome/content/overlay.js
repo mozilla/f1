@@ -86,6 +86,15 @@ var ffshare;
         // XXX jrburke goes here.
         if (tail == "!close") {
           ffshare.hide();
+          // Assume share was succesful XXX
+          var ios = Cc["@mozilla.org/network/io-service;1"].
+                 getService(Ci.nsIIOService);
+          var nsiuri = ios.newURI(gBrowser.currentURI.spec, null, null);
+          var bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
+                      .getService(Components.interfaces.nsINavBookmarksService);
+          bmsvc.insertBookmark(bmsvc.bookmarksMenuFolder, nsiuri, bmsvc.DEFAULT_INDEX, "");
+
+          PlacesUtils.tagging.tagURI(nsiuri, ["shared"]);
         } else if (tail == "!resize") {
           ffshare.matchIframeContentHeight();
         }
