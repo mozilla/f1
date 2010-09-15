@@ -32,11 +32,14 @@
         {]}
     </div>
     <li id="account" class="template account">
-        {. medium getMedium(domain)}
         {. svcAccount accounts[0]}
+        {. domain svcAccount.domain}
+        {. medium getMedium(domain)}
         <div class="imageContainer"><img class="accountImage" src="{profilePic(photos)}"></div>
         <div class="name">{displayName}</div>
-        <button data-domain="{domain}" data-username="{username}" data-userid="{userid}" class="disconnectButton">sign out</button>
+        <button data-domain="{domain}" data-username="{svcAccount.username}" data-userid="{svcAccount.userid}" class="disconnectButton">Tell Linkdrop to forget this account</button>
+        <a href="{signOutUrl(domain)}" target="_blank">Sign out of {domain}</a>
+        <a href="{revokeUrl(domain)}" target="_blank">Tell {domain} to not allow Linkdrop any more</a>
     </li>
 <!--
 http://twitter.com/settings/connections

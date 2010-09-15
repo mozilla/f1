@@ -29,14 +29,29 @@ require.def("disconnect",
         ["require", "jquery", "blade/fn", "rdapi", "blade/jig"],
 function (require,   $,        fn,         rdapi,   jig) {
 
+    
     var actions = {
         'twitter.com': {
+            medium: 'twitter',
+            revokeUrl: 'http://twitter.com/settings/connections',
+            signOutUrl: 'http://twitter.com/logout',
             signOut: function (userId, userName) {
                 //
                 
             }
         },
         'facebook.com': {
+            medium: 'facebook',
+            revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
+            signOutUrl: 'http://facebook.com',
+            signOut: function (userId, userName) {
+                
+            }
+        },
+        'google.com': {
+            medium: 'google',
+            revokeUrl: 'http://google.com',
+            signOutUrl: 'http://google.com',
             signOut: function (userId, userName) {
                 
             }
@@ -45,20 +60,17 @@ function (require,   $,        fn,         rdapi,   jig) {
 
     jig.addFn({
         getMedium: function (domain) {
-            if (domain === 'twitter.com') {
-                return 'twitter';
-            }
-            if (domain === 'facebook.com') {
-                return 'facebook';
-            }
-            if (domain === 'google.com') {
-                return 'google';
-            }
-            return '';
+            return actions[domain].medium;
         },
         profilePic: function (photos) {
             //TODO: check for a thumbnail picture, hopefully one that is square.
             return photos && photos[0] && photos[0].value || 'i/face2.png';
+        },
+        signOutUrl: function (domain) {
+            return actions[domain].signOutUrl;
+        },
+        revokeUrl: function (domain) {
+            return actions[domain].revokeUrl;
         }
     });
 

@@ -24,6 +24,8 @@ Tasks:
 
 * Settings tab should reflect accounts signed in, and link to account page
 
+* Create a neutral UI for the sharing dropdown - Andy
+
 * Change the sharing flow:
   * Change "need auth" screen
   * Change retry screen

@@ -16,8 +16,8 @@
 }
 
 body {
-  font-size: 11px;
-  font-family: "lucida grande";
+  font-size: 14px;
+  font-family: "helvetica neue", helvetica, arial, sans-serif;
   max-height: 128px;
   overflow: hidden;
   background-color: #fff;
@@ -36,60 +36,46 @@ a {
 }
 
 #tabs {
+  -moz-box-shadow: 0 -5px 2px -4px #DDDDDD inset;
+  height: 125px;
   overflow: hidden;
-  border-bottom: 1px solid #515151;
-}
-
-#twitter, #facebook, #gmail, #settings {
-  /* background-image: -moz-linear-gradient(top, #d0d0d0 0%, #a8a8a8 100%); */
-  background-color: #a7a7a7;
-/*
-  border-top: 1px solid #515151;
-  -moz-box-shadow: 0 2px 0 -1px #e3e3e3 inset;
-*/
+  border-bottom: 1px solid #ccc;
+  background-color: #f2f2f2;
 }
 
 ul.nav {
-  -moz-box-shadow:0 2px 0 -1px #CDCDCD inset;
-  background-color:#A7A7A7;
+  background-image: url("i/background.gif");
+  -moz-box-shadow: 0 -2px 3px rgba(0,0,0,0.5) inset;
   display: block;
   width: 100%;
   padding: 0 10px;
 }
 
 ul.nav .username {
-  font-size: 11px;
+  height: 24px;
+  font-size: 12px;
+  color: #fff;
+  font-weight: bold;
   line-height: 24px;
-  padding: 0 10px;
-  margin: 4px 10px;
-  border-left: 1px dotted #888;
-  display: inline-block;
+  position: absolute;
+  right: 35px;
+  top: 6px;
 }
 
 ul.nav .username img {
   border: 1px solid #fff;
-  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.25);
   width: 23px;
   height: 23px;
-  margin-right: 5px;
-}
-
-ul.nav .username .userId {
-  color: #000;
-  font-weight: bold;
-  text-shadow: 1px 1px 0 #bbb;
+  margin-left: 5px;
 }
 
 ul.nav .navWrap {
-  width: 960px;
-/*
-  background-image: url("i/logo.gif");
-  background-repeat: no-repeat;
-  background-position: right center;
-*/
+  width: 962px;
   position: relative;
   left: 50%;
-  margin-left: -480px;
+  margin-left:-481px;
+  border-left: 1px solid #222;
+  border-right: 1px solid #222;
 }
 
 ul.nav li {
@@ -97,39 +83,32 @@ ul.nav li {
   display: inline-block;
   float: left;
   list-style-type: none;
-  margin: 3px 0;
-  font-size: 11px;
+  background-color: #444;
+  margin: 10px 0 0 0px;
+  font-size: 12px;
   line-height: 24px;
-  background-image: -moz-linear-gradient(center top , #FDFDFD 0%, #AAAAAA 100%);
-  border-width: 1px;
-  border-style: solid;
-  border-color: #666;
-  -moz-box-shadow: 0 1px 0 #CDCDCD;
+  -moz-border-radius: 5px 5px 0 0;
+  -moz-box-shadow: 0 -2px 2px rgba(0, 0, 0, 0.45);
 }
 
 ul.nav li:hover {
-  background-color: rgba(255,255,255,0.5);
+  background-color: #555;
 }
 
-ul.nav li.ui-tabs-selected {
-  background-image: -moz-linear-gradient(center top , #bbb 0%, #aaa 100%); 
-  -moz-box-shadow: 0 0 3px #666 inset,0 1px 0 #CDCDCD;
+ul.nav li:nth-child(n+2) {
+  margin-left: -5px;
 }
 
-ul.nav li:first-child {
+ul.nav li:nth-child(1) {
   z-index: 1;
-  -moz-border-radius: 3px 0 0 3px;
 }
 
 ul.nav li:nth-child(2) {
   z-index: 2;
-  border-left: none;
-  border-right: none;
 }
 
 ul.nav li:nth-child(3) {
   z-index: 1;
-  -moz-border-radius: 0 3px 3px 0;
 }
 
 ul.nav li a {
@@ -137,27 +116,29 @@ ul.nav li a {
 }
 
 ul.nav li a.icon {
-  width: 36px;
+  width: 24px;
   height: 24px;
+  margin: 0 5px;
   background-repeat: no-repeat;
   background-position: center center;
   display: block;
 }
 
 ul.nav li a.icon.twitter {
-  background-image: url("../../../../../web/share/i/twitterIcon.png");
+  background-image: url("../share/i/twitter_w.png");
 }
 
 ul.nav li a.icon.facebook {
-  background-image: url("../../../../../web/share/i/facebookIcon.png");
+  background-image: url("../share/i/facebook_w.png");
 }
 
 ul.nav li a.icon.gmail {
-  background-image: url("../../../../../web/share/i/gmailIcon.png");
+  background-image: url("../share/i/gmail_w.png");
 }
 
 ul.nav li a.icon.settings {
-  background-image: url("../../../../../web/share/i/settingsIcon.png");
+  background-image: url("i/settings.png");
+  background-position: top left;
 }
 
 ul.nav li.debug {
@@ -185,17 +166,20 @@ ul.nav li span.name {
 }
 
 ul.nav li.ui-tabs-selected span.name {
-  display: none;
+  display: block;
 }
 
 
 ul.nav li.settings,
 ul.nav li.settings.ui-tabs-selected {
   position: absolute;
-  right: 0;
+  background-color: transparent;
+  background-image: none;
+  -moz-box-shadow: none;
+  right: 15px;
   top: 0;
+  width: 16px;
   text-align: center;
-  -moz-border-radius: 3px;
 }
 
 ul.nav li.settings:hover span.name,
@@ -208,9 +192,13 @@ ul.nav li.settings span.name {
 }
 
 ul.nav li.ui-tabs-selected {
-
+  background-color: #fff;
+  background-image: -moz-linear-gradient(top, #fff 0%, #f2f2f2 100%);
+  width: 128px;
+  z-index: 100;
 }
 
+ul.nav li a.icon,
 ul.nav li span.name {
   opacity: 0.5;
 }
@@ -234,27 +222,53 @@ ul.nav span.name {
   padding-left: 24px;
 }
 
+ul.nav li.ui-tabs-selected.settings {
+  width: 16px;
+}
+
 ul.nav li.ui-tabs-selected.settings span.name {
   display: none;
 }
 
-ul.nav li.ui-tabs-selected a.twitter,
-ul.nav li:hover a.twitter {
-  background-image: url("../../../../../web/share/i/twitterIconColor.png");
+ul.nav li.ui-tabs-selected a.twitter {
+  background-image: url(".../share/i/twitter_b.png");
 }
 
-ul.nav li.ui-tabs-selected a.facebook,
-ul.nav li:hover a.facebook {
-  background-image: url("../../../../../web/share/i/facebookIconColor.png");
+ul.nav li.ui-tabs-selected a.facebook {
+  background-image: url("../share/i/facebook_b.png");
 }
 
-ul.nav li.ui-tabs-selected a.gmail,
-ul.nav li:hover a.gmail {
-  background-image: url("../../../../../web/share/i/gmailIconColor.png");
+ul.nav li.ui-tabs-selected a.gmail {
+  background-image: url("../share/i/gmail_b.png");
 }
 
 ul.nav li.ui-tabs-selected a {
   color: #0a0a0a;
+}
+
+table {
+  width: 100%;
+}
+
+td.user {
+  width: 140px;
+  padding-right: 10px;
+  white-space: nowrap;
+}
+
+td.thumb {
+  width: 220px;
+  padding: 0 10px;
+}
+
+td.message {
+  width: 300px;
+  padding: 0 10px;
+}
+
+td.button {
+  padding: 1px 20px;
+  vertical-align: bottom;
 }
 
 div.user {
@@ -279,19 +293,10 @@ td.image {
   width: 90px;
 }
 
-.thumbnail {
-  height: 71px;
-  padding: 4px;
-  border: 1px solid #999;
-  margin: 0 5px 0 0;
-  -moz-border-radius: 3px;
-  background-color: #ccc;
-}
-
 div.thumb {
   border: 1px solid #aaa;
   background-color: #fff;
-  height: 61px;
+  height: 71px;
   width: 90px;
   display: inline-block;
 }
@@ -299,12 +304,12 @@ div.thumb {
 ul.info {
   display: inline-block;
   width: 150px;
-  font-size: 11px;
-  padding: 0 5px 0 10px;
+  font-size: 12px;
+  padding: 0 10px;
 }
 
 .info .description {
-  color: #000;
+  color: #666;
   font-size: 10px;
 }
 
@@ -323,79 +328,62 @@ ul.info {
 button {
   padding: 2px 15px;
   font-family: "helvetica neue", helvetica, arial, sans-serif;
-  font-size: 11px;
+  font-size: 12px;
   line-height:24px;
-  background-image: -moz-linear-gradient(top,#fdfdfd 0%,#aaa 100%);
-  border-width: 1px; 
-  border-style: solid;
-  border-color: #5C5C5C #888 #666;
-  -moz-border-radius: 3px;
-  margin-left: 5px;
+  background-image: -moz-linear-gradient(top,#fafafa 0%,#e6e6e6 100%);
+  border: 1px solid #bebebe;
+  -moz-box-shadow: 0 0 0 1px #fff inset;
+  margin-left: 10px;
   cursor: pointer;
 }
 
-button.share {
-  -moz-border-radius: 0 3px 3px 0;
-  -moz-box-shadow: 0 1px 0 #cdcdcd;
-  border-left: none;
-  margin-left: 0;
-}
-
-/*
 button:hover, button:active {
   border: 1px solid #999;
 }
-*/
 
 button:active {
   -moz-box-shadow: 0 0 0 1px rgba(255,255,255,0.35) inset, 0 0 3px rgba(0,0,0,0.75) inset;
 }
 
 textarea, input[type="text"] {
-  -moz-box-shadow: 0 2px 2px -2px #555 inset, 0 1px 0 #cdcdcd;
-  border-width: 1px; 
-  border-style: solid;
-  border-color: #5c5c5c #929292 #929292;
-  font-family: "lucida grande"
-  font-size: 12px;
-  line-height: 18px;
+  -moz-box-shadow: 0 0 2px #CCCCCC inset;
+/*   background-image: -moz-linear-gradient(center top , #FFFFFF 0%, #F2F2F2 100%); */
+  border: 1px solid #BEBEBE;
+  font-family: "helvetica neue",helvetica,arial,sans-serif;
+  font-size: 14px;
+  line-height: 24px;
   padding: 3px;
   margin: 0;
   width: 100%;
-  -moz-border-radius: 3px;
-}
-
-textarea.message {
-  min-height: 71px;
-  -moz-border-radius: 3px 0 0 3px;
-  font-size: 14px;
 }
 
 textarea:focus, input[type="text"]:focus {
-
+  border: 1px solid #999;
 }
 
 .inputs {
-  margin: 0 5px 0 0;
+  margin: 0 10px 0 0;
 }
 
 input[type="text"] {
-  height: 26px;
-  width: 238px;
+  height: 30px;
+  width: 234px;
   display: block;
 }
 
 input[type="text"]#to {
-  margin-bottom: 5px;
+  margin-bottom: 11px;
 }
 
 .entry {
-  padding: 5px 0;
-  width: 960px;
+  padding: 10px;
+  width: 962px;
   left: 50%;
-  margin-left: -480px;
+  margin-left: -481px;
   position: relative;
-  min-height: 71px;
+  border-left: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  min-height: 70px;
 }
 
 .entry .urlConfirmation {
@@ -411,7 +399,6 @@ input[type="text"]#to {
   color: green;
   font-size: 10px;
   cursor: pointer;
-  display: none;
 }
 
 .entry .urlConfirmation span {

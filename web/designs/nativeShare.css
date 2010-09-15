@@ -37,19 +37,21 @@ a {
 
 #tabs {
   overflow: hidden;
-  border-bottom: 1px solid #777;
-  background-color: #ddd;
-  -moz-box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
-  background-image:-moz-linear-gradient(center top , #EEEEEE 0%, #DDDDDD 100%);
+  border-bottom: 1px solid #515151;
 }
 
 #twitter, #facebook, #gmail, #settings {
-  /* background-color: #a7a7a7; */
+  /* background-image: -moz-linear-gradient(top, #d0d0d0 0%, #a8a8a8 100%); */
+  background-color: #a7a7a7;
+/*
+  border-top: 1px solid #515151;
+  -moz-box-shadow: 0 2px 0 -1px #e3e3e3 inset;
+*/
 }
 
 ul.nav {
-  /* -moz-box-shadow:0 2px 0 -1px #f9f9f9 inset; */
-  /* background-color:#A7A7A7; */
+  -moz-box-shadow:0 2px 0 -1px #CDCDCD inset;
+  background-color:#A7A7A7;
   display: block;
   width: 100%;
   padding: 0 10px;
@@ -75,11 +77,16 @@ ul.nav .username img {
 ul.nav .username .userId {
   color: #000;
   font-weight: bold;
-  /* text-shadow: 1px 1px 0 #bbb; */
+  text-shadow: 1px 1px 0 #bbb;
 }
 
 ul.nav .navWrap {
   width: 960px;
+/*
+  background-image: url("i/logo.gif");
+  background-repeat: no-repeat;
+  background-position: right center;
+*/
   position: relative;
   left: 50%;
   margin-left: -480px;
@@ -93,11 +100,11 @@ ul.nav li {
   margin: 3px 0;
   font-size: 11px;
   line-height: 24px;
-  background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+  background-image: -moz-linear-gradient(center top , #FDFDFD 0%, #AAAAAA 100%);
   border-width: 1px;
   border-style: solid;
-  border-color: #888;
-  -moz-box-shadow: 0 1px 0 #fff;
+  border-color: #666;
+  -moz-box-shadow: 0 1px 0 #CDCDCD;
 }
 
 ul.nav li:hover {
@@ -105,13 +112,13 @@ ul.nav li:hover {
 }
 
 ul.nav li.ui-tabs-selected {
-  -moz-box-shadow:0 0 1px #666666 inset, 0 1px 0 #FFFFFF;
-  background-image:-moz-linear-gradient(center top , #EEEEEE 0%, #CCCCCC 100%);
+  background-image: -moz-linear-gradient(center top , #bbb 0%, #aaa 100%); 
+  -moz-box-shadow: 0 0 3px #666 inset,0 1px 0 #CDCDCD;
 }
 
 ul.nav li:first-child {
   z-index: 1;
-  -moz-border-radius: 2px 0 0 2px;
+  -moz-border-radius: 3px 0 0 3px;
 }
 
 ul.nav li:nth-child(2) {
@@ -122,7 +129,7 @@ ul.nav li:nth-child(2) {
 
 ul.nav li:nth-child(3) {
   z-index: 1;
-  -moz-border-radius: 0 2px 2px 0;
+  -moz-border-radius: 0 3px 3px 0;
 }
 
 ul.nav li a {
@@ -138,19 +145,19 @@ ul.nav li a.icon {
 }
 
 ul.nav li a.icon.twitter {
-  background-image: url("../../../../../web/share/i/twitterIcon.png");
+  background-image: url("../share/i/twitterIcon.png");
 }
 
 ul.nav li a.icon.facebook {
-  background-image: url("../../../../../web/share/i/facebookIcon.png");
+  background-image: url("../share/i/facebookIcon.png");
 }
 
 ul.nav li a.icon.gmail {
-  background-image: url("../../../../../web/share/i/gmailIcon.png");
+  background-image: url("../share/i/gmailIcon.png");
 }
 
 ul.nav li a.icon.settings {
-  background-image: url("../../../../../web/share/i/settingsIcon.png");
+  background-image: url("../share/i/settingsIcon.png");
 }
 
 ul.nav li.debug {
@@ -188,7 +195,7 @@ ul.nav li.settings.ui-tabs-selected {
   right: 0;
   top: 0;
   text-align: center;
-  -moz-border-radius: 2px;
+  -moz-border-radius: 3px;
 }
 
 ul.nav li.settings:hover span.name,
@@ -233,17 +240,17 @@ ul.nav li.ui-tabs-selected.settings span.name {
 
 ul.nav li.ui-tabs-selected a.twitter,
 ul.nav li:hover a.twitter {
-  background-image: url("../../../../../web/share/i/twitterIconColor.png");
+  background-image: url("../share/i/twitterIconColor.png");
 }
 
 ul.nav li.ui-tabs-selected a.facebook,
 ul.nav li:hover a.facebook {
-  background-image: url("../../../../../web/share/i/facebookIconColor.png");
+  background-image: url("../share/i/facebookIconColor.png");
 }
 
 ul.nav li.ui-tabs-selected a.gmail,
 ul.nav li:hover a.gmail {
-  background-image: url("../../../../../web/share/i/gmailIconColor.png");
+  background-image: url(".../share/i/gmailIconColor.png");
 }
 
 ul.nav li.ui-tabs-selected a {
@@ -275,9 +282,10 @@ td.image {
 .thumbnail {
   height: 71px;
   padding: 4px;
-  border: 1px solid #bbb;
+  border: 1px solid #999;
   margin: 0 5px 0 0;
-  -moz-border-radius: 2px;
+  -moz-border-radius: 3px;
+  background-color: #ccc;
 }
 
 div.thumb {
@@ -314,45 +322,52 @@ ul.info {
 
 button {
   padding: 2px 15px;
-  background-image: -moz-linear-gradient(center top , #FAFAFA 0%, #DDDDDD 100%);
+  font-family: "helvetica neue", helvetica, arial, sans-serif;
+  font-size: 11px;
+  line-height:24px;
+  background-image: -moz-linear-gradient(top,#fdfdfd 0%,#aaa 100%);
   border-width: 1px; 
   border-style: solid;
-  border-color: #888;
-  -moz-border-radius: 2px;
+  border-color: #5C5C5C #888 #666;
+  -moz-border-radius: 3px;
   margin-left: 5px;
   cursor: pointer;
-  -moz-box-shadow: 0 1px 0 #fff;
 }
 
 button.share {
-  -moz-border-radius: 0 2px 2px 0;
+  -moz-border-radius: 0 3px 3px 0;
+  -moz-box-shadow: 0 1px 0 #cdcdcd;
   border-left: none;
   margin-left: 0;
 }
 
+/*
+button:hover, button:active {
+  border: 1px solid #999;
+}
+*/
+
 button:active {
-  background-image: -moz-linear-gradient(center top , #EEEEEE 0%, #CCCCCC 100%);
-  -moz-box-shadow:0 0 1px #666666 inset, 0 1px 0 #FFFFFF;
+  -moz-box-shadow: 0 0 0 1px rgba(255,255,255,0.35) inset, 0 0 3px rgba(0,0,0,0.75) inset;
 }
 
 textarea, input[type="text"] {
-  -moz-box-shadow: /* 0 2px 2px -2px #555 inset, */ 0 1px 0 #fff;
+  -moz-box-shadow: 0 2px 2px -2px #555 inset, 0 1px 0 #cdcdcd;
   border-width: 1px; 
   border-style: solid;
-  border-color: #888;
+  border-color: #5c5c5c #929292 #929292;
   font-family: "lucida grande"
   font-size: 12px;
   line-height: 18px;
   padding: 3px;
   margin: 0;
   width: 100%;
-  -moz-border-radius: 2px;
+  -moz-border-radius: 3px;
 }
 
 textarea.message {
-  -moz-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset;
   min-height: 71px;
-  -moz-border-radius: 2px 0 0 2px;
+  -moz-border-radius: 3px 0 0 3px;
   font-size: 14px;
 }
 
