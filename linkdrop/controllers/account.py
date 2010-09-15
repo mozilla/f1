@@ -22,9 +22,7 @@ class AccountController(BaseController):
 Accounts
 ========
 
-The 'account' namespace is used to access information regarding the current
-user's account. This does not retrieve the users contact, for that see
-the contacts API that uses @me/@self.
+OAuth authorization api.
 
 """
     __api_controller__ = True # for docs
@@ -38,8 +36,20 @@ the contacts API that uses @me/@self.
         return [a.profile for a in accts]
         
     def signout(self):
-        if request.params.get('domain'):
-            del session[request.params['domain']]
+        domain = request.params.get('domain')
+        username = request.params.get('username')
+        userid = request.params.get('userid')
+        if domain and username or userid:
+            try:
+                keys = session.get('account_keys', '').split(',')
+                q = Session.query(Account.key).filter(Account.key.in_(keys)).filter(Account.domain!=domain)
+                if username:
+                    q = q.filter(Account.username==username)
+                if userid:
+                    q = q.filter(Account.userid==userid)
+                session['account_keys'] = ','.join(q.all())
+            except:
+                session.clear()
         else:
             session.clear()
         session.save()
