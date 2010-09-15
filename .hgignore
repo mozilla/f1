@@ -6,5 +6,7 @@ syntax:regexp
 \.swp
 linkdrop.kpf
 lenv
+env
+data\/sessions
 \.DS_Store
 development.db

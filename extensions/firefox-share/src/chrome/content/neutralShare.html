@@ -5,7 +5,7 @@
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
 
-  <link rel="stylesheet" type="text/css" href="../skin/share.css">
+  <link rel="stylesheet" type="text/css" href="../skin/neutralShare.css">
 
   <script type="text/javascript">
   $(document).ready(function() {
@@ -25,11 +25,11 @@
 
   <ul class="nav clearfix">
     <div class="navWrap clearfix">
-      <li><a class="icon twitter" href="#twitter"><span class="name">Twitter</span></a></li>
-      <li><a class="icon facebook" href="#facebook"><span class="name">Facebook</span></a></li>
-      <li><a class="icon gmail" href="#gmail"><span class="name">Gmail</span></a></li>
+      <li><a class="icon twitter" title="share on twitter" href="#twitter"><span class="name">Twitter</span></a></li>
+      <li><a class="icon facebook" title="share on facebook" href="#facebook"><span class="name">Facebook</span></a></li>
+      <li><a class="icon gmail" title="share on Gmail" href="#gmail"><span class="name">Gmail</span></a></li>
       <li class="settings"><a class="icon settings" href="#settings"><span class="name"><img src="../skin/i/settings.png"></span></a></li>
-      <div class="username">@clarkbw <img src="../skin/i/bryanAvatar.jpg"></div>
+      <div class="username"><img src="../skin/i/bryanAvatar.jpg"><span class="userId">@clarkbw</span></div>
     </div>
   </ul>
 
@@ -39,7 +39,7 @@
         <textarea class="message"></textarea>
         <span class="urlConfirmation"><span>re-insert link</span></span>
       </div>
-      <button>share</button>
+      <button class="share">share</button>
     </div>
   </div>
 
@@ -53,7 +53,7 @@
         </ul>
       </div>
       <textarea class="message boxFlex"></textarea>
-      <button>share</button>
+      <button class="share">share</button>
     </div>
   </div>
 
@@ -67,7 +67,7 @@
         <textarea class="message"></textarea>
         <span class="urlConfirmation"><span>re-insert link</span></span>
       </div>
-      <button>share</button>
+      <button class="share">share</button>
     </div>
   </div>
 
