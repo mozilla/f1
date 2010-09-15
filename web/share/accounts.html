@@ -1,20 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Linkdrop Accounts</title>
+    <title>Accounts</title>
 
   <link rel="stylesheet" type="text/css" href="accounts.css">
 
   <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
-  <script>require(["disconnect.js"]);</script>
+  <script>require(["accounts.js"]);</script>
 </head>
 <body>
-<h1>Disconnect Accounts</h1>
-<p>If you wish to disconnect an account from Linkdrop,
-it is recommended that you disconnect your account from Linkdrop,
-as well as visit the account site to make sure you still want to stay signed
-in to it even after Linkdrop disconnects from it.</p>
+<h1>Accounts</h1>
 
 <div id="notifications"></div>
     <ol id="statuses">
@@ -40,7 +36,7 @@ in to it even after Linkdrop disconnects from it.</p>
         {. svcAccount accounts[0]}
         <div class="imageContainer"><img class="accountImage" src="{profilePic(photos)}"></div>
         <div class="name">{displayName}</div>
-        <button class="disconnectButton">disconnect</button>
+        <button data-domain="{domain}" data-username="{username}" data-userid="{userid}" class="disconnectButton">sign out</button>
     </li>
 <!--
 http://twitter.com/settings/connections
