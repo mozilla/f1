@@ -384,9 +384,10 @@ var ffshare;
         medium : this.getPageMedium(),
         url: gBrowser.currentURI.spec,
         canonicalUrl: this.getCanonicalURL(),
+        shortUrl: this.getShortURL(),
         previews: this.previews()
       };
-      
+
       if (! options.previews.length) {
         // then we need to make our own thumbnail
         options['thumbnail'] = this.getThumbnailData();
@@ -475,32 +476,36 @@ var ffshare;
       return "";
     },
 
-    getCanonicalURL: function () {
+    getShortURL: function() {
       var links = gBrowser.contentDocument.getElementsByTagName("link"),
         rel = null,
         rev = null,
         i;
 
+      // flickr does id="shorturl"
+      var shorturl = gBrowser.contentDocument.getElementById("shorturl");
+      if (shorturl) {
+        return shorturl.getAttribute("href");
+      }
+
       for (i = 0; i < links.length; i++) {
-        // we prefer 'rev' canonicals
+        // is there a rel=shortlink href?
         if (links[i].getAttribute("rel") === "shortlink") {
           return gBrowser.currentURI.resolve(links[i].getAttribute("href"));
         }
-        // but we'll take 'rev' canonicals
-        if (links[i].getAttribute("rev") === "canonical") {
-          rev = gBrowser.currentURI.resolve(links[i].getAttribute("href"));
-        }
-        // but we'll take 'rel' canonicals if that's all we have
-        if (links[i].getAttribute("rel") === "canonical") {
-          rel = gBrowser.currentURI.resolve(links[i].getAttribute("href"));
-        }
       }
+      return "";
+    },
 
-      if (rev) {
-        return rev;
-      }
-      if (rel) {
-        return rel;
+    getCanonicalURL: function () {
+      var links = gBrowser.contentDocument.getElementsByTagName("link"),
+        rel = null,
+        i;
+
+      for (i = 0; i < links.length; i++) {
+        if (links[i].getAttribute("rel") === "canonical") {
+          return gBrowser.currentURI.resolve(links[i].getAttribute("href"));
+        }
       }
       return '';
     },

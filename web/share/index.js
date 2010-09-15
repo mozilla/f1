@@ -315,32 +315,36 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
         tabDom.bind("tabsselect", updateUserTab);
 
         //Set up the URL in all the message containers
-        if (options.url) {
+        function updateLinks() {
+            $('textarea.message').each(function (i, node) {
+                var dom = $(node);
+                //If the message containder doesn't want URLs then respect that.
+                if (dom.hasClass('nourl')) {
+                } else if (dom.hasClass('short')) {
+                    dom.val(options.shortUrl || options.url);
+                } else {
+                    dom.val(options.canonicalUrl || options.url);
+                }
+            });
+            $(".meta .url").text(options.url);
+            $(".meta .surl").text(options.shortUrl || options.url);
+        }
+
+        if (options.url && !options.shortUrl) {
             rdapi('links/shorten', {
                 type: 'POST',
                 data: {
                     'url': options.canonicalUrl || options.url
                 },
-                success: function (json) {
-                    $(function () {
-                        options.shortUrl = json.result.short_url;
-                        $('textarea.message').each(function (i, node) {
-                            var dom = $(node);
-                            //If the message containder doesn't want URLs then respect that.
-                            if (dom.hasClass('nourl')) {
-                                return true;
-                            } else {
-                                dom.val(options.shortUrl);
-                            }
-                            return undefined;
-                        });
-                    });
+                success: function(json) {
+                    options.shortUrl = json.result.short_url;
+                    updateLinks();
                 },
                 error: function (json) {
                 }
             });
-            $(".meta .url").text(options.url);
-            $(".meta .curl").text(options.canonicalUrl);
+        } else {
+            updateLinks();
         }
 
         //Set up hidden form fields for facebook
