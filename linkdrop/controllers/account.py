@@ -38,7 +38,10 @@ the contacts API that uses @me/@self.
         return [a.profile for a in accts]
         
     def signout(self):
-        session.clear()
+        if request.params.get('domain'):
+            del session[request.params['domain']]
+        else:
+            session.clear()
         session.save()
 
     def _get_or_create_account(self, domain, userid, username):
