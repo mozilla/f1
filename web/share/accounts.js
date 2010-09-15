@@ -29,6 +29,20 @@ require.def("disconnect",
         ["require", "jquery", "blade/fn", "rdapi", "blade/jig"],
 function (require,   $,        fn,         rdapi,   jig) {
 
+    var actions = {
+        'twitter.com': {
+            signOut: function (userId, userName) {
+                //
+                
+            }
+        },
+        'facebook.com': {
+            signOut: function (userId, userName) {
+                
+            }
+        }
+    };
+
     jig.addFn({
         getMedium: function (domain) {
             if (domain === 'twitter.com') {
@@ -40,6 +54,7 @@ function (require,   $,        fn,         rdapi,   jig) {
             if (domain === 'google.com') {
                 return 'google';
             }
+            return '';
         },
         profilePic: function (photos) {
             //TODO: check for a thumbnail picture, hopefully one that is square.
@@ -49,18 +64,33 @@ function (require,   $,        fn,         rdapi,   jig) {
 
     rdapi('account/get', {
         success: function (json) {
-            if (json.error) {
-                $('#notifications').append(jig('#error', json.error));
-            } else {
-                //Sort accounts by type.
-                var accounts = {};
-                json.forEach(function (account) {
-                    var domain = account.accounts[0].domain,
-                        domainObj = accounts[domain] || (accounts[domain] = []);
-                    domainObj.push(account);
-                });
-                $('#statuses').append(jig('#accounts', accounts));
-            }
+            $(function () {
+                if (json.error) {
+                    $('#notifications').append(jig('#error', json.error));
+                } else {
+                    //Sort accounts by type.
+                    var accounts = {};
+                    json.forEach(function (account) {
+                        var domain = account.accounts[0].domain,
+                            domainObj = accounts[domain] || (accounts[domain] = []);
+                        domainObj.push(account);
+                    });
+                    $('#statuses').append(jig('#accounts', accounts));
+                }
+            });
         }
     });
+
+    $(function () {
+        $('body')
+            .delegate('button[data-domain]', 'click', function (evt) {
+                var buttonNode = evt.target;
+                    domain = buttonNode.getAttribute('data-domain'),
+                    username = buttonNode.getAttribute('data-username'),
+                    userid = buttonNode.getAttribute('data-userid');
+
+                actions[domain].signOut(userid, username);
+           });
+    });
+    
 });

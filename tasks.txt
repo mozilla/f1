@@ -30,9 +30,7 @@ Tasks:
   * Change error screen
   * Provide specialized positive feedback on first share
   * Provide positive feedback experience for every share
-  
-* Share UI
-  * Shorten links for twitter.
+    * Indicate bookmarking is being done, option to opt out.
 
 * Account settings page:
   * List possible services (twitter/facebook for testing)
@@ -49,6 +47,8 @@ Tasks:
 
 ## Smaller Changes
 
+* Redo the dev/production switch in the extension to be more logical name-based, like
+  "dev", to allow toggling a few switches internally, instead of setting an url.
 * Tag FF bookmarks with share data so they are picked up in sync.
 * Chrome to phone
 * Give another way to access history page outside of the "shared!" status.
