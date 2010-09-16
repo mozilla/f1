@@ -135,14 +135,16 @@ var ffshare;
             tags.push("facebook");
           }
 
-          var ios = Cc["@mozilla.org/network/io-service;1"].
-                 getService(Ci.nsIIOService);
-          var nsiuri = ios.newURI(gBrowser.currentURI.spec, null, null);
-          var bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
-                      .getService(Components.interfaces.nsINavBookmarksService);
-          bmsvc.insertBookmark(bmsvc.unfiledBookmarksFolder, nsiuri, bmsvc.DEFAULT_INDEX, ffshare.getPageTitle().trim());
-
-          PlacesUtils.tagging.tagURI(nsiuri, tags);
+          if (ffshare.useBookmarking) {
+            var ios = Cc["@mozilla.org/network/io-service;1"].
+                   getService(Ci.nsIIOService);
+            var nsiuri = ios.newURI(gBrowser.currentURI.spec, null, null);
+            var bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
+                        .getService(Components.interfaces.nsINavBookmarksService);
+            bmsvc.insertBookmark(bmsvc.unfiledBookmarksFolder, nsiuri, bmsvc.DEFAULT_INDEX, ffshare.getPageTitle().trim());
+  
+            PlacesUtils.tagging.tagURI(nsiuri, tags);
+          }
         } else if (tail == "!resize") {
           ffshare.matchIframeContentHeight();
         }
@@ -268,8 +270,11 @@ var ffshare;
     },
 
     frameAnimationTime: 300,
-    // You may want to set the pref to 'http://127.0.0.1:5000/share/' for local dev.
-    shareUrl: Application.prefs.getValue("linkdrop.share_url", 'https://linkdrop.mozillamessaging.com/share/'),
+
+    system: Application.prefs.getValue("linkdrop.system", "prod"),
+    shareUrl: Application.prefs.getValue("linkdrop.share_url", ""),
+    useBookmarking: Application.prefs.getValue("linkdrop.bookmarking", true),
+
     shareFrame: null,
 
     onLoad: function () {
@@ -432,7 +437,8 @@ var ffshare;
         url: gBrowser.currentURI.spec,
         canonicalUrl: this.getCanonicalURL(),
         shortUrl: this.getShortURL(),
-        previews: this.previews()
+        previews: this.previews(),
+        system: this.system
       };
 
       if (! options.previews.length) {
@@ -598,6 +604,14 @@ var ffshare;
       return previews;
     }
   };
+
+  if (!ffshare.shareUrl) {
+    if (ffshare.system === 'dev') {
+      ffshare.shareUrl = 'http://127.0.0.1:5000/share/';
+    } else {
+      ffshare.shareUrl = 'https://linkdrop.mozillamessaging.com/share/';
+    }
+  }
 
   window.addEventListener("load", ffshare.onLoad, false);
   window.addEventListener("unload", ffshare.onUnload, false);

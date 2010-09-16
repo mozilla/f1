@@ -19,9 +19,6 @@ Tasks:
 
 * First experience clicking on the share button
 
-
-* hide email, and debug tabs
-
 * Create a neutral UI for the sharing dropdown - Andy
 
 * Change the sharing flow:
@@ -47,12 +44,10 @@ Tasks:
 
 ## Smaller Changes
 
-* Redo the dev/production switch in the extension to be more logical name-based, like
-  "dev", to allow toggling a few switches internally, instead of setting an url.
-* Tag FF bookmarks with share data so they are picked up in sync.
 * Chrome to phone
 * Give another way to access history page outside of the "shared!" status.
 * If browser goes to about:config (non-web pages), do not show the share UI, or show a "not allowed" UI.
+  At the very least, check for exceptions on these pages, about:config has a canvas error at the moment.
 * Change extension to start reveal animation right away instead of waiting for iframe onload. Difficult,
   since animating while the browser component loads means the animation is choppy. Perhaps put in a placeholder
   xul element and have the browser page load in the background, then swap them once the page loads. Or,

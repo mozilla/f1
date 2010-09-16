@@ -33,6 +33,13 @@ body.status {
   max-height: 37px;
 }
 
+/* Turn off some things if not in dev */
+html.prod body li.debugTab,
+html.prod body li.gmailTab,
+.prod #settings [data-domain="google.com"] {
+    display: none;
+}
+
 a {
   text-decoration: none;
   outline: none;

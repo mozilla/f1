@@ -283,6 +283,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
         bodyDom = $('body');
 
+        //Set the type of system as a class on the UI to show/hide things in
+        //dev vs. production
+        if (options.system) {
+            $(document.documentElement).addClass(options.system);
+        }
+
         //Debug info on the data that was received.
         $('#debugOutput').val(JSON.stringify(options));
         $('#debugCurrentLocation').val(location.href);
