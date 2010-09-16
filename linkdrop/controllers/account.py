@@ -13,7 +13,7 @@ from linkdrop.lib.oauth import get_provider
 from linkdrop.model.meta import Session
 from linkdrop.model.account import Account
 from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import and_
+from sqlalchemy import and_, not_
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ OAuth authorization api.
     @api_response
     @json_exception_response
     def get(self, domain=None):
-        keys = session.get('account_keys', '').split(',')
+        keys = [k for k in session.get('account_keys', '').split(',') if k]
         accts = Session.query(Account).filter(Account.key.in_(keys)).all()
         return [a.profile for a in accts]
         
@@ -41,13 +41,14 @@ OAuth authorization api.
         userid = request.params.get('userid')
         if domain and username or userid:
             try:
-                keys = session.get('account_keys', '').split(',')
-                q = Session.query(Account.key).filter(Account.key.in_(keys)).filter(Account.domain!=domain)
+                keys = [k for k in session.get('account_keys', '').split(',') if k]
+                _and = [Account.domain==domain]
                 if username:
-                    q = q.filter(Account.username==username)
+                    _and.append(Account.username==username)
                 if userid:
-                    q = q.filter(Account.userid==userid)
-                session['account_keys'] = ','.join(q.all())
+                    _and.append(Account.userid==userid)
+                new_keys = Session.query(Account.key).filter(Account.key.in_(keys)).filter(not_(and_(*_and))).all()
+                session['account_keys'] = ','.join([k[0] for k in new_keys])
             except:
                 session.clear()
         else:
@@ -55,7 +56,7 @@ OAuth authorization api.
         session.save()
 
     def _get_or_create_account(self, domain, userid, username):
-        keys = session.get('account_keys', '').split(',')
+        keys = [k for k in session.get('account_keys', '').split(',') if k]
         # Find or create an account
         try:
             acct = Session.query(Account).filter(and_(Account.domain==domain, Account.userid==userid)).one()
