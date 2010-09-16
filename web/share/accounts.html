@@ -18,28 +18,35 @@
 
     <div id="error" class="template">There was an error: {message}</div>
 
-    <div id="accounts" class="template accounts">
-        {eachProp(_) [}
+    <div id="services" class="template services">
+        {[}
             <div class="domainHeader">
-                <h2>{prop}</h2>
-                <a class="domainLink" href="http://{prop}" target="_blank">Check signed-in account at {prop}</a>
+                <h2>{}</h2>
+                <ul class="svcActions">
+                    <li><a class="domainLink" href="http://{}" target="_blank">Check signed-in account at {}</a></li>
+                    <li><a class="domainLink" href="{revokeUrl(_)}" target="_blank">Tell {} to not allow Linkdrop any more</a></li>
+                </ul>
             </div>
-            <ul>
-                {value [}
+            <ul class="svcAccounts">
+                {accounts(_) [}
                     {#account}
+                {] [}
+                    <li><button class="connectButton" data-domain="{}">Add {} account to Linkdrop</button></li>
                 {]}
             </ul>
         {]}
     </div>
-    <li id="account" class="template account">
+    <li id="account" class="template account hbox">
         {. svcAccount accounts[0]}
         {. domain svcAccount.domain}
         {. medium getMedium(domain)}
-        <div class="imageContainer"><img class="accountImage" src="{profilePic(photos)}"></div>
-        <div class="name">{displayName}</div>
-        <button data-domain="{domain}" data-username="{svcAccount.username}" data-userid="{svcAccount.userid}" class="disconnectButton">Tell Linkdrop to forget this account</button>
-        <a href="{signOutUrl(domain)}" target="_blank">Sign out of {domain}</a>
-        <a href="{revokeUrl(domain)}" target="_blank">Tell {domain} to not allow Linkdrop any more</a>
+        <div class="accountInfo">
+            <div class="imageContainer"><img class="accountImage" src="{profilePic(photos)}"></div>
+            <div class="name">{displayName}</div>
+        </div>
+        <div class="actions boxFlex">
+            <button class="disconnectButton" data-domain="{domain}" data-username="{svcAccount.username}" data-userid="{svcAccount.userid}">Tell Linkdrop to forget this account</button>
+        </div>
     </li>
 <!--
 http://twitter.com/settings/connections

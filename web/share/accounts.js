@@ -22,43 +22,38 @@
  * */
 
 /*jslint plusplus: false */
-/*global require: false */
+/*global require: false, location: false */
 "use strict";
 
 require.def("disconnect",
-        ["require", "jquery", "blade/fn", "rdapi", "blade/jig"],
-function (require,   $,        fn,         rdapi,   jig) {
+        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig"],
+function (require,   $,        fn,         rdapi,   oauth,   jig) {
 
-    
-    var actions = {
-        'twitter.com': {
-            medium: 'twitter',
-            revokeUrl: 'http://twitter.com/settings/connections',
-            signOutUrl: 'http://twitter.com/logout',
-            signOut: function (userId, userName) {
-                //
-                
+    var accounts = {},
+        actions = {
+            'twitter.com': {
+                medium: 'twitter',
+                revokeUrl: 'http://twitter.com/settings/connections',
+                signOutUrl: 'http://twitter.com/logout'
+            },
+            'facebook.com': {
+                medium: 'facebook',
+                revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
+                signOutUrl: 'http://facebook.com'
+            },
+            'google.com': {
+                medium: 'google',
+                revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
+                signOutUrl: 'http://google.com/preferences'
             }
         },
-        'facebook.com': {
-            medium: 'facebook',
-            revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
-            signOutUrl: 'http://facebook.com',
-            signOut: function (userId, userName) {
-                
-            }
-        },
-        'google.com': {
-            medium: 'google',
-            revokeUrl: 'http://google.com',
-            signOutUrl: 'http://google.com',
-            signOut: function (userId, userName) {
-                
-            }
-        }
-    };
+        //An ordered list of services, used to show all the services supported
+        services = ['twitter.com', 'facebook.com', 'google.com'];
 
     jig.addFn({
+        accounts: function(service) {
+            return accounts[service];
+        },
         getMedium: function (domain) {
             return actions[domain].medium;
         },
@@ -74,20 +69,41 @@ function (require,   $,        fn,         rdapi,   jig) {
         }
     });
 
+    function showError(error) {
+        $('#notifications').append(jig('#error', error));
+    }
+
+    function signOut(domain, userId, userName) {
+        rdapi('account/signout', {
+            data: {
+                domain: domain,
+                userId: userId,
+                userName: userName
+            },
+            success: function () {
+                location.reload();
+            },
+            error: function (xhr, textStatus, err) {
+                showError({
+                    message: err
+                });
+            }
+        });
+    }
+
     rdapi('account/get', {
         success: function (json) {
             $(function () {
                 if (json.error) {
-                    $('#notifications').append(jig('#error', json.error));
+                    showError(json.error);
                 } else {
                     //Sort accounts by type.
-                    var accounts = {};
                     json.forEach(function (account) {
                         var domain = account.accounts[0].domain,
                             domainObj = accounts[domain] || (accounts[domain] = []);
                         domainObj.push(account);
                     });
-                    $('#statuses').append(jig('#accounts', accounts));
+                    $('#statuses').append(jig('#services', services));
                 }
             });
         }
@@ -95,14 +111,21 @@ function (require,   $,        fn,         rdapi,   jig) {
 
     $(function () {
         $('body')
-            .delegate('button[data-domain]', 'click', function (evt) {
-                var buttonNode = evt.target;
+            .delegate('button.connectButton', 'click', function (evt) {
+                var buttonNode = evt.target,
+                    domain = buttonNode.getAttribute('data-domain');
+                    oauth(domain, function () {
+                        location.reload();
+                    });
+            })
+            .delegate('button.disconnectButton', 'click', function (evt) {
+                var buttonNode = evt.target,
                     domain = buttonNode.getAttribute('data-domain'),
                     username = buttonNode.getAttribute('data-username'),
                     userid = buttonNode.getAttribute('data-userid');
 
-                actions[domain].signOut(userid, username);
-           });
+                signOut(domain, userid, username);
+            });
     });
     
 });

@@ -26,8 +26,8 @@
 "use strict";
 
 require.def("send",
-        ["require", "jquery", "blade/fn", "rdapi", "blade/url", "placeholder", "TextCounter"],
-function (require,   $,        fn,         rdapi,   url,         placeholder,   TextCounter) {
+        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/url", "placeholder", "TextCounter"],
+function (require,   $,        fn,         rdapi,   oauth,   url,         placeholder,   TextCounter) {
 
     var svcOptions = {
             'twitter': true,
@@ -35,34 +35,12 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
             'gmail': true
         },
         hash = location.href.split('#')[1],
-        urlArgs, sendData, authDone,
+        urlArgs, sendData,
         options = {
             services: null
         },
         tabDom, bodyDom, twitterCounter,
         previewWidth = 90, previewHeight = 70;
-
-    function reauthorize(callback, domain) {
-        if (callback) {
-            authDone = callback;
-        }
-        var url = location.protocol + "//" + location.host + "/send/auth.html";
-        window.open(url + "?domain=" +
-                              (domain || sendData.domain),
-                            "Firefox Share OAuth",
-                            "dialog=yes, modal=yes, width=800, height=480");
-    }
-
-    //Handle communication from the auth window, when it completes.
-    window.addEventListener("message", function (evt) {
-        //TODO: ideally lock down the domain check on evt.origin.
-        if (evt.data === 'authDone') {
-            if (authDone) {
-                authDone();
-                authDone = null;
-            }
-        }
-    }, false);  
 
     function showStatus(statusId, shouldCloseOrMessage) {
         tabDom.addClass('hidden');
@@ -306,7 +284,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
             cancelStatus(); 
         });
         $('#authOkButton').click(function (evt) {
-            reauthorize(sendMessage);
+            oauth(sendData.domain, sendMessage);
         });
 
         //Set up tabs.
@@ -336,7 +314,7 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
                 data: {
                     'url': options.canonicalUrl || options.url
                 },
-                success: function(json) {
+                success: function (json) {
                     options.shortUrl = json.result.short_url;
                     updateLinks();
                 },
@@ -399,22 +377,22 @@ function (require,   $,        fn,         rdapi,   url,         placeholder,   
             var node = evt.target,
                 domain = node.getAttribute('data-domain');
 
-            reauthorize(function () {
-                //After reauthorize, just reload the page, let the account
+            oauth(domain, function () {
+                //After oauth, just reload the page, let the account
                 //fetching do its work.
                 location.reload();
-            }, domain);
+            });
         });
 
         //Handle login click for user information area.
         $('ul.nav').delegate('.user-info', 'click', function (evt) {
             var domain = $(this).attr('data-domain');
 
-            reauthorize(function () {
-                //After reauthorize, just reload the page, let the account
+            oauth(domain, function () {
+                //After oauth, just reload the page, let the account
                 //fetching do its work.
                 location.reload();
-            }, domain);
+            });
         });
 
         $(".messageForm")

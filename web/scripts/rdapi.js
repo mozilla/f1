@@ -101,7 +101,7 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
         //any API call that returns them. Also be sure to remember any
         //user token
         options.success = function (json, textStatus, xhr) {
-            if (json.contacts) {
+            if (json && json.contacts) {
                 object.mixin(contacts, json.contacts, true);
             }
             if (oldSuccess) {
