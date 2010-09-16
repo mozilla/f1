@@ -26,8 +26,10 @@
 "use strict";
 
 require.def("send",
-        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/url", "placeholder", "TextCounter"],
-function (require,   $,        fn,         rdapi,   oauth,   url,         placeholder,   TextCounter) {
+        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
+         "placeholder", "TextCounter"],
+function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
+          placeholder,   TextCounter) {
 
     var svcOptions = {
             'twitter': true,
@@ -41,6 +43,13 @@ function (require,   $,        fn,         rdapi,   oauth,   url,         placeh
         },
         tabDom, bodyDom, twitterCounter,
         previewWidth = 90, previewHeight = 70;
+
+    jig.addFn({
+        profilePic: function (photos) {
+            //TODO: check for a thumbnail picture, hopefully one that is square.
+            return photos && photos[0] && photos[0].value || 'i/face2.png';
+        }
+    });
 
     function showStatus(statusId, shouldCloseOrMessage) {
         tabDom.addClass('hidden');
@@ -166,6 +175,9 @@ function (require,   $,        fn,         rdapi,   oauth,   url,         placeh
             serviceDom.find('input[name="userid"]').val(svcAccount.userid);
             serviceDom.find('input[name="username"]').val(svcAccount.username);
             serviceDom.find('div.user').removeClass('inactive');
+
+            //Replace the Add button in settings tab to show the user instead
+            $('#settings button[data-domain="' + svcAccount.domain + '"]').replaceWith(jig('#accountTemplate', account));
         });
     }
 
@@ -383,6 +395,15 @@ function (require,   $,        fn,         rdapi,   oauth,   url,         placeh
                 location.reload();
             });
         });
+
+        //In settings panel, the account link can open the acccounts.html. Listen
+        //for changes in that window, so this display updates when account changes are done.
+        window.addEventListener('message', function (evt) {
+            //TODO: ideally lock down the domain check on evt.origin.
+            if (evt.data === 'accountsUpdated') {
+                location.reload();
+            }
+        }, false);
 
         //Handle login click for user information area.
         $('ul.nav').delegate('.user-info', 'click', function (evt) {

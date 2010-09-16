@@ -152,7 +152,8 @@
         <a href="http://www.mozilla.com/en-US/firefox/video/" target="_blank">Learn more about Linkdrop and how to use by watching a video.</a>
     </div>
     <div class="col explainText">
-        To share using Linkdrop, add your favorite sharing service to it.
+        <span>To share using Linkdrop, add your favorite sharing service to it.</span>
+        <a class="accountLink" href="accounts.html" target="_blank">Modify or remove accounts</a>
     </div>
     <div class="col">
       <button class="auth" data-domain="twitter.com">Add Twitter</button>
@@ -162,6 +163,13 @@
   </div>
 
 </div>
+
+<script id="accountTemplate" type="text/template">
+    <div class="account">
+        <img src="{profilePic(photos)}"><span class="name">{displayName}</span>
+        <span class="accountDomain">{accounts[0].domain}</span>
+    </div>
+</script>
 
 </body>
 

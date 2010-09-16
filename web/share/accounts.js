@@ -111,6 +111,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
 
     $(function () {
         $('body')
+            .delegate('button.close', 'click', function (evt) {
+                window.close();
+            })
             .delegate('button.connectButton', 'click', function (evt) {
                 var buttonNode = evt.target,
                     domain = buttonNode.getAttribute('data-domain');
@@ -126,6 +129,16 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
 
                 signOut(domain, userid, username);
             });
+
+        //Tell our opener of changes. Basically, any change reloads this page,
+        //so just notify the opener every time page loads. May need to work
+        //out some flow issues if this is the very first load.
+        var opener = window.opener;
+        if (opener) {
+            //TODO: ideally lock down the domain be location.hostname, but
+            //a problem for 127 addresses?
+            opener.postMessage('accountsUpdated', '*');
+        }
     });
-    
+
 });

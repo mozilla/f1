@@ -424,3 +424,26 @@ img.video {
     width: 112px;
     height: 63px;
 }
+
+#settings .accountLink {
+    display: block;
+    margin-top: 20px;
+}
+
+#settings .account {
+    display: inline-block;
+    height: 72px;
+    padding: 2px 15px;
+    text-align: center;
+    font-size: 12px;
+}
+
+#settings .account img {
+    width: 22px;
+    height: 22px;
+}
+
+#settings .account .name,
+#settings .account .accountDomain {
+    display: block;
+}
