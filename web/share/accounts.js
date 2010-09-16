@@ -77,8 +77,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
         rdapi('account/signout', {
             data: {
                 domain: domain,
-                userId: userId,
-                userName: userName
+                userid: userId,
+                username: userName
             },
             success: function () {
                 location.reload();
