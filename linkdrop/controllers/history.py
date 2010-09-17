@@ -19,17 +19,17 @@ class HistoryController(BaseController):
     def get(self):
         keys = session.get('account_keys', '').split(',')
         stmt = Session.query(Account.id).filter(Account.key.in_(keys)).subquery()
-        data = Session.query(History, Account.domain, Account.username).filter(
+        data = Session.query(History, Account.domain, Account.username, Account.id).filter(
             Account.id == History.account_id).\
             filter(History.account_id.in_(stmt)).\
             order_by(History.published.desc()).\
             all()
         res = []
-        for h, d, u in data:
+        for h, d, u, i in data:
             r = h.to_dict()
             r['domain'] = d
             r['username'] = u
-            r['userid'] = Account.id
+            r['userid'] = i
             import sys
             print >>sys.stderr, r
             res.append(r)
