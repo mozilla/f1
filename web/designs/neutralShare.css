@@ -33,10 +33,16 @@ button::-moz-focus-inner {
 a {
   text-decoration: none;
   outline: none;
+  color: #00A0FF;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 #tabs {
   overflow: hidden;
+  width: 100%;
   border-bottom: 1px solid #777;
   background-color: #ddd;
   -moz-box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
@@ -403,18 +409,75 @@ input[type="text"]#to {
   color: #333;
 }
 
+#settings .entry ul {
+  min-width: 660px;
+}
+
 #settings .entry ul li {
   display: inline-block;
   float: left;
+  width: 220px;
+  min-height: 71px;
+}
+
+#settings .entry ul li:nth-child(1) {
+  padding: 0 10px 0 0;
+}
+
+#settings .entry ul li:nth-child(2) {
+  padding: 0 10px 0;
+}
+
+#settings .entry ul li:nth-child(3) {
+  padding: 0 0 0 10px;
 }
 
 #settings .entry ul li button {
-  margin: 0 10px 0 0;
-  width: 128px;
+  margin: 0;
+  width: 100%;
+  padding: 5px 0;
+}
+
+#settings .entry ul li h1 {
+  margin: 0 0 10px 0;
 }
 
 .entry h1 {
-  margin: 0 0 10px 0;
+  font-weight: bold;
+  margin: 0 0 5px 0;
+  color: #0a0a0a;
+  padding: 5px 0 0 0;
+  /* border-top: 1px dotted #888; */
+}
+
+.entry h1 a {
+  font-weight: normal;
+}
+
+#settings .entry .settings {
+  width: 253px;
+  margin: 0 0 0 10px;
+  padding: 0 0 0 10px;
+  border-left: 1px dotted #888;
+  color: #444;
+}
+
+#settings .entry .success {
+  width: 100%;
+  line-height: 24px;
+  color: #54B851;
+  font-weight: bold;
+}
+
+#settings .entry .success span.check {
+  width: 24px;
+  background-color: #54B851;
+  color: #fff;
+  -moz-border-radius: 12px;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: normal;
+  text-align: center;
 }
 
 /* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
