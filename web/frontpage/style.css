@@ -1,0 +1,218 @@
+* {
+  margin: 0;
+  padding: 0;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  list-style-type: none;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 21px;
+  color: #0a0a0a;
+}
+
+button::-moz-focus-inner { 
+  border: 0; 
+}
+
+a {
+  color: #00a0ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* grid */
+
+.c1, .c2, .c3 {
+  display: inline-block;
+  float: left;
+  min-height: 1%;
+  margin: 0 10px;
+  position: relative;
+}
+
+.c1 {
+  width: 220px;
+}
+
+.c2 {
+  width: 460px;
+}
+
+.c3 {
+  width: 700px;
+}
+
+.row {
+  float: left;
+  margin: 10px 0;
+}
+
+.row.about {
+  margin: 20px 0;
+}
+
+/* end grid */
+
+#wrapper {
+  width: 720px;
+  margin: 0 auto;
+  overflow: hidden;
+  padding: 0 0 60px 0;
+}
+
+#header.row {
+  margin: 36px 0;
+}
+
+#header.row .c1,
+#header.row .c2 {
+  min-height: 60px;
+}
+
+#header.row .logo {
+  background-image: url("i/ldsplash.png");
+  background-repeat: no-repeat;
+}
+
+#header.row button.download {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  width: 100%;
+  background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
+  border: 1px solid #888888;
+  padding: 5px 0;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+}
+
+#header.row button.download:hover {
+  border: 1px solid #444;
+}
+
+#header.row button.download:active {
+  background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
+  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
+  -webkit-box-shadow: 0 0 1px #666666 inset;
+  -moz-box-shadow: 0 0 1px #666666 inset;
+}
+
+#header.row button.download img {
+  vertical-align: bottom;
+}
+
+#header.row button.download span.meta {
+  display: block;
+  font-size: 10px;
+  color: #888;
+}
+
+#movie.c3 {
+  -moz-box-shadow: 0 10px 10px -10px #666;
+  -webkit-box-shadow: 0 10px 10px -10px #666;
+  position: relative;
+}
+
+#movie.c3 .corner {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  display: block;
+  z-index: 1;
+}
+
+#movie.c3 .corner.tl {
+  top: 0;
+  left: 0;
+  background-image: url("i/cornerTopLeft.png");
+}
+
+#movie.c3 .corner.tr {
+  top: 0;
+  right: 0;
+  background-image: url("i/cornerTopRight.png");
+}
+
+#movie.c3 .corner.br {
+  bottom: 0;
+  right: 0;
+  background-image: url("i/cornerBottomRight.png");
+}
+
+#movie.c3 .corner.bl {
+  bottom: 0;
+  left: 0;
+  background-image: url("i/cornerBottomLeft.png");
+}
+
+#movie.c3 iframe {
+  float: left;
+  z-index: 0;
+  position: relative;
+}
+
+#tagline.c3 {
+  padding: 10px 0;
+  border-width: 0 0 1px 0;
+  border-color: #e6e6e6;
+  border-style: solid;
+  font-style: italic;
+  font-size: 16px;
+  color: #00A0FF;
+}
+
+#tagline.c3 span.watch {
+  color: #888;
+  font-size: 12px;
+  float: right;
+  font-style: normal
+}
+
+.description {
+  font-size: 12px;
+  color: #666;
+}
+
+.description h1 {
+  font-size: 14px;
+  color: #0a0a0a;
+}
+
+.description.steps {
+  margin-top: 14px;
+}
+
+.description.steps img {
+  margin-top: 7px;
+}
+
+.description.steps span.step {
+  color: #fff;
+  background-color: orange;
+  width: 21px;
+  font-family: monospace;
+  -moz-border-radius: 12px;
+  -webkit-border-radius: 12px;
+  display: inline-block;
+  text-align: center;
+  margin-right: 5px;
+}
+
+#footer.row {
+  position: fixed;
+  bottom: 0;
+  background-color: rgba(255,255,255,0.5);
+  border-top: 1px solid #e6e6e6;
+  margin: 5px 0 0 0;
+  font-size: 10px;
+  color: #888;
+}

@@ -44,12 +44,9 @@ a {
 }
 
 #twitter, #facebook, #gmail, #settings {
-  /* background-color: #a7a7a7; */
 }
 
 ul.nav {
-  /* -moz-box-shadow:0 2px 0 -1px #f9f9f9 inset; */
-  /* background-color:#A7A7A7; */
   display: block;
   width: 100%;
   padding: 0 10px;
@@ -79,10 +76,12 @@ ul.nav .username .userId {
 }
 
 ul.nav .navWrap {
-  width: 960px;
   position: relative;
+/*
+  width: 960px;
   left: 50%;
   margin-left: -480px;
+*/
 }
 
 ul.nav li {
@@ -336,7 +335,6 @@ button:active {
 }
 
 textarea, input[type="text"] {
-  -moz-box-shadow: /* 0 2px 2px -2px #555 inset, */ 0 1px 0 #fff;
   border-width: 1px; 
   border-style: solid;
   border-color: #888;
@@ -347,17 +345,16 @@ textarea, input[type="text"] {
   margin: 0;
   width: 100%;
   -moz-border-radius: 2px;
+  -moz-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
 }
 
 textarea.message {
-  -moz-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset;
   min-height: 71px;
   -moz-border-radius: 2px 0 0 2px;
   font-size: 14px;
 }
 
 textarea:focus, input[type="text"]:focus {
-
 }
 
 .inputs {
@@ -375,10 +372,13 @@ input[type="text"]#to {
 }
 
 .entry {
-  padding: 5px 0;
+  padding: 5px 10px;
+  width: 100%;
+/*
   width: 960px;
   left: 50%;
   margin-left: -480px;
+*/
   position: relative;
   min-height: 71px;
 }

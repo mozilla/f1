@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.4/jquery-ui.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <title>Linkdrop</title>
+  <script type="text/javascript">
+  jQuery(function(){
+      jQuery(window).bind('load resize', function(){
+          var h = jQuery('button.download').height();
+          jQuery("button.download").css({ 'margin-top' : (-h/2) });
+      });
+  });    
+  </script>
+</head>
+<body>
+  <div id="wrapper">
+    <div id="header" class="row">
+      <div class="c2 logo">
+      </div>
+      <div class="c1 dl">
+        <button class="download">
+          <img src="i/linkdropIcon.png"> Install Linkdrop<!-- &trade; -->
+          <span class="meta">available for Firefox 3.6+</span>
+        </button>
+      </div>
+    </div>
+    <div class="row">
+      <div id="movie" class="c3">
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <div class="corner br"></div>
+        <div class="corner bl"></div>
+        <iframe name="wmode" value="transparent" src="http://player.vimeo.com/video/12571103?title=0&amp;byline=0&amp;portrait=0" width="700" height="438" frameborder="0"></iframe>
+      </div>
+      <div id="tagline" class="c3">
+        &ldquo;Drop links not bombs&rdquo; <span class="watch">Check out the video to get started</span>
+      </div>
+    </div>
+    <div class="row about">
+      <div class="c1 description">
+        <h1>So, what&rsquo;s Linkdrop?</h1>
+        Linkdrop is your conversation starter. Linkdrop is a browser extension that allows you to easily share, track and archive links in a fast and fun way. Share links from within the browser, from any webpage, using the same services you already know and love. Linkdrop is a product of <a href="http://mozillamessaging.com/">Mozilla Messaging</a>.</div>
+      <div class="c2">
+        <img src="i/screenshot_01.png">
+      </div>
+    </div>
+    <div class="row about">
+      <div class="c3 description">
+        <h1>Droppin&rsquo; links is as easy as...</h1>
+      </div>
+      <div class="c1 description steps">
+        <span class="step">01</span> Hit the share icon
+        <img src="i/step-01.png">
+      </div>
+      <div class="c1 description steps">
+        <span class="step">02</span> Choose your service
+        <img src="i/step-02.png">
+      </div>
+      <div class="c1 description steps">
+        <span class="step">03</span> Express yourself and hit share!
+        <img src="i/step-03.png">
+      </div>
+    </div>
+    <div class="row about">
+      <div class="c1 description">
+        <h1>Keep track of your links</h1>
+        Your share history is a way to keep track of the links you shared with your friends. Think of it as a way to archive points of interest, a social bookmark if you will.
+      </div>
+    </div>
+    <div id="footer" class="row">
+      <div class="c3">
+        Mozilla Messaging 2010
+      </div>
+    </div>
+  </div>
+</body>
