@@ -7,6 +7,7 @@ import oauth2 as oauth
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
+from paste.deploy.converters import asbool
 from linkdrop.lib.oauth.base import OAuth1, get_oauth_config
 
 from twitter.oauth import OAuth
@@ -63,9 +64,6 @@ class responder(OAuth1):
 
     def __init__(self):
         OAuth1.__init__(self, domain)
-        self.request_token_url = 'https://twitter.com/oauth/request_token'
-        self.access_token_url = 'https://twitter.com/oauth/access_token'
-        self.authorization_url = 'https://twitter.com/oauth/authenticate'
 
     def _get_credentials(self, access_token):
         # XXX should call twitter.api.VerifyCredentials to get the user object
@@ -98,18 +96,29 @@ class api():
         self.oauth_token_secret = account and account.oauth_token_secret or oauth_token_secret
         self.config = get_oauth_config(domain)
 
-    def rawcall(self, url, body):
-        raise Exception("NOT IMPLEMENTED")
-
-    def sendmessage(self, message, options={}):
+    def api(self):
         auth = OAuth(token=self.oauth_token,
                      token_secret=self.oauth_token_secret,
                      consumer_key=self.config['consumer_key'],
                      consumer_secret=self.config['consumer_secret'])
+        kwargs = {'auth': auth}
+        try:
+            kwargs['domain'] = self.config['host']
+        except KeyError:
+            pass
+        try:
+            kwargs['secure'] = asbool(self.config['secure'])
+        except KeyError:
+            pass
+        return Twitter(**kwargs)
+
+    def rawcall(self, url, body):
+        raise Exception("NOT IMPLEMENTED")
+
+    def sendmessage(self, message, options={}):
         result = error = None
         try:
-            api = Twitter(auth=auth)
-            result = api.statuses.update(status=message)
+            result = self.api().statuses.update(status=message)
             result[domain] = result['id']
         except TwitterHTTPError, exc:
             details = json.load(exc.e)
@@ -124,14 +133,9 @@ class api():
         return result, error
     
     def profile(self):
-        auth = OAuth(token=self.oauth_token,
-                     token_secret=self.oauth_token_secret,
-                     consumer_key=self.config['consumer_key'],
-                     consumer_secret=self.config['consumer_secret'])
         result = error = None
         try:
-            api = Twitter(auth=auth)
-            result = api.account.verify_credentials()
+            result = self.api().account.verify_credentials()
             result[domain] = result['id']
         except TwitterHTTPError, exc:
             details = "TwitterHTTPError %d" % (exc.e.code)

@@ -114,13 +114,12 @@ class responder(OAuth2):
 
      def __init__(self):
           OAuth2.__init__(self, domain)
-          self.authorization_url = 'https://graph.facebook.com/oauth/authorize'
-          self.access_token_url = 'https://graph.facebook.com/oauth/access_token'
 
      def _get_credentials(self, access_token):
+          profile_url = config.get("oauth.facebook.com.profile", self.profile_url)
           fields = 'id,first_name,last_name,name,link,birthday,email,website,verified,picture,gender,timezone'
           client = httplib2.Http()
-          resp, content = client.request(url(self.profile_url, access_token=access_token, fields=fields))
+          resp, content = client.request(url(profile_url, access_token=access_token, fields=fields))
           if resp['status'] != '200':
                raise Exception("Error status: %r", resp['status'])
 
@@ -167,7 +166,7 @@ class api():
           return result, error
 
      def sendmessage(self, message, options={}):
-          url = "https://graph.facebook.com/me/feed"
+          url = config.get("oauth.facebook.com.feed", "https://graph.facebook.com/me/feed")
           body = {
                "message": options['message']
           }
