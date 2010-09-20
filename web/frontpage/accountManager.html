@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="accountManager.css">
+  <title>Linkdrop: Account Manager</title>
+  <script type="text/javascript">
+  jQuery(function(){
+      jQuery(window).bind('load resize', function(){
+          var h = jQuery('button.download').height();
+          jQuery("button.download").css({ 'margin-top' : (-h/2) });
+      });
+  });    
+  </script>
+</head>
+<body>
+  <div id="wrapper">
+    <div id="header" class="row">
+      <div class="c2 logo">
+      </div>
+      <div class="c1 title">
+        <h1>Account Manager</h1>
+      </div>
+    </div>
+    <ul id="accounts">
+      <li class="row"> <!-- twitter -->
+        <div class="accountHeaders">
+          <div class="c1">
+            <h1><img src="i/twitterIcon.png"> Twitter accounts</h1>
+          </div>
+          <div class="c2 accountOptions">
+            <h1>Options</h1>
+          </div>
+        </div>
+        <ul class="accountListing">
+          <li>
+            <div class="c2"><a href="#">@_andychung</a></div>
+            <div class="c1 accountOptions">
+              <a href="#">remove</a>
+            </div>
+          </li>
+          <li>
+            <div class="c2"><a href="#">@mozillaraindrop</a></div>
+            <div class="c1 accountOptions">
+              <a href="#">remove</a>
+            </div>
+          </li>
+        </ul>
+      </li>
+      <li class="row"> <!-- facebook -->
+        <div class="accountHeaders">
+          <div class="c1">
+            <h1><img src="i/facebookIcon.png"> Facebook accounts</h1>
+          </div>
+          <div class="c2 accountOptions">
+            <h1>Options</h1>
+          </div>
+        </div>
+        <ul class="accountListing">
+          <li>
+            <div class="c2"><a href="#">Andy Chung (animalyouth@gmail.com)</a></div>
+            <div class="c1 accountOptions">
+              <a href="#">remove</a>
+            </div>
+          </li>
+        </ul>
+      </li>
+      <li class="row"> <!-- gmail -->
+        <div class="accountHeaders">
+          <div class="c1">
+            <h1><img src="i/gmailIcon.png"> Gmail accounts</h1>
+          </div>
+          <div class="c2 accountOptions">
+            <h1>Options</h1>
+          </div>
+        </div>
+        <ul class="accountListing">
+          <li>
+            <div class="c2"><a href="#">animalyouth@gmail.com</a></div>
+            <div class="c1 accountOptions">
+              <a href="#">remove</a>
+            </div>
+          </li>
+          <li>
+            <div class="c2"><a href="#">jn.rlly@gmail.com</a></div>
+            <div class="c1 accountOptions">
+              <a href="#">remove</a>
+            </div>
+          </li>
+          <li>
+            <div class="c2"><a href="#">momo@gmail.com</a></div>
+            <div class="c1 accountOptions">
+              <a href="#">remove</a>
+            </div>
+          </li>
+        </ul>
+      </li>
+    </ul>
+    <div id="footer" class="row">
+      <div class="c3">
+        Mozilla Messaging 2010
+      </div>
+    </div>
+  </div>
+</body>
