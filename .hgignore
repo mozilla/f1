@@ -10,3 +10,4 @@ env
 data\/sessions
 \.DS_Store
 development.db
+^grinder/.*\.log.*
