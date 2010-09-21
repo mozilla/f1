@@ -33,16 +33,22 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
         actions = {
             'twitter.com': {
                 medium: 'twitter',
+                name: 'Twitter',
+                icon: 'i/twitterIcon.png',
                 revokeUrl: 'http://twitter.com/settings/connections',
                 signOutUrl: 'http://twitter.com/logout'
             },
             'facebook.com': {
                 medium: 'facebook',
+                name: 'Facebook',
+                icon: 'i/facebookIcon.png',
                 revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
                 signOutUrl: 'http://facebook.com'
             },
             'google.com': {
                 medium: 'google',
+                name: 'Gmail',
+                icon: 'i/gmailIcon.png',
                 revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
                 signOutUrl: 'http://google.com/preferences'
             }
@@ -51,6 +57,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
         services = ['twitter.com', 'facebook.com', 'google.com'];
 
     jig.addFn({
+        serviceName: function(domain) {
+            return actions[domain].name;
+        },
+        serviceIcon: function (domain) {
+            return actions[domain].icon;
+        },
         accounts: function(service) {
             return accounts[service];
         },
@@ -103,7 +115,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
                             domainObj = accounts[domain] || (accounts[domain] = []);
                         domainObj.push(account);
                     });
-                    $('#statuses').append(jig('#services', services));
+                    $('#accounts').append(jig('#service', services));
                 }
             });
         }
@@ -111,17 +123,17 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
 
     $(function () {
         $('body')
-            .delegate('button.close', 'click', function (evt) {
+            .delegate('.close', 'click', function (evt) {
                 window.close();
             })
-            .delegate('button.connectButton', 'click', function (evt) {
+            .delegate('.connectButton', 'click', function (evt) {
                 var buttonNode = evt.target,
                     domain = buttonNode.getAttribute('data-domain');
                     oauth(domain, function () {
                         location.reload();
                     });
             })
-            .delegate('button.disconnectButton', 'click', function (evt) {
+            .delegate('.disconnectButton', 'click', function (evt) {
                 var buttonNode = evt.target,
                     domain = buttonNode.getAttribute('data-domain'),
                     username = buttonNode.getAttribute('data-username'),

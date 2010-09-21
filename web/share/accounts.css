@@ -1,171 +1,146 @@
-@import url(share.css);
+* {
+  margin: 0;
+  padding: 0;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  list-style-type: none;
+}
 
 body {
-    max-width: 500px;
-    margin: 20px auto;
-    border: 0;
-    max-height: inherit;
-    overflow: auto;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 21px;
+  color: #0a0a0a;
+}
+
+button::-moz-focus-inner { 
+  border: 0; 
+}
+
+a {
+  color: #00a0ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
 
 h1 {
-    font-size: 130%;
-    font-weight: bold;
+  font-size: 14px;
+  color: #0a0a0a;
 }
 
-h2 {
-    font-size: 110%;
-    font-weight: bold;
+/* grid */
+
+.c1, .c2, .c3 {
+  display: inline-block;
+  float: left;
+  min-height: 1%;
+  margin: 0 10px;
+  position: relative;
 }
 
-.svcActions {
-    margin-left: 100px;
+.c1 {
+  width: 220px;
 }
 
-.svcAccounts {
-    margin-left: 100px;
+.c2 {
+  width: 460px;
 }
 
-.svcAccounts li {
-    margin-top: 20px;
+.c3 {
+  width: 700px;
 }
 
-.svcAccounts li > div {
-    margin: 5px 0;
+.row {
+  float: left;
+  margin: 10px 0;
 }
 
-.domainHeader {
-    margin-top: 40px;
-    border-top: 1px solid #CCCCCC;
-    overflow: hidden;
+.row.about {
+  margin: 20px 0;
 }
 
-.domainLink {
-    display: block;
+/* end grid */
+
+#wrapper {
+  width: 720px;
+  margin: 0 auto;
+  overflow: hidden;
+  padding: 0 0 60px 0;
 }
 
-.imageContainer,
-.name {
-    width: 97px;
-    text-align: center;
+#header.row {
+  margin: 36px 0;
 }
 
-.accountImage {
-    -moz-box-shadow: 1px 1px 3px #555555;
-    width: 48px;
-    height: 48px;
+#header.row .c1,
+#header.row .c2 {
+  min-height: 60px;
 }
 
-.actions {
-    margin-top: 15px;
+#header.row .logo {
+  background-image: url("i/ldsplash.png");
+  background-repeat: no-repeat;
 }
 
-.actions > * {
-    display: block;
+#header.row .title h1 {
+  line-height: 60px;
+  text-align: right;
+  font-size: 16px;
+  font-weight: normal;
 }
 
-/* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
-/* hbox and vbox classes */
- 
-.hbox {
-	display: -webkit-box;
-	-webkit-box-orient: horizontal;
-	-webkit-box-align: stretch;
- 
-	display: -moz-box;
-	-moz-box-orient: horizontal;
-	-moz-box-align: stretch;
- 
-	display: box;
-	box-orient: horizontal;
-	box-align: stretch;
+#accounts .row {
+  padding: 10px 0 20px;
+  margin: 0;
+  border-width: 0 0 1px 0;
+  border-style: solid;
+  border-color: #e6e6e6;
 }
- 
-.hbox > * {
-	-webkit-box-flex: 0;
-	-moz-box-flex: 0;
-	box-flex: 0;
-	display: block;
+
+#accounts .row:last-child {
+  border-bottom: none;
 }
- 
-.vbox {
-	display: -webkit-box;
-	-webkit-box-orient: vertical;
-	-webkit-box-align: stretch;
- 
-	display: -moz-box;
-	-moz-box-orient: vertical;
-	-moz-box-align: stretch;
- 
-	display: box;
-	box-orient: vertical;
-	box-align: stretch;
+
+#accounts .accountHeaders {
+  float: left;
+  padding: 10px 0 7px;
 }
- 
-.vbox > * {
-	-webkit-box-flex: 0;
-	-moz-box-flex: 0;
-	box-flex: 0;
-	display: block;
+
+#accounts .accountHeaders img {
+  vertical-align: text-top;
 }
- 
-.spacer {
-	-webkit-box-flex: 1;
-	-moz-box-flex: 1;
-	box-flex: 1;
+
+#accounts ul.accountListing li {
+  float: left;
+  padding: 7px 0;
 }
- 
-.reverse {
-	-webkit-box-direction: reverse;
-	-moz-box-direction: reverse;
-	box-direction: reverse;
+
+#accounts ul.accountListing li:hover {
+  background-color: #F2F7FA;
 }
- 
-.boxFlex0 {
-	-webkit-box-flex: 0;
-	-moz-box-flex: 0;
-	box-flex: 0;
+
+#accounts .accountOptions {
+  text-align: right;
 }
- 
-.boxFlex1, .boxFlex {
-	-webkit-box-flex: 1;
-	-moz-box-flex: 1;
-	box-flex: 1;
+
+#accounts .accountOptions a:hover {
+  color: red;
+  text-decoration: none;
 }
- 
-.boxFlex2 {
-	-webkit-box-flex: 2;
-	-moz-box-flex: 2;
-	box-flex: 2;
+
+#accounts .accountOptions a:hover:before {
+  content: "× ";
 }
- 
-.boxGroup1 {
-	-webkit-box-flex-group: 1;
-	-moz-box-flex-group: 1;
-	box-flex-group: 1;
+  
+#footer.row {
+  position: fixed;
+  bottom: 0;
+  background-color: rgba(255,255,255,0.5);
+  border-top: 1px solid #e6e6e6;
+  margin: 5px 0 0 0;
+  font-size: 10px;
+  color: #888;
 }
- 
-.boxGroup2 {
-	-webkit-box-flex-group: 2;
-	-moz-box-flex-group: 2;
-	box-flex-group: 2;
-}
- 
-.start {
-	-webkit-box-pack: start;
-	-moz-box-pack: start;
-	box-pack: start;
-}
- 
-.end {
-	-webkit-box-pack: end;
-	-moz-box-pack: end;
-	box-pack: end;
-}
- 
-.center {
-	-webkit-box-pack: center;
-	-moz-box-pack: center;
-	box-pack: center;
-}
-/* END hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */

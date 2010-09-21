@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Accounts</title>
+    <title>Linkdrop: Account Manager</title>
 
   <link rel="stylesheet" type="text/css" href="accounts.css">
 
@@ -10,49 +10,60 @@
   <script>require(["accounts.js"]);</script>
 </head>
 <body>
-<h1>Accounts</h1>
-<button class="close">Close</button>
 
-<div id="notifications"></div>
-    <ol id="statuses">
-    </ol>
 
-    <div id="error" class="template">There was an error: {message}</div>
-
-    <div id="services" class="template services">
-        {[}
-            <div class="domainHeader">
-                <h2>{}</h2>
-                <ul class="svcActions">
-                    <li><a class="domainLink" href="http://{}" target="_blank">Check signed-in account at {}</a></li>
-                    <li><a class="domainLink" href="{revokeUrl(_)}" target="_blank">Tell {} to not allow Linkdrop any more</a></li>
-                </ul>
-            </div>
-            <ul class="svcAccounts">
-                {accounts(_) [}
-                    {#account}
-                {] [}
-                    <li><button class="connectButton" data-domain="{}">Add {} account to Linkdrop</button></li>
-                {]}
-            </ul>
-        {]}
+<div id="wrapper">
+  <div id="header" class="row">
+    <div class="c2 logo">
     </div>
-    <li id="account" class="template account hbox">
-        {. svcAccount accounts[0]}
-        {. domain svcAccount.domain}
-        {. medium getMedium(domain)}
-        <div class="accountInfo">
-            <div class="imageContainer"><img class="accountImage" src="{profilePic(photos)}"></div>
-            <div class="name">{displayName}</div>
-        </div>
-        <div class="actions boxFlex">
-            <button class="disconnectButton" data-domain="{domain}" data-username="{svcAccount.username}" data-userid="{svcAccount.userid}">Tell Linkdrop to forget this account</button>
-        </div>
-    </li>
-<!--
-http://twitter.com/settings/connections
+    <div class="c1 title">
+      <h1>Account Manager - <a href="#" class="close">Close</a></h1>
+    </div>
+  </div>
 
-http://www.facebook.com/editapps.php?v=allowed
--->
+  <div id="notifications"></div>
+
+  <ul id="accounts"></ul>
+
+  <div id="footer" class="row">
+    <div class="c3">
+      Mozilla Messaging 2010
+    </div>
+  </div>
+</div>
+
+<script id="service" type="text/template">
+  <li class="row">
+    <div class="accountHeaders">
+      <div class="c1">
+        <h1><img src="{serviceIcon(_)}"> {serviceName(_)} accounts</h1>
+      </div>
+      <div class="c2 accountOptions">
+        <h1>Options</h1>
+      </div>
+    </div>
+    <ul class="accountListing">
+      {accounts(_) [}
+        <li>
+          {.userAccount accounts[0]}
+          <div class="c2"><a href="#">{userAccount.username} [{userAccount.userid}]</a></div>
+          <div class="c1 accountOptions">
+            <a href="#" class="disconnectButton" data-domain="{domain}" data-username="{svcAccount.username}" data-userid="{svcAccount.userid}">remove</a>
+          </div>
+        </li>
+      {] [}
+        <li>
+          <div class="c2">&nbsp;</div>
+          <div class="c1 accountOptions">
+            <a href="#"class="connectButton" data-domain="{}">add</a>
+          </div>
+        </li>
+      {]}
+    </ul>
+  </li>
+</script>
+
+<div id="error" class="template">There was an error: {message}</div>
+
 </body>
 </html>
