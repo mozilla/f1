@@ -17,7 +17,7 @@
     <div class="c2 logo">
     </div>
     <div class="c1 title">
-      <h1>Account Manager - <a href="#" class="close">Close</a></h1>
+      <h1>Account Manager - <a href="#" class="close">close</a></h1>
     </div>
   </div>
 
@@ -52,10 +52,12 @@
           </div>
         </li>
       {] [}
-        <li>
-          <div class="c2">&nbsp;</div>
+        <li class="noAccount">
+          <div class="c2 addAccount">
+            No {serviceName(_)} accounts configured 
+          </div>
           <div class="c1 accountOptions">
-            <a href="#" class="connectButton" data-domain="{}">add</a>
+            <a href="#" class="connectButton" title="add a {serviceName(_)} account!" data-domain="{}">add account</a>
           </div>
         </li>
       {]}
