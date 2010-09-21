@@ -46,16 +46,16 @@
       {accounts(_) [}
         <li>
           {.userAccount accounts[0]}
-          <div class="c2"><a href="#">{userAccount.username} [{userAccount.userid}]</a></div>
+          <div class="c2"><a href="{accountLink(_)}" target="_blank">{displayName}</a></div>
           <div class="c1 accountOptions">
-            <a href="#" class="disconnectButton" data-domain="{domain}" data-username="{svcAccount.username}" data-userid="{svcAccount.userid}">remove</a>
+            <a href="#" class="disconnectButton" data-domain="{userAccount.domain}" data-username="{userAccount.username}" data-userid="{userAccount.userid}">remove</a>
           </div>
         </li>
       {] [}
         <li>
           <div class="c2">&nbsp;</div>
           <div class="c1 accountOptions">
-            <a href="#"class="connectButton" data-domain="{}">add</a>
+            <a href="#" class="connectButton" data-domain="{}">add</a>
           </div>
         </li>
       {]}

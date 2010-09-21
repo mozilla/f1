@@ -36,21 +36,30 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
                 name: 'Twitter',
                 icon: 'i/twitterIcon.png',
                 revokeUrl: 'http://twitter.com/settings/connections',
-                signOutUrl: 'http://twitter.com/logout'
+                signOutUrl: 'http://twitter.com/logout',
+                accountLink: function (account) {
+                    return 'http://twitter.com/' + account.username
+                }
             },
             'facebook.com': {
                 medium: 'facebook',
                 name: 'Facebook',
                 icon: 'i/facebookIcon.png',
                 revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
-                signOutUrl: 'http://facebook.com'
+                signOutUrl: 'http://facebook.com',
+                accountLink: function (account) {
+                    return 'http://www.facebook.com/profile.php?id=' + account.userid;
+                }
             },
             'google.com': {
                 medium: 'google',
                 name: 'Gmail',
                 icon: 'i/gmailIcon.png',
                 revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
-                signOutUrl: 'http://google.com/preferences'
+                signOutUrl: 'http://google.com/preferences',
+                accountLink: function (account) {
+                    return 'http://google.com/profiles/' + account.username;
+                }
             }
         },
         //An ordered list of services, used to show all the services supported
@@ -78,6 +87,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
         },
         revokeUrl: function (domain) {
             return actions[domain].revokeUrl;
+        },
+        accountLink: function (userAccount) {
+            var account = userAccount.accounts[0];
+            return actions[account.domain].accountLink(account);
         }
     });
 
