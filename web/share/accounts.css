@@ -92,6 +92,30 @@ h1 {
   font-weight: normal;
 }
 
+#header.row .title h1 a.close {
+  font-size: 11px;
+  color: #0a0a0a;
+  outline: none;
+  text-decoration: none;
+  padding: 5px 10px;
+  background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
+  border: 1px solid #888888;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+}
+
+#header.row .title h1 a.close:hover {
+  border: 1px solid #444;
+}
+
+#header.row .title h1 a.close:active {
+  background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
+  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
+  -webkit-box-shadow: 0 0 1px #666666 inset;
+  -moz-box-shadow: 0 0 1px #666666 inset;
+}
+
 #accounts .row {
   padding: 10px 0 20px;
   margin: 0;
