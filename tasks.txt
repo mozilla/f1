@@ -15,29 +15,44 @@ Tasks:
 
 * Start Page for the add-on
   * Video explaining it
+    * Sell video: make the case for using the extension. 45 seconds or less.
+  * Video on reload after install
+    * How to use it. Adding accounts then doing a share. Can be longer
   * Link to to install extension (host locally for now)
 
 * First experience clicking on the share button
 
 * Create a neutral UI for the sharing dropdown - Andy
 
+* Make sure name next to tab is not hyperlinked
+
+* If navigate away, first time, shrink the bar, tell them they can click on the
+  share button to bring it back.
+
 * Change the sharing flow:
-  * Change "need auth" screen
-  * Change retry screen
-  * Change error screen
+  * use box overlay when doing the share instead of shrinking the screen.
+  * Rewrite "need auth" screen
+    * If do share, but account changes, then do not auto share, go back to share,
+      with new account info, let them know that account changed.
+  * Rewrite retry screen
+  * Rewrite error screen
+    * If deny facebook, then tell them "You denied it...,"
   * Provide specialized positive feedback on first share
   * Provide positive feedback experience for every share
     * Indicate bookmarking is being done, option to opt out.
 
-* Account settings page:
-  * List possible services (twitter/facebook for testing)
-  * Show list of accounts that Linkdrop knows about, which ones are active,
-    a way to sign in/out for each one.
-  * Explain how to revoke Linkdrop from their service
-  * For sign out:
-    * Navigate to signout URL for the particular host in a browser window, to
-      clear their browser cookies for that site
-    * Call new Linkdrop API to remove that account from Linkdrop session.
+* Account settings tab (no standalone page):
+  * Detect twitter/facebook logged in reliable:
+    * Load twitter.com, look for <meta content="userNameHere" name="session-user-screen_name" />
+    * Load facebook.com: grep for new Presence(\"100000423120383\". A bit brittle.
+    * Both hit the web site, so triggers analytics/facebook may try to sign you into chat? Sound
+      in the background?
+  * If user clicks add then does deny on oauth window, need to capture the failure and
+    tell the user about it.
+  * Add accounts, then keep them in settings, put a tooltip to the tab after account is set up.
+  * If user clicks remove link, then add, always use OAuth forceLogin, but only for
+    the remove/add case, not for first adds.
+  * Add a "What is this?" link to the settings page that pops the main share/install page in a new browser.
 
 * Bugs
   * Twitter: if api send gets 403 duplicate, then we show need to authenticate instead of duplicate.
