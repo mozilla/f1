@@ -96,14 +96,14 @@ class ProfilerMiddleware():
     line profiling requires line_profiler: easy_install line_profiler
     """
         
-    def __init__(self, app, config, type='call', pprint='0', sort='time', grind='0', builtin='0', dir=None):
+    def __init__(self, app, g_config, config):
         self.app = app
-        self.profile_type = type
-        self.profile_print = bool(int(pprint))
-        self.profile_sort = sort
-        self.profile_grind = bool(int(grind))
-        self.profile_builtin = bool(int(builtin))
-        self.profile_data_dir = dir
+        self.profile_type = config.get('type', 'call')
+        self.profile_print = bool(int(config.get('pprint','0')))
+        self.profile_sort = config.get('sort', 'time')
+        self.profile_grind = bool(int(config.get('grind','0')))
+        self.profile_builtin = bool(int(config.get('builtin','0')))
+        self.profile_data_dir = config.get('dir', None)
 
     def __call__(self, environ, start_response):
         """ 
@@ -199,12 +199,12 @@ class ProfilerMiddleware():
                 data.close()
         return body
 
-def make_profile_middleware(app, global_conf, type='call', pprint='0', sort='time', grind='0', builtin='0', dir=None):
+def make_profile_middleware(app, global_conf, **kw):
     """
     Wrap the application in a component that will profile each
     request.  
     """
-    return ProfilerMiddleware(app, global_conf, type, pprint, sort, grind, builtin, dir)
+    return ProfilerMiddleware(app, global_conf, kw)
 
 class DBGPMiddleware():
     """WSGI Middleware which loads the PyDBGP debugger.
