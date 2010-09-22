@@ -82,14 +82,5 @@ The 'link' namespace is used to access information regarding the shortened links
         # important to canonicalize the URL
         if (not url.startswith('http://')):
             url = 'http://' + url
-        link = Link()
-        #print "shortening: ", url
-        link.long_url = url
-        link.userkey = ''
-        link.audience = ''
-        link.shorten()
-        #print "short_url = " + link.short_url
-        Session.add(link)
-        session.save()
-        Session.commit()
+        link = Link.get_or_create(url)
         return {'result': link.to_dict()}

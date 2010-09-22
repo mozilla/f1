@@ -12,10 +12,9 @@ from pylons.decorators.util import get_pylons
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
 from linkdrop.lib.oauth import get_provider
-from linkdrop.lib.links import sign_link
 
 from linkdrop.model.meta import Session
-from linkdrop.model import Account, History
+from linkdrop.model import Account, History, Link
 from linkdrop.model.types import UTCDateTime
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
@@ -34,6 +33,7 @@ The 'send' namespace is used to send updates to our supported services.
 
     @api_response
     @json_exception_response
+    #@profile
     def send(self):
         result = {}
         error = None
@@ -97,8 +97,9 @@ The 'send' namespace is used to send updates to our supported services.
             for key, val in request.POST.items():
                 setattr(history, key, val)
             Session.add(history)
-            link = sign_link(shorturl, acct.username)
-            Session.commit()
+            # remove for now until we have a need to do this
+            #link = sign_link(shorturl, acct.username)
+            #Session.commit()
             result['linkdrop'] = history.id
             result['shorturl'] = shorturl
             result['from'] = userid
