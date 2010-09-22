@@ -10,6 +10,11 @@ debug = true
 smtp_server = localhost
 error_email_from = paste@localhost
 
+# add bitly info then change test_shortener to no
+test_shortener = yes
+bitly.userid = FILL_ME_IN
+bitly.key = FILL_ME_IN
+
 # Register with twitter at http://dev.twitter.com/apps/new
 oauth.twitter.com.consumer_key = FILL_ME_IN
 oauth.twitter.com.consumer_secret = FILL_ME_IN
