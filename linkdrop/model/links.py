@@ -22,11 +22,8 @@ class Link(JsonExpandoMixin, SerializerMixin, Base):
     short_url = Column(RDUnicode(128), nullable=False, index=True, default='')
     audience = Column(RDUnicode(128), nullable=False, default='')
 
-    def __init__(self):
-        self.test_shortener = asbool(config.get('test_shortener'))
-
     def shorten(self):
-        if self.test_shortener:
+        if asbool(config.get('test_shortener')):
             assert self.id is not None
             self.short_url = url(controller='links', action='get', id=self.id, qualified=True)
         else:
@@ -46,7 +43,7 @@ class Link(JsonExpandoMixin, SerializerMixin, Base):
             l.long_url = longurl
             l.userkey = author
             Session.add(l)
-            if self.test_shortener:
+            if asbool(config.get('test_shortener')):
                 # add and commit to get the id, then shorten
                 Session.commit()
                 Session.flush()
