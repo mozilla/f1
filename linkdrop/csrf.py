@@ -48,7 +48,7 @@ class CsrfMiddleware(object):
                 and request.path_info.startswith(self.unprotected_path)):
                 resp = request.get_response(self.app)
                 resp.headers['X-Frame-Options'] = 'SAMEORIGIN'
-                resp.set_cookie('csrf', csrf_token, expires=3600)
+                resp.set_cookie('csrf', csrf_token, max_age=3600)
                 return resp(environ, start_response)
 
             # check incoming token
@@ -68,7 +68,7 @@ class CsrfMiddleware(object):
             return resp(environ, start_response)
 
         resp.headers['X-Frame-Options'] = 'SAMEORIGIN'
-        resp.set_cookie('csrf', csrf_token, expires=3600)
+        resp.set_cookie('csrf', csrf_token, max_age=3600)
 
         if resp.content_type.split(';')[0] in _HTML_TYPES:
             # ensure we don't add the 'id' attribute twice (HTML validity)
