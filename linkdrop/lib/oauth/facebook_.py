@@ -133,7 +133,7 @@ class responder(OAuth2):
 
 class api():
      def __init__(self, account):
-          self.access_token = account.oauth_token
+          self.access_token = account.get('oauth_token')
           
      def rawcall(self, url, body):
           url = url +"?"+urllib.urlencode(dict(access_token=self.access_token))

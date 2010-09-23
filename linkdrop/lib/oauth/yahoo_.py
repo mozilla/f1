@@ -83,7 +83,7 @@ class api():
     def __init__(self, account):
         self.config = get_oauth_config(domain)
         self.account = account
-        self.oauth_token = oauth.Token(key=account.oauth_token, secret=account.oauth_token_secret)
+        self.oauth_token = oauth.Token(key=account.get('oauth_token'), secret=account.get('oauth_token_secret'))
         self.consumer_key = self.config.get('consumer_key')
         self.consumer_secret = self.config.get('consumer_secret')
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
@@ -135,7 +135,7 @@ class api():
 
     def sendmessage(self, message, options={}):
         result = error = None
-        from_ = self.account.profile.get('verifiedEmail')
+        from_ = self.account.get('profile',{}).get('verifiedEmail')
         to_ = options['to']
         subject = options.get('subject')
 

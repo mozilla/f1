@@ -92,8 +92,8 @@ class responder(OAuth1):
 
 class api():
     def __init__(self, account=None, oauth_token=None, oauth_token_secret=None):
-        self.oauth_token = account and account.oauth_token or oauth_token
-        self.oauth_token_secret = account and account.oauth_token_secret or oauth_token_secret
+        self.oauth_token = account and account.get('oauth_token') or oauth_token
+        self.oauth_token_secret = account and account.get('oauth_token_secret') or oauth_token_secret
         self.config = get_oauth_config(domain)
 
     def api(self):

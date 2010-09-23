@@ -32,8 +32,7 @@ OAuth authorization api.
     @json_exception_response
     def get(self, domain=None):
         keys = [k for k in session.get('account_keys', '').split(',') if k]
-        accts = Session.query(Account).filter(Account.key.in_(keys)).all()
-        return [a.profile for a in accts]
+        return [session[k].get('profile') for k in keys]
         
     def signout(self):
         domain = request.params.get('domain')
@@ -42,13 +41,17 @@ OAuth authorization api.
         if domain and username or userid:
             try:
                 keys = [k for k in session.get('account_keys', '').split(',') if k]
+                for k in keys:
+                    session.pop(k)
                 _and = [Account.domain==domain]
                 if username:
                     _and.append(Account.username==username)
                 if userid:
                     _and.append(Account.userid==userid)
-                new_keys = Session.query(Account.key).filter(Account.key.in_(keys)).filter(not_(and_(*_and))).all()
-                session['account_keys'] = ','.join([k[0] for k in new_keys])
+                accts = Session.query(Account).filter(Account.key.in_(keys)).filter(not_(and_(*_and))).all()
+                session['account_keys'] = ','.join([a.key for a in accts])
+                for a in accts:
+                    session[a.key] = a.to_dict()
             except:
                 session.clear()
         else:
@@ -69,6 +72,7 @@ OAuth authorization api.
         if acct.key not in keys:
             keys.append(acct.key)
             session['account_keys'] = ','.join(keys)
+            session[acct.key] = acct.to_dict()
             session.save()
         return acct
 
@@ -97,6 +101,10 @@ OAuth authorization api.
             if 'oauth_token_secret' in user:
                 acct.oauth_token_secret = user['oauth_token_secret']
             Session.commit()
+            # XXX argh, this is also done in get_or_create above, but we have to
+            # ensure we have the updated data
+            session[acct.key] = acct.to_dict()
+            session.save()
         except Exception, e:
             import traceback
             traceback.print_exc()

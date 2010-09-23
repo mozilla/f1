@@ -14,7 +14,7 @@ from linkdrop.lib.helpers import json_exception_response, api_response, api_entr
 from linkdrop.lib.oauth import get_provider
 
 from linkdrop.model.meta import Session
-from linkdrop.model import Account, History, Link
+from linkdrop.model import History, Link
 from linkdrop.model.types import UTCDateTime
 from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
 
@@ -33,7 +33,6 @@ The 'send' namespace is used to send updates to our supported services.
 
     @api_response
     @json_exception_response
-    #@profile
     def send(self):
         result = {}
         error = None
@@ -62,22 +61,15 @@ The 'send' namespace is used to send updates to our supported services.
         provider = get_provider(domain)
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
-        try:
-            q = Session.query(Account).filter(Account.key.in_(keys)).filter(Account.domain==domain)
-            if username:
-                q = q.filter(Account.username==username)
-            if userid:
-                q = q.filter(Account.userid==userid)
-            acct = q.one()
-        except MultipleResultsFound:
+        acct = None
+        for k in keys:
+            a = session.get(k)
+            if a and a.get('domain') == domain and (a.get('username')==username or a.get('userid')==userid):
+                acct = a
+                break
+        if not acct:
             error = {'provider': domain,
-                     'reason': "Multiple accounts for %s were found, username or userid required" % domain,
-                     'code': 409
-            }
-            return {'result': result, 'error': error}
-        except NoResultFound:
-            error = {'provider': domain,
-                     'reason': "no user account for that domain",
+                     'reason': "not logged in or no user account for that domain",
                      'code': 401
             }
             return {'result': result, 'error': error}
@@ -92,14 +84,14 @@ The 'send' namespace is used to send updates to our supported services.
             # create a new record in the history table.
             assert result
             history = History()
-            history.account = acct
+            history.account_id = acct.get('id')
             history.published = UTCDateTime.now()
             for key, val in request.POST.items():
                 setattr(history, key, val)
             Session.add(history)
             # remove for now until we have a need to do this
             #link = sign_link(shorturl, acct.username)
-            #Session.commit()
+            Session.commit()
             result['linkdrop'] = history.id
             result['shorturl'] = shorturl
             result['from'] = userid
