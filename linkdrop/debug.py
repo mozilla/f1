@@ -60,11 +60,18 @@ class ContextualProfile(Profile):
 
 # avoid having to remove all @profile decorators if you want to do
 # a quick change to call profiling
-def empty_profiler(f):
-    return f
+def profile_wrapper(func):
+    from decorator import decorator
+    def wrap(_f, *args, **kwds):
+        if not hasattr(_f, '_prof_wrapped'):
+            f = _profiler(_f)
+            f._prof_wrapped = True
+        return f(*args, **kwds)
+    return decorator(wrap, func)
 
 import __builtin__
-__builtin__.__dict__['profile'] = empty_profiler
+__builtin__.__dict__['_profiler'] = None
+__builtin__.__dict__['profile'] = profile_wrapper
 
 class ProfilerMiddleware():
     """WSGI Middleware which profiles the subsequent handlers and outputs cachegrind files.
@@ -164,9 +171,7 @@ class ProfilerMiddleware():
             p = prof = ContextualProfile()
 
         if self.profile_builtin:
-            p = __builtin__.__dict__.get('profile', None)
-            if not p or p == empty_profiler:
-                p = __builtin__.__dict__['profile'] = prof
+            __builtin__.__dict__['_profiler'] = p
 
         if self.profile_type == 'line':
             # reset the profile for the next run
