@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Linkdrop Alpha</title>
   <link rel="stylesheet" type="text/css" href="share.css">
-
   <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
   <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
   <script>require(["index.js"]);</script>
@@ -31,22 +31,22 @@
 <div id="tabs">
 
   <div class="wrap">
-  <ul class="nav">
+  <ul class="nav clearfix">
     <li><a class="icon twitter" href="#twitter"><span class="name">Twitter</span></a></li>
     <li><a class="icon facebook" href="#facebook"><span class="name">Facebook</span></a></li>
     <li class="gmailTab"><a class="icon gmail" href="#gmail"><span class="name">Gmail</span></a></li>
     <li class="debugTab"><a class="icon debug" href="#debug"><span class="name">debug</span></a></li>
     <li class="settings"><a class="icon settings" href="#settings"><span class="name"></span></a></li>
     <div class="user-info">
-        <span class="status inactive"></span>
-        <span class="username"></span>
         <span class="avatar"><img class="avatar" src=""></span>
+        <span class="username"></span>
+        <span class="status inactive"></span>
     </div>
   </ul>
   </div>
 
   <div id="twitter">
-    <form name="twitterSend" class="messageForm" action="#">
+    <form name="twitterSend" class="messageForm hbox" action="#">
       <div class="user inactive col" data-domain="twitter.com">
       <input type="hidden" name="domain" value="twitter.com" />
       <input type="hidden" name="userid" value="" />
@@ -54,7 +54,7 @@
         <span class="avatar"><img class="avatar" src="i/face2.png"></span>
         <span class="username">Twitter User</span>
       </div>
-      <div class="thumb col">
+      <div class="thumb">
         <div class="image"><img class="thumb"/></div>
         <div class="meta">
           <div class="title"></div>
@@ -63,19 +63,16 @@
           <a title="A smaller, shorter link to use for Twitter" class="surl"></a>
         </div>
       </div>
-      <div class="message col twitterCounter">
+      <div class="message twitterCounter boxFlex">
         <textarea class="message short" name="message"></textarea>
         <div class="counter"></div>
       </div>
-      <div class="button col">
-        <button type="submit">share</button>
-      </div>
+      <button class="share" type="submit">share</button>
     </form>
-    <div id="resultReason">&nbsp;</div>
   </div>
 
   <div id="facebook">
-    <form name="facebookSend" class="messageForm" action="#">
+    <form name="facebookSend" class="messageForm hbox" action="#">
       <div class="user inactive col">
         <input type="hidden" name="domain" value="facebook.com" />
         <input type="hidden" name="userid" value="" />
@@ -89,7 +86,7 @@
         <span class="avatar"><img class="avatar" src="i/face2.png"></span>
         <span class="username">Facebook User</span>
       </div>
-      <div class="thumb col">
+      <div class="thumb">
         <div class="image"><img class="thumb"/></div>
         <div class="meta">
           <div class="title"></div>
@@ -97,17 +94,15 @@
           <div class="url"></div>
         </div>
       </div>
-      <div class="message col">
+      <div class="message boxFlex">
         <textarea class="message nourl" name="message"></textarea>
       </div>
-      <div class="button col">
-        <button type="submit">share</button>
-      </div>
+      <button class="share" type="submit">share</button>
     </form>
   </div>
 
   <div id="gmail">
-    <form name="googleSend" class="messageForm" action="#">
+    <form name="googleSend" class="messageForm hbox" action="#">
     <div class="user inactive col">
       <input type="hidden" name="domain" value="google.com" />
       <input type="hidden" name="userid" value="" />
@@ -115,16 +110,14 @@
       <span class="avatar"><img class="avatar" src="i/face2.png"></span>
       <span class="username">Gmail User</span>
     </div>
-    <div class="addressing col">
-      <div><input name="to" placeholder="to" type="text" value=""/></div>
-      <div><input name="subject" placeholder="subject" type="text" value=""/></div>
+    <div class="addressing">
+      <input name="to" placeholder="to" type="text" value=""/>
+      <input name="subject" placeholder="subject" type="text" value=""/>
     </div>
-    <div class="message col">
+    <div class="message boxFlex">
       <textarea class="message" name="message"></textarea>
     </div>
-    <div class="button col">
-      <button>share</button>
-    </div>
+    <button class="share" type="submit">share</button>
     </form>
   </div>
 
@@ -145,29 +138,54 @@
   </div>
 
   <div id="settings">
-    <div class="col">
-        <a href="http://www.mozilla.com/en-US/firefox/video/" target="_blank"><img class="video" src="i/video.png"></a>
-    </div>
-    <div class="col videoText">
-        <a href="http://www.mozilla.com/en-US/firefox/video/" target="_blank">Learn more about Linkdrop and how to use by watching a video.</a>
-    </div>
-    <div class="col explainText">
+    <form class="messageForm hbox">
+  <!--
+      <div class="col">
+          <a href="http://www.mozilla.com/en-US/firefox/video/" target="_blank"><img class="video" src="i/video.png"></a>
+      </div>
+      <div class="col videoText">
+          <a href="http://www.mozilla.com/en-US/firefox/video/" target="_blank">Learn more about Linkdrop and how to use by watching a video.</a>
+      </div>
+  -->
+  
+      <ul class="boxFlex">
+        <li>
+          <h1><img src="../share/i/twitterIcon.png"> Twitter</h1>
+          <button class="auth" data-domain="twitter.com">Add Twitter</button>
+        </li>
+        <li>
+          <h1><img src="../share/i/facebookIcon.png"> Facebook</h1>
+          <button class="auth" data-domain="facebook.com">Add Facebook</button>
+        </li>
+        <li>
+          <h1><img src="../share/i/gmailIcon.png"> Gmail</h1>
+          <button class="auth" data-domain="google.com">Add Gmail</button>
+        </li>
+      </ul>
+      
+<!--
+      <div class="boxFlex">
+        <button class="auth" data-domain="twitter.com">Add Twitter</button>
+        <button class="auth" data-domain="facebook.com">Add Facebook</button>
+        <button class="auth" data-domain="google.com">Add Gmail</button>
+      </div>
+-->
+      
+      <div class="explainText">
+        <h1>Settings</h1>
         <span>To share using Linkdrop, add your favorite sharing service to it.</span>
         <a class="accountLink" href="accounts.html" target="_blank">Modify or remove accounts</a>
-    </div>
-    <div class="col">
-      <button class="auth" data-domain="twitter.com">Add Twitter</button>
-      <button class="auth" data-domain="facebook.com">Add Facebook</button>
-      <button class="auth" data-domain="google.com">Add Gmail</button>
-    </div>
+      </div>
+    </form>
   </div>
 
 </div>
 
 <script id="accountTemplate" type="text/template">
     <div class="account">
-        <img src="{profilePic(photos)}"><span class="name">{displayName}</span>
-        <span class="accountDomain">{accounts[0].domain}</span>
+        <!-- <img src="{profilePic(photos)}"> --> 
+        <span title="gmail is properly configured!" class="check">&#x2714;</span> <span class="name">{displayName}</span>
+        <span class="accountDomain">({accounts[0].domain})</span>
     </div>
 </script>
 

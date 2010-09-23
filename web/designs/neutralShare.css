@@ -56,11 +56,6 @@ ul.nav {
   display: block;
   width: 100%;
   padding: 0 10px;
-/*
-  background-image: url("i/linkdropiconfaded.png");
-  background-repeat: no-repeat;
-  background-position: right 10px;
-*/
 }
 
 ul.nav .username {
@@ -208,10 +203,6 @@ ul.nav li.settings.ui-tabs-selected span.name {
 
 ul.nav li.settings span.name {
   display: none;
-}
-
-ul.nav li.ui-tabs-selected {
-
 }
 
 ul.nav li span.name {
