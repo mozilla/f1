@@ -4,16 +4,13 @@
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
   <link rel="stylesheet" type="text/css" href="style.css">
   <title>Linkdrop</title>
-  <script type="text/javascript">
-  jQuery(function(){
-      jQuery(window).bind('load resize', function(){
-          var h = jQuery('button.download').height();
-          jQuery("button.download").css({ 'margin-top' : (-h/2) });
-      });
-  });    
-  </script>
+  <script type="text/javascript" data-main="index.js" src="../scripts/requireplugins-jquery-1.4.2.js"></script>
 </head>
 <body>
+  <div id="installed">
+    Congratulations, you installed Linkdrop. Click on the button to start to share.
+    <button id="installClose">Hide</button>  
+  </div>
   <div id="wrapper">
     <div id="header" class="row">
       <div class="c2 logo">

@@ -59,6 +59,10 @@ a:hover {
 
 /* end grid */
 
+#installed {
+    display: none;
+}
+
 #wrapper {
   width: 720px;
   margin: 0 auto;
