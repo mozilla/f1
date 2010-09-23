@@ -15,6 +15,9 @@ from webob.exc import HTTPForbidden
 import re
 import itertools
 import random
+# middleware needs to explicitly import the debug module to get
+# the profiler ready
+#import linkdrop.debug
 
 _ERROR_MSG = 'Cross Site Request Forgery detected. Request aborted.'
 
