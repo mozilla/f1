@@ -12,8 +12,14 @@ httpUtilities = HTTPPluginControl.getHTTPUtilities()
 
 log = grinder.logger.output
 
+# Properties read from the grinder .properties file.
+# After how many 'send' requests should we perform oauth?  This is to
+# simulate cookie expiry or session timeouts.
+sends_per_oauth = grinder.getProperties().getInt("linkdrop.sends_per_oauth", 0)
+
 # The URL of the server we want to hit.
-url0 = 'http://127.0.0.1:5000'
+linkdrop_host = grinder.getProperties().getProperty("linkdrop.host", 'http://127.0.0.1:5000')
+
 
 # *sob* - failed to get json packages working.  Using 're' is an option,
 # although it requires you install jython2.5 (which still doesn't have
@@ -22,16 +28,8 @@ url0 = 'http://127.0.0.1:5000'
 _json_ns = {'null': None}
 def json_loads(val):
     return eval(val, _json_ns)
-    
-# Set up a cookie handler to accept all cookies
-class MyCookiePolicyHandler(CookiePolicyHandler):
-    def acceptCookie(self, cookie, request, response):
-        return 1
 
-    def sendCookie(self, cookie, request):
-        return 1
-
-CookieModule.setCookiePolicyHandler(MyCookiePolicyHandler())
+CookieModule.setCookiePolicyHandler(None)
 from net.grinder.plugin.http import HTTPPluginControl
 HTTPPluginControl.getConnectionDefaults().followRedirects = 1
 
@@ -48,57 +46,70 @@ connectionDefaults.defaultHeaders = \
 
 request1 = HTTPRequest()
 
-class TestRunner:
-  """A TestRunner instance is created for each worker thread."""
-  def __init__(self):
-      self.csrf = None
-
-  # A method for each recorded page.
-  def fetchAccounts(self):
+# Here are the "helper functions" used by the actual test.
+def getCSRF():
     threadContext = HTTPPluginControl.getThreadHTTPClientContext()
     CookieModule.discardAllCookies(threadContext)
-    result = request1.GET(url0 + '/api/account/get')
+    result = request1.GET(linkdrop_host + '/api/account/get')
+    assert result.getStatusCode()==200, result
+    csrf = linkdrop = None
     for cookie in CookieModule.listAllCookies(threadContext):
+        if cookie.name == "linkdrop":
+            linkdrop = cookie
         if cookie.name == "csrf":
-            self.csrf = cookie.value
-            break
-    return result
+            csrf = cookie.value
+    assert csrf and linkdrop
+    return csrf, linkdrop
 
-  def authTwitter(self):
+def authTwitter(csrf):
     # Call authorize requesting we land back on /account/get - after
     # a couple of redirects for auth, we should wind up with the data from
     # account/get - which should now include our account info.
-    result = request1.POST(url0 + '/api/account/authorize',
-      ( NVPair('csrftoken', self.csrf),
+    result = request1.POST(linkdrop_host + '/api/account/authorize',
+      ( NVPair('csrftoken', csrf),
         NVPair('domain', 'twitter.com'),
         NVPair('end_point_success', '/api/account/get'),
         NVPair('end_point_auth_failure', '/send/auth.html#oauth_failure'), ),
       ( NVPair('Content-Type', 'application/x-www-form-urlencoded'), ))
-
+    assert result.getStatusCode()==200, result
     data = json_loads(result.getText())
     assert data, 'account/get failed to return data'
     userid = data[0]['accounts'][0]['userid']
     return userid
 
-  def send(self, userid):
-    """POST send (requests 1201-1202)."""
-    result = request1.POST(url0 + '/api/send',
-      ( NVPair('domain', 'twitter.com'),
+def send(userid, csrf, domain="twitter.com", message="take that!"):
+    """POST send."""
+    result = request1.POST(linkdrop_host + '/api/send',
+      ( NVPair('domain', domain),
         NVPair('userid', userid),
-        NVPair('csrftoken', self.csrf),
-        NVPair('message', 'take that!'), ),
+        NVPair('csrftoken', csrf),
+        NVPair('message', message), ),
       ( NVPair('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8'), ))
-
+    assert result.getStatusCode()==200, result
+    assert '"error": null' in result.getText(), result.getText()
     return result
 
-  def doit(self):
-    self.fetchAccounts()
-    userid = self.authTwitter()
-    self.send(userid)
+# The test itself.
+class TestRunner:
+    """A TestRunner instance is created for each worker thread."""
+    def __init__(self):
+        self.csrf = None
+        self.linkdrop_cookie = None
 
-  # wrap the work in a grinder 'Test' - the unit where stats are collected.
-  doit = Test(1, "send with oauth").wrap(doit)
+    def doit(self):
+        if self.csrf is None or \
+           (sends_per_oauth and grinder.getRunNumber() % sends_per_oauth==0):
+            self.csrf, self.linkdrop_cookie = getCSRF()
+            self.userid = authTwitter(self.csrf)
+        # cookies are reset by the grinder each test run - re-inject the
+        # linkdrop session cookie.
+        threadContext = HTTPPluginControl.getThreadHTTPClientContext()
+        CookieModule.addCookie(self.linkdrop_cookie, threadContext)
+        send(self.userid, self.csrf)
 
-  def __call__(self):
-    """This method is called for every run performed by the worker thread."""
-    self.doit()
+    # wrap the work in a grinder 'Test' - the unit where stats are collected.
+    doit = Test(1, "send with oauth").wrap(doit)
+
+    def __call__(self):
+        """This method is called for every run performed by the worker thread."""
+        self.doit()
