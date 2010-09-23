@@ -30,7 +30,5 @@ class HistoryController(BaseController):
             r['domain'] = d
             r['username'] = u
             r['userid'] = i
-            import sys
-            print >>sys.stderr, r
             res.append(r)
         return res
