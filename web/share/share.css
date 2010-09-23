@@ -560,6 +560,18 @@ h1 img {
   width: 253px;
 }
 
+#settings .remove {
+  font-weight: normal;
+  line-height: 7px;
+  padding-left: 28px;
+  display: block;
+}
+
+
+#settings .remove a:hover {
+  color: red;
+}
+
 /* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
 /* hbox and vbox classes */
  
