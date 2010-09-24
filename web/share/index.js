@@ -177,10 +177,10 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       tipDom.css({
         top: top,
         left: left
-      }).fadeIn(3500, function () {
+      }).fadeIn(200, function () {
         setTimeout(function () {
-          tipDom.fadeOut(2000);
-        }, 2000);
+          tipDom.fadeOut(200);
+        }, 5000);
       });
     }, 1000);
   }
