@@ -70,6 +70,8 @@ ul.nav li.hidden {
 ul.nav {
   display: block;
   width: 100%;
+  /* min-height for when all tabs are hidden on first config. */
+  min-height: 32px;
 }
 
 ul.nav li {
@@ -138,7 +140,7 @@ ul.nav li a.icon.settings {
   background-image: url("i/settingsIcon.png");
 }
 
-.toolTip {
+#tabToolTip {
   position: absolute;
   background-color: rgba(0,0,0,0.8);
   color: #fff;
@@ -151,7 +153,7 @@ ul.nav li a.icon.settings {
   line-height: 20px;
 }
 
-.toolTip span.arrow {
+#tabToolTip span.arrow {
   border-color:transparent rgba(0,0,0,0.8) transparent transparent;
   border-style: solid;
   border-width: 10px;

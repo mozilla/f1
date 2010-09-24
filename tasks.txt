@@ -22,8 +22,6 @@ Tasks:
 
 * First experience clicking on the share button
 
-* Create a neutral UI for the sharing dropdown - Andy
-
 * Make sure name next to tab is not hyperlinked
 
 * If navigate away, first time, shrink the bar, tell them they can click on the
@@ -49,10 +47,8 @@ Tasks:
       in the background?
   * If user clicks add then does deny on oauth window, need to capture the failure and
     tell the user about it.
-  * Add accounts, then keep them in settings, put a tooltip to the tab after account is set up.
   * If user clicks remove link, then add, always use OAuth forceLogin, but only for
     the remove/add case, not for first adds.
-  * Add a "What is this?" link to the settings page that pops the main share/install page in a new browser.
 
 * Bugs
   * Twitter: if api send gets 403 duplicate, then we show need to authenticate instead of duplicate.

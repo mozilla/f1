@@ -272,9 +272,7 @@ var ffshare;
     frameAnimationTime: 300,
 
     system: Application.prefs.getValue("linkdrop.system", "prod"),
-    get shareUrl() {
-      return Application.prefs.getValue("linkdrop.share_url", "")
-    },
+    shareUrl: Application.prefs.getValue("linkdrop.share_url", ""),
     useBookmarking: Application.prefs.getValue("linkdrop.bookmarking", true),
 
     shareFrame: null,

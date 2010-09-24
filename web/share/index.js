@@ -41,31 +41,34 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       'twitter.com': {
         medium: 'twitter',
         name: 'Twitter',
+        tabName: 'twitterTab',
         icon: 'i/twitterIcon.png',
         revokeUrl: 'http://twitter.com/settings/connections',
         signOutUrl: 'http://twitter.com/logout',
         accountLink: function (account) {
-            return 'http://twitter.com/' + account.username
+          return 'http://twitter.com/' + account.username;
         }
       },
       'facebook.com': {
         medium: 'facebook',
         name: 'Facebook',
+        tabName: 'facebookTab',
         icon: 'i/facebookIcon.png',
         revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
         signOutUrl: 'http://facebook.com',
         accountLink: function (account) {
-            return 'http://www.facebook.com/profile.php?id=' + account.userid;
+          return 'http://www.facebook.com/profile.php?id=' + account.userid;
         }
       },
       'google.com': {
         medium: 'google',
         name: 'Gmail',
+        tabName: 'gmailTab',
         icon: 'i/gmailIcon.png',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
         signOutUrl: 'http://google.com/preferences',
         accountLink: function (account) {
-            return 'http://google.com/profiles/' + account.username;
+          return 'http://google.com/profiles/' + account.username;
         }
       }
     },
@@ -84,7 +87,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       //TODO: check for a thumbnail picture, hopefully one that is square.
       return photos && photos[0] && photos[0].value || 'i/face2.png';
     },
-    serviceName: function(domain) {
+    serviceName: function (domain) {
       return actions[domain].name;
     }
   });
@@ -160,6 +163,26 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     } else {
       imgNode.width = previewWidth;
     }
+  }
+
+  function showTabToolTip(domain) {
+    var tabClass = actions[domain].tabName,
+        tabNode = $('.' + tabClass)[0],
+        rect = tabNode.getBoundingClientRect(),
+        top = rect.top + 3,
+        left = rect.left + rect.width + 7,
+        tipDom = $('#tabToolTip');
+
+    setTimeout(function () {
+      tipDom.css({
+        top: top,
+        left: left
+      }).fadeIn(3500, function () {
+        setTimeout(function () {
+          tipDom.fadeOut(2000);
+        }, 2000);
+      });
+    }, 1000);
   }
 
   function getServiceUserName(serviceName) {
@@ -354,7 +377,32 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
     getAccounts(function () {
       //Compare the old accounts with new accounts to see if one was added.
-      console.log("here");
+      var oldMap = {}, newMap = {}, domains = [], domain;
+      oldAccounts.forEach(function (account) {
+        oldMap[account.accounts[0].domain] = true;
+        
+      });
+      accounts.forEach(function (account) {
+        domain = account.accounts[0].domain;
+        if (!newMap[domain]) {
+          newMap[domain] = true;
+          domains.push(domain);
+        }
+      });
+
+      //Find the missing domain from the old map.
+      domain = null;
+      domains.some(function (d) {
+        if (!oldMap[d]) {
+          domain = d;
+          return true;
+        }
+        return false;
+      });
+
+      if (domain) {
+        showTabToolTip(domain);
+      }
     });
   }
 
@@ -366,6 +414,11 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     if (!options.title) {
       options.title = options.url;
     }
+    //For now disable guessing on accounts, since it is not reliable.
+    //TODO: remove the services stuff completely later, both here and
+    //in the extension if cannot get reliable account signed in detection in
+    //the browser via the browser cookies.
+    options.services = {};
   }
 
   getAccounts();
