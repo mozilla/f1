@@ -452,7 +452,13 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       cancelStatus(); 
     });
     $('#authOkButton').click(function (evt) {
-      oauth(sendData.domain, sendMessage);
+      oauth(sendData.domain, function (success) {
+        if (success) {
+          sendMessage();
+        } else {
+          showStatus('statusOAuthFailed');
+        }
+      });
     });
 
     //Set up tabs.
@@ -547,8 +553,12 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       var node = evt.target,
         domain = node.getAttribute('data-domain');
 
-      oauth(domain, function () {
-        accountsUpdated();
+      oauth(domain, function (success) {
+        if (success) {
+          accountsUpdated();
+        } else {
+          showStatus('statusOAuthFailed');
+        }
       });
     });
 

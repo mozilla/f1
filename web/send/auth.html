@@ -18,10 +18,11 @@
         require(["require", "jquery", "blade/url"],
         function (require,   $,        url) {
             var target = window.location.href.split('#')[1];
-            if (target) {
+            if (target && (target === 'oauth_success' || target === 'oauth_failure')) {
+                
                 //TODO: ideally lock down the domain be location.hostname, but
                 //a problem for 127 addresses?
-              window.opener.postMessage('authDone', '*');
+              window.opener.postMessage(target, '*');
               window.close();
             }
             var search = window.location.href.split('?')[1];

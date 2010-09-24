@@ -34,9 +34,16 @@ function () {
     //Handle communication from the auth window, when it completes.
     window.addEventListener("message", function (evt) {
         //TODO: ideally lock down the domain check on evt.origin.
-        if (evt.data === 'authDone') {
+        var status = evt.data;
+        if (status) {
+            if (status === 'oauth_success') {
+                status = true;
+            } else {
+                status = false;
+            }
+
             if (authDone) {
-                authDone();
+                authDone(status);
                 authDone = null;
             }
         }

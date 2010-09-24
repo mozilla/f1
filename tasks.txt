@@ -22,8 +22,6 @@ Tasks:
 
 * First experience clicking on the share button
 
-* Make sure name next to tab is not hyperlinked
-
 * If navigate away, first time, shrink the bar, tell them they can click on the
   share button to bring it back.
 
@@ -34,7 +32,6 @@ Tasks:
       with new account info, let them know that account changed.
   * Rewrite retry screen
   * Rewrite error screen
-    * If deny facebook, then tell them "You denied it...,"
   * Provide specialized positive feedback on first share
   * Provide positive feedback experience for every share
     * Indicate bookmarking is being done, option to opt out.
@@ -45,8 +42,6 @@ Tasks:
     * Load facebook.com: grep for new Presence(\"100000423120383\". A bit brittle.
     * Both hit the web site, so triggers analytics/facebook may try to sign you into chat? Sound
       in the background?
-  * If user clicks add then does deny on oauth window, need to capture the failure and
-    tell the user about it.
   * If user clicks remove link, then add, always use OAuth forceLogin, but only for
     the remove/add case, not for first adds.
 

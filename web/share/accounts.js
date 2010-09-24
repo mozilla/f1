@@ -142,8 +142,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
             .delegate('.connectButton', 'click', function (evt) {
                 var buttonNode = evt.target,
                     domain = buttonNode.getAttribute('data-domain');
-                    oauth(domain, function () {
-                        location.reload();
+                    oauth(domain, function (success) {
+                        if (success) {
+                            location.reload();
+                        }
                     });
             })
             .delegate('.disconnectButton', 'click', function (evt) {
