@@ -98,6 +98,7 @@ ul.nav li:nth-child(n+2) {
 ul.nav li.first {
   -moz-border-radius-topleft: 2px;
   -moz-border-radius-bottomleft: 2px;
+  border-left: 1px solid #888888;
 }
 
 ul.nav li.last {
