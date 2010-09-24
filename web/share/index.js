@@ -330,19 +330,25 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       }
       tabDom.tabs('select', selection);
   
-      //Apply first and end classes to whatever tabs are shown.
-      $('.ui-tabs-nav > li').filter(function (i) {
+      //TODO: HACK, clean this up later.
+      updateUserTab(null, {panel: $(selection)[0]});
+    }
+
+    //Apply first and end classes to whatever tabs are shown.
+    $('.ui-tabs-nav > li')
+      //Reset the tabs
+      .removeClass('first')
+      .removeClass('last')
+      //Only grab non-hidden and non-settings tabs.
+      .filter(function (i) {
         var tab = $(this),
             hidden = tab.hasClass('hidden'),
             settings = tab.hasClass('settings');
         return !hidden && !settings;
       })
-        .first().addClass("first").end()
-        .last().addClass("last");
-  
-      //TODO: HACK, clean this up later.
-      updateUserTab(null, {panel: $(selection)[0]});
-    }
+      //Apply the new first and last
+      .first().addClass('first').end()
+      .last().addClass('last');
 
     if (callback) {
       callback();
