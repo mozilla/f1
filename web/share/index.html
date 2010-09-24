@@ -34,23 +34,21 @@
 
 <div id="tabs">
 
-  <div class="wrap">
-  <ul class="nav clearfix">
-    <li class="twitterTab leftTab hidden"><a class="icon twitter" href="#twitter"><span class="name">Twitter</span></a></li>
-    <li class="facebookTab leftTab hidden"><a class="icon facebook" href="#facebook"><span class="name">Facebook</span></a></li>
-    <li class="gmailTab leftTab hidden"><a class="icon gmail" href="#gmail"><span class="name">Gmail</span></a></li>
-    <li class="debugTab"><a class="icon debug" href="#debug"><span class="name">debug</span></a></li>
-    <li class="settings"><a class="icon settings" href="#settings"><span class="name"></span></a></li>
+  <ul class="nav">
+    <li class="twitterTab leftTab hidden"><a class="icon twitter" href="#twitter"></a></li>
+    <li class="facebookTab leftTab hidden"><a class="icon facebook" href="#facebook"></a></li>
+    <li class="gmailTab leftTab hidden"><a class="icon gmail" href="#gmail"></a></li>
+    <li class="debugTab"><a class="icon debug" href="#debug"></a></li>
+    <li class="settings"><a class="icon settings" href="#settings"></a></li>
     <div class="user-info">
       <span class="avatar"><img class="avatar" src=""></span>
       <span class="username"></span>
       <span class="status inactive"></span>
     </div>
   </ul>
-  </div>
 
   <div id="twitter">
-    <form name="twitterSend" class="messageForm hbox" action="#">
+    <form name="twitterSend" class="hbox" action="#">
       <div class="user inactive col" data-domain="twitter.com">
       <input type="hidden" name="domain" value="twitter.com" />
       <input type="hidden" name="userid" value="" />
@@ -76,7 +74,7 @@
   </div>
 
   <div id="facebook">
-    <form name="facebookSend" class="messageForm hbox" action="#">
+    <form name="facebookSend" class="hbox" action="#">
       <div class="user inactive col">
         <input type="hidden" name="domain" value="facebook.com" />
         <input type="hidden" name="userid" value="" />
@@ -95,7 +93,7 @@
         <div class="meta">
           <div class="title"></div>
           <div class="description"></div>
-          <div class="url"></div>
+          <a title="The link for this page" class="url"></a>
         </div>
       </div>
       <div class="message boxFlex">
@@ -106,7 +104,7 @@
   </div>
 
   <div id="gmail">
-    <form name="googleSend" class="messageForm hbox" action="#">
+    <form name="googleSend" class="hbox" action="#">
     <div class="user inactive col">
       <input type="hidden" name="domain" value="google.com" />
       <input type="hidden" name="userid" value="" />
@@ -126,23 +124,20 @@
   </div>
 
   <div id="debug">
-    <div class="col">
+    <div class="hbox">
+      <div>
         <button onclick="location = '#!close'">Close</button>
         <button onclick="window.showStatus('statusSharing', true)">Show Sharing</button>
         <button onclick="window.showStatus('statusError', true)">Show Error</button>
         <button onclick="window.showStatus('statusShared', true)">Show Shared</button>
+      </div>
+      <textarea  class="boxFlex" id="debugOutput"></textarea>
+      <textarea  class="boxFlex" id="debugCurrentLocation"></textarea>
     </div>
-    <div class="col">
-        <textarea  id="debugOutput"></textarea>
-    </div>
-    <div class="col">
-        <textarea  id="debugCurrentLocation"></textarea>
-    </div>
-
   </div>
 
   <div id="settings">
-    <div class="messageForm hbox">
+    <div class="hbox">
       <ul class="boxFlex">
         <li>
           <h1><img src="../share/i/twitterIcon.png"> Twitter</h1>

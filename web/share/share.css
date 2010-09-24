@@ -50,19 +50,33 @@ ul.nav li.hidden {
 }
 
 #tabs {
+  padding: 0 10px;
   overflow: hidden;
-  width: 100%;
   border-bottom: 1px solid #777;
   background-color: #ddd;
   -moz-box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
   background-image: -moz-linear-gradient(center top , #EEEEEE 0%, #DDDDDD 100%);
 }
 
-.wrap {
-  position: relative;
-  display: block;
-  padding: 0 10px;
-  width: 100%;
+button::-moz-focus-inner {
+  border: 0;
+}
+
+button {
+  padding: 2px 15px;
+  background-image: -moz-linear-gradient(center top , #FAFAFA 0%, #DDDDDD 100%);
+  border-width: 1px;
+  border-style: solid;
+  border-color: #888;
+  -moz-border-radius: 2px;
+  margin-left: 5px;
+  cursor: pointer;
+  -moz-box-shadow: 0 1px 0 #fff;
+}
+
+button:active {
+  background-image: -moz-linear-gradient(center top , #EEEEEE 0%, #CCCCCC 100%);
+  -moz-box-shadow:0 0 1px #666666 inset, 0 1px 0 #FFFFFF;
 }
 
 /* === TABS === */
@@ -118,12 +132,6 @@ ul.nav li a.icon {
   display: block;
 }
 
-ul.nav li span.name {
-  display: none;
-  font-weight: bold;
-  color: #444;
-}
-
 ul.nav li a.icon.twitter {
   background-image: url("i/twitterIcon.png");
 }
@@ -143,6 +151,8 @@ ul.nav li a.icon.debug {
 ul.nav li a.icon.settings {
   background-image: url("i/settingsIcon.png");
 }
+
+/* === TAB TOOLTIP === */
 
 #tabToolTip {
   position: absolute;
@@ -243,10 +253,10 @@ ul.nav li.ui-tabs-selected a.debug {
 
 /* === TAB PANELS === */
 
-.messageForm {
+.ui-tabs-panel > form,
+.ui-tabs-panel > div.hbox {
   min-height: 71px;
-  padding: 5px 10px;
-  position: relative;
+  padding: 5px 0;
   width: 100%;
 }
 
@@ -254,42 +264,9 @@ ul.nav li.ui-tabs-selected a.debug {
   display: none;
 }
 
-/* col stuff */
-
-.col {
-  display: inline-block;
-  margin: 0 10px;
-  overflow: hidden;
-}
-
-.col.user {
-  width: 140px;
-  margin-left: 0;
-  white-space: nowrap;
+.ui-tabs-panel .user {
   display: none;
 }
-
-.col.thumb {
-  width: 220px;
-}
-
-.col.addressing {
-  width: 220px;
-}
-
-.col.message {
-  width: 540px;
-}
-
-.col.button {
-  vertical-align: bottom;
-}
-
-.col.button.twitterCounter {
-  vertical-align: top;
-}
-
-/* end col stuff */
 
 .thumb {
   -moz-border-radius: 2px 2px 2px 2px;
@@ -318,31 +295,6 @@ ul.nav li.ui-tabs-selected a.debug {
   padding: 0;
 }
 
-#twitter .counter {
-  position: absolute;
-  bottom: 3px;
-  right: 5px;
-  color: #888;
-  font-weight: bold;
-}
-
-.TextCountOver {
-  color: red !important;
-}
-
-.user.inactive {
-  opacity: 0.5;
-  background: -moz-repeating-linear-gradient(top left -45deg, #aaa, #aaa 5px, #fff 5px, #fff 10px) #aaa no-repeat fixed;
-  -moz-border-radius: 1%;
-  cursor: pointer;
-}
-
-div.user .username {
-  color: #444;
-  font-size: small;
-  font-weight: bold;
-}
-
 div.image,
 div.meta {
   display: inline-block;
@@ -356,48 +308,30 @@ div.meta {
 
 .meta .title {
   font-size: 11px;
+  white-space: nowrap;
 }
 
 .meta .description {
   color: #444;
   white-space: normal;
-  font-size: 10px;
-  line-height: 14px;
-  height: 28px;  /* 2 lines worth */
+  font-size: 9px;
+  line-height: 11px;
+  height: 22px;  /* 2 lines worth */
   overflow: hidden;
 }
 
 .meta .url,
 .meta .surl {
-  font-size: 10px;
+  font-size: 9px;
   text-decoration: underline;
   display: block;
+  white-space: nowrap;
+  color: #222;
 }
 
 .addressing {
   margin: 0 5px 0 0;
   width: 253px;
-}
-
-button::-moz-focus-inner { 
-  border: 0; 
-}
-
-button {
-  padding: 2px 15px;
-  background-image: -moz-linear-gradient(center top , #FAFAFA 0%, #DDDDDD 100%);
-  border-width: 1px; 
-  border-style: solid;
-  border-color: #888;
-  -moz-border-radius: 2px;
-  margin-left: 5px;
-  cursor: pointer;
-  -moz-box-shadow: 0 1px 0 #fff;
-}
-
-button:active {
-  background-image: -moz-linear-gradient(center top , #EEEEEE 0%, #CCCCCC 100%);
-  -moz-box-shadow:0 0 1px #666666 inset, 0 1px 0 #FFFFFF;
 }
 
 button.share {
@@ -437,38 +371,21 @@ input[type="password"].placeholder {
   color: #888;
 }
 
-div.status {
-  position: relative;
-  width: 100%;
-  padding: 10px;
-  background-position: top center;
-  background-repeat: repeat;
-  background-color: #444;
-  background-image: url("i/background.gif");
-  -moz-box-shadow: 0 -2px 3px rgba(0,0,0,0.25) inset;
-  color: white;
-}
+/* === TWITTER PANEL === */
 
-.statusButton {
+#twitter .counter {
   position: absolute;
-  right: 10px;
-  top: 6px;
+  bottom: 3px;
+  right: 5px;
+  color: #888;
+  font-weight: bold;
 }
 
-.col.videoText,
-.col.explainText {
-    width: 210px;
-    white-space: normal;
+.TextCountOver {
+  color: red !important;
 }
 
-.col.videoText a {
-    color: #a0a0a0;
-}
-
-img.video {
-    width: 112px;
-    height: 63px;
-}
+/* === SETTINGS PANEL === */
 
 #settings .aboutLink {
     display: block;
@@ -483,8 +400,8 @@ img.video {
 }
 
 #settings .account img {
-    width: 22px;
-    height: 22px;
+  width: 22px;
+  height: 22px;
 }
 
 #settings .account .name,
@@ -586,6 +503,26 @@ h1 img {
 
 #settings .remove a:hover {
   color: red;
+}
+
+/* === STATUS MESSAGES === */
+
+div.status {
+  position: relative;
+  width: 100%;
+  padding: 10px;
+  background-position: top center;
+  background-repeat: repeat;
+  background-color: #444;
+  background-image: url("i/background.gif");
+  -moz-box-shadow: 0 -2px 3px rgba(0,0,0,0.25) inset;
+  color: white;
+}
+
+.statusButton {
+  position: absolute;
+  right: 10px;
+  top: 6px;
 }
 
 /* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
