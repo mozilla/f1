@@ -3,11 +3,12 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>ffshare@mozilla.org</em:id>
     <em:type>2</em:type>
-    <em:name>Firefox Share</em:name>
-    <em:version>0.1</em:version>
-    <em:creator>Bryan Clark</em:creator>
+    <em:name>Firefox Linkdrop Share</em:name>
+    <em:version>0.5</em:version>
+    <em:creator>Mozilla</em:creator>
     <em:contributor></em:contributor>
-    <em:description>Helps you share the link you're currently looking at.</em:description>
+    <em:homepageURL>http://linkdrop.mozillamessaging.com/</em:homepageURL>
+    <em:iconURL>chrome://ffshare/skin/extension-icon.png</em:iconURL>
     <em:aboutURL>chrome://ffshare/content/about.xul</em:aboutURL>
     <em:targetApplication>
       <Description>
