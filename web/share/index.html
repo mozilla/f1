@@ -10,7 +10,7 @@
 <body>
 
 <div id="statusSharing" class="status hidden">
-    Sharing...
+  Sharing...
 </div>
 
 <div id="statusAuth" class="status hidden">
@@ -19,35 +19,32 @@
 </div>
 
 <div id="statusError" class="status hidden">
-    Linkdrop just vomited. <span id="statusErrorMessage"></span>
-    <button id="statusErrorButton" class="statusButton">OK</button>
+  Linkdrop just vomited. <span id="statusErrorMessage"></span>
+  <button id="statusErrorButton" class="statusButton">OK</button>
 </div>
 
 <div id="statusShared" class="status hidden">
-    Message Shared!
-    <button id="shareHistoryButton" class="statusButton">View Share History</button>
+  Message Shared!
+  <button id="shareHistoryButton" class="statusButton">View Share History</button>
+</div>
+
+<div class="toolTip">
+  Try me!<span class="arrow"></span>
 </div>
 
 <div id="tabs">
 
   <div class="wrap">
   <ul class="nav clearfix">
-    <li>
-      <a class="icon twitter" href="#twitter">
-        <span class="name">Twitter</span>
-      </a>
-      <div class="toolTip">
-        Try me!<span class="arrow"></span>
-      </div>
-    </li>
-    <li><a class="icon facebook" href="#facebook"><span class="name">Facebook</span></a></li>
-    <li class="gmailTab"><a class="icon gmail" href="#gmail"><span class="name">Gmail</span></a></li>
+    <li class="twitterTab leftTab hidden"><a class="icon twitter" href="#twitter"><span class="name">Twitter</span></a></li>
+    <li class="facebookTab leftTab hidden"><a class="icon facebook" href="#facebook"><span class="name">Facebook</span></a></li>
+    <li class="gmailTab leftTab hidden"><a class="icon gmail" href="#gmail"><span class="name">Gmail</span></a></li>
     <li class="debugTab"><a class="icon debug" href="#debug"><span class="name">debug</span></a></li>
     <li class="settings"><a class="icon settings" href="#settings"><span class="name"></span></a></li>
     <div class="user-info">
-        <span class="avatar"><img class="avatar" src=""></span>
-        <span class="username"></span>
-        <span class="status inactive"></span>
+      <span class="avatar"><img class="avatar" src=""></span>
+      <span class="username"></span>
+      <span class="status inactive"></span>
     </div>
   </ul>
   </div>
@@ -145,56 +142,44 @@
   </div>
 
   <div id="settings">
-    <form class="messageForm hbox">
-  <!--
-      <div class="col">
-          <a href="http://www.mozilla.com/en-US/firefox/video/" target="_blank"><img class="video" src="i/video.png"></a>
-      </div>
-      <div class="col videoText">
-          <a href="http://www.mozilla.com/en-US/firefox/video/" target="_blank">Learn more about Linkdrop and how to use by watching a video.</a>
-      </div>
-  -->
-  
+    <div class="messageForm hbox">
       <ul class="boxFlex">
         <li>
           <h1><img src="../share/i/twitterIcon.png"> Twitter</h1>
-          <button class="auth" data-domain="twitter.com">Add Twitter</button>
+          <span data-domain="twitter.com"></span>
         </li>
         <li>
           <h1><img src="../share/i/facebookIcon.png"> Facebook</h1>
-          <button class="auth" data-domain="facebook.com">Add Facebook</button>
+          <span data-domain="facebook.com"></span>
         </li>
-        <li>
+        <li class="gmailSettings">
           <h1><img src="../share/i/gmailIcon.png"> Gmail</h1>
-          <button class="auth" data-domain="google.com">Add Gmail</button>
+          <span data-domain="google.com"></span>
         </li>
       </ul>
-      
-<!--
-      <div class="boxFlex">
-        <button class="auth" data-domain="twitter.com">Add Twitter</button>
-        <button class="auth" data-domain="facebook.com">Add Facebook</button>
-        <button class="auth" data-domain="google.com">Add Gmail</button>
-      </div>
--->
-      
+
       <div class="explainText">
         <h1>Settings</h1>
         <span>To share using Linkdrop, add your favorite sharing service to it.</span>
-        <a class="accountLink" href="accounts.html" target="_blank">Modify or remove accounts</a>
+        <a class="aboutLink" href="../frontpage/" target="_blank">About Linkdrop</a>
       </div>
-    </form>
+    </div>
   </div>
 
 </div>
 
 <script id="accountTemplate" type="text/template">
-    <div class="account">
-        <!-- <img src="{profilePic(photos)}"> --> 
-        <span title="gmail is properly configured!" class="check">&#x2714;</span> <span class="name">{displayName}</span>
-        <span class="accountDomain">({accounts[0].domain})</span>
-        <span class="remove"><a href="#">remove</a></span>
-    </div>
+  {.userAccount accounts[0]}
+  <div class="account">
+    <!-- <img src="{profilePic(photos)}"> --> 
+    <span title="gmail is properly configured!" class="check">&#x2714;</span> <span class="name">{displayName}</span>
+    <span class="accountDomain">({userAccount.domain})</span>
+    <span class="remove"><a class="accountRemove" href="#" data-domain="{userAccount.domain}" data-username="{userAccount.username}" data-userid="{userAccount.userid}">remove</a></span>
+  </div>
+</script>
+
+<script id="addAccountTemplate" type="text/template">
+  <button class="auth" data-domain="{_}">Add {serviceName(_)}</button>
 </script>
 
 </body>

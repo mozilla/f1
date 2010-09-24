@@ -34,7 +34,7 @@ body.status {
 /* Turn off some things if not in dev */
 html.prod body li.debugTab,
 html.prod body li.gmailTab,
-.prod #settings [data-domain="google.com"] {
+html.prod body #settings li.gmailSettings {
     display: none;
 }
 
@@ -44,7 +44,8 @@ a {
   color: #00A0FF;
 }
 
-.hidden {
+.hidden,
+ul.nav li.hidden {
   display: none;
 }
 
@@ -93,12 +94,14 @@ ul.nav li:nth-child(n+2) {
   -moz-border-radius: 0;
 }
 
-ul.nav li:first-child {
-  -moz-border-radius: 2px 0 0 2px;
+ul.nav li.first {
+  -moz-border-radius-topleft: 2px;
+  -moz-border-radius-bottomleft: 2px;
 }
 
-ul.nav li:nth-last-child(3) {
-  -moz-border-radius: 0 2px 2px 0;
+ul.nav li.last {
+  -moz-border-radius-topright: 2px;
+  -moz-border-radius-bottomright: 2px;
 }
 
 ul.nav li a.icon {
@@ -135,7 +138,7 @@ ul.nav li a.icon.settings {
   background-image: url("i/settingsIcon.png");
 }
 
-ul.nav li .toolTip {
+.toolTip {
   position: absolute;
   background-color: rgba(0,0,0,0.8);
   color: #fff;
@@ -148,11 +151,7 @@ ul.nav li .toolTip {
   line-height: 20px;
 }
 
-ul.nav li:hover .toolTip {
-  display: block;
-}
-
-ul.nav li .toolTip span.arrow {
+.toolTip span.arrow {
   border-color:transparent rgba(0,0,0,0.8) transparent transparent;
   border-style: solid;
   border-width: 10px;
@@ -238,7 +237,7 @@ ul.nav li.ui-tabs-selected a.debug {
 
 /* === TAB PANELS === */
 
-form.messageForm {
+.messageForm {
   min-height: 71px;
   padding: 5px 10px;
   position: relative;
@@ -455,7 +454,7 @@ img.video {
     height: 63px;
 }
 
-#settings .accountLink {
+#settings .aboutLink {
     display: block;
 }
 
