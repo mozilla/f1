@@ -577,17 +577,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       });
     });
 
-    //Handle login click for user information area.
-    $('ul.nav').delegate('.user-info', 'click', function (evt) {
-      var domain = $(this).attr('data-domain');
-
-      oauth(domain, function () {
-        //After oauth, just reload the page, let the account
-        //fetching do its work.
-        location.reload();
-      });
-    });
-
     $("form.messageForm")
       .submit(function (evt) {
         //First clear old errors
