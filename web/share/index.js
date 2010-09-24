@@ -460,7 +460,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
     //Set up tabs.
     tabDom = $("#tabs");
-    tabDom.tabs(/* { fx: { opacity: 'toggle', duration: 200 } } */);
+    tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
     tabDom.bind("tabsselect", updateUserTab);
 
     //Set up the URL in all the message containers
