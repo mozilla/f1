@@ -471,6 +471,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         if (dom.hasClass('nourl')) {
         } else if (dom.hasClass('short')) {
           dom.val(options.shortUrl || options.url);
+        } else if (dom.hasClass('includeMeta')) {
+          dom.val((options.title || "") + "\n" + (options.canonicalUrl || options.url));
         } else {
           dom.val(options.canonicalUrl || options.url);
         }
