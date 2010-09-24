@@ -4,6 +4,7 @@
   Application: false, gBrowser: false, window: false, Components: false */
 
 var ffshare;
+var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 (function () {
 
   var slice = Array.prototype.slice,
@@ -271,9 +272,9 @@ var ffshare;
 
     frameAnimationTime: 300,
 
-    system: Application.prefs.getValue("linkdrop.system", "prod"),
-    shareUrl: Application.prefs.getValue("linkdrop.share_url", ""),
-    useBookmarking: Application.prefs.getValue("linkdrop.bookmarking", true),
+    system: Application.extensions.get(FFSHARE_EXT_ID).prefs.getValue("system", "prod"),
+    shareUrl: Application.extensions.get(FFSHARE_EXT_ID).prefs.getValue("share_url", ""),
+    useBookmarking: Application.extensions.get(FFSHARE_EXT_ID).prefs.getValue("bookmarking", true),
 
     shareFrame: null,
 
