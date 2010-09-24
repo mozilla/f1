@@ -85,7 +85,6 @@ ul.nav li {
   border-style: solid;
   border-color: #888;
   -moz-box-shadow: 0 1px 0 #fff;
-  -moz-border-radius: 2px;
   position: relative;
 }
 
@@ -102,6 +101,10 @@ ul.nav li.first {
 ul.nav li.last {
   -moz-border-radius-topright: 2px;
   -moz-border-radius-bottomright: 2px;
+}
+
+ul.nav li.first.last {
+  border-left: 1px solid #888;
 }
 
 ul.nav li a.icon {
@@ -174,7 +177,7 @@ ul.nav .user-info {
 }
 
 ul.nav .user-info .status {
-  display: inline-block;
+  display: none;
   -moz-border-radius: 100px;
   width: 8px;
   height: 8px;
@@ -372,6 +375,10 @@ div.meta {
   width: 253px;
 }
 
+button::-moz-focus-inner { 
+  border: 0; 
+}
+
 button {
   padding: 2px 15px;
   background-image: -moz-linear-gradient(center top , #FAFAFA 0%, #DDDDDD 100%);
@@ -382,6 +389,11 @@ button {
   margin-left: 5px;
   cursor: pointer;
   -moz-box-shadow: 0 1px 0 #fff;
+}
+
+button:active {
+  background-image: -moz-linear-gradient(center top , #EEEEEE 0%, #CCCCCC 100%);
+  -moz-box-shadow:0 0 1px #666666 inset, 0 1px 0 #FFFFFF;
 }
 
 button.share {
@@ -504,6 +516,7 @@ img.video {
   width: 100%;
   padding: 5px 0;
 }
+
 
 #settings ul li h1 {
   margin: 0 0 10px 0;
