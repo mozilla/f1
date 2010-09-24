@@ -21,6 +21,7 @@ setup(
         "oauth2",
         "python-dateutil",
         "python-openid",
+        "python-memcached",
         "twitter",
         "sqlalchemy-migrate>=0.5.4",
     ],

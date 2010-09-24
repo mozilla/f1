@@ -63,10 +63,12 @@ class ContextualProfile(Profile):
 def profile_wrapper(func):
     from decorator import decorator
     def wrap(_f, *args, **kwds):
-        if not hasattr(_f, '_prof_wrapped'):
-            f = _profiler(_f)
-            f._prof_wrapped = True
-        return f(*args, **kwds)
+        if _profiler:
+            if not hasattr(_f, '_prof_wrapped'):
+                f = _profiler(_f)
+                f._prof_wrapped = True
+            return f(*args, **kwds)
+        return _f(*args, **kwds)
     return decorator(wrap, func)
 
 import __builtin__

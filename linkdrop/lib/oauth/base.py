@@ -11,7 +11,7 @@ import oauth2 as oauth
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
-
+from paste.deploy.converters import asbool
 
 
 def get_oauth_config(provider):
@@ -40,6 +40,7 @@ class OAuth1():
     def request_access(self):
         session['end_point_success'] = request.POST['end_point_success']
         session['end_point_auth_failure'] = request.POST['end_point_auth_failure']
+        force_login = request.POST.get('force_login') and True
 
         # Create the consumer and client, make the request
         client = oauth.Client(self.consumer)
@@ -47,7 +48,10 @@ class OAuth1():
                                         action="verify",
                                         qualified=True)}
         if self.scope:
-            params[ 'scope': self.scope ]
+            params[ 'scope' ] = self.scope
+        # force_login is twitter specific
+        if asbool(request.POST.get('force_login')):
+            params['force_login']='true'
         
         # We go through some shennanigans here to specify a callback url
         oauth_request = oauth.Request.from_consumer_and_token(self.consumer,

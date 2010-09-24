@@ -6,7 +6,7 @@ can use OpenId+OAuth hybrid protocol to request access to Google Apps using OAut
 """
 import urlparse
 
-from openid.extensions import ax
+from openid.extensions import ax, pape
 import oauth2 as oauth
 #from oauth2.clients.smtp import SMTP
 import smtplib
@@ -54,7 +54,19 @@ class responder(OpenIDResponder):
         for attr in request_attributes:
             ax_request.add(ax.AttrInfo(attributes[attr], required=True))
         authrequest.addExtension(ax_request)
-        
+
+        # Add PAPE request information. Setting max_auth_age to zero will force a login.
+        requested_policies = []
+        policy_prefix = 'policy_'
+        for k, v in request.POST.iteritems():
+            if k.startswith(policy_prefix):
+                policy_attr = k[len(policy_prefix):]
+                requested_policies.append(getattr(pape, policy_attr))
+
+        pape_request = pape.Request(requested_policies,
+                                    max_auth_age=request.POST.get('pape_max_auth_age',None))
+        authrequest.addExtension(pape_request)
+
         oauth_request = OAuthRequest(consumer=self.consumer_key, scope=self.scope or 'http://www.google.com/m8/feeds/')
         authrequest.addExtension(oauth_request)
         
