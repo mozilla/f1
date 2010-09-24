@@ -26,6 +26,10 @@ a:hover {
   text-decoration: underline;
 }
 
+strong {
+  font-weight: bold;
+}
+
 /* grid */
 
 .c1, .c2, .c3 {
@@ -60,7 +64,31 @@ a:hover {
 /* end grid */
 
 #installed {
-    display: none;
+  display: none;
+  background-color: #fdff94;
+  border-bottom: 1px solid #e6e6e6;
+  padding: 50px 0;
+}
+
+#installed .installWrapper {
+  width: 720px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+#installed img {
+  vertical-align: top;
+}
+
+a#installClose {
+  cursor: pointer;
+  color: #ff5959;
+  float: right;
+}
+
+a#installClose:hover {
+  text-decoration: none;
+  color: red;
 }
 
 #wrapper {
