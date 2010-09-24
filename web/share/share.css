@@ -253,8 +253,7 @@ ul.nav li.ui-tabs-selected a.debug {
 
 /* === TAB PANELS === */
 
-.ui-tabs-panel > form,
-.ui-tabs-panel > div.hbox {
+.messageForm {
   min-height: 71px;
   padding: 5px 0;
   width: 100%;

@@ -48,7 +48,7 @@
   </ul>
 
   <div id="twitter">
-    <form name="twitterSend" class="hbox" action="#">
+    <form name="twitterSend" class="hbox messageForm" action="#">
       <div class="user inactive col" data-domain="twitter.com">
       <input type="hidden" name="domain" value="twitter.com" />
       <input type="hidden" name="userid" value="" />
@@ -74,7 +74,7 @@
   </div>
 
   <div id="facebook">
-    <form name="facebookSend" class="hbox" action="#">
+    <form name="facebookSend" class="hbox messageForm" action="#">
       <div class="user inactive col">
         <input type="hidden" name="domain" value="facebook.com" />
         <input type="hidden" name="userid" value="" />
@@ -104,7 +104,7 @@
   </div>
 
   <div id="gmail">
-    <form name="googleSend" class="hbox" action="#">
+    <form name="googleSend" class="hbox messageForm" action="#">
     <div class="user inactive col">
       <input type="hidden" name="domain" value="google.com" />
       <input type="hidden" name="userid" value="" />
@@ -124,7 +124,7 @@
   </div>
 
   <div id="debug">
-    <div class="hbox">
+    <div class="hbox messageForm">
       <div>
         <button onclick="location = '#!close'">Close</button>
         <button onclick="window.showStatus('statusSharing', true)">Show Sharing</button>
@@ -137,7 +137,7 @@
   </div>
 
   <div id="settings">
-    <div class="hbox">
+    <div class="hbox messageForm">
       <ul class="boxFlex">
         <li>
           <h1><img src="../share/i/twitterIcon.png"> Twitter</h1>
