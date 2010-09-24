@@ -77,7 +77,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     options = {
       services: null
     },
-    tabDom, bodyDom, twitterCounter,
+    tabDom, bodyDom, clickBlockDom, twitterCounter,
     updateTab = true,
     accounts, oldAccounts,
     previewWidth = 90, previewHeight = 70;
@@ -98,11 +98,9 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   }
 
   function showStatus(statusId, shouldCloseOrMessage) {
-    tabDom.addClass('hidden');
     $('div.status').addClass('hidden');
+    clickBlockDom.removeClass('hidden');
     $('#' + statusId).removeClass('hidden');
-    bodyDom.addClass('status');
-    location = '#!resize';
 
     if (shouldCloseOrMessage === true) {
       setTimeout(function () {
@@ -120,10 +118,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   window.showStatus = showStatus;
 
   function cancelStatus() {
+    clickBlockDom.addClass('hidden');
     $('div.status').addClass('hidden');
-    tabDom.removeClass('hidden');
-    bodyDom.removeClass('status');
-    location = '#!resize';
   }
 
   function sendMessage() {
@@ -435,6 +431,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       picture;
 
     bodyDom = $('body');
+    clickBlockDom = $('#clickBlock');
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production

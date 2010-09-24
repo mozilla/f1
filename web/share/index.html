@@ -9,29 +9,6 @@
 </head>
 <body>
 
-<div id="statusSharing" class="status hidden">
-  Sharing...
-</div>
-
-<div id="statusAuth" class="status hidden">
-    Need to authenticate. <button id="authOkButton">OK</button>
-    <button id="statusAuthButton" class="statusButton">Cancel</button>
-</div>
-
-<div id="statusError" class="status hidden">
-  Linkdrop just vomited. <span id="statusErrorMessage"></span>
-  <button id="statusErrorButton" class="statusButton">OK</button>
-</div>
-
-<div id="statusShared" class="status hidden">
-  Message Shared!
-  <button id="shareHistoryButton" class="statusButton">View Share History</button>
-</div>
-
-<div id="tabToolTip">
-  Try me!<span class="arrow"></span>
-</div>
-
 <div id="tabs">
 
   <ul class="nav">
@@ -163,6 +140,7 @@
 
 </div>
 
+<!-- Start templates -->
 <script id="accountTemplate" type="text/template">
   {.userAccount accounts[0]}
   <div class="account">
@@ -175,6 +153,37 @@
 <script id="addAccountTemplate" type="text/template">
   <button class="auth" data-domain="{_}">Add {serviceName(_)}</button>
 </script>
+<!-- End templates -->
+
+<div id="tabToolTip">
+  Try me!<span class="arrow"></span>
+</div>
+
+<!-- Click blocker for status messages. Should be before status messages but
+     after main content for z-order purposes -->
+<div id="clickBlock" class="hidden"></div>
+
+<!-- Start status messages, should be last in the page for z-order purposes -->
+<div id="statusSharing" class="status hidden">
+  Sharing...
+</div>
+
+<div id="statusAuth" class="status hidden">
+    Need to authenticate. <button id="authOkButton">OK</button>
+    <button id="statusAuthButton" class="statusButton">Cancel</button>
+</div>
+
+<div id="statusError" class="status hidden">
+  Linkdrop just vomited. <span id="statusErrorMessage"></span>
+  <button id="statusErrorButton" class="statusButton">OK</button>
+</div>
+
+<div id="statusShared" class="status hidden">
+  Message Shared!
+  <button id="shareHistoryButton" class="statusButton">View Share History</button>
+</div>
+
+<!-- End status messages -->
 
 </body>
 
