@@ -6,6 +6,9 @@
 {
   list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
 }
+#ffshare-toolbar-button > image {
+  width: 21px;
+}
 #ffshare-popup {
   -moz-appearance: none;
   -moz-window-shadow: none;
