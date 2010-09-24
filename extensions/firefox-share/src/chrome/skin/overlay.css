@@ -1,20 +1,15 @@
 #ffshare-toolbar-button
 {
   list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
-  -moz-image-region: rect(0px, 36px, 22px, 0px);
-}
-#ffshare-toolbar-button > image
-{
-  width: 36px;
-  height: 22px;
+  -moz-image-region: rect(0px, 35px, 23px, 0px);
 }
 #ffshare-toolbar-button[disabled="true"]
 {
-  -moz-image-region: rect(23px, 36px, 55px, 0px);
+  -moz-image-region: rect(23px, 35px, 46px, 0px);
 }
 #ffshare-toolbar-button:active
 {
-  -moz-image-region: rect(46px, 36px, 68px, 0px);
+  -moz-image-region: rect(46px, 35px, 69px, 0px);
 }
 #ffshare-popup {
   -moz-appearance: none;

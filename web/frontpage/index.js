@@ -33,12 +33,12 @@ require.def(['require', 'jquery', 'hashDispatch'],
         var hash = location.href.split('#')[1],
             installedDom = $('#installed');
         if (hash === 'installed') {
-            installedDom.fadeIn(2000);
+            installedDom.fadeIn(500);
         }
 
         //Allow closing the installed area thing.
         $('body').delegate('#installClose', 'click', function (evt) {
-            installedDom.fadeOut(2000);
+            installedDom.fadeOut(500);
         });
 
         $(window).bind('load resize', function () {
