@@ -292,6 +292,7 @@ ul.nav li.ui-tabs-selected a.debug {
 
 .thumb {
   -moz-border-radius: 2px 2px 2px 2px;
+  -moz-box-shadow: 0 1px 0 #fff;
   background-image: -moz-linear-gradient(center top , #EEEEEE 0%, #DDDDDD 100%);
   border: 1px solid #BBBBBB;
   height: 71px;
@@ -556,7 +557,7 @@ h1 img {
 }
 
 #settings span.check {
-  width: 24px;
+  width: 22px;
   background-color: #54B851;
   color: #fff;
   -moz-border-radius: 12px;
@@ -577,7 +578,7 @@ h1 img {
 #settings .remove {
   font-weight: normal;
   line-height: 7px;
-  padding-left: 28px;
+  padding-left: 26px;
   display: block;
 }
 
