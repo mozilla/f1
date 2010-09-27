@@ -123,6 +123,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   }
 
   function sendMessage() {
+    showStatus('statusSharing');
     rdapi('send', {
       type: 'POST',
       data: sendData,
