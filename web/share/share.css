@@ -307,6 +307,7 @@ div.meta {
 
 .meta .title {
   font-size: 11px;
+  font-weight: bold;
   white-space: nowrap;
 }
 
@@ -315,17 +316,17 @@ div.meta {
   white-space: normal;
   font-size: 9px;
   line-height: 11px;
-  height: 22px;  /* 2 lines worth */
+  max-height: 22px;  /* 2 lines worth */
   overflow: hidden;
 }
 
 .meta .url,
 .meta .surl {
   font-size: 9px;
-  text-decoration: underline;
+  text-decoration: none;
   display: block;
   white-space: nowrap;
-  color: #222;
+  color: #00A0FF;
 }
 
 .addressing {
