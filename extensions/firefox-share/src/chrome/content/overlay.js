@@ -272,9 +272,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     frameAnimationTime: 300,
 
-    system: Application.extensions.get(FFSHARE_EXT_ID).prefs.getValue("system", "prod"),
-    shareUrl: Application.extensions.get(FFSHARE_EXT_ID).prefs.getValue("share_url", ""),
-    useBookmarking: Application.extensions.get(FFSHARE_EXT_ID).prefs.getValue("bookmarking", true),
+    system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
+    shareUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
+    useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
 
     shareFrame: null,
 

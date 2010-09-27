@@ -344,7 +344,7 @@ textarea, input[type="text"] {
   border-width: 1px; 
   border-style: solid;
   border-color: #888;
-  font-family: "lucida grande"
+  font-family: "lucida grande";
   font-size: 12px;
   line-height: 18px;
   padding: 3px;
