@@ -168,24 +168,23 @@
   Sharing...
 </div>
 
-<div id="statusAuth" class="status hidden">
-    Need to authenticate. <button id="authOkButton">OK</button>
-    <button id="statusAuthButton" class="statusButton">Cancel</button>
+<div id="statusAuth" class="status hidden error">
+  Sorry, you need to authenticate before we continue. <button id="authOkButton">ok</button>
+  <button id="statusAuthButton" class="statusButton">Cancel</button>
 </div>
 
-<div id="statusOAuthFailed" class="status hidden">
-  Could not connect to your account. Please try again.
-  <button id="statusErrorButton" class="statusButton">OK</button>
+<div id="statusOAuthFailed" class="status hidden error">
+  Sorry, we couldn't connect to your account. Please try again.
+  <button id="statusErrorButton" class="statusButton">ok</button>
 </div>
 
-<div id="statusError" class="status hidden">
-  Linkdrop just vomited. <span id="statusErrorMessage"></span>
-  <button id="statusErrorButton" class="statusButton">OK</button>
+<div id="statusError" class="status hidden error">
+  We're really sorry, for some reason Linkdrop failed. <span id="statusErrorMessage"></span>
+  <button id="statusErrorButton" class="statusButton">ok</button>
 </div>
 
 <div id="statusShared" class="status hidden">
   Message Shared!
-  <button id="shareHistoryButton" class="statusButton">View Share History</button>
 </div>
 
 <!-- End status messages -->

@@ -512,31 +512,31 @@ h1 img {
     left: 0;
     width: 100%;
     height: 100%;
-    opacity: .6;
+    opacity: 0.75;
     background-color: white;
 }
 
 div.status {
   position: absolute;
   top: 10px;
-  left: 40%;
-  width: 200px;
-  height: 80px;
-  padding: 10px;
-  margin: auto;
-  border: 1px solid red;
-  background-position: top center;
-  background-repeat: repeat;
-  background-color: #444;
-  background-image: url("i/background.gif");
-  -moz-box-shadow: 0 -2px 3px rgba(0,0,0,0.25) inset;
-  color: white;
+  left: 10px;
+  padding: 5px 20px;
+  background-color: yellow;
+  color: #0a0a0a;
+  -moz-border-radius: 10px;
+}
+
+div.status.error {
+  background-color: #ff5959;
+  color: #fff;
+  font-weight: bold;
 }
 
 .statusButton {
-  position: absolute;
-  right: 10px;
-  top: 6px;
+  font-size: 11px;
+  vertical-align: baseline;
+  font-weight: normal;
+  -moz-box-shadow: none;
 }
 
 /* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
