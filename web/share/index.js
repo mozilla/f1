@@ -340,8 +340,9 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       .filter(function (i) {
         var tab = $(this),
             hidden = tab.hasClass('hidden'),
-            settings = tab.hasClass('settings');
-        return !hidden && !settings;
+            settings = tab.hasClass('settings'),
+            debugTab = tab.hasClass('debugTab');
+        return !hidden && !settings && !debugTab;
       })
       //Apply the new first and last
       .first().addClass('first').end()
