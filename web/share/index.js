@@ -440,6 +440,12 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     if (options.system) {
       $(document.documentElement).addClass(options.system);
     }
+    
+    //Create ellipsis for thumbnail section
+    $('.title').textOverflow(null,true);
+    $('.description').textOverflow(null,true);
+    $('.url').textOverflow(null,true);
+    $('.surl').textOverflow(null,true);
 
     //Debug info on the data that was received.
     $('#debugOutput').val(JSON.stringify(options));
@@ -624,6 +630,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       .each(function (i, node) {
         placeholder(node);
       });
+    
   });
 
 });

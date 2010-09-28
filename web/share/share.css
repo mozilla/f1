@@ -303,6 +303,7 @@ div.meta {
 .meta {
   padding: 0 3px;
   width: 150px;
+  line-height: 14px;
 }
 
 .meta .title {
@@ -315,8 +316,7 @@ div.meta {
   color: #444;
   white-space: normal;
   font-size: 9px;
-  line-height: 11px;
-  max-height: 22px;  /* 2 lines worth */
+  /* max-height: 22px;  */ 
   overflow: hidden;
 }
 
