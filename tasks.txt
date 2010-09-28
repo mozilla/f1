@@ -25,6 +25,10 @@ Tasks:
     * How to use it. Adding accounts then doing a share. Can be longer
   * Link to to install extension (host locally for now)
 
+* NEED BETTER ERROR MESSAGES from extension for when it cannot work, like:
+  * going to an ip address URL
+  * going to an about: URL
+
 * First experience clicking on the share button
 
 * If navigate away, first time, shrink the bar, tell them they can click on the
@@ -73,3 +77,6 @@ Tasks:
   * Set up a mock service that we can use for testing send API?
 * Switch to async/queue-based send API
 * Use google contacts API to enable gmail tab autocomplete for To: address
+
+
+
