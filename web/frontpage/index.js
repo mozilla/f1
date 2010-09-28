@@ -37,9 +37,14 @@ require.def(['require', 'jquery', 'hashDispatch'],
         }
 
         //Allow closing the installed area thing.
-        $('body').delegate('#installClose', 'click', function (evt) {
-            installedDom.fadeOut(500);
-        });
+        $('body')
+            .delegate('#download', 'click', function (evt) {
+                $('#installFrame').attr('src', '../share-0.1-dev.xpi');
+                location = '#installed';
+            })
+            .delegate('#installClose', 'click', function (evt) {
+                installedDom.fadeOut(500);
+            });
 
         $(window).bind('load resize', function () {
             var h = $('button.download').height();

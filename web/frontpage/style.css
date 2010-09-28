@@ -248,3 +248,7 @@ a#installClose:hover {
   font-size: 10px;
   color: #888;
 }
+
+#installFrame {
+    display: none;
+}
