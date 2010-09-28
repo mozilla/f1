@@ -152,6 +152,7 @@ a#installClose:hover {
   -moz-box-shadow: 0 10px 10px -10px #666;
   -webkit-box-shadow: 0 10px 10px -10px #666;
   position: relative;
+  overflow-x: hidden;
 }
 
 #movie.c3 .corner {
