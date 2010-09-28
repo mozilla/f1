@@ -149,8 +149,8 @@ a#installClose:hover {
 }
 
 #movie.c3 {
-  -moz-box-shadow: 0 10px 10px -10px #666;
-  -webkit-box-shadow: 0 10px 10px -10px #666;
+  -moz-box-shadow: 0 5px 10px 0 #666;
+  -webkit-box-shadow: 0 5px 10px 0 #666;
   position: relative;
   overflow-x: hidden;
 }
@@ -175,6 +175,7 @@ a#installClose:hover {
   background-image: url("i/cornerTopRight.png");
 }
 
+/*
 #movie.c3 .corner.br {
   bottom: 0;
   right: 0;
@@ -186,6 +187,7 @@ a#installClose:hover {
   left: 0;
   background-image: url("i/cornerBottomLeft.png");
 }
+*/
 
 #movie.c3 iframe {
   float: left;
@@ -221,7 +223,7 @@ a#installClose:hover {
 }
 
 .description.steps {
-  margin-top: 14px;
+  margin-top: 14px
 }
 
 .description.steps img {
