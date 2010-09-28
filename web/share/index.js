@@ -150,18 +150,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     });
   }
 
-  function resizePreview(evt) {
-    var imgNode = evt.target,
-      width = imgNode.width,
-      height = imgNode.height;
-
-    if (height > width) {
-      imgNode.height = previewHeight;
-    } else {
-      imgNode.width = previewWidth;
-    }
-  }
-
   function showTabToolTip(domain) {
     var tabClass = actions[domain].tabName,
         tabNode = $('.' + tabClass)[0],
@@ -532,12 +520,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     if (options.description) {
       $('.description').text(options.description);
     }
-
-    //Remember the thumbnail preview size for later, to adjust the image
-    //to fit within the size.
-    //previewWidth = parseInt(thumbDivNode.style.width, 10);
-    //previewHeight = parseInt(thumbDivNode.style.height, 10);
-    thumbImgDom.bind('load', resizePreview);
 
     //Set preview image for facebook
     if (options.previews && options.previews.length) {

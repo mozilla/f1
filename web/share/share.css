@@ -283,6 +283,7 @@ ul.nav li.ui-tabs-selected a.debug {
   display: inline-block;
   height: 61px;
   width: 90px;
+  text-align: center;
 }
 
 .thumb .image .thumb {
@@ -292,6 +293,7 @@ ul.nav li.ui-tabs-selected a.debug {
   height: auto;
   margin: 0;
   padding: 0;
+  max-width: 90px;
 }
 
 div.image,
