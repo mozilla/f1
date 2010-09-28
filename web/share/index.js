@@ -28,7 +28,7 @@
 
 require.def("send",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
-         "placeholder", "TextCounter"],
+         "placeholder", "TextCounter", "jquery.textOverflow"],
 function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
           placeholder,   TextCounter) {
 
@@ -440,12 +440,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     if (options.system) {
       $(document.documentElement).addClass(options.system);
     }
-    
-    //Create ellipsis for thumbnail section
-    $('.title').textOverflow(null,true);
-    $('.description').textOverflow(null,true);
-    $('.url').textOverflow(null,true);
-    $('.surl').textOverflow(null,true);
 
     //Debug info on the data that was received.
     $('#debugOutput').val(JSON.stringify(options));
@@ -555,6 +549,12 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
     //Set up twitter text counter
     twitterCounter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 140);
+
+    //Create ellipsis for thumbnail section
+    $('.title').textOverflow(null,true);
+    $('.description').textOverflow(null,true);
+    $('.url').textOverflow(null,true);
+    $('.surl').textOverflow(null,true);
 
     //Handle button click for services in the settings.
     $('#settings').delegate('.auth', 'click', function (evt) {
