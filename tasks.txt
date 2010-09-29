@@ -18,39 +18,65 @@ User testing questions:
 
 Tasks:
 
-* Start Page for the add-on
-  * Video explaining it
-    * Sell video: make the case for using the extension. 45 seconds or less.
-  * Video on reload after install
-    * How to use it. Adding accounts then doing a share. Can be longer
-  * Link to to install extension (host locally for now)
+* Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...
+
+* Do a build, preseed the UI so it is fast on first click. And just snap down the
+  UI right away instead of waiting for load? Then in that case skip the animation.
+  Also hide the UI until the jquery UI has been rendered, so don't see all tabs shown.
+
+* Instructions: want honest feedback on if they would recommend.
+
+* Above the fold work on the home page.
+
+* Add play video to the instructions
+
+* Add instructions to move recorder bar to the upper left (so they will see the share button after install)
+
+* Make a note about restarting firefox
+
+* After install, make noticeable arrow pointing up to the button in the toolbar.
+    * Add-on tell the page pixel location of the share button for arrow.
+
+* Have add-on poke the page after first install instead of using the hashtag.
+
+* If not get hosted on amo, then when click install, put a web page overlay that points to the allow button.
+
+* Make the buttons in the fontpage less realistic, people tried to click on them.
+
+* After add one account, transition immediately to that tab.
+
+* Maybe consider something different for the settings tab icon.
+
+* Description/message in facebook should be optional. But fails. Does not know to type a message in the box for facebook.
+
+* Put in placeholder text in message area if empty.
+
+* Store info on if first share, and if so after first share, give them a link to the service to see if it shared.
+
+* Gozer look at logs for auth failures
+
+* Right click on the page to also trigger the extension
+
+* check that the account/get call if it fails show something useful.
+
+* Show the share icon in toolbar as depressed while panel is open.
+
+* So need share button to respond per-tab, right now open new tab, click the
+  button and if open in another tab, it closes it in the other tab, but does nothing
+  in current tab. User needs to click again.
+
+* A way to test if the oauth window is not coming up very quickly?
+
+* Save persistent cookie for linkdrop session? Video says only need to save the name once, need
+to reconcile expectations.
+
+
+----------------------
 
 * NEED BETTER ERROR MESSAGES from extension for when it cannot work, like:
   * going to an ip address URL
   * going to an about: URL
 
-* First experience clicking on the share button
-
-* If navigate away, first time, shrink the bar, tell them they can click on the
-  share button to bring it back.
-
-* Change the sharing flow:
-  * use box overlay when doing the share instead of shrinking the screen.
-  * Rewrite "need auth" screen
-    * If do share, but account changes, then do not auto share, go back to share,
-      with new account info, let them know that account changed.
-  * Rewrite retry screen
-  * Rewrite error screen
-  * Provide specialized positive feedback on first share
-  * Provide positive feedback experience for every share
-    * Indicate bookmarking is being done, option to opt out.
-
-* Account settings tab (no standalone page):
-  * Detect twitter/facebook logged in reliable:
-    * Load twitter.com, look for <meta content="userNameHere" name="session-user-screen_name" />
-    * Load facebook.com: grep for new Presence(\"100000423120383\". A bit brittle.
-    * Both hit the web site, so triggers analytics/facebook may try to sign you into chat? Sound
-      in the background?
   * If user clicks remove link, then add, always use OAuth forceLogin, but only for
     the remove/add case, not for first adds.
 
