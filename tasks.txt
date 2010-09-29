@@ -19,6 +19,8 @@ User testing questions:
 Tasks:
 
 * Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...
+  "Linkdrop by Mozilla Labs" on main page.
+  "Mozilla Labs Linkdrop" for everything else.
 
 * Do a build, preseed the UI so it is fast on first click. And just snap down the
   UI right away instead of waiting for load? Then in that case skip the animation.
