@@ -102,6 +102,12 @@ app_instance_uuid = ${app_instance_uuid}
 sqlalchemy.url = sqlite:///production.db
 #sqlalchemy.url = mysql+mysqldb://linkdrop:linkdrop@localhost/linkdrop
 
+# SQLAlchemy migration
+# if managed, the migration repository is here
+migrate.repository = %(here)s/changes
+# automatically do database upgrades
+migrate.auto = 0
+
 # WARNING: *THE LINE BELOW MUST BE UNCOMMENTED ON A PRODUCTION ENVIRONMENT*
 # Debug mode will enable the interactive debugging tool, allowing ANYONE to
 # execute malicious code after an exception is raised.
