@@ -59,10 +59,12 @@ class CsrfMiddleware(object):
                 request_csrf_token = environ.get('HTTP_X_CSRF', request.POST.get('csrftoken'))
                 if request_csrf_token != csrf_token:
                     resp = HTTPForbidden(_ERROR_MSG)
+                    resp.headers['X-Error'] = 'CSRF'
                 else:
                     resp = request.get_response(self.app)
             except KeyError:
                 resp = HTTPForbidden(_ERROR_MSG)
+                resp.headers['X-Error'] = 'CSRF'
         # if we're a get, we don't do any checking
         else:
             resp = request.get_response(self.app)
