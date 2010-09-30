@@ -28,30 +28,30 @@ Tasks:
 
 * Instructions: want honest feedback on if they would recommend.
 
-* Above the fold work on the home page.
+* Above the fold work on the home page. -Andy
 
-* Add play video to the instructions
+* Add play video to the instructions -Andy
 
-* Add instructions to move recorder bar to the upper left (so they will see the share button after install)
+* Add instructions to move recorder bar to the upper left (so they will see the share button after install) -Andy
 
-* Make a note about restarting firefox
+* Make a note about restarting firefox -Andy
 
-* After install, make noticeable arrow pointing up to the button in the toolbar.
+* After install, make noticeable arrow pointing up to the button in the toolbar. -Andy(design)
     * Add-on tell the page pixel location of the share button for arrow.
 
 * Have add-on poke the page after first install instead of using the hashtag.
 
 * If not get hosted on amo, then when click install, put a web page overlay that points to the allow button.
 
-* Make the buttons in the fontpage less realistic, people tried to click on them.
+* Make the buttons in the fontpage less realistic, people tried to click on them. -Andy
 
 * After add one account, transition immediately to that tab.
 
-* Maybe consider something different for the settings tab icon.
+* Maybe consider something different for the settings tab icon. -Andy
 
 * Description/message in facebook should be optional. But fails. Does not know to type a message in the box for facebook.
 
-* Put in placeholder text in message area if empty.
+* Put in placeholder text in message area if empty. -Andy
 
 * Store info on if first share, and if so after first share, give them a link to the service to see if it shared.
 
