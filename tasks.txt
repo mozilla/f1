@@ -19,8 +19,11 @@ User testing questions:
 Tasks:
 
 * Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...  - Bryan (coordinate)
-  "Linkdrop by Mozilla Labs" on main page.
-  "Mozilla Labs Linkdrop" for everything else.
+  * Twitter OAuth - Shane
+  * Facebook Auth - Mark
+  * Extension - Bryan
+  * Front Page - Andy
+  "Linkdrop by Mozilla Labs" for everything.
 
 * Do a build, preseed the UI so it is fast on first click. And just snap down the       - James
   UI right away instead of waiting for load? Then in that case skip the animation.
