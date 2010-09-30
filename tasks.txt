@@ -24,7 +24,6 @@ Tasks:
 
 * Do a build, preseed the UI so it is fast on first click. And just snap down the       - James
   UI right away instead of waiting for load? Then in that case skip the animation.
-  Also hide the UI until the jquery UI has been rendered, so don't see all tabs shown.
 
 * Instructions: want honest feedback on if they would recommend. - Andy
 

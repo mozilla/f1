@@ -7,7 +7,7 @@
  * See http://pajhome.org.uk/crypt/md5 for more info.
  */
 
-const EXPORTED_SYMBOLS = ["hex_md5"];
+var EXPORTED_SYMBOLS = ["hex_md5"];
 
 /*
  * Configurable variables. You may need to tweak these to be compatible with

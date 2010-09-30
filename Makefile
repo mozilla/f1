@@ -6,6 +6,10 @@ srcdir=$(TOPSRCDIR)/extensions/firefox-share/src/
 objdir=$(TOPSRCDIR)/extensions/firefox-share/dist/
 stage_dir=$(objdir)/stage
 xpi_dir=$(TOPSRCDIR)/web
+web_dir=$(TOPSRCDIR)/web
+static_dir=$(TOPSRCDIR)/web-static
+webbuild_dir=$(TOPSRCDIR)/tools/webbuild
+requirejs_dir=$(webbuild_dir)/requirejs
 
 version := 0.1
 
@@ -57,7 +61,15 @@ $(xpi_dir)/$(xpi_name): $(xpi_dir) $(stage_dir) $(dep_files)
 	cd $(stage_dir) && zip -9r $(xpi_name) $(xpi_files)
 	mv $(stage_dir)/$(xpi_name) $(xpi_dir)/$(xpi_name)
 
+web: $(static_dir)
+
+$(static_dir):
+	cp -r $(web_dir) $(static_dir)
+	cd $(webbuild_dir) && $(requirejs_dir)/build/build.sh share.build.js
+	cd $(webbuild_dir) && $(requirejs_dir)/build/build.sh frontpage.build.js
+
 clean:
 	rm -rf $(objdir)
+	rm -rf $(static_dir)
 
 .PHONY: xpi clean

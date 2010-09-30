@@ -13,3 +13,5 @@ development.db
 ^grinder/.*\.log.*
 ^grinder/.*-file-store
 ^grinder/.*\$py.class
+web-static
+

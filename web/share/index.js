@@ -552,6 +552,9 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       });
     });
 
+    //Make the body visible now to the user, now that tabs have been set up.
+    bodyDom.removeClass('invisible');
+
     //In settings, hook up remove buttons to remove an account
     bodyDom.delegate('.accountRemove', 'click', function (evt) {
       var buttonNode = evt.target,

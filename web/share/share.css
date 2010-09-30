@@ -49,6 +49,10 @@ ul.nav li.hidden {
   display: none;
 }
 
+.invisible {
+    visibility: hidden;
+}
+
 #tabs {
   padding: 0 10px;
   overflow: hidden;
