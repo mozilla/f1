@@ -39,8 +39,9 @@ require.def(['require', 'jquery', 'hashDispatch'],
         //Allow closing the installed area thing.
         $('body')
             .delegate('#download', 'click', function (evt) {
-                $('#installFrame').attr('src', '../share-0.1-dev.xpi');
                 location = '#installed';
+                $('#installFrame').attr('src', '../share-0.1-dev.xpi')
+                                  .ready(function() { $("#allow_helper").fadeIn("slow").delay(10 * 1000).fadeOut("slow"); });
             })
             .delegate('#installClose', 'click', function (evt) {
                 installedDom.fadeOut(500);

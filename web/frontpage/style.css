@@ -255,6 +255,27 @@ a#installClose:hover {
   border-top: 1px solid #e6e6e6;
 }
 
+#allow_helper,
 #installFrame {
     display: none;
+}
+
+#allow_helper {
+  position: absolute;
+  top: 0;
+  right: 11px; /* aproximate size and spacing */
+}
+#allow_helper .arrow {
+  background-image: url("i/allow-arrow.png");
+  background-repeat: no-repeat;
+  background-position: 92.5% top;
+  height: 22px;
+  display: block;
+}
+#allow_helper .message {
+  -moz-border-radius: 50px;
+  background-color: #729fcf;
+  padding: 7px 14px;
+  color: #000;
+  text-shadow: 0 1px rgba(255, 255, 255, 0.4)
 }
