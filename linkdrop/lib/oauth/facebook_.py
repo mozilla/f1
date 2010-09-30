@@ -168,7 +168,7 @@ class api():
      def sendmessage(self, message, options={}):
           url = config.get("oauth.facebook.com.feed", "https://graph.facebook.com/me/feed")
           body = {
-               "message": options['message']
+               "message": message
           }
 
           for arg in ['link', 'name', 'description', 'picture']:

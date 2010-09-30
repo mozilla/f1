@@ -39,14 +39,14 @@ The 'send' namespace is used to send updates to our supported services.
         # If we don't have a key in our session we bail early with a
         # 401
         domain = request.POST.get('domain')
-        message = request.POST.get('message')
+        message = request.POST.get('message', '')
         username = request.POST.get('username')
         shorturl = request.POST.get('shorturl')
         userid = request.POST.get('userid')
         to = request.POST.get('to')
-        if not domain or not message:
+        if not domain:
             error = {
-                'reason': "'domain' and 'message' request params are not optional",
+                'reason': "'domain' is not optional",
                 'code': 409
             }
             return {'result': result, 'error': error}
