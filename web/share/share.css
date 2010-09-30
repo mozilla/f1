@@ -224,15 +224,19 @@ ul.nav li.settings.ui-tabs-selected  {
   right: 0;
   top: 0;
   text-align: center;
-  border: 1px solid #888;
   -moz-border-radius: 2px;
+}
+
+ul.nav li.settings {
+  border: 1px solid #888;
 }
 
 /* === TAB SELECTED === */
 
 ul.nav li.ui-tabs-selected {
-  -moz-box-shadow:0 0 1px #666666 inset, 0 1px 0 #FFFFFF;
-  background-image:-moz-linear-gradient(center top , #EEEEEE 0%, #CCCCCC 100%);
+  -moz-box-shadow:0 0 5px #444 inset, 0 1px 0 #FFFFFF;
+  background-image:-moz-linear-gradient(center top , #bbb 0%, #aaa 100%);
+  border-color: #666;
 }
 
 ul.nav li.ui-tabs-selected a.twitter {
@@ -369,7 +373,8 @@ input[type="text"] {
 }
 
 input[type="text"].placeholder,
-input[type="password"].placeholder {
+input[type="password"].placeholder,
+textarea.placeholder {
   color: #888;
 }
 

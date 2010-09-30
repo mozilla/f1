@@ -246,10 +246,13 @@ a#installClose:hover {
   position: fixed;
   bottom: 0;
   background-color: rgba(255,255,255,0.5);
-  border-top: 1px solid #e6e6e6;
   margin: 5px 0 0 0;
   font-size: 10px;
   color: #888;
+}
+
+#footer .c3 {
+  border-top: 1px solid #e6e6e6;
 }
 
 #installFrame {
