@@ -30,10 +30,12 @@ require.def(['require', 'jquery', 'hashDispatch'],
 
     $(function () {
         //If this is after an install, then show the "click the button" UI.
-        var hash = location.href.split('#')[1],
-            installedDom = $('#installed');
-        if (hash === 'installed') {
+        if (window.buttonX) {
+            var installedDom = $('#installed');
+            var installClose = $('#installClose');
             installedDom.fadeIn(500);
+            installClose.css({'position': 'fixed', left: window.buttonX});
+            installClose.text(window.buttonX);
         }
 
         //Allow closing the installed area thing.
