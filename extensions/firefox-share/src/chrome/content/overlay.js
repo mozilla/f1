@@ -311,7 +311,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         iframeNode.setAttribute("type", "content");
         iframeNode.setAttribute("style", "width: 100px; height: 100px; background: pink;");
         iframeNode.setAttribute("src", ffshare.shareUrl);
-        //iframeNode.setAttribute("style", "visibility: collapsed;")
+        iframeNode.setAttribute("style", "visibility: collapsed;")
         ffshare.tab.linkedBrowser.parentNode.appendChild(iframeNode);
       }
     },
