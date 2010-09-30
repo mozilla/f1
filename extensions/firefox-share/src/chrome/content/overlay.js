@@ -182,6 +182,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onLocationChange: function(/*in nsIWebProgress*/ aWebProgress,
                           /*in nsIRequest*/ aRequest,
                           /*in nsIURI*/ aLocation) {
+      if (aLocation.spec == ffshare.frontpageUrl) {
+        ffshare.hitFrontPage();
+      }
     },
     onStatusChange: function(/*in nsIWebProgress*/ aWebProgress,
                           /*in nsIRequest*/ aRequest,
@@ -270,10 +273,19 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       Application.console.log("shownPOPUP!");
     },
 
+    hitFrontPage: function() {
+        if (! this.firstRun)
+          return;
+        var button = document.getElementById("ffshare-toolbar-button");
+        var rect = button.getBoundingClientRect();
+        this.tab.linkedBrowser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
+    },
+
     frameAnimationTime: 300,
 
     system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
     shareUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
+    frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
     useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
 
     shareFrame: null,
@@ -281,11 +293,27 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onLoad: function () {
       // initialization code
       this.initialized = true;
+      this.firstRun = false;
       this.strings = document.getElementById("ffshare-strings");
       var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
       observerService.addObserver(httpObserver, "http-on-examine-response", false);
       var flags = Components.interfaces.nsIWebProgress;
       gBrowser.selectedTab.linkedBrowser.addProgressListener(httpObserver, flags.STATE_DOCUMENT);
+      Application.console.log("pref = " + Application.prefs.getValue("extensions.ffshare@mozilla.org.install-event-fired", ""));
+      if (Application.prefs.getValue("extensions.ffshare@mozilla.org.install-event-fired", "")) {
+        this.firstRun = true;
+        // curse you.
+        Application.prefs.setValue("extensions.ffshare@mozilla.org.install-event-fired", false);
+        // create a hidden iframe and get it to load the standard contents
+        // to prefill the cache
+        Application.console.log('creating the hidden iframe');
+        iframeNode = document.createElement("browser");
+        iframeNode.setAttribute("type", "content");
+        iframeNode.setAttribute("style", "width: 100px; height: 100px; background: pink;");
+        iframeNode.setAttribute("src", ffshare.shareUrl);
+        //iframeNode.setAttribute("style", "visibility: collapsed;")
+        ffshare.tab.linkedBrowser.parentNode.appendChild(iframeNode);
+      }
     },
 
     onUnload: function () {
@@ -396,23 +424,24 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     hide: function () {
       this.unregisterListener();
-      this.tab = null;
       this.changeHeight(0, fn.bind(this, function () {
           this.shareFrame.parentNode.removeChild(this.shareFrame);
           this.shareFrame = null;
       }));
     },
-  
+
+    get tab() {
+      return gBrowser.selectedTab;
+    },
+
     show: function () {
       //Create the iframe.
-      var tab = gBrowser.selectedTab,
-          parentNode = tab.linkedBrowser.parentNode,
+      var parentNode = this.tab.linkedBrowser.parentNode,
           iframeNode = document.createElement("browser"),
           url, options;
 
       //Remember iframe node for later.
       this.shareFrame = iframeNode;
-      this.tab = tab;
 
       iframeNode.className = 'ffshare-frame';
       iframeNode.style.width = '100%';
@@ -611,6 +640,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ffshare.shareUrl = 'http://127.0.0.1:5000/share/';
     } else {
       ffshare.shareUrl = 'https://linkdrop.mozillamessaging.com/share/';
+    }
+  }
+
+  if (!ffshare.frontpageUrl) {
+    if (ffshare.system === 'dev') {
+      ffshare.frontpageUrl = 'http://127.0.0.1:5000/frontpage/';
+    } else {
+      ffshare.frontpageUrl = 'https://linkdrop.mozillamessaging.com/frontpage/';
     }
   }
 
