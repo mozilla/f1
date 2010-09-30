@@ -18,15 +18,15 @@ User testing questions:
 
 Tasks:
 
-* Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...
+* Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...  - Bryan (coordinate)
   "Linkdrop by Mozilla Labs" on main page.
   "Mozilla Labs Linkdrop" for everything else.
 
-* Do a build, preseed the UI so it is fast on first click. And just snap down the
+* Do a build, preseed the UI so it is fast on first click. And just snap down the       - James
   UI right away instead of waiting for load? Then in that case skip the animation.
   Also hide the UI until the jquery UI has been rendered, so don't see all tabs shown.
 
-* Instructions: want honest feedback on if they would recommend.
+* Instructions: want honest feedback on if they would recommend. - Andy
 
 * Above the fold work on the home page. -Andy
 
@@ -39,13 +39,13 @@ Tasks:
 * After install, make noticeable arrow pointing up to the button in the toolbar. -Andy(design)
     * Add-on tell the page pixel location of the share button for arrow.
 
-* Have add-on poke the page after first install instead of using the hashtag.
+* Have add-on poke the page after first install instead of using the hashtag. - David
 
-* If not get hosted on amo, then when click install, put a web page overlay that points to the allow button.
+* If not get hosted on amo, then when click install, put a web page overlay that points to the allow button. - Bryan
 
 * Make the buttons in the fontpage less realistic, people tried to click on them. -Andy
 
-* After add one account, transition immediately to that tab.
+* After add one account, transition immediately to that tab. - James
 
 * Maybe consider something different for the settings tab icon. -Andy
 
@@ -57,17 +57,17 @@ Tasks:
 
 * Gozer look at logs for auth failures
 
-* Right click on the page to also trigger the extension
+* Right click on the page to also trigger the extension - Bryan
 
-* check that the account/get call if it fails show something useful.
+* check that the account/get call if it fails show something useful. - James
 
-* Show the share icon in toolbar as depressed while panel is open.
+* Show the share icon in toolbar as depressed while panel is open. - Bryan
 
-* So need share button to respond per-tab, right now open new tab, click the
+* So need share button to respond per-tab, right now open new tab, click the    - Bryan
   button and if open in another tab, it closes it in the other tab, but does nothing
   in current tab. User needs to click again.
 
-* A way to test if the oauth window is not coming up very quickly?
+* A way to test if the oauth window is not coming up very quickly? - James
 
 * Save persistent cookie for linkdrop session? Video says only need to save the name once, need
 to reconcile expectations.
