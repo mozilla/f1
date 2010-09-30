@@ -3,8 +3,8 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>ffshare@mozilla.org</em:id>
     <em:type>2</em:type>
-    <em:name>Firefox Linkdrop Share</em:name>
-    <em:version>0.5</em:version>
+    <em:name>Linkdrop by Mozilla Labs</em:name>
+    <em:version>0.6</em:version>
     <em:creator>Mozilla</em:creator>
     <em:contributor></em:contributor>
     <em:homepageURL>http://linkdrop.mozillamessaging.com/</em:homepageURL>
