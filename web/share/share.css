@@ -550,6 +550,15 @@ div.status.error {
   -moz-box-shadow: none;
 }
 
+#statusErrorMessage {
+    display: inline-block;
+    margin-top: 3px;
+}
+
+#statusServerError {
+    line-height: 20px;
+}
+
 /* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
 /* hbox and vbox classes */
  

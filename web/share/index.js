@@ -79,8 +79,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     },
     tabDom, bodyDom, clickBlockDom, twitterCounter,
     updateTab = true,
-    accounts, oldAccounts,
-    previewWidth = 90, previewHeight = 70;
+    accounts, oldAccounts;
 
   jig.addFn({
     profilePic: function (photos) {
@@ -91,6 +90,10 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       return actions[domain].name;
     }
   });
+
+  function close() {
+    location = '#!close';
+  }
 
   function showError(error) {
     //TODO: make this nicer.
@@ -349,6 +352,9 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         }
         accounts = json;
         updateAccounts(json, callback);
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        showStatus('statusServerError');
       }
     });
   }
@@ -436,11 +442,16 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     //Hook up button for share history
     $('#shareHistoryButton').click(function (evt) {
       window.open('history.html');
-      location = '#!close';
+      close();
     });
-    $('#statusAuthButton, #statusErrorButton').click(function (evt) {
-      cancelStatus(); 
-    });
+    bodyDom
+      .delegate('#statusAuthButton, #statusErrorButton', 'click', function (evt) {
+        cancelStatus();
+      })
+      .delegate('#statusServerErrorButton', 'click', function (evt) {
+        close();
+      });
+
     $('#authOkButton').click(function (evt) {
       oauth(sendData.domain, function (success) {
         if (success) {
@@ -533,10 +544,10 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     twitterCounter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 140);
 
     //Create ellipsis for thumbnail section
-    $('.title').textOverflow(null,true);
-    $('.description').textOverflow(null,true);
-    $('.url').textOverflow(null,true);
-    $('.surl').textOverflow(null,true);
+    $('.title').textOverflow(null, true);
+    $('.description').textOverflow(null, true);
+    $('.url').textOverflow(null, true);
+    $('.surl').textOverflow(null, true);
 
     //Handle button click for services in the settings.
     $('#settings').delegate('.auth', 'click', function (evt) {
@@ -545,7 +556,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
       oauth(domain, function (success) {
         if (success) {
-          accountsUpdated();
+          location.reload();
         } else {
           showStatus('statusOAuthFailed');
         }

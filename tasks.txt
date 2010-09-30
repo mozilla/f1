@@ -44,8 +44,6 @@ Tasks:
 
 * Make the buttons in the fontpage less realistic, people tried to click on them. -Andy
 
-* After add one account, transition immediately to that tab. - James
-
 * Maybe consider something different for the settings tab icon. -Andy
 
 * Description/message in facebook should be optional. But fails. Does not know to type a message in the box for facebook.
@@ -57,8 +55,6 @@ Tasks:
 * Gozer look at logs for auth failures
 
 * Right click on the page to also trigger the extension - Bryan
-
-* check that the account/get call if it fails show something useful. - James
 
 * Show the share icon in toolbar as depressed while panel is open. - Bryan
 
