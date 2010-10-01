@@ -274,8 +274,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     hitFrontPage: function() {
-        if (! this.firstRun)
+        if (! ffshare.firstRun)
           return;
+        ffshare.firstRun = false;
         var button = document.getElementById("ffshare-toolbar-button");
         var rect = button.getBoundingClientRect();
         this.tab.linkedBrowser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
@@ -292,21 +293,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     onLoad: function () {
       // initialization code
-      this.initialized = true;
-      this.firstRun = false;
-      this.strings = document.getElementById("ffshare-strings");
       var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
       observerService.addObserver(httpObserver, "http-on-examine-response", false);
       var flags = Components.interfaces.nsIWebProgress;
       gBrowser.selectedTab.linkedBrowser.addProgressListener(httpObserver, flags.STATE_DOCUMENT);
-      Application.console.log("pref = " + Application.prefs.getValue("extensions.ffshare@mozilla.org.install-event-fired", ""));
       if (Application.prefs.getValue("extensions.ffshare@mozilla.org.install-event-fired", "")) {
         this.firstRun = true;
         // curse you.
         Application.prefs.setValue("extensions.ffshare@mozilla.org.install-event-fired", false);
         // create a hidden iframe and get it to load the standard contents
         // to prefill the cache
-        Application.console.log('creating the hidden iframe');
         iframeNode = document.createElement("browser");
         iframeNode.setAttribute("type", "content");
         iframeNode.setAttribute("style", "width: 100px; height: 100px; background: pink;");
@@ -651,6 +647,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   }
 
-  window.addEventListener("load", ffshare.onLoad, false);
-  window.addEventListener("unload", ffshare.onUnload, false);
+  window.addEventListener("load", fn.bind(ffshare, "onLoad"), false);
+  window.addEventListener("unload", fn.bind(ffshare, "onUnload"), false);
 }());
