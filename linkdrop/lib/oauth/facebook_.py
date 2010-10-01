@@ -135,7 +135,58 @@ class responder(OAuth2):
 class api():
      def __init__(self, account):
           self.access_token = account.get('oauth_token')
-          
+     
+     def _make_error(self, data, resp):
+          # Facebook makes error handling fun!  So much for standards.
+          # handle the various error mechanisms they deliver and hope
+          # something works. (this is in part, proper oauth2 error
+          # handling, in part facebook oauth error handling and facebook
+          # rest api error handling).
+
+          # brainbook sends a 400 status to get us to authenticate, check
+          # for the authenticate header, though its almost forgivable
+          # considering the state of the oauth 2.0 draft text.  They FAIL
+          # at getting the format of the value for www-authenticate correct
+          # so we wont even bother with it, but the real error_code is
+          # hidden within.
+          if 'www-authenticate' in resp:
+               status = 401
+          else:
+               status = int(resp['status'])
+
+          # this should be retreived from www-authenticate if provided there,
+          # see above comments
+          code = data.get('error_code', 0)
+
+          # try oauth 2.0-10 first, facebook points to api libraries that
+          # do it this way, perhaps some sandbox got updated.
+          if 'error_description' in data:
+               error = {
+                    'message': data.get('error_description',
+                                        'This is very descriptive'),
+                    'uri': data.get('error_uri', ''),
+                    'state': data.get('state', 'of decay'),
+               }
+          # now try what fb currenty gives us (i.e. oauth 2.0-00 kind of)
+          elif isinstance(data.get('error', None), dict):
+               error = copy.copy(data['error'])
+          # fallback to their rest error message
+          elif 'error_msg' in data:
+               error = {
+                    'message': data.get('error_msg', 'it\'s an error, kthx'),
+               }
+          # who knows, some other abberation 
+          else:
+               error = {
+                    'message': "expectedly, an unexpected facebook error: %r"% (data,),
+               }
+               log.error(error['message'])
+
+          error.update({'code': code,
+                        'provider': domain,
+                        'status': status})
+          return error
+
      def rawcall(self, url, body):
           url = url +"?"+urllib.urlencode(dict(access_token=self.access_token))
 
@@ -146,21 +197,13 @@ class api():
           }
           resp, content = httplib2.Http().request(url, 'POST', headers=headers, body=body)
 
-          response = json.loads(content)
+          data = json.loads(content)
           result = error = None
-          if 'id' in response:
-              result = response
-              result['facebook.com'] = response['id']
-          elif 'error' in response:
-               error = copy.copy(response.error)
-               error.update({'provider': domain,
-                             'status': int(resp['status'])})
+          if 'id' in data:
+               result = data
+               result[domain] = data['id']
           else:
-              error = {'provider': domain,
-                       'message': "unexpected facebook response: %r"% (response,),
-                       'status': int(resp['status']) 
-              }
-              log.error("unexpected facebook response: %r", response)
+               error = self._make_error(data, resp)
 
           return result, error
 
