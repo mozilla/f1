@@ -289,8 +289,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
     useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
 
-    shareFrame: null,
-
     onLoad: function () {
       // initialization code
       var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
@@ -430,20 +428,61 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       return gBrowser.selectedTab;
     },
 
-    show: function () {
-      //Create the iframe.
+    get shareFrameId() {
+      return "ffhsare" + this.tab.getAttribute("linkedpanel").replace("panel","");
+    },
+
+    get shareFrameExists() {
+      return (document.getElementById(this.shareFrameId) != null);
+    },
+
+    get shareFrame() {
       var parentNode = this.tab.linkedBrowser.parentNode,
-          iframeNode = document.createElement("browser"),
-          url, options;
+          id = this.shareFrameId, iframeNode = null, url, options;
 
-      //Remember iframe node for later.
-      this.shareFrame = iframeNode;
+      iframeNode = document.getElementById(id);
 
-      iframeNode.className = 'ffshare-frame';
-      iframeNode.style.width = '100%';
-      iframeNode.style.height = '114px';
-      //Make sure it can go all the way to zero.
-      iframeNode.style.minHeight = 0;
+      if (iframeNode == null) {
+        //Create the iframe.
+        iframeNode = document.createElement("browser");
+
+        iframeNode.id = id;
+        iframeNode.className = 'ffshare-frame';
+        iframeNode.style.width = '100%';
+        iframeNode.style.height = '114px';
+        //Make sure it can go all the way to zero.
+        iframeNode.style.minHeight = 0;
+
+        options = {
+          services: this.getKnownServices(),
+          title: this.getPageTitle(),
+          description : this.getPageDescription(),
+          medium : this.getPageMedium(),
+          url: gBrowser.currentURI.spec,
+          canonicalUrl: this.getCanonicalURL(),
+          shortUrl: this.getShortURL(),
+          previews: this.previews(),
+          system: this.system
+        };
+
+        if (! options.previews.length) {
+          // then we need to make our own thumbnail
+          options['thumbnail'] = this.getThumbnailData();
+        }
+
+        url = this.shareUrl +
+                  '#options=' + encodeURIComponent(JSON.stringify(options));
+
+        iframeNode.setAttribute("type", "content");
+        iframeNode.setAttribute("src", url);
+        parentNode.insertBefore(iframeNode, parentNode.firstChild);
+
+      }
+      return iframeNode;
+    },
+
+    show: function () {
+      var iframeNode = this.shareFrame;
 
       /*
       //Figure out if CSS transitions can be used
@@ -453,33 +492,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       } else {
         this.useCssTransition = false;
       }
-
       iframeNode.addEventListener('DOMContentLoaded', fn.bind(this, 'matchIframeContentHeight'), true);
       */
 
-      options = {
-        services: this.getKnownServices(),
-        title: this.getPageTitle(),
-        description : this.getPageDescription(),
-        medium : this.getPageMedium(),
-        url: gBrowser.currentURI.spec,
-        canonicalUrl: this.getCanonicalURL(),
-        shortUrl: this.getShortURL(),
-        previews: this.previews(),
-        system: this.system
-      };
-
-      if (! options.previews.length) {
-        // then we need to make our own thumbnail
-        options['thumbnail'] = this.getThumbnailData();
-      }
-
-      url = this.shareUrl +
-                '#options=' + encodeURIComponent(JSON.stringify(options));
-
-      iframeNode.setAttribute("type", "content");
-      iframeNode.setAttribute("src", url);
-      parentNode.insertBefore(iframeNode, parentNode.firstChild);
       this.registerListener();
     },
 
@@ -508,7 +523,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     onToolbarButtonCommand: function (e) {
-      if (this.shareFrame) {
+      if (this.shareFrameExists) {
         this.hide();
       } else {
         this.show();
