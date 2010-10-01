@@ -223,15 +223,15 @@ class OpenIDResponder():
             log.debug('Handling OpenID login')
         
         # Load default parameters that all Auth Responders take
-        session['end_point_success'] = request.POST['end_point_success']
-        session['end_point_auth_failure'] = request.POST['end_point_auth_failure']
+        session['end_point_success'] = request.POST.get('end_point_success', self.config.get('oauth_success'))
+        fail_uri = session['end_point_auth_failure'] = request.POST.get('end_point_auth_failure', self.config.get('oauth_failure'))
         openid_url = request.POST.get('openid_identifier')
         
         # Let inherited consumers alter the openid identifier if desired
         openid_url = self._lookup_identifier(openid_url)
         
         if not openid_url or (self.endpoint_regex and not re.match(self.endpoint_regex, end_point)):
-            return redirect(session['end_point_auth_failure'])
+            return redirect(fail_uri)
         
         openid_session = {}
         oidconsumer = consumer.Consumer(openid_session, self.openid_store)
@@ -239,10 +239,10 @@ class OpenIDResponder():
         try:
             authrequest = oidconsumer.begin(openid_url)
         except consumer.DiscoveryFailure:
-            return redirect(session['end_point_auth_failure'])
+            return redirect(fail_uri)
         
         if authrequest is None:
-            return redirect(session['end_point_auth_failure'])
+            return redirect(fail_uri)
 
         # Update the authrequest
         self._update_authrequest(authrequest)

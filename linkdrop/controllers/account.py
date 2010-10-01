@@ -109,6 +109,6 @@ OAuth authorization api.
             import traceback
             traceback.print_exc()
             err = urllib.urlencode([('error',str(e))])
-            url = session['end_point_auth_failure'].split('#')
+            url = session.get('end_point_auth_failure',config.get('oauth_failure')).split('#')
             return redirect('%s?%s#%s' % (url[0], err, url[1]))
-        return redirect(session['end_point_success'])
+        return redirect(session.get('end_point_success', config.get('oauth_success')))

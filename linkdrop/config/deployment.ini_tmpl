@@ -15,6 +15,9 @@ test_shortener = yes
 bitly.userid = FILL_ME_IN
 bitly.key = FILL_ME_IN
 
+oauth_failure = /auth.html#oauth_failure
+oauth_success = /auth.html#oauth_success
+
 # Register with twitter at http://dev.twitter.com/apps/new
 oauth.twitter.com.consumer_key = FILL_ME_IN
 oauth.twitter.com.consumer_secret = FILL_ME_IN
