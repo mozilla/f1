@@ -127,8 +127,8 @@ class api():
             else:
                 msg = str(details)
             error = {'provider': domain,
-                     'reason': msg,
-                     'code': exc.e.code
+                     'message': msg,
+                     'status': exc.e.code
             }
         return result, error
     
@@ -146,8 +146,8 @@ class api():
             else:
                 msg = str(details)
             error = {'provider': domain,
-                     'reason': msg,
-                     'code': exc.e.code
+                     'message': msg,
+                     'status': exc.e.code
             }
         return result, error
     

@@ -46,15 +46,15 @@ The 'send' namespace is used to send updates to our supported services.
         to = request.POST.get('to')
         if not domain:
             error = {
-                'reason': "'domain' is not optional",
-                'code': 409
+                'message': "'domain' is not optional",
+                'code': constants.INVALID_PARAMS
             }
             return {'result': result, 'error': error}
         keys = session.get('account_keys', '').split(',')
         if not keys:
             error = {'provider': domain,
-                     'reason': "no user session exists, auth required",
-                     'code': 401
+                     'message': "no user session exists, auth required",
+                     'status': 401
             }
             return {'result': result, 'error': error}
 
@@ -69,8 +69,8 @@ The 'send' namespace is used to send updates to our supported services.
                 break
         if not acct:
             error = {'provider': domain,
-                     'reason': "not logged in or no user account for that domain",
-                     'code': 401
+                     'message': "not logged in or no user account for that domain",
+                     'status': 401
             }
             return {'result': result, 'error': error}
 

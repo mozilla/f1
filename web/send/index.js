@@ -87,11 +87,11 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
                 message: message
             },
             success: function (json) {
-                // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
+                // {'message': u'Status is a duplicate.', 'provider': u'twitter.com'}
                 $("#resultMsg").removeClass("hidden")
-                if (json['error'] && json['error']['reason']) {
-                    $("#resultReason").text("Error: "+json['error']['reason']);
-                    if (json['error']['code'] ==  401 || json['error']['code'] ==  403 ) {
+                if (json['error'] && json['error']['message']) {
+                    $("#resultReason").text("Error: "+json['error']['message']);
+                    if (json['error']['status'] ==  401 || json['error']['status'] ==  403 ) {
                         reauthorize();
                     }
                 }
