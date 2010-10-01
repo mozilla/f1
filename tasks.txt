@@ -23,6 +23,9 @@ Tasks:
   * Front Page Logos - Andy
   "Linkdrop by Mozilla Labs" for everything.
 
+* make config files inherit a 'default' so we can have some values for the
+  production server (they may already support this) - Shane
+
 * Instructions: want honest feedback on if they would recommend. - Andy
 
 * Add instructions to move recorder bar to the upper left (so they will see the share button after install) -Andy
