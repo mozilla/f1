@@ -20,9 +20,7 @@ Tasks:
 
 * Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...  - Bryan (coordinate)
   * Twitter OAuth - Shane
-  * Facebook Auth - Mark
-  * Extension - Bryan
-  * Front Page - Andy
+  * Front Page Logos - Andy
   "Linkdrop by Mozilla Labs" for everything.
 
 * Do a build, preseed the UI so it is fast on first click. And just snap down the       - James
@@ -32,36 +30,24 @@ Tasks:
 
 * Instructions: want honest feedback on if they would recommend. - Andy
 
-* Above the fold work on the home page. -Andy
-
-* Add play video to the instructions -Andy
-
 * Add instructions to move recorder bar to the upper left (so they will see the share button after install) -Andy
-
-* Make a note about restarting firefox -Andy
 
 * After install, make noticeable arrow pointing up to the button in the toolbar. -Andy(design)
     * Add-on tell the page pixel location of the share button for arrow.
 
 * Have add-on poke the page after first install instead of using the hashtag. - David
 
-* If not get hosted on amo, then when click install, put a web page overlay that points to the allow button. - Bryan
-
-* Make the buttons in the fontpage less realistic, people tried to click on them. -Andy
+* Make the button in the install feedback less realistic, people tried to click on them. -Andy
 
 * Maybe consider something different for the settings tab icon. -Andy
 
-* Description/message in facebook should be optional. But fails. Does not know to type a message in the box for facebook.
-
-* Put in placeholder text in message area if empty. -Andy
-
-* Store info on if first share, and if so after first share, give them a link to the service to see if it shared.
+* Store info on if first share, and if so after first share, give them a link to the service to see if it shared. - Bryan
 
 * Gozer look at logs for auth failures
 
 * Right click on the page to also trigger the extension - Bryan
 
-* Show the share icon in toolbar as depressed while panel is open. - Bryan
+* Show the share icon in toolbar as depressed while panel is open. - David
 
 * So need share button to respond per-tab, right now open new tab, click the    - Bryan
   button and if open in another tab, it closes it in the other tab, but does nothing
