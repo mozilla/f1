@@ -38,10 +38,6 @@ Tasks:
 
 * Right click on the page to also trigger the extension - David
 
-* So need share button to respond per-tab, right now open new tab, click the    - Bryan
-  button and if open in another tab, it closes it in the other tab, but does nothing
-  in current tab. User needs to click again.
-
 * Save persistent cookie for linkdrop session? Video says only need to save the name once, need
 to reconcile expectations.
 
@@ -58,6 +54,7 @@ to reconcile expectations.
 
 * Bugs
   * Twitter: if api send gets 403 duplicate, then we show need to authenticate instead of duplicate.
+  * Share per tab can possibly close the wrong (or not close the shared) linkdrop if you've switched tabs
 
 * Reconsider the long and short URL being shown next to the text input.
 
