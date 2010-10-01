@@ -81,9 +81,9 @@ strong {
 }
 
 a#installClose {
+  position: absolute;
   cursor: pointer;
   color: #ff5959;
-  float: right;
 }
 
 a#installClose:hover {

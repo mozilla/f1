@@ -28,15 +28,63 @@
 require.def(['require', 'jquery', 'hashDispatch'],
     function (require,   $,        hashDispatch) {
 
+    function bounceOut(/* Decimal? */n) {
+        //From dojo easing functions.
+        // summary:
+        //        An easing function that 'bounces' near the end of an Animation
+        var s = 7.5625,
+            p = 2.75,
+            l; 
+        if (n < (1 / p)) {
+            l = s * Math.pow(n, 2);
+        } else if (n < (2 / p)) {
+            n -= (1.5 / p);
+            l = s * Math.pow(n, 2) + .75;
+        } else if (n < (2.5 / p)) {
+            n -= (2.25 / p);
+            l = s * Math.pow(n, 2) + .9375;
+        } else {
+            n -= (2.625 / p);
+            l = s * Math.pow(n, 2) + .984375;
+        }
+        return l;
+    }
+
+    function bounceIn(/* Decimal? */n) {
+        // summary: 
+        //        An easing function that 'bounces' near the beginning of an Animation
+        return (1 - bounceOut(1 - n)); // Decimal
+    }
+
+    function bounceInOut(/* Decimal? */n) {
+        // summary: 
+        //        An easing function that 'bounces' at the beginning and end of the Animation
+        if (n < 0.5) {
+            return bounceIn(n * 2) / 2;
+        }
+        return (bounceOut(n * 2 - 1) / 2) + 0.5; // Decimal
+    }
+
     $(function () {
         var installedDom = $('#installed'),
-            installClose = $('#installClose');
+            installClose = $('#installClose'),
+            //x = 1153;
+            x = window.buttonX;
 
         //If this is after an install, then show the "click the button" UI.
-        if (window.buttonX) {
+        if (x) {
+            //TODO: fix this hardcoded 23px offset. Need to make it half the width
+            //of the arrow, but cannot dynamically ask for it because it is hidden
+            //so has no width. Would need to take it out of DOM, show it, then get
+            //width.
+            x = x - 23;
             installedDom.fadeIn(500);
-            installClose.css({'position': 'fixed', left: window.buttonX});
-            installClose.text(window.buttonX);
+            installClose.css({'position': 'fixed', left: x, top: 100});
+            
+            //Animate up to the top
+            installClose.animate({
+                top: 0
+            }, 2000, bounceIn);
         }
 
         //Allow closing the installed area thing.
@@ -46,9 +94,6 @@ require.def(['require', 'jquery', 'hashDispatch'],
                                   .ready(function () {
                                     $("#allow_helper").fadeIn("slow").delay(10 * 1000).fadeOut("slow");
                                 });
-            })
-            .delegate('#installClose', 'click', function (evt) {
-                installedDom.fadeOut(500);
             });
 
         $(window).bind('load resize', function () {
