@@ -29,10 +29,11 @@ require.def(['require', 'jquery', 'hashDispatch'],
     function (require,   $,        hashDispatch) {
 
     $(function () {
+        var installedDom = $('#installed'),
+            installClose = $('#installClose');
+
         //If this is after an install, then show the "click the button" UI.
         if (window.buttonX) {
-            var installedDom = $('#installed');
-            var installClose = $('#installClose');
             installedDom.fadeIn(500);
             installClose.css({'position': 'fixed', left: window.buttonX});
             installClose.text(window.buttonX);
@@ -41,9 +42,10 @@ require.def(['require', 'jquery', 'hashDispatch'],
         //Allow closing the installed area thing.
         $('body')
             .delegate('#download', 'click', function (evt) {
-                location = '#installed';
                 $('#installFrame').attr('src', '../share-0.1-dev.xpi')
-                                  .ready(function() { $("#allow_helper").fadeIn("slow").delay(10 * 1000).fadeOut("slow"); });
+                                  .ready(function () {
+                                    $("#allow_helper").fadeIn("slow").delay(10 * 1000).fadeOut("slow");
+                                });
             })
             .delegate('#installClose', 'click', function (evt) {
                 installedDom.fadeOut(500);
