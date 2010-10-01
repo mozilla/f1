@@ -149,7 +149,7 @@ class api():
           # at getting the format of the value for www-authenticate correct
           # so we wont even bother with it, but the real error_code is
           # hidden within.
-          if 'www-authenticate' in resp:
+          if 'invalid_token' in resp.get('www-authenticate',''):
                status = 401
           else:
                status = int(resp['status'])
