@@ -327,6 +327,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       //TODO: on first run, just need the tab selection to go without the
       //jQuery animation transition, then this setTimeout can be removed.
       setTimeout(function () {
+        bodyDom.removeClass('loading');
         tabDom.removeClass('invisible');
       }, 100);
 

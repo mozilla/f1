@@ -23,11 +23,6 @@ Tasks:
   * Front Page Logos - Andy
   "Linkdrop by Mozilla Labs" for everything.
 
-* Do a build, preseed the UI so it is fast on first click. And just snap down the       - James
-  UI right away instead of waiting for load? Then in that case skip the animation.
-
-* Move auth.html, remove tab transition animation on first set - James
-
 * Instructions: want honest feedback on if they would recommend. - Andy
 
 * Add instructions to move recorder bar to the upper left (so they will see the share button after install) -Andy

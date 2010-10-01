@@ -441,10 +441,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       iframeNode.className = 'ffshare-frame';
       iframeNode.style.width = '100%';
-      iframeNode.style.height = 0;
+      iframeNode.style.height = '114px';
       //Make sure it can go all the way to zero.
       iframeNode.style.minHeight = 0;
 
+      /*
       //Figure out if CSS transitions can be used
       if ('MozTransition' in iframeNode.style) {
         this.useCssTransition = true;
@@ -454,6 +455,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       iframeNode.addEventListener('DOMContentLoaded', fn.bind(this, 'matchIframeContentHeight'), true);
+      */
 
       options = {
         services: this.getKnownServices(),
