@@ -22,40 +22,61 @@
  * Contributor(s):
  * */
 
-/*jslint */
+/*jslint indent: 2 */
 /*global require: false, window: false, location: false */
 "use strict";
 
 require.def("oauth",
-        [],
 function () {
-    var authDone;
+  var authDone, win, lastDomain, lastDomainTime = 0;
 
-    //Handle communication from the auth window, when it completes.
-    window.addEventListener("message", function (evt) {
-        //TODO: ideally lock down the domain check on evt.origin.
-        var status = evt.data;
-        if (status) {
-            if (status === 'oauth_success') {
-                status = true;
-            } else {
-                status = false;
-            }
+  //Handle communication from the auth window, when it completes.
+  window.addEventListener("message", function (evt) {
+    //TODO: ideally lock down the domain check on evt.origin.
+    var status = evt.data;
+    if (status) {
+      if (status === 'oauth_success') {
+        status = true;
+      } else {
+        status = false;
+      }
 
-            if (authDone) {
-                authDone(status);
-                authDone = null;
-            }
-        }
-    }, false);  
+      //Reset windows
+      win = null;
+      lastDomain = null;
 
-    return function oauth(domain, callback) {
-        if (callback) {
-            authDone = callback;
-        }
-        var url = location.protocol + "//" + location.host + "/send/auth.html";
-        window.open(url + "?domain=" + domain,
-                            "Firefox Share OAuth",
-                            "dialog=yes, modal=yes, width=800, height=480");
-    };
+      if (authDone) {
+        authDone(status);
+        authDone = null;
+      }
+    }
+  }, false);
+
+  return function oauth(domain, callback) {
+    if (callback) {
+      authDone = callback;
+    }
+    var url = location.protocol + "//" + location.host + "/send/auth.html",
+        currentTime = (new Date()).getTime();
+
+    //Could have a window handle, but could be closed, so account for it.
+    if (win && win.closed) {
+      win = null;
+    }
+
+    //If got another request for the domain and window has not shown up yet
+    //for 5 seconds, or if domain is different, then try window open call.
+    //5 seconds is a bit arbitrary, slower systems may have a longer wait,
+    //but just trying to reduce the edge cases of seeing multiple windows.
+    if ((!win && domain === lastDomain && currentTime > lastDomainTime + 5000) || domain !== lastDomain) {
+      lastDomain = domain;
+      lastDomainTime = currentTime;
+      win = window.open(url + "?domain=" + domain,
+        "ffshareOAuth",
+        "dialog=yes, modal=yes, width=800, height=480");
+      win.focus();
+    } else if (win) {
+      win.focus();
+    }
+  };
 });

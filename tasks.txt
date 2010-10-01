@@ -65,8 +65,6 @@ Tasks:
   button and if open in another tab, it closes it in the other tab, but does nothing
   in current tab. User needs to click again.
 
-* A way to test if the oauth window is not coming up very quickly? - James
-
 * Save persistent cookie for linkdrop session? Video says only need to save the name once, need
 to reconcile expectations.
 
