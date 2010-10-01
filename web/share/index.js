@@ -323,6 +323,13 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         selection = '#settings';
       }
       tabDom.tabs('select', selection);
+      //Make the body visible now to the user, now that tabs have been set up.
+      //TODO: on first run, just need the tab selection to go without the
+      //jQuery animation transition, then this setTimeout can be removed.
+      setTimeout(function () {
+        tabDom.removeClass('invisible');
+      }, 100);
+
   
       //TODO: HACK, clean this up later.
       updateUserTab(null, {panel: $(selection)[0]});
@@ -568,9 +575,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         }
       });
     });
-
-    //Make the body visible now to the user, now that tabs have been set up.
-    bodyDom.removeClass('invisible');
 
     //In settings, hook up remove buttons to remove an account
     bodyDom.delegate('.accountRemove', 'click', function (evt) {
