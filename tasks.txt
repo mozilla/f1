@@ -36,8 +36,6 @@ Tasks:
 
 * Gozer look at logs for auth failures
 
-* Right click on the page to also trigger the extension - David
-
 * Save persistent cookie for linkdrop session? Video says only need to save the name once, need
 to reconcile expectations.
 

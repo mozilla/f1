@@ -9,6 +9,20 @@
     <stringbundle id="ffshare-strings" src="chrome://ffshare/locale/overlay.properties"/>
   </stringbundleset>
 
+  <popupset id="mainPopupSet">
+    <!--  Right click / context menu share option -->
+    <popup id="contentAreaContextMenu">
+      <!-- XXX this menuitem is dynamically shown so we have to dynamically hide it -->
+      <!--<menuitem id="context-sendpage" hidden="true"/>-->
+      <menuitem id="context-ffshare"
+                insertbefore="context-sendpage"
+                label="&ffshareContext.label;"
+                accesskey="&ffshareContext.accesskey;"
+                oncommand="ffshare.onMenuItemCommand(event)"/>
+    </popup>
+  </popupset>
+
+
   <!--  Take over the file menu share option -->
   <menupopup id="menu_FilePopup">
     <menuitem id="menu_sendLink" hidden="true"/>
