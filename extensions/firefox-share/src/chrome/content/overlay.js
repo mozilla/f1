@@ -274,7 +274,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     hitFrontPage: function() {
-        if (! ffshare.firstRun)
+        if (!ffshare.firstRun)
           return;
         ffshare.firstRun = false;
         var button = document.getElementById("ffshare-toolbar-button");
@@ -288,6 +288,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     shareUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
     frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
     useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
+    firstRun: Application.prefs.getValue("extensions.ffshare@mozilla.org.first-install", true),
 
     shareFrame: null,
 
@@ -297,10 +298,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       observerService.addObserver(httpObserver, "http-on-examine-response", false);
       var flags = Components.interfaces.nsIWebProgress;
       gBrowser.selectedTab.linkedBrowser.addProgressListener(httpObserver, flags.STATE_DOCUMENT);
-      if (Application.prefs.getValue("extensions.ffshare@mozilla.org.install-event-fired", "")) {
-        this.firstRun = true;
+      if (this.firstRun) {
         // curse you.
-        Application.prefs.setValue("extensions.ffshare@mozilla.org.install-event-fired", false);
+        Application.prefs.setValue("extensions.ffshare@mozilla.org.first-install", false);
         // create a hidden iframe and get it to load the standard contents
         // to prefill the cache
         iframeNode = document.createElement("browser");
