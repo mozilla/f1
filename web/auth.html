@@ -4,7 +4,7 @@
     <title>Firefox Share OAuthorization</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 
-    <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+    <script src="scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
     <style>
          .hidden {
              display: none;
@@ -42,8 +42,8 @@
     <div class="authorize hidden">
         <form name="authForm" action="/api/account/authorize" method="POST">
 	 <input type="hidden" name="domain" id="domain" value="">
-	 <input type="hidden" name="end_point_success" value="/send/auth.html#oauth_success">
-	 <input type="hidden" name="end_point_auth_failure" value="/send/auth.html#oauth_failure">
+	 <input type="hidden" name="end_point_success" value="/auth.html#oauth_success">
+	 <input type="hidden" name="end_point_auth_failure" value="/auth.html#oauth_failure">
          <button type="submit">send</button>
         </form>
 

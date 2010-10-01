@@ -56,7 +56,7 @@ function () {
     if (callback) {
       authDone = callback;
     }
-    var url = location.protocol + "//" + location.host + "/send/auth.html",
+    var url = location.protocol + "//" + location.host + "/auth.html",
         currentTime = (new Date()).getTime();
 
     //Could have a window handle, but could be closed, so account for it.
