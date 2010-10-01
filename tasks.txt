@@ -35,8 +35,6 @@ Tasks:
 * After install, make noticeable arrow pointing up to the button in the toolbar. -Andy(design)
     * Add-on tell the page pixel location of the share button for arrow.
 
-* Have add-on poke the page after first install instead of using the hashtag. - David
-
 * Make the button in the install feedback less realistic, people tried to click on them. -Andy
 
 * Maybe consider something different for the settings tab icon. -Andy
@@ -45,9 +43,7 @@ Tasks:
 
 * Gozer look at logs for auth failures
 
-* Right click on the page to also trigger the extension - Bryan
-
-* Show the share icon in toolbar as depressed while panel is open. - David
+* Right click on the page to also trigger the extension - David
 
 * So need share button to respond per-tab, right now open new tab, click the    - Bryan
   button and if open in another tab, it closes it in the other tab, but does nothing
