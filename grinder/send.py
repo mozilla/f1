@@ -20,7 +20,6 @@ sends_per_oauth = grinder.getProperties().getInt("linkdrop.sends_per_oauth", 0)
 # The URL of the server we want to hit.
 linkdrop_host = grinder.getProperties().getProperty("linkdrop.host", 'http://127.0.0.1:5000')
 
-
 # *sob* - failed to get json packages working.  Using 're' is an option,
 # although it requires you install jython2.5 (which still doesn't have
 # json builtin) - so to avoid all that complication, hack 'eval' into
@@ -61,6 +60,8 @@ def getCSRF():
     assert csrf and linkdrop
     return csrf, linkdrop
 
+getCSRF = Test(2, "get CSRF").wrap(getCSRF)
+
 def authTwitter(csrf):
     # Call authorize requesting we land back on /account/get - after
     # a couple of redirects for auth, we should wind up with the data from
@@ -77,6 +78,8 @@ def authTwitter(csrf):
     userid = data[0]['accounts'][0]['userid']
     return userid
 
+authTwitter = Test(3, "auth Twitter").wrap(authTwitter)
+
 def send(userid, csrf, domain="twitter.com", message="take that!"):
     """POST send."""
     result = request1.POST(linkdrop_host + '/api/send',
@@ -88,6 +91,8 @@ def send(userid, csrf, domain="twitter.com", message="take that!"):
     assert result.getStatusCode()==200, result
     assert '"error": null' in result.getText(), result.getText()
     return result
+
+send = Test(4, "Send message").wrap(send)
 
 # The test itself.
 class TestRunner:
@@ -112,4 +117,7 @@ class TestRunner:
 
     def __call__(self):
         """This method is called for every run performed by the worker thread."""
-        self.doit()
+        TestRunner.doit(self)
+
+
+
