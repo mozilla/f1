@@ -453,7 +453,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         this.useCssTransition = false;
       }
 
-      iframeNode.addEventListener('load', fn.bind(this, 'matchIframeContentHeight'), true);
+      iframeNode.addEventListener('DOMContentLoaded', fn.bind(this, 'matchIframeContentHeight'), true);
 
       options = {
         services: this.getKnownServices(),
