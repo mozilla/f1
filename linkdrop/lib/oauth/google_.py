@@ -171,15 +171,15 @@ Subject: %s
                     server.sendmail(from_, to_, body)
                 except ValueError, e:
                     error = {"provider": self.host,
-                             "reason": "%s: %s" % (exc.smtp_code, exc.smtp_error),
-                             "code": exc.smtp_code
+                             "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
+                             "status": exc.smtp_code
                             }
             finally:
                 server.quit()
         except smtplib.SMTPResponseException, exc:
             error={"provider": self.host,
-                   "reason": "%s: %s" % (exc.smtp_code, exc.smtp_error),
-                   "code": exc.smtp_code
+                   "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
+                   "status": exc.smtp_code
                    }
         if error is None:
             result = {"status": "message sent"}

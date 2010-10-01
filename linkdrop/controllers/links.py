@@ -9,6 +9,7 @@ from pylons.decorators.util import get_pylons
 from linkdrop.lib.base import BaseController, render
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
 from linkdrop.lib.oauth import get_provider
+from linkdrop.lib import constants
 
 from linkdrop.model.meta import Session
 from linkdrop.model.links import Link
@@ -69,13 +70,18 @@ The 'link' namespace is used to access information regarding the shortened links
     @json_exception_response
     def shorten(self):
         if not request.POST:
-            return {'error': "must be POST call"}
+            # XXX should be a 405
+            return {
+                'code': constants.INVALID_REQUEST,
+                'message': "must be POST call"}
         try:
             url = request.POST.get('url')
             #_from = request.POST.get('from')
             #_to = request.POST.get('to')
         except KeyError, what:
-            error = {'reason': "'%s' request param is not optional" % (what,),
+            error = {
+                'code': constants.INVALID_PARAMS,
+                'message': "'%s' request param is not optional" % (what,),
             }
             return {'error': error}
 

@@ -9,6 +9,7 @@ import json
 import httplib2
 import urllib
 import random
+import copy
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -151,15 +152,13 @@ class api():
               result = response
               result['facebook.com'] = response['id']
           elif 'error' in response:
-              error = {'provider': domain,
-                       'reason': response['error'].get('message'),
-                       'type': response['error'].get('type'),
-                       'code': int(resp['status']) 
-              }
+               error = copy.copy(response.error)
+               error.update({'provider': domain,
+                             'status': int(resp['status'])})
           else:
               error = {'provider': domain,
-                       'reason': "unexpected facebook response: %r"% (response,),
-                       'code': int(resp['status']) 
+                       'message': "unexpected facebook response: %r"% (response,),
+                       'status': int(resp['status']) 
               }
               log.error("unexpected facebook response: %r", response)
 

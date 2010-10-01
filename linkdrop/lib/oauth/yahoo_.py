@@ -4,6 +4,7 @@ from openid.extensions import ax
 import oauth2 as oauth
 import httplib2
 import json
+import copy
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -106,28 +107,25 @@ class api():
         headers.update(oauth_request.to_header())
 
         resp, content = httplib2.Http().request(url, 'POST', headers=headers, body=postdata)
-        print resp, content
         response = json.loads(content)
         result = error = None
         if 'id' in response:
             # this is a good thing
             error = response['error']
             if error:
-                error = {
-                    'reason': response['error'].get('message'),
-                    'code': int(resp['status']),
-                    'detail': response['error']
-                }
+                error = copy.copy(error)
+                error.update({
+                    'provider': domain,
+                    'status': int(resp['status']),
+                })
             return response['result'], error
         elif 'error' in response:
-            error = {'provider': domain,
-                     'reason': response['error'].get('description'),
-                     'code': int(resp['status']) 
-            }
+            error = copy.copy(error)
+            error.update({ 'provider': domain, 'status': int(resp['status']) })
         else:
             error = {'provider': domain,
-                     'reason': "unexpected yahoo response: %r"% (response,),
-                     'code': int(resp['status']) 
+                     'message': "unexpected yahoo response: %r"% (response,),
+                     'status': int(resp['status']) 
             }
             log.error("unexpected yahoo response: %r", response)
 

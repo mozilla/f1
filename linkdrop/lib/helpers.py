@@ -69,7 +69,9 @@ def api_response(func, *args, **kwargs):
         pylons.response.headers['Content-Type'] = 'text/xml'
         return '<?xml version="1.0" encoding="UTF-8"?>' + ser({'response': data}).encode('utf-8')
     pylons.response.headers['Content-Type'] = 'application/json'
-    return json.dumps(data)
+    res = json.dumps(data)
+    #import sys;print >> sys.stderr, res
+    return res
 
 def api_entry(**kw):
     """Decorator to add tags to functions.

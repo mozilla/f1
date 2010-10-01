@@ -84,19 +84,19 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
             type: 'POST',
             data: sendData,
             success: function (json) {
-                // {'reason': u'Status is a duplicate.', 'provider': u'twitter.com'}
-                if (json.error && json.error.reason) {
-                    var code = json.error.code;
+                // {'message': u'Status is a duplicate.', 'provider': u'twitter.com'}
+                if (json.error && json.error.status) {
+                    var code = json.error.status;
                     // XXX need to find out what error codes everyone uses
-                    if (code == 400 || code ==  401 || code == 403 || code >= 530) {
+                    if (code ==  401 || code >= 535) {
                         reauthorize();
                         showStatus('statusAuth');
                     } else {
-                        showStatus('statusError', json.error.reason);
+                        showStatus('statusError', json.error.message);
                     }
                 }
                 else if (json.error) {
-                    showStatus('statusError', json.error.reason);
+                    showStatus('statusError', json.error.message);
                 } else {
                     showStatus('statusShared', "Message Sent");
                 }
