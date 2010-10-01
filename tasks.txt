@@ -26,12 +26,7 @@ Tasks:
 * make config files inherit a 'default' so we can have some values for the
   production server (they may already support this) - Shane
 
-* Instructions: want honest feedback on if they would recommend. - Andy
-
-* Add instructions to move recorder bar to the upper left (so they will see the share button after install) -Andy
-
 * After install, make noticeable arrow pointing up to the button in the toolbar. -Andy(design)
-    * Add-on tell the page pixel location of the share button for arrow.
 
 * Make the button in the install feedback less realistic, people tried to click on them. -Andy
 
@@ -50,6 +45,7 @@ Tasks:
 * Save persistent cookie for linkdrop session? Video says only need to save the name once, need
 to reconcile expectations.
 
+* Open settings tab immediately after first run
 
 ----------------------
 
