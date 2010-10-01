@@ -64,7 +64,7 @@ $(xpi_dir)/$(xpi_name): $(xpi_dir) $(stage_dir) $(dep_files)
 web: $(static_dir)
 
 $(static_dir):
-	cp -r $(web_dir) $(static_dir)
+	rsync -av $(web_dir)/ $(static_dir)/
 	cd $(webbuild_dir) && $(requirejs_dir)/build/build.sh share.build.js
 	cd $(webbuild_dir) && $(requirejs_dir)/build/build.sh frontpage.build.js
 
