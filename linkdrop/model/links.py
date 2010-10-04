@@ -15,6 +15,7 @@ from linkdrop.model.serializer_mixin import SerializerMixin
 
 class Link(JsonExpandoMixin, SerializerMixin, Base):
     __tablename__ = 'links'
+    __table_args__ = make_table_args()
 
     id = Column(Integer, primary_key=True)
     userkey = Column(RDUnicode(128), index=True)
