@@ -275,7 +275,7 @@ a#installClose:hover {
 #allow_helper {
   position: fixed;
   z-index: 100;
-  top: 2px;
+  top: 5px;
   right: 20px; /* aproximate size and spacing */
   font-size: 12px;
 }
