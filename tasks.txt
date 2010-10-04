@@ -20,8 +20,6 @@ Tasks:
 
 * Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...  - Bryan (coordinate)
   * Twitter OAuth - Shane
-  * Front Page Logos - Andy
-  "Linkdrop by Mozilla Labs" for everything.
 
 * make config files inherit a 'default' so we can have some values for the
   production server (they may already support this) - Shane

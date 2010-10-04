@@ -104,11 +104,11 @@ a#installClose:hover {
 
 #header.row .c1,
 #header.row .c2 {
-  min-height: 60px;
+  min-height: 90px;
 }
 
 #header.row .logo {
-  background-image: url("i/ldsplash.png");
+  background-image: url("i/ldsplash-labs.png");
   background-repeat: no-repeat;
 }
 
