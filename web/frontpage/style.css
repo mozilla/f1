@@ -261,21 +261,27 @@ a#installClose:hover {
 }
 
 #allow_helper {
-  position: absolute;
-  top: 0;
-  right: 11px; /* aproximate size and spacing */
+  position: fixed;
+  z-index: 100;
+  top: 16px;
+  right: 12px; /* aproximate size and spacing */
+  font-size: 12px;
 }
+
 #allow_helper .arrow {
-  background-image: url("i/allow-arrow.png");
-  background-repeat: no-repeat;
-  background-position: 92.5% top;
-  height: 22px;
-  display: block;
+  border-color: transparent transparent #ccc;
+  border-style: solid;
+  border-width: 8px;
+  top: -20px;
+  height: 0;
+  right: 21px;
+  position: absolute;
+  width: 0;
 }
+
 #allow_helper .message {
-  -moz-border-radius: 50px;
-  background-color: #729fcf;
+  -moz-border-radius: 5px;
+  background-color: #ccc;
   padding: 7px 14px;
   color: #000;
-  text-shadow: 0 1px rgba(255, 255, 255, 0.4)
 }
