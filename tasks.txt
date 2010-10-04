@@ -28,6 +28,7 @@ Tasks:
 * Maybe consider something different for the settings tab icon and button. -Andy
 
 * Store info on if first share, and if so after first share, give them a link to the service to see if it shared. - Bryan
+  * Done, but not pushed until after this round of user testing.
 
 * Save persistent cookie for linkdrop session? Video says only need to save the name once, need
 to reconcile expectations.
