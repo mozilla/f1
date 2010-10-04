@@ -389,6 +389,9 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     });
     $(".meta .url").text(options.url);
     $(".meta .surl").text(options.shortUrl || options.url);
+
+    //Make sure placeholder text is updated.
+    placeholder();
   }
 
   function getAccounts(callback) {
