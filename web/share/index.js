@@ -43,6 +43,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         name: 'Twitter',
         tabName: 'twitterTab',
         icon: 'i/twitterIcon.png',
+        serviceUrl: 'http://twitter.com',
         revokeUrl: 'http://twitter.com/settings/connections',
         signOutUrl: 'http://twitter.com/logout',
         accountLink: function (account) {
@@ -54,6 +55,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         name: 'Facebook',
         tabName: 'facebookTab',
         icon: 'i/facebookIcon.png',
+        serviceUrl: 'http://facebook.com',
         revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
         signOutUrl: 'http://facebook.com',
         accountLink: function (account) {
@@ -65,6 +67,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         name: 'Gmail',
         tabName: 'gmailTab',
         icon: 'i/gmailIcon.png',
+        serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
         signOutUrl: 'http://google.com/preferences',
         accountLink: function (account) {
@@ -125,6 +128,18 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     $('div.status').addClass('hidden');
   }
 
+  function showStatusShared() {
+    var domain = (sendData && sendData.domain) || 'twitter.com';
+    $('#statusShared').empty().append(jig('#sharedTemplate', {
+      title: options.title,
+      service: actions[domain].name,
+      href: actions[domain].serviceUrl
+    })).find('.shareTitle').textOverflow(null, true);
+    showStatus('statusShared', true);
+  }
+  //Make it globally visible for debug purposes
+  window.showStatusShared = showStatusShared;
+
   function sendMessage() {
     showStatus('statusSharing');
     rdapi('send', {
@@ -145,7 +160,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         else if (json.error) {
           showStatus('statusError', json.error.message);
         } else {
-          showStatus('statusShared', true);
+          showStatusShared();
         }
       },
       error: function (xhr, textStatus, err) {

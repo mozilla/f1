@@ -552,6 +552,16 @@ div.status {
   background-color: yellow;
 }
 
+#statusShared a {
+    color: #0a0a0a;
+}
+
+.shareTitle {
+    display: inline-block;
+    max-width: 200px;
+    font-weight: bold;
+}
+
 div.status.error {
   background-color: #ff5959;
   color: #fff;
