@@ -89,6 +89,7 @@ strong {
 a#installClose {
   cursor: pointer;
   color: #ff5959;
+  float: right;
 }
 
 a#installClose:hover {
@@ -97,7 +98,7 @@ a#installClose:hover {
 }
 
 #shareArrow {
-  position: absolute;
+  position: fixed;
   top: 0;
   color: #ff5959;
 }

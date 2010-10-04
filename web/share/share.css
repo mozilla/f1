@@ -539,9 +539,17 @@ div.status {
   top: 10px;
   left: 10px;
   padding: 5px 20px;
-  background-color: yellow;
   color: #0a0a0a;
   -moz-border-radius: 10px;
+  font-size: 12px;
+}
+
+#statusSharing {
+  background-color: #e6e6e6;
+}
+
+#statusShared {
+  background-color: yellow;
 }
 
 div.status.error {
