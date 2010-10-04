@@ -87,7 +87,6 @@ strong {
 }
 
 a#installClose {
-  position: absolute;
   cursor: pointer;
   color: #ff5959;
 }
@@ -95,6 +94,12 @@ a#installClose {
 a#installClose:hover {
   text-decoration: none;
   color: red;
+}
+
+#shareArrow {
+  position: absolute;
+  top: 0;
+  color: #ff5959;
 }
 
 #wrapper {

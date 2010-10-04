@@ -166,7 +166,6 @@ require.def(['require', 'jquery', 'hashDispatch'],
 
     $(function () {
         var installedDom = $('#installed'),
-            installClose = $('#installClose'),
             //x = 965;
             x = window.buttonX;
 
@@ -178,25 +177,19 @@ require.def(['require', 'jquery', 'hashDispatch'],
             //width.
             x = x - 23;
             installedDom.fadeIn(500);
-            installClose.css({'position': 'fixed', left: x, top: 50});
-
-            //Animate up to the top
-            installClose.animate({
-                top: 0
-            }/* , 6000, 'easeOutBounce' */);
+            $('#shareArrow').css({left: x});
         }
 
-        //Allow closing the installed area thing.
         $('body')
+            .delegate('#installClose', 'click', function (evt) {
+                //Allow closing the installed area thing.
+                installedDom.fadeOut(500);
+            })
             .delegate('#download', 'click', function (evt) {
                 $('#installFrame').attr('src', '../share-0.1-dev.xpi')
                                   .ready(function () {
                                     $("#allow_helper")
-                                        .css({ top: 100})
                                         .fadeIn("slow")
-                                        .animate({
-                                            top: 5
-                                        }/* , 4000, 'easeOutBounce' */)
                                         .delay(10 * 1000)
                                         .fadeOut("slow");
                                 });
