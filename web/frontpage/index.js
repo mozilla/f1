@@ -166,8 +166,8 @@ require.def(['require', 'jquery', 'hashDispatch'],
 
     $(function () {
         var installedDom = $('#installed'),
-            x = 965;
-            //x = window.buttonX;
+            //x = 965;
+            x = window.buttonX;
 
         //If this is after an install, then show the "click the button" UI.
         if (x) {

@@ -104,7 +104,7 @@
         <button onclick="location = '#!close'">Close</button>
         <button onclick="window.showStatus('statusSharing', true)">Show Sharing</button>
         <button onclick="window.showStatus('statusError', true)">Show Error</button>
-        <button onclick="window.showStatus('statusShared', true)">Show Shared</button>
+        <button onclick="window.showStatusShared()">Show Shared</button>
       </div>
       <textarea  class="boxFlex" id="debugOutput"></textarea>
       <textarea  class="boxFlex" id="debugCurrentLocation"></textarea>
@@ -150,6 +150,10 @@
 
 <script id="addAccountTemplate" type="text/template">
   <button class="auth" data-domain="{_}">Add {serviceName(_)}</button>
+</script>
+
+<script id="sharedTemplate" type="text/template">
+  <a href="{href}" target="_blank">Shared <span class="shareTitle">{title}</span> on {service}</a>
 </script>
 <!-- End templates -->
 
