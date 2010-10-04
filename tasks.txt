@@ -18,8 +18,9 @@ User testing questions:
 
 Tasks:
 
-* Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...  - Bryan (coordinate)
-  * Twitter OAuth - Shane
+* Time for a new name, avoid conflict with linkdrop.com
+  * Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...  - Bryan (coordinate)
+  * Twitter OAuth - "Linkdrop" is taken, probably by linkdrop.com, so we have to use "Mozilla Linkdrop"
 
 * make config files inherit a 'default' so we can have some values for the
   production server (they may already support this) - Shane
