@@ -25,6 +25,10 @@ Tasks:
 * make config files inherit a 'default' so we can have some values for the
   production server (they may already support this) - Shane
 
+* define branching/tagging used for production server, limit production server
+  to updating on those tags, and are there any controls we can do to ensure
+  the server does not update via unauthorized commits? - Gozer/Mark/Shane
+
 * Maybe consider something different for the settings tab icon and button. -Andy
 
 * Store info on if first share, and if so after first share, give them a link to the service to see if it shared. - Bryan
