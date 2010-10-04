@@ -171,11 +171,11 @@ require.def(['require', 'jquery', 'hashDispatch'],
 
         //If this is after an install, then show the "click the button" UI.
         if (x) {
-            //TODO: fix this hardcoded 23px offset. Need to make it half the width
+            //TODO: fix this hardcoded 8px offset. Need to make it half the width
             //of the arrow, but cannot dynamically ask for it because it is hidden
             //so has no width. Would need to take it out of DOM, show it, then get
             //width.
-            x = x - 23;
+            x = x - 8;
             installedDom.fadeIn(500);
             $('#shareArrow').css({left: x});
         }
