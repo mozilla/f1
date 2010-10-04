@@ -12,6 +12,7 @@ from pylons.decorators.util import get_pylons
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
 from linkdrop.lib.oauth import get_provider
+from linkdrop.lib import constants
 
 from linkdrop.model.meta import Session
 from linkdrop.model import History, Link
