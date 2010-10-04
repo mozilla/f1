@@ -136,7 +136,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
           var code = json.error.status;
           // XXX need to find out what error codes everyone uses
           // oauth+smtp will return a 535 on authentication failure
-          if (code ===  401 || code == 535) {
+          if (code ===  401 || code === 535) {
             showStatus('statusAuth');
           } else {
             showStatus('statusError', json.error.message);
@@ -149,7 +149,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         }
       },
       error: function (xhr, textStatus, err) {
-        if (xhr.status==403) {
+        if (xhr.status === 403) {
           // XXX check for X-Error header == CSRF. if so, we need to
           // make a get request to get a new CSRF token, and then
           // replay our api call
@@ -358,6 +358,24 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     }
   }
 
+  //Set up the URL in all the message containers
+  function updateLinks() {
+    $('textarea.message').each(function (i, node) {
+      var dom = $(node);
+      //If the message containder doesn't want URLs then respect that.
+      if (dom.hasClass('nourl')) {
+      } else if (dom.hasClass('short')) {
+        dom.val(options.shortUrl || options.url);
+      } else if (dom.hasClass('includeMeta')) {
+        dom.val((options.title || "") + "\n" + (options.canonicalUrl || options.url));
+      } else {
+        dom.val(options.canonicalUrl || options.url);
+      }
+    });
+    $(".meta .url").text(options.url);
+    $(".meta .surl").text(options.shortUrl || options.url);
+  }
+
   function getAccounts(callback) {
     rdapi('account/get', {
       success: function (json) {
@@ -366,6 +384,26 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         }
         accounts = json;
         updateAccounts(json, callback);
+
+        //If no short URL, get it now. Need to wait until
+        //after the account/get call so we have a csrf token
+        //to do the POST call.
+        if (options.url && !options.shortUrl) {
+          rdapi('links/shorten', {
+            type: 'POST',
+            data: {
+              'url': options.canonicalUrl || options.url
+            },
+            success: function (json) {
+              options.shortUrl = json.result.short_url;
+              updateLinks();
+            },
+            error: function (json) {
+            }
+          });
+        } else {
+          updateLinks();
+        }
       },
       error: function (xhr, textStatus, errorThrown) {
         showStatus('statusServerError');
@@ -480,41 +518,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     tabDom = $("#tabs");
     tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
     tabDom.bind("tabsselect", updateUserTab);
-
-    //Set up the URL in all the message containers
-    function updateLinks() {
-      $('textarea.message').each(function (i, node) {
-        var dom = $(node);
-        //If the message containder doesn't want URLs then respect that.
-        if (dom.hasClass('nourl')) {
-        } else if (dom.hasClass('short')) {
-          dom.val(options.shortUrl || options.url);
-        } else if (dom.hasClass('includeMeta')) {
-          dom.val((options.title || "") + "\n" + (options.canonicalUrl || options.url));
-        } else {
-          dom.val(options.canonicalUrl || options.url);
-        }
-      });
-      $(".meta .url").text(options.url);
-      $(".meta .surl").text(options.shortUrl || options.url);
-    }
-
-    if (options.url && !options.shortUrl) {
-      rdapi('links/shorten', {
-        type: 'POST',
-        data: {
-          'url': options.canonicalUrl || options.url
-        },
-        success: function (json) {
-          options.shortUrl = json.result.short_url;
-          updateLinks();
-        },
-        error: function (json) {
-        }
-      });
-    } else {
-      updateLinks();
-    }
 
     //Set up hidden form fields for facebook
     //TODO: try sending data urls via options.thumbnail if no
