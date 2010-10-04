@@ -77,7 +77,13 @@ strong {
 }
 
 #installed img {
-  vertical-align: top;
+  vertical-align: text-bottom;
+}
+
+#installClose {
+  text-align: center;
+  font-size: 12px;
+  z-index: 101;
 }
 
 a#installClose {
@@ -263,25 +269,18 @@ a#installClose:hover {
 #allow_helper {
   position: fixed;
   z-index: 100;
-  top: 16px;
-  right: 12px; /* aproximate size and spacing */
+  top: 2px;
+  right: 20px; /* aproximate size and spacing */
   font-size: 12px;
 }
 
-#allow_helper .arrow {
-  border-color: transparent transparent #ccc;
-  border-style: solid;
-  border-width: 8px;
-  top: -20px;
-  height: 0;
-  right: 21px;
-  position: absolute;
-  width: 0;
+#allow_helper .message {
+  color: #000;
+  background-color: yellow;
+  padding: 7px 14px;
+  -moz-border-radius: 5px;
 }
 
-#allow_helper .message {
-  -moz-border-radius: 5px;
-  background-color: #ccc;
-  padding: 7px 14px;
-  color: #000;
+#allow_helper img {
+  vertical-align: text-bottom;
 }

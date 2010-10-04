@@ -167,7 +167,7 @@ require.def(['require', 'jquery', 'hashDispatch'],
     $(function () {
         var installedDom = $('#installed'),
             installClose = $('#installClose'),
-            //x = 1153;
+            //x = 965;
             x = window.buttonX;
 
         //If this is after an install, then show the "click the button" UI.
@@ -183,7 +183,7 @@ require.def(['require', 'jquery', 'hashDispatch'],
             //Animate up to the top
             installClose.animate({
                 top: 0
-            }, 6000, 'easeOutBounce');
+            }/* , 6000, 'easeOutBounce' */);
         }
 
         //Allow closing the installed area thing.
@@ -195,8 +195,8 @@ require.def(['require', 'jquery', 'hashDispatch'],
                                         .css({ top: 100})
                                         .fadeIn("slow")
                                         .animate({
-                                            top: 16
-                                        }, 4000, 'easeOutBounce')
+                                            top: 5
+                                        }/* , 4000, 'easeOutBounce' */)
                                         .delay(10 * 1000)
                                         .fadeOut("slow");
                                 });
