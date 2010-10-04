@@ -17,6 +17,8 @@ def make_table_args(*args, **kw):
     kwuse = kw.copy()
     if 'mysql_charset' not in kwuse:
         kwuse['mysql_charset'] = 'utf8'
+    if 'mysql_engine' not in kwuse:
+        kwuse['mysql_engine'] = 'InnoDB'
     if not args:
         return kwuse
     return args + (kwuse,)
