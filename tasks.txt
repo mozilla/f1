@@ -34,6 +34,8 @@ Tasks:
 * Store info on if first share, and if so after first share, give them a link to the service to see if it shared. - Bryan
   * Done, but not pushed until after this round of user testing.
 
+* Hide the "Congratulations" bar after people click the toolbar button.
+
 * Save persistent cookie for linkdrop session? Video says only need to save the name once, need
 to reconcile expectations.
 
