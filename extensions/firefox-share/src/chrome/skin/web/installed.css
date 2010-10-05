@@ -1,0 +1,7 @@
+#download.download {
+  display: none;
+}
+/* XXX we could replace the download with something else */
+#clickToolbar {
+  display: block !important;
+}
