@@ -1,5 +1,6 @@
 import logging
 import urllib, cgi, json, sys
+from urlparse import urlparse
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -86,7 +87,8 @@ The 'link' namespace is used to access information regarding the shortened links
             return {'error': error}
 
         # important to canonicalize the URL
-        if (not url.startswith('http://')):
+        u = urlparse(url)
+        if not u.scheme:
             url = 'http://' + url
         link = Link.get_or_create(url)
         return {'result': link.to_dict()}
