@@ -47,6 +47,9 @@ to reconcile expectations.
 
   * If user clicks remove link, then add, always use OAuth forceLogin, but only for
     the remove/add case, not for first adds.
+    - in the backend, this is done for the services that support it, for
+      twitter, you must add 'force_login=true' to the post data when calling
+      /api/account/authorize. For google, add 'pape_max_auth_age=0'.
 
 * Bugs
   * Share per tab can possibly close the wrong (or not close the shared) linkdrop if you've switched tabs
