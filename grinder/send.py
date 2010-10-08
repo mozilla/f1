@@ -20,7 +20,14 @@ sends_per_oauth = grinder.getProperties().getInt("linkdrop.sends_per_oauth", 0)
 # The URL of the server we want to hit.
 linkdrop_host = grinder.getProperties().getProperty("linkdrop.host", 'http://127.0.0.1:5000')
 
+# Service we want to test
 linkdrop_service = grinder.getProperties().getProperty("linkdrop.service", 'twitter.com')
+
+# Static URL we want to hit
+linkdrop_static_url = grinder.getProperties().getProperty("linkdrop.static_url", '/share/')
+
+# How often we want to hit the static page per send
+linkdrop_static_per_send = grinder.getProperties().getInt("linkdrop.static_per_send", 0)
 
 # *sob* - failed to get json packages working.  Using 're' is an option,
 # although it requires you install jython2.5 (which still doesn't have
@@ -96,6 +103,13 @@ def send(userid, csrf, domain=linkdrop_service, message="take that!"):
 
 send = Test(4, "Send message").wrap(send)
 
+def getStatic(url="/share/"):
+	result = request1.POST(linkdrop_host + url)
+	assert result.getStatusCode()==200, result
+	return result
+
+getStatic = Test(5, "Static request").wrap(getStatic)
+
 # The test itself.
 class TestRunner:
     """A TestRunner instance is created for each worker thread."""
@@ -104,6 +118,9 @@ class TestRunner:
         self.linkdrop_cookie = None
 
     def doit(self):
+	if linkdrop_static_per_send:
+	    for i in range(0,linkdrop_static_per_send):
+            	getStatic(linkdrop_static_url)
         if self.csrf is None or \
            (sends_per_oauth and grinder.getRunNumber() % sends_per_oauth==0):
             self.csrf, self.linkdrop_cookie = getCSRF()
