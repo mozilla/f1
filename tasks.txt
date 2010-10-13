@@ -1,22 +1,44 @@
-# NEXT TWO WEEKS
-
-## Bigger Tasks
-
-### First user test pass
-
-Goals:
-
-* Is this faster/easier/better for you to share links?
-  * Is oauth an issue?
-  * sharing is easier/better
-  * is it simple or understandable?
-
-User testing questions:
-- Does the icon make sense?
-- Does the acount sign in work for you? (something like that)
-- Would you recommend to other?
-
 Tasks:
+
+* remember last service used for share for next share -  James
+* Move the link out of the text box - James
+  * Subtract length of URL from text count for twitter.
+* API send: pass flag to indicate if shortening is needed. Use this to
+  do the twitter send since no longer showing the shortened URL. Shane/James
+* Email drop the title into the subject and link in the text box. Put space around
+  the link. - James
+* Make sure OAuth gmail is for contacts and message sending. - Shane
+* Proxy for Contacts API: "Most Contacted", save to localstorage. - Shane/James
+* James: Contacts API calls from the web.
+* Design autocomplete, start with jquery UI -  James then Andy
+* Multiple recipients for email - Andy
+* Tooltips vs using text for tab buttons. - Andy
+* Fix first install dialog: - Bryan/James
+  * make sure to focus on frontpage after install, or pop a tab
+    for it if not there, and poke the page to tell it first install.
+* Make sure the overlay works with tabs correctly. - Bryan/James
+* Speed of page display: - James
+  * make sure files can be aggressively cached.
+
+* Blog post - Andy
+  * mention the constraints with email/contacts API
+
+* Frontpage work - Andy
+  * New video
+  * reflect the new UI.
+  * Get rid of allow thing.
+
+* David: get a privacy policy.
+
+* analytics
+
+* Post the add-on on AMO. - Shane, Bryan review.
+
+* Ops - Gozer
+  * Check if ready to handle load, monitoring in place.
+
+
+
 
 * Time for a new name, avoid conflict with linkdrop.com
   * Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...  - Bryan (coordinate)
