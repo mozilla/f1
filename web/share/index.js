@@ -381,14 +381,25 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       if (dom.hasClass('nourl')) {
       } else if (dom.hasClass('short')) {
         dom.val(options.shortUrl || options.url);
-      } else if (dom.hasClass('includeMeta')) {
-        dom.val((options.title || "") + "\n" + (options.canonicalUrl || options.url));
+      } else if (dom.hasClass('urlWithSpace')) {
+        dom.val("\n" + (options.canonicalUrl || options.url) + "\n");
       } else {
         dom.val(options.canonicalUrl || options.url);
       }
     });
     $(".meta .url").text(options.url);
     $(".meta .surl").text(options.shortUrl || options.url);
+
+
+    //Set up twitter text counter
+    if (!twitterCounter) {
+        twitterCounter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 114);
+    }
+
+    //Update counter. If using a short url from the web page itself, it could potentially be a different
+    //length than a bit.ly url so account for that.
+    //The + 1 is to account for a space before adding the URL to the tweet.
+    twitterCounter.updateLimit(options.shortUrl ? (140 - (options.shortUrl.length + 1)) : 114);
 
     //Make sure placeholder text is updated.
     placeholder();
@@ -494,6 +505,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   $(function () {
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
+      gmailDom = $('#gmail'),
       picture;
 
     bodyDom = $('body');
@@ -551,6 +563,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
     if (options.title) {
       facebookDom.find('[name="name"]').val(options.title);
+      gmailDom.find('[name="subject"]').val(options.title);
     }
 
     if (options.description) {
@@ -574,9 +587,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     } else {
       thumbImgDom.attr('src', options.thumbnail);
     }
-
-    //Set up twitter text counter
-    twitterCounter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 140);
 
     //Create ellipsis for thumbnail section
     $('.title').textOverflow(null, true);

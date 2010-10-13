@@ -1,12 +1,8 @@
 Tasks:
 
 * remember last service used for share for next share -  James
-* Move the link out of the text box - James
-  * Subtract length of URL from text count for twitter.
 * API send: pass flag to indicate if shortening is needed. Use this to
   do the twitter send since no longer showing the shortened URL. Shane/James
-* Email drop the title into the subject and link in the text box. Put space around
-  the link. - James
 * Make sure OAuth gmail is for contacts and message sending. - Shane
 * Proxy for Contacts API: "Most Contacted", save to localstorage. - Shane/James
 * James: Contacts API calls from the web.
