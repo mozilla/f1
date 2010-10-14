@@ -129,6 +129,17 @@
             </div>
         {]}
 
+        {and(urlargs, urlargs.length) [}
+            <div class="section">
+                <h3>URL Arguments</h3>
+                <ul>
+                    {urlargs[}
+                        <li><b class="{required [}required{]}">{name}</b> ({type}): {doc}</li>
+                    {]}
+                </ul>
+            </div>
+        {]}
+
         {and(queryargs, queryargs.length) [}
             <div class="section">
                 <h3>Parameters</h3>

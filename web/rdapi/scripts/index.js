@@ -174,6 +174,11 @@ function ($,        rdapi,   object,         jig) {
         }
     }
 
+    function getCsrfToken() {
+        var token = /csrf=([^\; ]+)/.exec(document.cookie);
+        return token && token[1] ? token[1] : null;
+    }
+
     rdapi('docs', {
         success: function (json) {
             var prop, methodName, apiSection, methods, method, tocItem, obj,
@@ -417,9 +422,9 @@ function ($,        rdapi,   object,         jig) {
 
                             data = requestBody;
                         }
+                        
 
-                        //Construct the data call.
-                        $.ajax({
+                        var options = {
                             type: 'POST',
                             url: url,
                             data: data,
@@ -435,7 +440,17 @@ function ($,        rdapi,   object,         jig) {
                                     ERROR: xhr.responseText
                                 }));
                             }
-                        });
+                        }
+
+                        var csrfToken =  getCsrfToken();
+                        if (csrfToken) {
+                            options.beforeSend = function (xhr) {
+                                xhr.setRequestHeader('X-CSRF', csrfToken);
+                            }
+                        }
+
+                        //Construct the data call.
+                        $.ajax(options);
                     })
                     //Handle close action for an API Call form
                     .delegate('form .apiCallClose', 'click', function (evt) {
