@@ -184,18 +184,47 @@ Subject: %s
             result = {"status": "message sent"}
         return result, error
 
-    def getcontacts(self, start=0, page=25):
+    def getgroup_id(self, group):
+        url = 'http://www.google.com/m8/feeds/groups/default/full?v=2'
+        method = 'GET'
+        client = oauth.Client(self.consumer, self.oauth_token)
+        resp, content = client.request(url, method)
+        feed = gdata.contacts.GroupsFeedFromString(content)
+        for entry in feed.entry:
+            this_group = entry.content.text
+            if this_group.startswith('System Group: '):
+                this_group = this_group[14:]
+            if group == this_group:
+                return entry.id.text
+        
+    def getcontacts(self, start=0, page=25, group=None):
         contacts = []
-        url = 'http://www.google.com/m8/feeds/contacts/default/full?max-results=%d' % (page,)
+        url = 'http://www.google.com/m8/feeds/contacts/default/full?v=1&max-results=%d' % (page,)
         method = 'GET'
         if start > 0:
             url = url + "&start-index=%d" % (start,)
+        if group:
+            gid = self.getgroup_id(group)
+            if not gid:
+                error={"provider": domain,
+                       "message": "Group '%s' not available" % group,
+                       }
+                return None, error
+            url = url + "&group=%s" % (gid,)
 
         # itemsPerPage, startIndex, totalResults
         client = oauth.Client(self.consumer, self.oauth_token)
         resp, content = client.request(url, method)
+        if int(resp.status) != 200:
+            error={"provider": domain,
+                   "message": content,
+                   "status": int(resp.status)
+                   }
+            return None, error
+            
         feed = gdata.contacts.ContactsFeedFromString(content)
         for entry in feed.entry:
+            #print entry.group_membership_info
             email = entry.email[0]
             p = {
                 'displayName': entry.title.text or email.address,
@@ -204,8 +233,8 @@ Subject: %s
             contacts.append(p)
         result = {
             'entry': contacts,
-            'totalResults': feed.total_results.text,
             'itemsPerPage': feed.items_per_page.text,
-            'startIndex':   feed.start_index.text
+            'startIndex':   feed.start_index.text,
+            'totalResults': feed.total_results.text,
         }
         return result, None

@@ -60,12 +60,16 @@ Start index used for paging results.
             api_arg('maxresults', 'integer', False, 25, None, """
 Max results to be returned per request, used with startindex for paging.
 """),
+            api_arg('group', 'string', False, 'Contacts', None, """
+Name of the group to return.
+"""),
         ],
         response={'type': 'object', 'doc': 'Portable Contacts Collection'}
     )
     def get(self, domain):
         username = request.params.get('username')
         userid = request.params.get('userid')
+        group = request.params.get('group', None)
         startIndex = int(request.params.get('startindex','0'))
         maxResults = int(request.params.get('maxresults','25'))
         keys = session.get('account_keys', '').split(',')
@@ -92,6 +96,6 @@ Max results to be returned per request, used with startindex for paging.
             }
             return {'result': None, 'error': error}
 
-        result, error = provider.api(acct).getcontacts(startIndex, maxResults)
+        result, error = provider.api(acct).getcontacts(startIndex, maxResults, group)
         return {'result': result, 'error': error}
 
