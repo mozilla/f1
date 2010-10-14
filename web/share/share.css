@@ -136,10 +136,14 @@ ul.nav li.first.last {
 }
 
 ul.nav li a.icon {
-  width: 36px;
+  margin: 0 0 0 8px;
+  padding: 0 10px 0 20px;
+  font-weight: bold;
+  color: #333;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.25);
   height: 24px;
   background-repeat: no-repeat;
-  background-position: center center;
+  background-position: left center;
   display: block;
 }
 
@@ -400,6 +404,30 @@ textarea.placeholder {
 
 .TextCountOver {
   color: red !important;
+}
+
+/* === AUTOCOMPLETE === */
+ul.ui-autocomplete {
+  background-color: #fff;
+  min-width: 253px;
+  width: 253px;
+  border: 1px solid #aaa;
+  border-top: none;
+  -moz-box-shadow: 0 2px 2px rgba(0,0,0,0.5);
+}
+
+ul.ui-autocomplete li.ui-menu-item a {
+  padding: 5px;
+  overflow-x: hidden;
+  white-space: nowrap;
+  cursor: pointer;
+  display: block;
+}
+
+ul.ui-autocomplete li.ui-menu-item a.ui-state-hover {
+  background-color: #00A0FF;
+  color: white;
+  font-weight: bold;
 }
 
 /* === SETTINGS PANEL === */
