@@ -4,6 +4,8 @@ import json
 import urllib
 import sys
 import httplib2
+import copy
+from urlparse import urlparse
 
 from pylons import config, request, response, session
 from pylons.controllers.util import abort, redirect
@@ -42,6 +44,7 @@ The 'send' namespace is used to send updates to our supported services.
         domain = request.POST.get('domain')
         message = request.POST.get('message', '')
         username = request.POST.get('username')
+        longurl = request.POST.get('link')
         shorturl = request.POST.get('shorturl')
         userid = request.POST.get('userid')
         to = request.POST.get('to')
@@ -75,8 +78,16 @@ The 'send' namespace is used to send updates to our supported services.
             }
             return {'result': result, 'error': error}
 
+        args = copy.copy(request.POST)
+        if not shorturl and longurl:
+            u = urlparse(longurl)
+            if not u.scheme:
+                longurl = 'http://' + longurl
+            shorturl = Link.get_or_create(longurl)
+            args['shorturl'] = shorturl
+
         # send the item.
-        result, error = provider.api(acct).sendmessage(message, request.POST)
+        result, error = provider.api(acct).sendmessage(message, args)
 
         if error:
             assert not result

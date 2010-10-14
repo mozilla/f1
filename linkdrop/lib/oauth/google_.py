@@ -158,6 +158,16 @@ Subject: %s
 
 %s
 """ % (to_, from_, subject, message)
+
+        # insert the url if it is not already in the message
+        longurl = options.get('link')
+        shorturl = options.get('shorturl')
+        if shorturl:
+            if shorturl not in message:
+                message += "\n\n%s\n" % shorturl
+        elif longurl and longurl not in message:
+            message += "\n\n%s\n" % longurl
+
         try:
             try:
                 try:

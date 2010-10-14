@@ -118,6 +118,21 @@ class api():
     def sendmessage(self, message, options={}):
         result = error = None
         try:
+            # insert the url if it is not already in the message
+            longurl = options.get('link')
+            shorturl = options.get('shorturl')
+            if shorturl:
+                # if the long url is in the message body, replace it with
+                # the short url, otherwise just make sure shorturl is in
+                # the body.
+                if longurl and longurl in message:
+                    message = message.replace(longurl, shorturl)
+                elif shorturl not in message:
+                    message += " %s" % shorturl
+            elif longurl and longurl not in message:
+                # some reason we dont have a short url, add the long url
+                message += " %s" % longurl
+
             result = self.api().statuses.update(status=message)
             result[domain] = result['id']
         except TwitterHTTPError, exc:
