@@ -23,7 +23,7 @@
 
 /*jslint plusplus: false, indent: 2 */
 /*global require: false, location: true, window: false, alert: false,
-  document: false, setTimeout: false */
+  document: false, setTimeout: false, localStorage: false */
 "use strict";
 
 require.def("send",
@@ -82,7 +82,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     },
     tabDom, bodyDom, clickBlockDom, twitterCounter,
     updateTab = true,
-    accounts, oldAccounts;
+    accounts, oldAccounts, gmailDom;
 
   jig.addFn({
     profilePic: function (photos) {
@@ -192,6 +192,70 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         }, 5000);
       });
     }, 1000);
+  }
+
+  /**
+   * Makes sure there is an autocomplete set up with the latest
+   * localstorage data.
+   */
+  function updateAutoComplete() {
+
+    //Create autocomplete for gmail to field
+    var toDom = gmailDom.find('[name="to"]'),
+        widget = toDom.data('autocomplete'),
+        data = localStorage.gmailContacts;
+
+    if (data) {
+      data = JSON.parse(data);
+    } else {
+      data = [];
+    }
+
+    if (!widget) {
+      toDom.autocomplete();
+    }
+
+    toDom.autocomplete('option', 'source', data);
+  }
+
+  /**
+   * Use localStorage to save gmail contacts, but fetch from API
+   * server if there is no localStorage copy.
+   */
+  function storeGmailContacts(account) {
+    if (!localStorage.gmailContacts) {
+      var svcAccount = account.accounts[0];
+
+      rdapi('contacts/' + svcAccount.domain, {
+        data: {
+          username: svcAccount.username,
+          userid: svcAccount.userid,
+          startindex: 0,
+          maxresults: 50
+        },
+        success: function (json) {
+          //Transform data to a form usable by autocomplete.
+          if (json && !json.error) {
+            var entries = json.result.entry,
+                data = [];
+
+            entries.forEach(function (entry) {
+              entry.emails.forEach(function (email) {
+                data.push({
+                  label: entry.displayName + ' <' + email.value + '>',
+                  value: email.value
+                });
+              });
+            });
+
+            localStorage.gmailContacts = JSON.stringify(data);
+            updateAutoComplete();
+          }
+        }
+      });
+    } else {
+      updateAutoComplete();
+    }
   }
 
   function getServiceUserName(serviceName) {
@@ -309,9 +373,16 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
     if (userAccounts.gmail) {
       updateAccountDisplay('gmail', userAccounts.gmail);
+      //Make sure we have contacts for auto-complete
+      storeGmailContacts(userAccounts.gmail);
     } else {
       updateServiceDisplayName('gmail');
       updateAccountButton('google.com');
+
+      //Make sure there is no cached data hanging around.
+      if (localStorage.gmailContacts) {
+        delete localStorage.gmailContacts;
+      }
     }
 
     if (updateTab) {
@@ -393,7 +464,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
     //Set up twitter text counter
     if (!twitterCounter) {
-        twitterCounter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 114);
+      twitterCounter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 114);
     }
 
     //Update counter. If using a short url from the web page itself, it could potentially be a different
@@ -505,11 +576,11 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   $(function () {
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
-      gmailDom = $('#gmail'),
       picture;
 
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
+    gmailDom = $('#gmail');
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
@@ -594,11 +665,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     $('.url').textOverflow(null, true);
     $('.surl').textOverflow(null, true);
 
-    //Create autocomplete for gmail to field
-     gmailDom.find('[name="to"]').autocomplete({
-        source: ['James Burke <jrburke@example.com>', 'Andy Chung <andy@crazylongdomainnamethatishuge.com>', 'Shane <short@ex.com>']
-    });
-
     //Handle button click for services in the settings.
     $('#settings').delegate('.auth', 'click', function (evt) {
       var node = evt.target,
@@ -635,6 +701,11 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
           });
         }
       });
+
+      //Remove any cached data
+      if (domain === 'google.com' && localStorage.gmailContacts) {
+        delete localStorage.gmailContacts;
+      }
     });
 
     $("form.messageForm")
