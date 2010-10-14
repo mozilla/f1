@@ -84,6 +84,17 @@ def api_entry(**kw):
             if 'name' in kw:
                 doc = kw['name'] + "\n" + "="*len(kw['name']) +"\n\n" + doc
             args = []
+            for m in kw.get('urlargs', []):
+                line = "  %(name)-20s %(type)-10s %(doc)s" % m
+                opts = []
+                if m['required']: opts.append("required")
+                if m['default']: opts.append("default=%s" % m['default'])
+                if m['allowed']: opts.append("options=%r" % m['allowed'])
+                if opts:
+                    line = "%s (%s)" % (line, ','.join(opts),)
+                args.append(line)
+            d = "URL Arguments\n-------------\n\n%s\n\n" % '\n'.join(args)
+            args = []
             for m in kw.get('queryargs', []):
                 line = "  %(name)-20s %(type)-10s %(doc)s" % m
                 opts = []
@@ -93,7 +104,7 @@ def api_entry(**kw):
                 if opts:
                     line = "%s (%s)" % (line, ','.join(opts),)
                 args.append(line)
-            d = "Request Arguments\n-----------------\n\n%s\n\n" % '\n'.join(args)
+            d += "Request Arguments\n-----------------\n\n%s\n\n" % '\n'.join(args)
             if 'bodyargs' in kw:
                 assert 'body' not in kw, "can't specify body and bodyargs"
                 for m in kw['bodyargs']:
@@ -129,7 +140,7 @@ def api_arg(name, type=None, required=False, default=None, allowed=None, doc=Non
 if __name__ == '__main__':
     @api_entry(
         name="contacts",
-        body=("json", "A json object"),
+        body={'type': "json", 'doc': "A json object"},
         doc="""
 See Portable Contacts for api for detailed documentation.
 
@@ -158,7 +169,7 @@ http://portablecontacts.net/draft-spec.html
             api_arg('sortOrder', 'string', False, 'ascending', ['ascending','descending'], 'A list of conversation ids'),
             api_arg('fields', 'list', False, None, None, 'A list of fields to return'),
         ],
-        response=('object', 'A POCO result object')
+        response={'type': 'object', 'doc': 'An object that describes the API methods and parameters.'}
     )
     def foo():
         pass
