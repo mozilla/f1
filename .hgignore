@@ -7,11 +7,13 @@ syntax:regexp
 linkdrop.kpf
 lenv
 env
+tmp
+dist
 data\/sessions
 \.DS_Store
-development.db
+\.db
+\.xpi
 ^grinder/.*\.log.*
 ^grinder/.*-file-store
 ^grinder/.*\$py.class
 web-static
-web/share-0.1-dev.xpi
