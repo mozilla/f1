@@ -594,6 +594,11 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     $('.url').textOverflow(null, true);
     $('.surl').textOverflow(null, true);
 
+    //Create autocomplete for gmail to field
+     gmailDom.find('[name="to"]').autocomplete({
+        source: ['James Burke <jrburke@example.com>', 'Andy Chung <andy@crazylongdomainnamethatishuge.com>', 'Shane <short@ex.com>']
+    });
+
     //Handle button click for services in the settings.
     $('#settings').delegate('.auth', 'click', function (evt) {
       var node = evt.target,
