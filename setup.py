@@ -23,6 +23,7 @@ setup(
         "python-openid",
         "python-memcached",
         "twitter",
+        "gdata", # google api support
         "sqlalchemy-migrate>=0.5.4",
     ],
     setup_requires=["PasteScript>=1.6.3"],

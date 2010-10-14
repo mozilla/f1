@@ -11,6 +11,8 @@ import oauth2 as oauth
 #from oauth2.clients.smtp import SMTP
 import smtplib
 import base64
+import gdata.contacts
+
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -138,9 +140,6 @@ class api():
         self.consumer_key = self.config.get('consumer_key')
         self.consumer_secret = self.config.get('consumer_secret')
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
-         
-    def rawcall(self, url, body):
-        raise Exception("NOT IMPLEMENTED")
 
     def sendmessage(self, message, options={}):
         result = error = None
@@ -185,5 +184,28 @@ Subject: %s
             result = {"status": "message sent"}
         return result, error
 
+    def getcontacts(self, start=0, page=25):
+        contacts = []
+        url = 'http://www.google.com/m8/feeds/contacts/default/full?max-results=%d' % (page,)
+        method = 'GET'
+        if start > 0:
+            url = url + "&start-index=%d" % (start,)
 
-
+        # itemsPerPage, startIndex, totalResults
+        client = oauth.Client(self.consumer, self.oauth_token)
+        resp, content = client.request(url, method)
+        feed = gdata.contacts.ContactsFeedFromString(content)
+        for entry in feed.entry:
+            email = entry.email[0]
+            p = {
+                'displayName': entry.title.text or email.address,
+                'emails': [{'value': email.address, 'primary': email.primary}]
+            }
+            contacts.append(p)
+        result = {
+            'entry': contacts,
+            'totalResults': feed.total_results.text,
+            'itemsPerPage': feed.items_per_page.text,
+            'startIndex':   feed.start_index.text
+        }
+        return result, None
