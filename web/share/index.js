@@ -453,7 +453,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       } else if (dom.hasClass('short')) {
         dom.val(options.shortUrl || options.url);
       } else if (dom.hasClass('urlWithSpace')) {
-        dom.val("\n" + (options.canonicalUrl || options.url) + "\n");
+        dom.val((options.canonicalUrl || options.url) + "\n");
       } else {
         dom.val(options.canonicalUrl || options.url);
       }
