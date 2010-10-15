@@ -485,25 +485,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         accounts = json;
         updateAccounts(json, callback);
 
-        //If no short URL, get it now. Need to wait until
-        //after the account/get call so we have a csrf token
-        //to do the POST call.
-        if (options.url && !options.shortUrl) {
-          rdapi('links/shorten', {
-            type: 'POST',
-            data: {
-              'url': options.canonicalUrl || options.url
-            },
-            success: function (json) {
-              options.shortUrl = json.result.short_url;
-              updateLinks();
-            },
-            error: function (json) {
-            }
-          });
-        } else {
-          updateLinks();
-        }
+        updateLinks();
       },
       error: function (xhr, textStatus, errorThrown) {
         showStatus('statusServerError');
@@ -576,6 +558,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   $(function () {
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
+      twitterDom = $('#twitter'),
       picture;
 
     bodyDom = $('body');
@@ -629,6 +612,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     }
 
     if (options.url) {
+      twitterDom.find('[name="link"]').val(options.url);
       facebookDom.find('[name="link"]').val(options.url);
     }
 
@@ -734,7 +718,14 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
             sendData[node.name] = node.value;
           }
         });
-        sendData.shorturl = options.shortUrl;
+
+        if (sendData.domain === 'twitter.com') {
+          if (options.shortUrl) {
+            sendData.shorturl = options.shortUrl;
+          } else {
+            sendData.shorten = true;
+          }
+        }
 
         sendMessage();
         return false;

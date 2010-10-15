@@ -5,7 +5,6 @@ Tasks:
   do the twitter send since no longer showing the shortened URL. Shane/James
 * Make sure OAuth gmail is for contacts and message sending. - Shane
 * Proxy for Contacts API: "Most Contacted", save to localstorage. - Shane/James
-* James: Contacts API calls from the web.
 * Multiple recipients for email - Andy
 * Make sure the overlay works with tabs correctly. - Bryan/James
 * Speed of page display: - James

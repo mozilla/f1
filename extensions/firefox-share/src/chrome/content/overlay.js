@@ -10,10 +10,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   var slice = Array.prototype.slice,
       ostring = Object.prototype.toString, fn;
 
-  var dbConn = Cc["@mozilla.org/browser/nav-history-service;1"].
-    getService(Ci.nsPIPlacesDatabase).
-    DBConnection;
-
   var queryToObject = function (/*String*/ str) {
     // summary:
     //        Create an object representing a de-serialized query section of a
@@ -157,92 +153,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
-  var httpObserver = {
-    
-    started: true,
-    found: false,
-    // 
-    observe: function(subject, topic, data) {
-      try {
-        var channel = subject.QueryInterface(Components.interfaces.nsIHttpChannel);
-      } catch (e) {
-        return;
-      }
-      if (channel) {
-        var shortenedBy = null;
-        try {
-          shortenedBy = channel.getResponseHeader("x-shortened-by");
-        } catch (e) {
-          // not really a channel I guess?
-        }
-        if (shortenedBy) {
-          //Application.console.log('found x-shortened-by');
-          ffshare.friend = shortenedBy;
-          this.found = true;
-        }
-      }
-    },
-
-    onLocationChange: function(/*in nsIWebProgress*/ aWebProgress,
-                          /*in nsIRequest*/ aRequest,
-                          /*in nsIURI*/ aLocation) {
-    },
-    onStatusChange: function(/*in nsIWebProgress*/ aWebProgress,
-                          /*in nsIRequest*/ aRequest,
-                          /*in nsIURI*/ aLocation) {
-    },
-    onProgressChange: function(/*in nsIWebProgress*/ aWebProgress,
-                          /*in nsIRequest*/ aRequest,
-                          /*in nsIURI*/ aLocation) {
-    },
-    onSecurityChange: function(/*in nsIWebProgress*/ aWebProgress,
-                          /*in nsIRequest*/ aRequest,
-                          /*in nsIURI*/ aLocation) {
-    },
-
-    onStateChange: function(aWebProgress, aRequest, aStateFlags, aStatus) {
-    // maybe can just use onLocationChange, but I don't think so?
-    var flags = Components.interfaces.nsIWebProgressListener;
-    var orange = document.getElementById('share-indicator')
-    if (aStateFlags & flags.STATE_IS_DOCUMENT) {
-      if (aStateFlags & flags.STATE_START) {
-        //Application.console.log("DOC START");
-        //Application.console.log("hiding on docstart");
-        this.started = true;
-        orange.style.visibility = 'collapse';
-      } else if (aStateFlags & flags.STATE_STOP) {
-        //Application.console.log("DOC STOP: ");
-        this.started = false;
-        if (this.found) {
-          //Application.console.log('showing');
-          orange.style.visibility = 'visible';
-        } else {
-          //Application.console.log('hiding');
-          //orange.style.visibility = 'collapse';
-        }
-        this.found = false;
-      }
-    } else if (aStateFlags & flags.STATE_IS_WINDOW &&
-               aStateFlags & flags.STATE_STOP) {
-      // This seems like an excessive check but works very well
-      if (ffshare.firstRun) {
-        ffshare.onFirstRun();
-      }
-    }
-
-  },
-
-  QueryInterface: function(iid) {
-    if (iid.equals(Components.interfaces.nsIObserver) ||
-        iid.equals(Components.interfaces.nsIWebProgressListener) ||
-        iid.equals(Components.interfaces.nsISupportsWeakReference) ||
-        iid.equals(Components.interfaces.nsISupports))
-      return this;
-    throw Components.results.NS_NOINTERFACE;
-  }
-
-  };
-
   var navProgressListener = {
     // detect navigational events for the tab, so we can close
 
@@ -266,17 +176,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   ffshare = {
 
-    whoFrom: function() {
-      var popup = document.getElementById("ffshare-popup");
-      var orange = document.getElementById("share-indicator");
-      var friend = document.getElementById("friend");
-      friend.value = this.friend;
-      popup.hidden = false;
-      var rect = orange.getBoundingClientRect();
-      popup.openPopup(null,null,rect.left - 10, rect.top + rect.height);
-      popup.popupBoxObject.setConsumeRollupEvent(Ci.nsIPopupBoxObject.ROLLUP_CONSUME);
-
-    },
     onPopupShown: function() {
       Application.console.log("shownPOPUP!");
     },
@@ -288,22 +187,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
     useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
     firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", true),
-
-    onLoad: function () {
-      // initialization code
-      Components.classes["@mozilla.org/observer-service;1"]
-                .getService(Components.interfaces.nsIObserverService)
-                .addObserver(httpObserver, "http-on-examine-response", false);
-      gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(httpObserver, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
-    },
-
-    onUnload: function () {
-      // initialization code
-      Components.classes["@mozilla.org/observer-service;1"]
-                .getService(Components.interfaces.nsIObserverService)
-                .removeObserver(httpObserver, "http-on-examine-response");
-      gBrowser.getBrowserForTab(gBrowser.selectedTab).removeProgressListener(httpObserver);
-    },
 
     onFirstRun: function () {
       // create a hidden iframe and get it to load the standard contents
@@ -404,91 +287,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.onToolbarButtonCommand(e);
     },
 
-    getKnownServices: function () {
-      // Returns a map of all of the known services we have found logins
-      // for, with the following structure:
-       //{'gmail': {
-       //     'usernames': ['john.doe', 'jane baz']
-       //     },
-       //{'twitter': {
-       //     'usernames': ['john.doe', 'jane baz']
-       //     },
-       //
-      var loginMgr = Components.classes["@mozilla.org/login-manager;1"]
-                         .getService(Components.interfaces.nsILoginManager),
-          logins = loginMgr.getAllLogins({}),
-          knownServices = [
-        {'hostnames': [['http://twitter.com', true],
-                       ['https://twitter.com', true]
-                       ], 'name': 'twitter'},
-        {'hostnames': [['http://mail.google.com', true],
-                       ['https://mail.google.com', true],
-                       ['http://www.google.com', false],
-                       ['https://www.google.com', false],
-                       ], 'name': 'gmail'},
-        {'hostnames': [['http://www.facebook.com', true],
-                       ['https://login.facebook.com', true]
-                       ], 'name': 'facebook'}
-      ],
-          detectedServices = [],
-          detectedServicesMap = {},
-          i, j, hostnameIndex, svcName, username, svcData, exists, ui;
-      for (i = 0; i < logins.length; i++) {
-        for (j = 0; j < knownServices.length; j++) {
-          for (hostnameIndex = 0; hostnameIndex < knownServices[j].hostnames.length; hostnameIndex++) {
-            var [svcUrl, countsTowardsFrecency] = knownServices[j].hostnames[hostnameIndex];
-            if (svcUrl === logins[i].hostname) {
-              var svcName = knownServices[j].name;
-              var svcData;
-              var username = logins[i].username;
-              if (! detectedServicesMap[svcName]) {
-                svcData = {'usernames': [], 'frecency': 0};
-                detectedServicesMap[svcName] = svcData;
-                detectedServices.push(svcName);
-              } else {
-                svcData = detectedServicesMap[svcName];
-              }
-              if (countsTowardsFrecency) // should count frecency for this domain
-                svcData['frecency'] += this.getFrecencyForURI(svcUrl);
-              exists = false;
-              for (ui = 0; ui < svcData.usernames.length; ui++) {
-                if (svcData.usernames[ui] === username) {
-                  exists = true;
-                }
-              }
-              if (!exists) {
-                svcData.usernames.push(username);
-              }
-            }
-          }
-        }
-      }
-      return detectedServicesMap;
-    },
-
-    /**
-     * Returns the frecency of a URI.
-     *
-     * XXX: should move to async as places moves to async.
-     *
-     * @param  aURI
-     *         the URI of a place
-     * @return the frecency of aURI
-     */
-    getFrecencyForURI: function(url) {
-      var ios = Cc["@mozilla.org/network/io-service;1"].
-             getService(Ci.nsIIOService);
-      var uri = ios.newURI(url, null, null);
-      var sql = "SELECT frecency FROM moz_places WHERE url = :url LIMIT 1";
-      var stmt = dbConn.createStatement(sql);
-      stmt.params.url = uri.spec;
-      var retval = stmt.executeStep();
-      if (retval == false) return 0;
-      var frecency = stmt.getInt32(0);
-      stmt.finalize();
-      return frecency;
-    },
-
     registerListener: function() {
       this.shareFrame.webProgress.addProgressListener(iframeProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
       gBrowser.getBrowserForTab(gBrowser.selectedTab).webProgress.addProgressListener(navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
@@ -537,7 +335,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         iframeNode.style.minHeight = 0;
 
         options = {
-          services: this.getKnownServices(),
           title: this.getPageTitle(),
           description : this.getPageDescription(),
           medium : this.getPageMedium(),
@@ -766,7 +563,4 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ffshare.frontpageUrl = 'https://linkdrop.mozillamessaging.com/frontpage/';
     }
   }
-
-  window.addEventListener("load", fn.bind(ffshare, "onLoad"), false);
-  window.addEventListener("unload", fn.bind(ffshare, "onUnload"), false);
 }());
