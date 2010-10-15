@@ -9,9 +9,6 @@ Tasks:
 * Design autocomplete, start with jquery UI -  James then Andy
 * Multiple recipients for email - Andy
 * Tooltips vs using text for tab buttons. - Andy
-* Fix first install dialog: - Bryan/James
-  * make sure to focus on frontpage after install, or pop a tab
-    for it if not there, and poke the page to tell it first install.
 * Make sure the overlay works with tabs correctly. - Bryan/James
 * Speed of page display: - James
   * make sure files can be aggressively cached.
