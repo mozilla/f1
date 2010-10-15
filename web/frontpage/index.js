@@ -179,6 +179,13 @@ require.def(['require', 'jquery', 'hashDispatch'],
             }
         });
 
+        $(window).bind('hideInstalled', function () {
+          //Once a person clicks on the toolbar button for the first time we
+          // should get a hideInstalled event
+          $('#installed').fadeOut("fast");
+        });
+
+
         $('body')
             .delegate('#installClose', 'click', function (evt) {
                 //Allow closing the installed area thing.

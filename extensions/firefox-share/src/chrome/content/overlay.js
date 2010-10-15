@@ -331,7 +331,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           var numTabs = tabbrowser.browsers.length;
           for (var index = 0; index < numTabs; index++) {
             var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-            log(url + " == " + currentBrowser.currentURI.spec);
             if (url == currentBrowser.currentURI.spec) {
 
               // The URL is already opened. Select this tab.
@@ -567,6 +566,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     show: function () {
       var iframeNode = this.shareFrame;
+
+      if (this.frontpageUrl == gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI.spec) {
+        var browser = gBrowser.getBrowserForTab(gBrowser.selectedTab);
+        // If we're looking at the front page we should clear the first run helper
+        var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
+        evt.initEvent("hideInstalled", true, false);
+        browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
+      }
 
       /*
       //Figure out if CSS transitions can be used
