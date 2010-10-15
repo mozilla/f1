@@ -6,9 +6,7 @@ Tasks:
 * Make sure OAuth gmail is for contacts and message sending. - Shane
 * Proxy for Contacts API: "Most Contacted", save to localstorage. - Shane/James
 * James: Contacts API calls from the web.
-* Design autocomplete, start with jquery UI -  James then Andy
 * Multiple recipients for email - Andy
-* Tooltips vs using text for tab buttons. - Andy
 * Make sure the overlay works with tabs correctly. - Bryan/James
 * Speed of page display: - James
   * make sure files can be aggressively cached.
