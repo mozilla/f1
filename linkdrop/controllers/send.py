@@ -85,7 +85,7 @@ The 'send' namespace is used to send updates to our supported services.
             u = urlparse(longurl)
             if not u.scheme:
                 longurl = 'http://' + longurl
-            shorturl = Link.get_or_create(longurl)
+            shorturl = Link.get_or_create(longurl).short_url
             args['shorturl'] = shorturl
 
         # send the item.
