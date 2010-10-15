@@ -165,20 +165,19 @@ require.def(['require', 'jquery', 'hashDispatch'],
     });
 
     $(function () {
-        var installedDom = $('#installed'),
-            //x = 965;
-            x = window.buttonX;
-
-        //If this is after an install, then show the "click the button" UI.
-        if (x) {
-            //TODO: fix this hardcoded 8px offset. Need to make it half the width
-            //of the arrow, but cannot dynamically ask for it because it is hidden
-            //so has no width. Would need to take it out of DOM, show it, then get
-            //width.
-            x = x - 8;
-            installedDom.fadeIn(500);
-            $('#shareArrow').css({left: x});
-        }
+        $(window).bind('buttonX', function () {
+          //If this is after an install, then show the "click the button" UI.
+            var x = window.buttonX;
+            if (x) {
+              //TODO: fix this hardcoded 8px offset. Need to make it half the width
+              //of the arrow, but cannot dynamically ask for it because it is hidden
+              //so has no width. Would need to take it out of DOM, show it, then get
+              //width.
+              x = x - 8;
+              $('#installed').fadeIn(500);
+              $('#shareArrow').css({left: x});
+            }
+        });
 
         $('body')
             .delegate('#installClose', 'click', function (evt) {
