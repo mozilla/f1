@@ -1,14 +1,14 @@
 Tasks:
 
 * remember last service used for share for next share -  James
-* API send: pass flag to indicate if shortening is needed. Use this to
-  do the twitter send since no longer showing the shortened URL. Shane/James
-* Make sure OAuth gmail is for contacts and message sending. - Shane
 * Proxy for Contacts API: "Most Contacted", save to localstorage. - Shane/James
 * Multiple recipients for email - Andy
 * Make sure the overlay works with tabs correctly. - Bryan/James
 * Speed of page display: - James
   * make sure files can be aggressively cached.
+
+* Contacts API: fetch them all.
+* Do something awesome for subject.
 
 * Blog post - Andy
   * mention the constraints with email/contacts API

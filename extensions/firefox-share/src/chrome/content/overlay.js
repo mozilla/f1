@@ -1,7 +1,8 @@
 'use strict';
-/*jslint indent: 2, plusplus: false */
+/*jslint indent: 2, es5: true, plusplus: false, onevar: false */
 /*global document: false, setInterval: false, clearInterval: false,
-  Application: false, gBrowser: false, window: false, Components: false */
+  Application: false, gBrowser: false, window: false, Components: false,
+  Cc: false, Ci: false, PlacesUtils: false */
 
 var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
@@ -36,30 +37,30 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         parts, name, val;
 
     qp.forEach(function (item) {
-        if (item.length) {
-            parts = item.split('=');
-            name = dec(parts.shift());
-            val = dec(parts.join('='));
-            if (typeof ret[name] === 'string') {
-                ret[name] = [ret[name]];
-            }
-
-            if (ostring.call(ret[name]) === '[object Array]') {
-                ret[name].push(val);
-            } else {
-                ret[name] = val;
-            }
+      if (item.length) {
+        parts = item.split('=');
+        name = dec(parts.shift());
+        val = dec(parts.join('='));
+        if (typeof ret[name] === 'string') {
+          ret[name] = [ret[name]];
         }
+
+        if (ostring.call(ret[name]) === '[object Array]') {
+          ret[name].push(val);
+        } else {
+          ret[name] = val;
+        }
+      }
     });
     return ret;
   };
 
   function log(msg) {
-    Application.console.log('.'+msg); // avoid clearing on empty log
+    Application.console.log('.' + msg); // avoid clearing on empty log
   }
 
   function error(msg) {
-    Components.utils.reportError('.'+msg); // avoid clearing on empty log
+    Components.utils.reportError('.' + msg); // avoid clearing on empty log
   }
 
   fn = {
@@ -105,23 +106,27 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
-  var iframeProgressListener = {
+  var IframeProgressListener = function () {
+  };
+  
+  IframeProgressListener.prototype = {
     // detect communication from the iframe via location setting
-    QueryInterface: function(aIID) {
+    QueryInterface: function (aIID) {
       if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
           aIID.equals(Components.interfaces.nsIWebProgressListener2)  ||
           aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-          aIID.equals(Components.interfaces.nsISupports))
+          aIID.equals(Components.interfaces.nsISupports)) {
         return this;
+      }
       throw Components.results.NS_NOINTERFACE;
     },
 
-    onLocationChange: function(/*in nsIWebProgress*/ aWebProgress,
+    onLocationChange: function (/*in nsIWebProgress*/ aWebProgress,
                           /*in nsIRequest*/ aRequest,
                           /*in nsIURI*/ aLocation) {
       var hashIndex = aLocation.spec.indexOf("#");
-      if (hashIndex != -1) {
-        var tail = aLocation.spec.slice(hashIndex+1, aLocation.spec.length);
+      if (hashIndex !== -1) {
+        var tail = aLocation.spec.slice(hashIndex + 1, aLocation.spec.length);
         if (tail.indexOf("!success") === 0) {
           ffshare.hide();
 
@@ -129,10 +134,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           var bits = tail.slice("!success:".length, tail.length);
           var retvals = queryToObject(bits);
           var tags = ['shared', 'linkdrop'];
-          if (retvals.domain == 'twitter.com') {
+          if (retvals.domain === 'twitter.com') {
             tags.push("twitter");
           }
-          if (retvals.domain == 'facebook.com') {
+          if (retvals.domain === 'facebook.com') {
             tags.push("facebook");
           }
 
@@ -146,26 +151,50 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   
             PlacesUtils.tagging.tagURI(nsiuri, tags);
           }
-        } else if (tail == "!resize") {
+        } else if (tail === "!resize") {
           ffshare.matchIframeContentHeight();
         }
       }
     }
   };
 
+  var firstRunProgressListener = {
+    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
+      // maybe can just use onLocationChange, but I don't think so?
+      var flags = Components.interfaces.nsIWebProgressListener;
+      if (aStateFlags & flags.STATE_IS_WINDOW &&
+                 aStateFlags & flags.STATE_STOP) {
+        // This seems like an excessive check but works very well
+        if (ffshare.firstRun) {
+          ffshare.onFirstRun();
+        }
+      }
+    },
+
+    QueryInterface: function (iid) {
+      if (iid.equals(Components.interfaces.nsIWebProgressListener) ||
+          iid.equals(Components.interfaces.nsISupportsWeakReference) ||
+          iid.equals(Components.interfaces.nsISupports)) {
+        return this;
+      }
+      throw Components.results.NS_NOINTERFACE;
+    }
+  };
+
   var navProgressListener = {
     // detect navigational events for the tab, so we can close
 
-    QueryInterface: function(aIID) {
+    QueryInterface: function (aIID) {
       if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
           aIID.equals(Components.interfaces.nsIWebProgressListener2)  ||
           aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-          aIID.equals(Components.interfaces.nsISupports))
+          aIID.equals(Components.interfaces.nsISupports)) {
         return this;
+      }
       throw Components.results.NS_NOINTERFACE;
     },
 
-    onLocationChange: function(/*in nsIWebProgress*/ aWebProgress,
+    onLocationChange: function (/*in nsIWebProgress*/ aWebProgress,
                           /*in nsIRequest*/ aRequest,
                           /*in nsIURI*/ aLocation) {
       // For now, any navigation causes collapsing.
@@ -174,160 +203,42 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
-  ffshare = {
+  var TabFrame = function (tab) {
+    this.tab = tab;
+    this.visible = false;
+  };
 
-    onPopupShown: function() {
-      Application.console.log("shownPOPUP!");
-    },
+  TabFrame.prototype = {
 
-    frameAnimationTime: 300,
-
-    system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
-    shareUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
-    frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
-    useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
-    firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", true),
-
-    onFirstRun: function () {
-      // create a hidden iframe and get it to load the standard contents
-      // to prefill the cache
-      var iframeNode = document.createElement("browser");
-      iframeNode.setAttribute("type", "content");
-      iframeNode.setAttribute("style", "width: 100px; height: 100px; background: pink;");
-      iframeNode.setAttribute("src", this.shareUrl);
-      iframeNode.setAttribute("style", "visibility: collapse;");
-      gBrowser.getBrowserForTab(gBrowser.selectedTab).parentNode.appendChild(iframeNode);
-
-      //Taken from https://developer.mozilla.org/en/Code_snippets/Tabbed_browser
-      function openAndReuseOneTabPerURL(url) {
-        var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                           .getService(Components.interfaces.nsIWindowMediator);
-        var browserEnumerator = wm.getEnumerator("navigator:browser");
-
-        // Check each browser instance for our URL
-        var found = false;
-        while (!found && browserEnumerator.hasMoreElements()) {
-          var browserWin = browserEnumerator.getNext();
-          var tabbrowser = browserWin.gBrowser;
-
-          // Check each tab of this browser instance
-          var numTabs = tabbrowser.browsers.length;
-          for (var index = 0; index < numTabs; index++) {
-            var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-            if (url == currentBrowser.currentURI.spec) {
-
-              // The URL is already opened. Select this tab.
-              tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
-
-              // Focus *this* browser-window
-              browserWin.focus();
-
-              var rect = browserWin.document.getElementById("ffshare-toolbar-button").getBoundingClientRect();
-              var browser = gBrowser.getBrowserForTab(tabbrowser.selectedTab);
-
-              // try setting the button location as the window may have already loaded
-              try {
-                browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
-                var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
-                evt.initEvent("buttonX", true, false);
-                browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
-              } catch (ignore) { }
-
-              // Add the load handler in case the window hasn't finished loaded (unlikely)
-              browser.addEventListener("load",
-                                       function buttonX() {
-                                          browser.removeEventListener("load", buttonX, true);
-                                          browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
-                                          var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
-                                          evt.initEvent("buttonX", true, false);
-                                          browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
-                                       }, true);
-
-              found = true;
-              break;
-            }
-          }
-        }
-
-        // Our URL isn't open. Open it now.
-        if (!found) {
-          var recentWindow = wm.getMostRecentWindow("navigator:browser");
-          if (recentWindow) {
-            var rect = recentWindow.document.getElementById("ffshare-toolbar-button").getBoundingClientRect();
-            // Use the existing browser (recent) Window
-            var tab = recentWindow.gBrowser.loadOneTab(url,{ referrerURI: null,
-                                                             charset: null,
-                                                             postData: null,
-                                                             inBackground: false,
-                                                             allowThirdPartyFixup: null });
-            var browser = gBrowser.getBrowserForTab(tab);
-            browser.addEventListener("load",
-                                     function buttonX() {
-                                        browser.removeEventListener("load", buttonX, true);
-                                        browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
-                                        var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
-                                        evt.initEvent("buttonX", true, false);
-                                        browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
-                                     }, true);
-          }
-          else {
-            // No browser windows are open, so open a new one.
-            window.open(url);
-          }
-        }
-      };
-
-      openAndReuseOneTabPerURL(this.frontpageUrl);
-
-      // curse you first install prefs!
-      Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
-    },
-
-    onMenuItemCommand: function (e) {
-      this.onToolbarButtonCommand(e);
-    },
-
-    registerListener: function() {
-      this.shareFrame.webProgress.addProgressListener(iframeProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
-      gBrowser.getBrowserForTab(gBrowser.selectedTab).webProgress.addProgressListener(navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+    registerListener: function () {
+      this.iframeProgressListener = new IframeProgressListener();
+      this.shareFrame.webProgress.addProgressListener(this.iframeProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+      gBrowser.getBrowserForTab(this.tab).webProgress.addProgressListener(navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
     },
     
-    unregisterListener: function(listener) {
-      this.shareFrame.webProgress.removeProgressListener(iframeProgressListener);
-      gBrowser.getBrowserForTab(gBrowser.selectedTab).webProgress.removeProgressListener(navProgressListener);
+    unregisterListener: function (listener) {
+      this.shareFrame.webProgress.removeProgressListener(this.iframeProgressListener);
+      this.iframeProgressListener = null;
+      gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(navProgressListener);
     },
 
     hide: function () {
       this.unregisterListener();
       this.changeHeight(0, fn.bind(this, function () {
-          this.shareFrame.parentNode.removeChild(this.shareFrame);
-          this.shareFrame = null;
+        this.shareFrame.parentNode.removeChild(this.shareFrame);
+        this.shareFrame = null;
       }));
+      this.visible = false;
     },
 
-    get tab() {
-      return gBrowser.selectedTab;
-    },
+    createShareFrame: function () {
+      var parentNode = gBrowser.getBrowserForTab(this.tab).parentNode,
+          iframeNode = null, url, options;
 
-    get shareFrameId() {
-      return "ffhsare" + this.tab.getAttribute("linkedpanel").replace("panel","");
-    },
-
-    get shareFrameExists() {
-      return (document.getElementById(this.shareFrameId) != null);
-    },
-
-    get shareFrame() {
-      var parentNode = gBrowser.getBrowserForTab(gBrowser.selectedTab).parentNode,
-          id = this.shareFrameId, iframeNode = null, url, options;
-
-      iframeNode = document.getElementById(id);
-
-      if (iframeNode == null) {
+      if (iframeNode === null) {
         //Create the iframe.
         iframeNode = document.createElement("browser");
 
-        iframeNode.id = id;
         iframeNode.className = 'ffshare-frame';
         iframeNode.style.width = '100%';
         iframeNode.style.height = '114px';
@@ -342,15 +253,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           canonicalUrl: this.getCanonicalURL(),
           shortUrl: this.getShortURL(),
           previews: this.previews(),
-          system: this.system
+          system: ffshare.system
         };
 
         if (! options.previews.length) {
           // then we need to make our own thumbnail
-          options['thumbnail'] = this.getThumbnailData();
+          options.thumbnail = this.getThumbnailData();
         }
 
-        url = this.shareUrl +
+        url = ffshare.shareUrl +
                   '#options=' + encodeURIComponent(JSON.stringify(options));
 
         iframeNode.setAttribute("type", "content");
@@ -358,14 +269,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         parentNode.insertBefore(iframeNode, parentNode.firstChild);
 
       }
-      return iframeNode;
+      return (this.shareFrame = iframeNode);
     },
 
     show: function () {
-      var iframeNode = this.shareFrame;
+      var iframeNode = this.shareFrame || this.createShareFrame();
 
-      if (this.frontpageUrl == gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI.spec) {
-        var browser = gBrowser.getBrowserForTab(gBrowser.selectedTab);
+      if (ffshare.frontpageUrl === gBrowser.getBrowserForTab(this.tab).currentURI.spec) {
+        var browser = gBrowser.getBrowserForTab(this.tab);
         // If we're looking at the front page we should clear the first run helper
         var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
         evt.initEvent("hideInstalled", true, false);
@@ -373,7 +284,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       /*
-      //Figure out if CSS transitions can be used
+      //Figure out if CSS transitions can be used. Right now, trying to
+      //transition the height as the page loads is too choppy, and waiting
+      //for the iframe to load before doing the animation is too long to wait.
       if ('MozTransition' in iframeNode.style) {
         this.useCssTransition = true;
         iframeNode.addEventListener("transitionend", fn.bind(this, 'onTransitionEnd'), true);
@@ -382,6 +295,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
       iframeNode.addEventListener('DOMContentLoaded', fn.bind(this, 'matchIframeContentHeight'), true);
       */
+
+      this.visible = true;
 
       this.registerListener();
     },
@@ -410,22 +325,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
     },
 
-    onToolbarButtonCommand: function (e) {
-      if (this.shareFrameExists) {
-        this.hide();
-      } else {
-        this.show();
-      }
-    },
-
     getPageTitle: function () {
       var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
       var titleNode = gBrowser.contentDocument.getElementsByTagName('title')[0];
       for (var i = 0; i < metaNodes.length; i++) {
-        if ("title" == metaNodes[i].getAttribute("name")) {
+        if ("title" === metaNodes[i].getAttribute("name")) {
           var content = metaNodes[i].getAttribute("content");
-          if (content)
+          if (content) {
             return content.trim();
+          }
         }
       }
       if (titleNode) {
@@ -437,10 +345,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     getPageDescription: function () {
       var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
       for (var i = 0; i < metaNodes.length; i++) {
-        if ("description" == metaNodes[i].getAttribute("name")) {
+        if ("description" === metaNodes[i].getAttribute("name")) {
           var content = metaNodes[i].getAttribute("content");
-          if (content)
+          if (content) {
             return content;
+          }
         }
       }
       return "";
@@ -448,19 +357,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     // According to Facebook - (only the first 3 are interesting)
     // Valid values for medium_type are audio, image, video, news, blog, and mult.
-    getPageMedium: function() {
+    getPageMedium: function () {
       var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
       for (var i = 0; i < metaNodes.length; i++) {
-        if ("medium" == metaNodes[i].getAttribute("name")) {
+        if ("medium" === metaNodes[i].getAttribute("name")) {
           var content = metaNodes[i].getAttribute("content");
-          if (content)
+          if (content) {
             return content;
+          }
         }
       }
       return "";
     },
 
-    getShortURL: function() {
+    getShortURL: function () {
       var links = gBrowser.contentDocument.getElementsByTagName("link"),
         rel = null,
         rev = null,
@@ -500,24 +410,29 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // work but currently don't provide the right kind of meta data
     getURLHacks: function () {
       // Google Maps Hack :( obviously this regex isn't robust
-      if (/^maps\.google.*/.test(gBrowser.currentURI.host))
+      if (/^maps\.google.*/.test(gBrowser.currentURI.host)) {
         return gBrowser.contentDocument.getElementById("link").getAttribute("href");
+      }
 
       return '';
     },
 
-    getThumbnailData: function() {
+    getThumbnailData: function () {
       var canvas = gBrowser.contentDocument.createElement("canvas"); // where?
       canvas.setAttribute('width', '90');
       canvas.setAttribute('height', '70');
-      var tab = gBrowser.selectedTab;
+      var tab = this.tab;
       var win = gBrowser.getBrowserForTab(tab).contentWindow;
       var aspectRatio = canvas.width / canvas.height;
       var w = win.innerWidth + win.scrollMaxX;
-      var h = Math.max(win.innerHeight, w/aspectRatio);
+      var h = Math.max(win.innerHeight, w / aspectRatio);
 
-      if (w > 10000) w = 10000;
-      if (h > 10000) h = 10000;
+      if (w > 10000) {
+        w = 10000;
+      }
+      if (h > 10000) {
+        h = 10000;
+      }
 
       var canvasW = canvas.width;
       var canvasH = canvas.height;
@@ -525,7 +440,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ctx.clearRect(0, 0, canvasW, canvasH);
       ctx.save();
 
-      var scale = canvasH/h;
+      var scale = canvasH / h;
       ctx.scale(scale, scale);
       ctx.drawWindow(win, 0, 0, w, h, "rgb(255,255,255)");
       ctx.restore();
@@ -548,6 +463,148 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
+  function sendJustInstalledEvent(browser, rect) {
+    browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
+    var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
+    evt.initEvent("buttonX", true, false);
+    browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
+  }
+
+  function makeInstalledLoadHandler(browser, rect) {
+    return function () {
+      sendJustInstalledEvent(browser, rect);
+    };
+  }
+
+  ffshare = {
+
+    system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
+    shareUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
+    frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
+    useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
+    firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", true),
+
+    onLoad: function () {
+      // initialization code
+      if (this.firstRun) {
+        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
+        this.addedFirstRunProgressListener = true;
+      }
+    },
+
+    onUnload: function () {
+      // initialization code
+      if (this.addedFirstRunProgressListener) {
+        gBrowser.getBrowserForTab(gBrowser.selectedTab).removeProgressListener(firstRunProgressListener);
+      }
+    },
+
+    onFirstRun: function () {
+      // create a hidden iframe and get it to load the standard contents
+      // to prefill the cache
+      var iframeNode = document.createElement("browser");
+      iframeNode.setAttribute("type", "content");
+      iframeNode.setAttribute("style", "width: 100px; height: 100px; background: pink;");
+      iframeNode.setAttribute("src", this.shareUrl);
+      iframeNode.setAttribute("style", "visibility: collapse;");
+      gBrowser.getBrowserForTab(gBrowser.selectedTab).parentNode.appendChild(iframeNode);
+
+      //Taken from https://developer.mozilla.org/en/Code_snippets/Tabbed_browser
+      function openAndReuseOneTabPerURL(url) {
+        var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+                           .getService(Components.interfaces.nsIWindowMediator);
+        var browserEnumerator = wm.getEnumerator("navigator:browser"),
+            rect, browser;
+
+        // Check each browser instance for our URL
+        var found = false;
+        while (!found && browserEnumerator.hasMoreElements()) {
+          var browserWin = browserEnumerator.getNext();
+          var tabbrowser = browserWin.gBrowser;
+
+          // Check each tab of this browser instance
+          var numTabs = tabbrowser.browsers.length;
+          for (var index = 0; index < numTabs; index++) {
+            var currentBrowser = tabbrowser.getBrowserAtIndex(index);
+            if (url === currentBrowser.currentURI.spec) {
+
+              // The URL is already opened. Select this tab.
+              tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
+
+              // Focus *this* browser-window
+              browserWin.focus();
+
+              rect = browserWin.document.getElementById("ffshare-toolbar-button").getBoundingClientRect();
+              browser = gBrowser.getBrowserForTab(tabbrowser.selectedTab);
+
+              // try setting the button location as the window may have already loaded
+              try {
+                sendJustInstalledEvent(browser, rect);
+              } catch (ignore) { }
+
+              // Add the load handler in case the window hasn't finished loaded (unlikely)
+              browser.addEventListener("load", makeInstalledLoadHandler(browser, rect, true));
+
+              found = true;
+              break;
+            }
+          }
+        }
+
+        // Our URL isn't open. Open it now.
+        if (!found) {
+          var recentWindow = wm.getMostRecentWindow("navigator:browser");
+          if (recentWindow) {
+            rect = recentWindow.document.getElementById("ffshare-toolbar-button").getBoundingClientRect();
+            // Use the existing browser (recent) Window
+            var tab = recentWindow.gBrowser.loadOneTab(url, { referrerURI: null,
+                                                             charset: null,
+                                                             postData: null,
+                                                             inBackground: false,
+                                                             allowThirdPartyFixup: null });
+            browser = gBrowser.getBrowserForTab(tab);
+            browser.addEventListener("load",
+                                    function buttonX() {
+                                      browser.removeEventListener("load", buttonX, true);
+                                      browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
+                                      var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
+                                      evt.initEvent("buttonX", true, false);
+                                      browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
+                                    }, true);
+          }
+          else {
+            // No browser windows are open, so open a new one.
+            window.open(url);
+          }
+        }
+      }
+
+      openAndReuseOneTabPerURL(this.frontpageUrl);
+
+      // curse you first install prefs!
+      Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
+    },
+
+    onMenuItemCommand: function (e) {
+      this.onToolbarButtonCommand(e);
+    },
+
+    onToolbarButtonCommand: function (e) {
+      var selectedTab = gBrowser.selectedTab,
+          tabFrame = selectedTab.ffshareTabFrame;
+      if (!tabFrame) {
+        tabFrame = new TabFrame(selectedTab);
+        selectedTab.ffshareTabFrame = tabFrame;
+      }
+
+      if (tabFrame.visible) {
+        tabFrame.hide();
+      } else {
+        tabFrame.show();
+      }
+    }
+  };
+
   if (!ffshare.shareUrl) {
     if (ffshare.system === 'dev') {
       ffshare.shareUrl = 'http://linkdrop.caraveo.com:5000/share/';
@@ -563,4 +620,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ffshare.frontpageUrl = 'https://linkdrop.mozillamessaging.com/frontpage/';
     }
   }
+
+  window.addEventListener("load", fn.bind(ffshare, "onLoad"), false);
+  window.addEventListener("unload", fn.bind(ffshare, "onUnload"), false);
 }());
