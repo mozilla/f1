@@ -106,8 +106,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
-  var IframeProgressListener = function () {
-  };
+  function IframeProgressListener(tabFrame) {
+    this.tabFrame = tabFrame;
+  }
   
   IframeProgressListener.prototype = {
     // detect communication from the iframe via location setting
@@ -128,7 +129,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (hashIndex !== -1) {
         var tail = aLocation.spec.slice(hashIndex + 1, aLocation.spec.length);
         if (tail.indexOf("!success") === 0) {
-          ffshare.hide();
+          this.tabFrame.hide();
 
           // XXX Should probably have a pref to disable auto-tagging & auto-bookmarking
           var bits = tail.slice("!success:".length, tail.length);
@@ -147,12 +148,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
             var nsiuri = ios.newURI(gBrowser.currentURI.spec, null, null);
             var bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
                         .getService(Components.interfaces.nsINavBookmarksService);
-            bmsvc.insertBookmark(bmsvc.unfiledBookmarksFolder, nsiuri, bmsvc.DEFAULT_INDEX, ffshare.getPageTitle().trim());
+            bmsvc.insertBookmark(bmsvc.unfiledBookmarksFolder, nsiuri, bmsvc.DEFAULT_INDEX, this.tabFrame.getPageTitle().trim());
   
             PlacesUtils.tagging.tagURI(nsiuri, tags);
           }
         } else if (tail === "!resize") {
-          ffshare.matchIframeContentHeight();
+          this.tabFrame.matchIframeContentHeight();
         }
       }
     }
@@ -181,7 +182,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
-  var navProgressListener = {
+  function NavProgressListener(tabFrame) {
+    this.tabFrame = tabFrame;
+  }
+  
+  NavProgressListener.prototype = {
     // detect navigational events for the tab, so we can close
 
     QueryInterface: function (aIID) {
@@ -197,9 +202,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onLocationChange: function (/*in nsIWebProgress*/ aWebProgress,
                           /*in nsIRequest*/ aRequest,
                           /*in nsIURI*/ aLocation) {
-      // For now, any navigation causes collapsing.
-      // XXX refine to be tolerant of #-appending
-      ffshare.hide();
+      this.tabFrame.hide();
     }
   };
 
@@ -211,15 +214,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   TabFrame.prototype = {
 
     registerListener: function () {
-      this.iframeProgressListener = new IframeProgressListener();
+      this.iframeProgressListener = new IframeProgressListener(this);
+      this.navProgressListener = new NavProgressListener(this);
       this.shareFrame.webProgress.addProgressListener(this.iframeProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
-      gBrowser.getBrowserForTab(this.tab).webProgress.addProgressListener(navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+      gBrowser.getBrowserForTab(this.tab).webProgress.addProgressListener(this.navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
     },
     
     unregisterListener: function (listener) {
       this.shareFrame.webProgress.removeProgressListener(this.iframeProgressListener);
       this.iframeProgressListener = null;
-      gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(navProgressListener);
+      gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(this.navProgressListener);
+      this.navProgressListener = null;
     },
 
     hide: function () {
@@ -268,6 +273,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         iframeNode.setAttribute("src", url);
         parentNode.insertBefore(iframeNode, parentNode.firstChild);
 
+        iframeNode.contentWindow.wrappedJSObject.addEventListener("load", function (evt) {
+          log("GOT IFRAME LOAD");
+          iframeNode.contentWindow.wrappedJSObject.addEventListener("ffshare:close", fn.bind(this, function (evt) {
+            log("GOT ffshare:close");
+            this.hide();
+          }), false);
+        }, false);
       }
       return (this.shareFrame = iframeNode);
     },
