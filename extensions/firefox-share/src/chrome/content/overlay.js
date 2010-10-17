@@ -114,7 +114,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // detect communication from the iframe via location setting
     QueryInterface: function (aIID) {
       if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-          aIID.equals(Components.interfaces.nsIWebProgressListener2)  ||
           aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
           aIID.equals(Components.interfaces.nsISupports)) {
         return this;
@@ -155,6 +154,33 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         } else if (tail === "!resize") {
           this.tabFrame.matchIframeContentHeight();
         }
+      }
+    }
+  };
+
+  function StateProgressListener(tabFrame) {
+    this.tabFrame = tabFrame;
+  }
+  
+  StateProgressListener.prototype = {
+    // detect communication from the iframe via location setting
+    QueryInterface: function (aIID) {
+      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
+          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
+          aIID.equals(Components.interfaces.nsISupports)) {
+        return this;
+      }
+      throw Components.results.NS_NOINTERFACE;
+    },
+
+    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
+      var flags = Components.interfaces.nsIWebProgressListener;
+      if (aStateFlags & flags.STATE_IS_WINDOW &&
+                 aStateFlags & flags.STATE_STOP) {
+
+        this.tabFrame.shareFrame.contentWindow.wrappedJSObject.addEventListener("ffshare:close", fn.bind(this, function (evt) {
+          this.tabFrame.hide();
+        }), false);
       }
     }
   };
@@ -214,15 +240,24 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   TabFrame.prototype = {
 
     registerListener: function () {
+      var shareFrameProgress = this.shareFrame.webProgress;
+
       this.iframeProgressListener = new IframeProgressListener(this);
+      shareFrameProgress.addProgressListener(this.iframeProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+
+      this.stateProgressListener = new StateProgressListener(this);
+      shareFrameProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
+
       this.navProgressListener = new NavProgressListener(this);
-      this.shareFrame.webProgress.addProgressListener(this.iframeProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
       gBrowser.getBrowserForTab(this.tab).webProgress.addProgressListener(this.navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
     },
     
     unregisterListener: function (listener) {
-      this.shareFrame.webProgress.removeProgressListener(this.iframeProgressListener);
+      var shareFrameProgress = this.shareFrame.webProgress;
+      shareFrameProgress.removeProgressListener(this.iframeProgressListener);
+      shareFrameProgress.removeProgressListener(this.stateProgressListener);
       this.iframeProgressListener = null;
+
       gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(this.navProgressListener);
       this.navProgressListener = null;
     },
@@ -272,14 +307,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         iframeNode.setAttribute("type", "content");
         iframeNode.setAttribute("src", url);
         parentNode.insertBefore(iframeNode, parentNode.firstChild);
-
-        iframeNode.contentWindow.wrappedJSObject.addEventListener("load", function (evt) {
-          log("GOT IFRAME LOAD");
-          iframeNode.contentWindow.wrappedJSObject.addEventListener("ffshare:close", fn.bind(this, function (evt) {
-            log("GOT ffshare:close");
-            this.hide();
-          }), false);
-        }, false);
       }
       return (this.shareFrame = iframeNode);
     },

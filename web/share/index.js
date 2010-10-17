@@ -95,12 +95,9 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   });
 
   function close() {
-    location = '#!close';
-    /*
     var evt = document.createEvent("Event");
     evt.initEvent("ffshare:close", true, true);
     window.dispatchEvent(evt);
-    */
   }
   window.closeShare = close;
 
