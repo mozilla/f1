@@ -36,6 +36,6 @@ class History(JsonExpandoMixin, SerializerMixin, Base):
         # a one time modification to the table so insert statments
         # get modified properly
         if asbool(config.get('delayed_inserts', False)) and not \
-            hasattr('insert_prefix', History.__table__):
+            hasattr(History.__table__, 'insert_prefix'):
             History.__table__.insert_prefix = 'DELAYED'
 
