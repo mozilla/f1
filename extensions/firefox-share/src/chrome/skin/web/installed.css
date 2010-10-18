@@ -1,6 +1,16 @@
 #download.download {
   display: none;
 }
+
+#header.row #noButton {
+  display: block;
+  text-align: right;
+  color: #888;
+}
+
+#header.row #noButton img {
+  vertical-align:text-bottom;
+}
 /* XXX we could replace the download with something else */
 #clickToolbar {
   display: block !important;

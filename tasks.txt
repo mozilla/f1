@@ -15,8 +15,6 @@ Tasks:
 
 * Frontpage work - Andy
   * New video
-  * reflect the new UI.
-  * Get rid of allow thing.
 
 * David: get a privacy policy.
 
