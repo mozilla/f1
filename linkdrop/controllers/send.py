@@ -97,19 +97,16 @@ The 'send' namespace is used to send updates to our supported services.
         else:
             # create a new record in the history table.
             assert result
-            history = History()
-            history.account_id = acct.get('id')
-            history.published = UTCDateTime.now()
-            for key, val in request.POST.items():
-                setattr(history, key, val)
-            Session.add(history)
-            # remove for now until we have a need to do this
-            #link = sign_link(shorturl, acct.username)
-            Session.commit()
-            result['linkdrop'] = history.id
+            if asbool(config.get('history_enabled', True)):
+                history = History()
+                history.account_id = acct.get('id')
+                history.published = UTCDateTime.now()
+                for key, val in request.POST.items():
+                    setattr(history, key, val)
+                Session.add(history)
+                Session.commit()
             result['shorturl'] = shorturl
             result['from'] = userid
             result['to'] = to
-            log.info("send success - linkdrop id is %s", history.id)
         # no redirects requests, just return the response.
         return {'result': result, 'error': error}
