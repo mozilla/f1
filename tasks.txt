@@ -1,14 +1,14 @@
 Tasks:
 
-* remember last service used for share for next share -  James
-* Proxy for Contacts API: "Most Contacted", save to localstorage. - Shane/James
-* Multiple recipients for email - Andy
-* Make sure the overlay works with tabs correctly. - Bryan/James
+* remember last service used for share for next share -  Bryan/James
+* Look into better designs for multiple recipients for email - Andy
+* Make sure the overlay works with tab switching correctly. - Bryan/James
 * Speed of page display: - James
   * make sure files can be aggressively cached.
-
-* Contacts API: fetch them all.
-* Do something awesome for subject.
+* Design for interface when system is running slowly (503 message) - Andy
+* Save all contacts to localstorage for autocomplete - Shane/James
+* Do something awesome for subject text of emails
+  * Link sent from $PERSON to you
 
 * Blog post - Andy
   * mention the constraints with email/contacts API
@@ -20,7 +20,10 @@ Tasks:
 
 * David: get a privacy policy.
 
-* analytics
+* anonymized user analytics
+  * number of accounts setup
+  * number of accounts used
+  * (email) number of recipients
 
 * Post the add-on on AMO. - Shane, Bryan review.
 
