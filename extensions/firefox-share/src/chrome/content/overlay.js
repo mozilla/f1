@@ -106,58 +106,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
-  function IframeProgressListener(tabFrame) {
-    this.tabFrame = tabFrame;
-  }
-  
-  IframeProgressListener.prototype = {
-    // detect communication from the iframe via location setting
-    QueryInterface: function (aIID) {
-      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-          aIID.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    },
-
-    onLocationChange: function (/*in nsIWebProgress*/ aWebProgress,
-                          /*in nsIRequest*/ aRequest,
-                          /*in nsIURI*/ aLocation) {
-      var hashIndex = aLocation.spec.indexOf("#");
-      if (hashIndex !== -1) {
-        var tail = aLocation.spec.slice(hashIndex + 1, aLocation.spec.length);
-        if (tail.indexOf("!success") === 0) {
-          this.tabFrame.hide();
-
-          // XXX Should probably have a pref to disable auto-tagging & auto-bookmarking
-          var bits = tail.slice("!success:".length, tail.length);
-          var retvals = queryToObject(bits);
-          var tags = ['shared', 'linkdrop'];
-          if (retvals.domain === 'twitter.com') {
-            tags.push("twitter");
-          }
-          if (retvals.domain === 'facebook.com') {
-            tags.push("facebook");
-          }
-
-          if (ffshare.useBookmarking) {
-            var ios = Cc["@mozilla.org/network/io-service;1"].
-                   getService(Ci.nsIIOService);
-            var nsiuri = ios.newURI(gBrowser.currentURI.spec, null, null);
-            var bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
-                        .getService(Components.interfaces.nsINavBookmarksService);
-            bmsvc.insertBookmark(bmsvc.unfiledBookmarksFolder, nsiuri, bmsvc.DEFAULT_INDEX, this.tabFrame.getPageTitle().trim());
-  
-            PlacesUtils.tagging.tagURI(nsiuri, tags);
-          }
-        } else if (tail === "!resize") {
-          this.tabFrame.matchIframeContentHeight();
-        }
-      }
-    }
-  };
-
   function StateProgressListener(tabFrame) {
     this.tabFrame = tabFrame;
   }
@@ -178,8 +126,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (aStateFlags & flags.STATE_IS_WINDOW &&
                  aStateFlags & flags.STATE_STOP) {
 
-        this.tabFrame.shareFrame.contentWindow.wrappedJSObject.addEventListener("ffshare:close", fn.bind(this, function (evt) {
-          this.tabFrame.hide();
+        this.tabFrame.shareFrame.contentWindow.wrappedJSObject.addEventListener("message", fn.bind(this, function (evt) {
+          //Make sure we only act on messages from the page we expect.
+          if (ffshare.shareUrl.indexOf(evt.origin) === 0) {
+            //Mesages have the following properties:
+            //name: the string name of the messsage
+            //data: the JSON structure of data for the message.
+            var message = JSON.parse(evt.data),
+                name = message.name,
+                data = message.data;
+
+            if (this.tabFrame[name]) {
+              this.tabFrame[name](data);
+            }
+          }
         }), false);
       }
     }
@@ -242,9 +202,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     registerListener: function () {
       var shareFrameProgress = this.shareFrame.webProgress;
 
-      this.iframeProgressListener = new IframeProgressListener(this);
-      shareFrameProgress.addProgressListener(this.iframeProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
-
       this.stateProgressListener = new StateProgressListener(this);
       shareFrameProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
 
@@ -254,9 +211,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     
     unregisterListener: function (listener) {
       var shareFrameProgress = this.shareFrame.webProgress;
-      shareFrameProgress.removeProgressListener(this.iframeProgressListener);
       shareFrameProgress.removeProgressListener(this.stateProgressListener);
-      this.iframeProgressListener = null;
+      this.stateProgressListener = null;
 
       gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(this.navProgressListener);
       this.navProgressListener = null;
@@ -338,6 +294,33 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.visible = true;
 
       this.registerListener();
+    },
+
+    /**
+     * Called by content page when share is successful.
+     * @param {Object} data info about the share.
+     */
+    success: function (data) {
+      this.hide();
+
+      if (ffshare.useBookmarking) {
+        var tags = ['shared', 'linkdrop'];
+        if (data.domain === 'twitter.com') {
+          tags.push("twitter");
+        }
+        if (data.domain === 'facebook.com') {
+          tags.push("facebook");
+        }
+
+        var ios = Cc["@mozilla.org/network/io-service;1"].
+               getService(Ci.nsIIOService);
+        var nsiuri = ios.newURI(gBrowser.currentURI.spec, null, null);
+        var bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
+                    .getService(Components.interfaces.nsINavBookmarksService);
+        bmsvc.insertBookmark(bmsvc.unfiledBookmarksFolder, nsiuri, bmsvc.DEFAULT_INDEX, this.getPageTitle().trim());
+
+        PlacesUtils.tagging.tagURI(nsiuri, tags);
+      }
     },
 
     changeHeight: function (height, onEnd) {

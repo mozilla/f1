@@ -94,11 +94,17 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     }
   });
 
-  function close() {
-    var evt = document.createEvent("Event");
-    evt.initEvent("ffshare:close", true, true);
-    window.dispatchEvent(evt);
+  function sendChromeMessage(name, data) {
+    window.postMessage(JSON.stringify({
+      name: name,
+      data: data
+    }), location.protocol + "//" + location.host);
   }
+
+  function close() {
+    sendChromeMessage('hide');
+  }
+  //For debug tab purpose, make it global.
   window.closeShare = close;
 
   function showError(error) {
@@ -113,7 +119,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
     if (shouldCloseOrMessage === true) {
       setTimeout(function () {
-        location = '#!success:' + url.objectToQuery({
+        sendChromeMessage('success', {
           domain: sendData.domain,
           username: sendData.username,
           userid: sendData.userid
