@@ -20,6 +20,15 @@ sends_per_oauth = grinder.getProperties().getInt("linkdrop.sends_per_oauth", 0)
 # The URL of the server we want to hit.
 linkdrop_host = grinder.getProperties().getProperty("linkdrop.host", 'http://127.0.0.1:5000')
 
+# Service we want to test
+linkdrop_service = grinder.getProperties().getProperty("linkdrop.service", 'twitter.com')
+
+# Static URL we want to hit
+linkdrop_static_url = grinder.getProperties().getProperty("linkdrop.static_url", '/share/')
+
+# How often we want to hit the static page per send
+linkdrop_static_per_send = grinder.getProperties().getInt("linkdrop.static_per_send", 0)
+
 # *sob* - failed to get json packages working.  Using 're' is an option,
 # although it requires you install jython2.5 (which still doesn't have
 # json builtin) - so to avoid all that complication, hack 'eval' into
@@ -62,13 +71,13 @@ def getCSRF():
 
 getCSRF = Test(2, "get CSRF").wrap(getCSRF)
 
-def authTwitter(csrf):
+def authService(csrf):
     # Call authorize requesting we land back on /account/get - after
     # a couple of redirects for auth, we should wind up with the data from
     # account/get - which should now include our account info.
     result = request1.POST(linkdrop_host + '/api/account/authorize',
       ( NVPair('csrftoken', csrf),
-        NVPair('domain', 'twitter.com'),
+        NVPair('domain', linkdrop_service),
         NVPair('end_point_success', '/api/account/get'),
         NVPair('end_point_auth_failure', '/send/auth.html#oauth_failure'), ),
       ( NVPair('Content-Type', 'application/x-www-form-urlencoded'), ))
@@ -78,9 +87,9 @@ def authTwitter(csrf):
     userid = data[0]['accounts'][0]['userid']
     return userid
 
-authTwitter = Test(3, "auth Twitter").wrap(authTwitter)
+authService = Test(3, "auth %s" % linkdrop_service).wrap(authService)
 
-def send(userid, csrf, domain="twitter.com", message="take that!"):
+def send(userid, csrf, domain=linkdrop_service, message="take that!"):
     """POST send."""
     result = request1.POST(linkdrop_host + '/api/send',
       ( NVPair('domain', domain),
@@ -94,6 +103,13 @@ def send(userid, csrf, domain="twitter.com", message="take that!"):
 
 send = Test(4, "Send message").wrap(send)
 
+def getStatic(url="/share/"):
+	result = request1.POST(linkdrop_host + url)
+	assert result.getStatusCode()==200, result
+	return result
+
+getStatic = Test(5, "Static request").wrap(getStatic)
+
 # The test itself.
 class TestRunner:
     """A TestRunner instance is created for each worker thread."""
@@ -102,10 +118,13 @@ class TestRunner:
         self.linkdrop_cookie = None
 
     def doit(self):
+	if linkdrop_static_per_send:
+	    for i in range(0,linkdrop_static_per_send):
+            	getStatic(linkdrop_static_url)
         if self.csrf is None or \
            (sends_per_oauth and grinder.getRunNumber() % sends_per_oauth==0):
             self.csrf, self.linkdrop_cookie = getCSRF()
-            self.userid = authTwitter(self.csrf)
+            self.userid = authService(self.csrf)
         # cookies are reset by the grinder each test run - re-inject the
         # linkdrop session cookie.
         threadContext = HTTPPluginControl.getThreadHTTPClientContext()
