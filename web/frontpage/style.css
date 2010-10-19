@@ -107,7 +107,6 @@ a#installClose:hover {
   width: 720px;
   margin: 0 auto;
   overflow: hidden;
-  padding: 0 0 60px 0;
 }
 
 #header.row {
@@ -234,7 +233,8 @@ a#installClose:hover {
   color: #666;
 }
 
-.description h1 {
+.description h1,
+.description h2 {
   font-size: 14px;
   color: #0a0a0a;
 }
@@ -260,16 +260,13 @@ a#installClose:hover {
 }
 
 #footer.row {
-  position: fixed;
-  bottom: 0;
-  background-color: rgba(255,255,255,0.5);
-  margin: 5px 0 0 0;
   font-size: 10px;
   color: #888;
 }
 
 #footer .c3 {
   border-top: 1px solid #e6e6e6;
+  padding: 10px 0 0 0;
 }
 
 #allow_helper,
