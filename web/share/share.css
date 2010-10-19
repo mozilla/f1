@@ -18,7 +18,7 @@
 body {
   font-size: 11px;
   font-family: "lucida grande";
-  max-height: 128px;
+  max-height: 113px;
   overflow: hidden;
   background-color: #fff;
   background-position: bottom center;
@@ -61,6 +61,7 @@ body #tabs.invisible {
 }
 
 #tabs {
+  min-height: 113px;
   padding: 0 10px;
   overflow: hidden;
   border-bottom: 1px solid #777;
@@ -563,45 +564,47 @@ h1 img {
     left: 0;
     width: 100%;
     height: 100%;
-    opacity: 0.75;
-    background-color: white;
+    background-image:-moz-linear-gradient(center top , #EEEEEE 0%, #DDDDDD 100%);
 }
 
 div.status {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  right: 10px;
-  padding: 5px 20px;
+  width: 100%;
+  height: 113px;
+  line-height: 113px;
+  top: 0;
+  left: 0;
   color: #0a0a0a;
-  -moz-border-radius: 7px;
   font-size: 14px;
   text-align: center;
 }
 
+div.status img {
+  vertical-align: middle;
+}
+
 #statusSharing {
-  background-color: #e6e6e6;
+  background-color: transparent;
 }
 
 #statusShared {
-  background-color: yellow;
+  background-color: rgba(0,255,0,0.25);
 }
 
 #statusShared a {
-    color: #0a0a0a;
-    text-decoration: underline;
+  color: #0a0a0a;
+  text-decoration: underline;
 }
 
 .shareTitle {
-    display: inline-block;
-    max-width: 200px;
-    font-weight: bold;
+  display: inline-block;
+  max-width: 200px;
+  font-weight: bold;
 }
 
 div.status.error {
-  background-color: #ff5959;
+  background-color: rgba(255,0,0,0.5);
   color: #fff;
-  font-weight: bold;
 }
 
 .statusButton {
@@ -609,6 +612,7 @@ div.status.error {
   vertical-align: baseline;
   font-weight: normal;
   -moz-box-shadow: none;
+  border-color: maroon;
 }
 
 #statusErrorMessage {
