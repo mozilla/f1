@@ -1,7 +1,6 @@
 Tasks:
 
 * remember last service used for share for next share -  Bryan/James
-* Look into better designs for multiple recipients for email - Andy
 * Make sure the overlay works with tab switching correctly. - Bryan/James
 * Speed of page display: - James
   * make sure files can be aggressively cached.
