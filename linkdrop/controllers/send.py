@@ -98,6 +98,15 @@ The 'send' namespace is used to send updates to our supported services.
             # create a new record in the history table.
             assert result
             if asbool(config.get('history_enabled', True)):
+                # this is faster, but still want to look further into SA perf
+                #data = {
+                #    'json_attributes': json.dumps(dict(request.POST)),
+                #    'account_id': acct.get('id'),
+                #    'published': UTCDateTime.now()
+                #}
+                #Session.execute("INSERT DELAYED INTO history (json_attributes, account_id, published) VALUES (:json_attributes, :account_id, :published)",
+                #                data)
+
                 history = History()
                 history.account_id = acct.get('id')
                 history.published = UTCDateTime.now()

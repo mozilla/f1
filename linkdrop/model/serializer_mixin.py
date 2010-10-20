@@ -28,10 +28,10 @@ class SerializerMixin(object):
                         val = val.isoformat().split('.')[0].replace('+00:00','')+'Z'
     
                     if prop.key == 'json_attributes':
-                        propdict.update(json.loads(val))
+                        propdict.update(val)
                     else:
                         propdict[prop.key] = val
-                elif prop.key != 'json_attributes':
+                else:
                     propdict[prop.key] = val
 
         for val in self._rd_collection_to_dict('tags', fields):
