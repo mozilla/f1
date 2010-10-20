@@ -101,9 +101,10 @@
 
   <div id="debug">
     <div class="hbox messageForm">
-      <div>
+      <div style="width:450px;">
         <button onclick="window.closeShare()">Close</button>
         <button onclick="window.showStatus('statusSharing', true)">Show Sharing</button>
+        <button onclick="window.showStatus('statusServerBusy', true)">Show Server Busy</button>
         <button onclick="window.showStatus('statusError', true)">Show Error</button>
         <button onclick="window.showStatusShared()">Show Shared</button>
       </div>
@@ -188,6 +189,10 @@
 <div id="statusServerError" class="status hidden error">
   We're really sorry, the Linkdrop server is having problems. Please try again later. <span id="statusServerErrorMessage"></span>
   <button id="statusServerErrorButton" class="statusButton">ok</button>
+</div>
+
+<div id="statusServerBusy" class="status hidden warning">
+  Sorry, Linkdrop is too busy sharing things right now. Please try again later.
 </div>
 
 <div id="statusShared" class="status hidden">
