@@ -457,14 +457,15 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   function updateLinks() {
     $('textarea.message').each(function (i, node) {
       var dom = $(node);
+      var val = dom.val() + '\n';
       //If the message containder doesn't want URLs then respect that.
       if (dom.hasClass('nourl')) {
       } else if (dom.hasClass('short')) {
-        dom.val(options.shortUrl || options.url);
+        dom.val(val + options.shortUrl || options.url);
       } else if (dom.hasClass('urlWithSpace')) {
-        dom.val((options.canonicalUrl || options.url) + "\n");
+        dom.val(val + (options.canonicalUrl || options.url) + "\n");
       } else {
-        dom.val(options.canonicalUrl || options.url);
+        dom.val(val + options.canonicalUrl || options.url);
       }
     });
     $(".meta .url").text(options.url);
@@ -627,7 +628,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
     if (options.title) {
       facebookDom.find('[name="name"]').val(options.title);
-      gmailDom.find('[name="subject"]').val(options.title);
+      gmailDom.find('[name="message"]').val(options.title);
     }
 
     if (options.description) {
