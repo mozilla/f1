@@ -1,5 +1,6 @@
 """Pylons environment configuration"""
 import os
+from ConfigParser import ConfigParser
 
 #from mako.lookup import TemplateLookup
 from pylons.configuration import PylonsConfig
@@ -29,9 +30,17 @@ def load_environment(global_conf, app_conf):
                  static_files=os.path.join(root, 'public'),
                  templates=[os.path.join(root, 'templates')])
 
+    # import our private.ini that holds keys, etc
+    imp = global_conf.get('import')
+    if imp:
+        cp = ConfigParser()
+        cp.read(imp)
+        global_conf.update(cp.defaults())
+        if cp.has_section('APP'):
+            app_conf.update(cp.items('APP'))
+
     # Initialize config with the basic options
     config.init_app(global_conf, app_conf, package='linkdrop', paths=paths)
-
     config['routes.map'] = make_map(config)
     config['pylons.app_globals'] = app_globals.Globals(config)
     config['pylons.h'] = linkdrop.lib.helpers
