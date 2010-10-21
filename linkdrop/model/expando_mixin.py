@@ -15,7 +15,7 @@ class Json(types.TypeDecorator, types.MutableType):
         return json.dumps(value)
 
     def process_result_value(self, value, dialect):
-        return json.loads(value)
+        return value and json.loads(value) or {}
 
 # The actual mixin class
 class JsonExpandoMixin(object):
