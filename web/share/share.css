@@ -38,11 +38,15 @@ body.status {
 }
 
 /* Turn off some things if not in dev */
-html.prod body li.debugTab,
+html.prod body li.debugTab {
+    display: none;
+}
+/*
 html.prod body li.gmailTab,
 html.prod body #settings li.gmailSettings {
     display: none;
 }
+*/
 
 a {
   text-decoration: none;
