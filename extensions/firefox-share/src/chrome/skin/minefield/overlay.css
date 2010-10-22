@@ -7,7 +7,8 @@
   list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
 }
 #ffshare-toolbar-button > image {
-  width: 21px;
+  width: auto;
+  height: auto;
 }
 #ffshare-popup {
   -moz-appearance: none;
