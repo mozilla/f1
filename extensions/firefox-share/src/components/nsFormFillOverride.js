@@ -11,13 +11,6 @@ function _() {
 }
 _("?loaded");
 
-__defineGetter__("FAC", function() {
-  _("get standard FormAutoComplete (FAC)");
-  delete this.FAC;
-  return this.FAC = Components.classesByID["{c11c21b2-71c9-4f87-a0f8-5e13f50495fd}"].
-    getService(Ci.nsIFormAutoComplete);
-});
-
 __defineGetter__("acDataStorage", function() {
   delete this.ffshareAutoCompleteData;
   Cu.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
@@ -31,8 +24,10 @@ function FFShareAutoComplete() {
 
 FFShareAutoComplete.prototype = {
   classDescription: "FFShare AutoComplete",
-  contractID: "@mozilla.org/satchel/form-autocomplete;1",
-  classID: Components.ID("{a7685da4-c42a-ed4b-ae53-2f19ac6164a3}"),
+  contractID: "@labs.mozilla.com/linkdrop/form-autocomplete;1",
+  classID: Components.ID("{53687491-6055-2842-8751-bc27ddf21fd6}"),
+  _xpcom_categories: [{category: "form-autocomplete-handler",
+                       entry: "linkdrop"}],
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIFormAutoComplete]),
 
   isShareType: function (name, field) {
@@ -85,13 +80,11 @@ _("previousMatch is now: " + previousMatch);
   },
 
   autoCompleteSearch: function autoCompleteSearch(name, query, field, prev) {
-    _("autocomplete search", Array.slice(arguments));
+    _("FFShareAutoComplete search", Array.slice(arguments));
 
     if (this.isShareType(name, field))
       return this.findEmails(query);
-
-    // Use the base form autocomplete for non-people searches
-    return FAC.autoCompleteSearch(name, query, field, prev);
+    return null;
   }
 };
 
