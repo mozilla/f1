@@ -44,24 +44,6 @@
            style="margin-left: 3px;visibility: collapse;"/>
   </hbox>
 
-  <popupset id="mainPopupSet">
-    <panel id="ffshare-popup" onpopupshown="ffshare.onPopupShown()">
-      <vbox>
-
-        <description>This page was shared with you by your friend:</description>
-        <description id="friend"></description>
-        <hbox class="row">
-          <label class="message" value="Your Message:"/>
-          <spacer flex="1"/>
-          <label class="count" id="ffshare-count" value="140"/>
-        </hbox>
-        <!--onkeyup won't pick up some paste events? -->
-        <html:textarea class="message" id="ffshare-message" onkeyup="ffshare.updateCount()"></html:textarea>
-      </vbox>
-    </panel>
-  </popupset>
-
-
   <toolbar id="nav-bar">
     <toolbarbutton id="ffshare-toolbar-button"
                    insertbefore="urlbar-search-splitter"
@@ -79,6 +61,9 @@
                    oncommand="ffshare.onToolbarButtonCommand(event)"/>
   </toolbarpalette>
 
-
+  <!-- This enables email autocomplete when we load our form in a regular
+       web page in the browser, for development. Could remove if we only
+       want autocomplete inside the browser created by the extension. -->
+  <tabbrowser id="content" autocompletepopup="PopupAutoCompleteRichResult"/>
 
 </overlay>
