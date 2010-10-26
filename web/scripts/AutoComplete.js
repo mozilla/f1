@@ -24,13 +24,13 @@ function ($,    object,         fn,         dispatch) {
 
     setDimensions: function () {
       this.dimensions = this.dom[0].getBoundingClientRect();
-      dispatch.pub('autoCompleteRect', this.dimensions);
+      //dispatch.pub('autoCompleteRect', this.dimensions);
     },
 
     setData: function (data) {
       this.data = data;
       //Let the chrome know of the available completions
-      dispatch.pub('autoCompleteData', data);
+      //dispatch.pub('autoCompleteData', data);
     },
 
     askForCompletions: function (evt) {
@@ -43,11 +43,11 @@ function ($,    object,         fn,         dispatch) {
         text = parts[parts.length - 1].trim();
       }
 
-      dispatch.pub('autoComplete', text);
+      //dispatch.pub('autoComplete', text);
     },
 
     onBlur: function (evt) {
-      dispatch.pub('autoCompleteBlur');
+      //dispatch.pub('autoCompleteBlur');
     }
   });
 });

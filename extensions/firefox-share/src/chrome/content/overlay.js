@@ -236,6 +236,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         //Create the iframe.
         iframeNode = document.createElement("browser");
 
+        //Allow the rich autocomplete, something built into gecko.
+        iframeNode.setAttribute('autocompletepopup', 'PopupAutoCompleteRichResult');
+ 
         iframeNode.className = 'ffshare-frame';
         iframeNode.style.width = '100%';
         iframeNode.style.height = '114px';
