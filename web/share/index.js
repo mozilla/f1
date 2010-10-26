@@ -28,9 +28,9 @@
 
 require.def("send",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
-         "placeholder", "TextCounter", "jquery.textOverflow"],
+         "placeholder", "TextCounter", "AutoComplete", "dispatch", "jquery.textOverflow"],
 function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
-          placeholder,   TextCounter) {
+          placeholder,   TextCounter,   AutoComplete,   dispatch) {
 
   var svcOptions = {
       'twitter': true,
@@ -82,7 +82,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     },
     tabDom, bodyDom, clickBlockDom, twitterCounter,
     updateTab = true,
-    accounts, oldAccounts, gmailDom;
+    accounts, oldAccounts, gmailDom, autoCompleteWidget;
 
   jig.addFn({
     profilePic: function (photos) {
@@ -94,15 +94,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     }
   });
 
-  function sendChromeMessage(name, data) {
-    window.postMessage(JSON.stringify({
-      name: name,
-      data: data
-    }), location.protocol + "//" + location.host);
-  }
-
   function close() {
-    sendChromeMessage('hide');
+    dispatch.pub('hide');
   }
   //For debug tab purpose, make it global.
   window.closeShare = close;
@@ -119,7 +112,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
     if (shouldCloseOrMessage === true) {
       setTimeout(function () {
-        sendChromeMessage('success', {
+        dispatch.pub('success', {
           domain: sendData.domain,
           username: sendData.username,
           userid: sendData.userid
@@ -151,6 +144,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
   function sendMessage() {
     showStatus('statusSharing');
+
     rdapi('send', {
       type: 'POST',
       data: sendData,
@@ -208,10 +202,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
    * localstorage data.
    */
   function updateAutoComplete() {
-
-    //Create autocomplete for gmail to field
-    var toDom = gmailDom.find('[name="to"]'),
-        widget = toDom.data('autocomplete'),
+    var toNode = gmailDom.find('[name="to"]')[0],
         data = localStorage.gmailContacts;
 
     if (data) {
@@ -220,11 +211,12 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       data = [];
     }
 
-    if (!widget) {
-      toDom.autocomplete();
+    if (!autoCompleteWidget) {
+      autoCompleteWidget = new AutoComplete(toNode);
     }
 
-    toDom.autocomplete('option', 'source', data);
+    dispatch.pub('autoCompleteData', data);
+    //autoCompleteWidget.setData(data);
   }
 
   /**
@@ -240,7 +232,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
           username: svcAccount.username,
           userid: svcAccount.userid,
           startindex: 0,
-          maxresults: 50
+          maxresults: 200
         },
         success: function (json) {
           //Transform data to a form usable by autocomplete.
@@ -251,8 +243,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
             entries.forEach(function (entry) {
               entry.emails.forEach(function (email) {
                 data.push({
-                  label: entry.displayName + ' <' + email.value + '>',
-                  value: email.value
+                  displayName: entry.displayName,
+                  email: email.value
                 });
               });
             });
@@ -263,7 +255,11 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         }
       });
     } else {
+      //This function could be called before window is loaded, or after. In
+      //either case, make sure to let the chrome know about it, since chrome
+      //listens after the page is loaded (not after just DOM ready)
       updateAutoComplete();
+      $(window).bind('load', updateAutoComplete);
     }
   }
 
@@ -391,6 +387,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       //Make sure there is no cached data hanging around.
       if (localStorage.gmailContacts) {
         delete localStorage.gmailContacts;
+        updateAutoComplete();
       }
     }
 
@@ -456,8 +453,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   //Set up the URL in all the message containers
   function updateLinks() {
     $('textarea.message').each(function (i, node) {
-      var dom = $(node);
-      var val = dom.val() + '\n';
+      var dom = $(node),
+          val = dom.val() + '\n';
       //If the message containder doesn't want URLs then respect that.
       if (dom.hasClass('nourl')) {
       } else if (dom.hasClass('short')) {

@@ -8,6 +8,8 @@ var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 (function () {
 
+  Components.utils.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
+
   var slice = Array.prototype.slice,
       ostring = Object.prototype.toString, fn;
 
@@ -132,12 +134,22 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
             //Mesages have the following properties:
             //name: the string name of the messsage
             //data: the JSON structure of data for the message.
-            var message = JSON.parse(evt.data),
-                name = message.name,
-                data = message.data;
+            var message = evt.data, skip = false, topic, data;
+            try {
+              //Only some messages are valid JSON, only care about the ones
+              //that are.
+              message = JSON.parse(message);
+            } catch (e) {
+              skip = true;
+            }
 
-            if (this.tabFrame[name]) {
-              this.tabFrame[name](data);
+            if (!skip) {
+              topic = message.topic;
+              data = message.data;
+  
+              if (topic && this.tabFrame[topic]) {
+                this.tabFrame[topic](data);
+              }
             }
           }
         }), false);
@@ -224,6 +236,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         this.shareFrame.parentNode.removeChild(this.shareFrame);
         this.shareFrame = null;
       }));
+      this.hideAutoComplete();
       this.visible = false;
     },
 
@@ -235,6 +248,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         //Create the iframe.
         iframeNode = document.createElement("browser");
 
+        //Allow the rich autocomplete, something built into gecko.
+        iframeNode.setAttribute('autocompletepopup', 'PopupAutoCompleteRichResult');
+ 
         iframeNode.className = 'ffshare-frame';
         iframeNode.style.width = '100%';
         iframeNode.style.height = '114px';
@@ -482,6 +498,82 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         }
       }
       return previews;
+    },
+
+    //Methods for handling autocomplete
+
+    escapeHtml: function (text) {
+      return text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    },
+
+    autoCompleteData: function (data) {
+      ffshareAutoCompleteData.set(data);
+    },
+
+    autoCompleteRect: function (rect) {
+      this.acRect = rect;
+    },
+
+    hideAutoComplete: function () {
+      var listNode = this.tab.ffshareAcList;
+      if (listNode) {
+        listNode.style.display = 'none';
+      }
+    },
+
+    autoComplete: function (text) {
+/*
+      //Store the autocomplete DOM on the tab object, so if the tab is
+      //destroyed, it will be too.
+      var listNode = this.tab.ffshareAcList,
+          matches, html = '', style, liNode, textNode;
+
+      if (!listNode) {
+        listNode = this.tab.ffshareAcList = document.createElementNS("http://www.w3.org/1999/xhtml", "html:ul");
+        style = listNode.style;
+        style.position = 'absolute';
+        style.display = 'none';
+        style.zIndex = 100;
+        //TODO: make sure this does not leak.
+        gBrowser.getBrowserForTab(this.tab).parentNode.appendChild(listNode);
+      }
+
+      //Fill in the autocomplete options.
+      matches = this.acData.filter(function (item) {
+        return item.label.indexOf(text) !== -1;
+      });
+
+      if (matches.length) {
+        //Clear previous children.
+        while (listNode.firstChild) {
+          listNode.removeChild(listNode.firstChild);
+        }
+
+        //Fill in new children.
+        matches.forEach(fn.bind(this, function (item) {
+          liNode = document.createElementNS("http://www.w3.org/1999/xhtml", "html:li");
+          liNode.matchValue = item.value;
+          textNode = document.createTextNode(item.label);
+          liNode.appendChild(textNode);
+          listNode.appendChild(liNode);
+          //html += '<li data-value="' + this.escapeHtml(item.value) + '">' +
+          //      this.escapeHtml(item.label) + '</li>';
+        }));
+
+        style = listNode.style;
+        if (style.display === 'none') {
+          style.top = this.acRect.top + this.acRect.height;
+          style.left = this.acRect.left;
+          style.display = 'block';
+        }
+      } else {
+        this.hideAutoComplete();
+      }
+*/
     }
   };
 
