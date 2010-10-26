@@ -8,6 +8,8 @@ var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 (function () {
 
+  Components.utils.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
+
   var slice = Array.prototype.slice,
       ostring = Object.prototype.toString, fn;
 
@@ -132,12 +134,22 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
             //Mesages have the following properties:
             //name: the string name of the messsage
             //data: the JSON structure of data for the message.
-            var message = JSON.parse(evt.data),
-                topic = message.topic,
-                data = message.data;
+            var message = evt.data, skip = false, topic, data;
+            try {
+              //Only some messages are valid JSON, only care about the ones
+              //that are.
+              message = JSON.parse(message);
+            } catch (e) {
+              skip = true;
+            }
 
-            if (topic && this.tabFrame[topic]) {
-              this.tabFrame[topic](data);
+            if (!skip) {
+              topic = message.topic;
+              data = message.data;
+  
+              if (topic && this.tabFrame[topic]) {
+                this.tabFrame[topic](data);
+              }
             }
           }
         }), false);
@@ -498,10 +510,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         .replace(/"/g, '&quot;');
     },
 
-    acData: [],
-
     autoCompleteData: function (data) {
-      this.acData = data;
+      ffshareAutoCompleteData.set(data);
     },
 
     autoCompleteRect: function (rect) {
