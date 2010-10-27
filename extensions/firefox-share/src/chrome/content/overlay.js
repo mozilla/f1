@@ -154,10 +154,24 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           }
         }), false);
       }
-    }
+    },
+
+    onLocationChange: function (aWebProgress, aRequest, aLocation) {},
+    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
+    onSecurityChange: function (aWebProgress, aRequest, aState) {},
+    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
   };
 
   var firstRunProgressListener = {
+    QueryInterface: function (iid) {
+      if (iid.equals(Components.interfaces.nsIWebProgressListener) ||
+          iid.equals(Components.interfaces.nsISupportsWeakReference) ||
+          iid.equals(Components.interfaces.nsISupports)) {
+        return this;
+      }
+      throw Components.results.NS_NOINTERFACE;
+    },
+
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       // maybe can just use onLocationChange, but I don't think so?
       var flags = Components.interfaces.nsIWebProgressListener;
@@ -170,14 +184,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
     },
 
-    QueryInterface: function (iid) {
-      if (iid.equals(Components.interfaces.nsIWebProgressListener) ||
-          iid.equals(Components.interfaces.nsISupportsWeakReference) ||
-          iid.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    }
+    onLocationChange: function (aWebProgress, aRequest, aLocation) {},
+    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
+    onSecurityChange: function (aWebProgress, aRequest, aState) {},
+    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
   };
 
   function NavProgressListener(tabFrame) {
@@ -189,7 +199,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     QueryInterface: function (aIID) {
       if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-          aIID.equals(Components.interfaces.nsIWebProgressListener2)  ||
           aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
           aIID.equals(Components.interfaces.nsISupports)) {
         return this;
@@ -201,7 +210,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                           /*in nsIRequest*/ aRequest,
                           /*in nsIURI*/ aLocation) {
       this.tabFrame.hide();
-    }
+    },
+
+    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
+    onSecurityChange: function (aWebProgress, aRequest, aState) {},
+    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
+    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
   };
 
   var TabFrame = function (tab) {
@@ -595,7 +609,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
               } catch (ignore) { }
 
               // Add the load handler in case the window hasn't finished loaded (unlikely)
-              browser.addEventListener("load", makeInstalledLoadHandler(browser, rect, true));
+              browser.addEventListener("load", makeInstalledLoadHandler(browser, rect), true);
 
               found = true;
               break;
