@@ -257,6 +257,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var parentNode = gBrowser.getBrowserForTab(this.tab).parentNode,
           iframeNode = null, url, options;
 
+      // fx4 fix
+      while (parentNode.localName != 'notificationbox')
+        parentNode = parentNode.parentNode
+
       if (iframeNode === null) {
         //Create the iframe.
         iframeNode = document.createElement("browser");
