@@ -144,6 +144,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
   function sendMessage() {
     showStatus('statusSharing');
+
     rdapi('send', {
       type: 'POST',
       data: sendData,
@@ -214,7 +215,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       autoCompleteWidget = new AutoComplete(toNode);
     }
 
-    autoCompleteWidget.setData(data);
+    dispatch.pub('autoCompleteData', data);
   }
 
   /**
@@ -230,7 +231,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
           username: svcAccount.username,
           userid: svcAccount.userid,
           startindex: 0,
-          maxresults: 50
+          maxresults: 200
         },
         success: function (json) {
           //Transform data to a form usable by autocomplete.
@@ -241,8 +242,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
             entries.forEach(function (entry) {
               entry.emails.forEach(function (email) {
                 data.push({
-                  label: entry.displayName + ' <' + email.value + '>',
-                  value: email.value
+                  displayName: entry.displayName,
+                  email: email.value
                 });
               });
             });
@@ -385,6 +386,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       //Make sure there is no cached data hanging around.
       if (localStorage.gmailContacts) {
         delete localStorage.gmailContacts;
+        updateAutoComplete();
       }
     }
 

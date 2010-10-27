@@ -12,42 +12,40 @@ function ($,    object,         fn,         dispatch) {
   
       //Wire up events.
       this.dom
-      .bind('keyup', fn.bind(this, 'askForCompletions'))
-      .bind('blur', fn.bind(this, 'onBlur'));
-
-      //Tell the chrome about where the dimensions are for the text
-      //area. This can execute after DOM ready but before window onload,
-      //but not guaranteed, so do both.
-      this.setDimensions();
-      $(window).bind('load', fn.bind(this, "setDimensions"));
+      .bind('keyup', fn.bind(this, 'onKeyUp'));
     },
 
-    setDimensions: function () {
-      this.dimensions = this.dom[0].getBoundingClientRect();
-      dispatch.pub('autoCompleteRect', this.dimensions);
-    },
+    onKeyUp: function (evt) {
+      //If Enter is detected, then probably an autocomplete completion,
+      //make sure end of string is visible.
+      if (evt.keyCode === 13) {
+        /*
+        var self = this;
+        console.log('key: ', evt);
+        setTimeout(function () {
+          var event = document.createEvent("KeyboardEvent");
+          event.initKeyEvent(                                                                                      
+                 "keydown",        //  in DOMString typeArg,                                                           
+                  true,             //  in boolean canBubbleArg,                                                        
+                  true,             //  in boolean cancelableArg,                                                       
+                  null,             //  in nsIDOMAbstractView viewArg,  Specifies UIEvent.view. This value may be null.     
+                  false,            //  in boolean ctrlKeyArg,                                                               
+                  false,            //  in boolean altKeyArg,                                                        
+                  false,            //  in boolean shiftKeyArg,                                                      
+                  false,            //  in boolean metaKeyArg,                                                       
+                  39,               //  in unsigned long keyCodeArg,                                                      
+                   0);              //  in unsigned long charCodeArg);              
 
-    setData: function (data) {
-      this.data = data;
-      //Let the chrome know of the available completions
-      dispatch.pub('autoCompleteData', data);
-    },
-
-    askForCompletions: function (evt) {
-      //Get the text in the textarea, but only get the text after
-      //the last comma, since multiple values can be in the text field.
-      var text = this.dom.val() || '',
-        parts = text.split(',');
-
-      if (parts.length > 1) {
-        text = parts[parts.length - 1].trim();
+          self.dom[0].dispatchEvent(event);
+          
+          //var value = self.dom.val(),
+           //   length = value.length;
+          //self.dom[0].value = value;
+          //self.dom[0].setSelectionRange(length, length);
+          console.log('sent keydown event');
+        }, 200);
+        */
       }
-
-      dispatch.pub('autoComplete', text);
-    },
-
-    onBlur: function (evt) {
-      dispatch.pub('autoCompleteBlur');
     }
   });
 });

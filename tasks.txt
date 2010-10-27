@@ -6,6 +6,8 @@ Tasks:
   * make sure files can be aggressively cached.
 * Design for interface when system is running slowly (503 message) - Andy
 * Save all contacts to localstorage for autocomplete - Shane/James
+* Make sure localStorage/autocomplete data cache is cleared when user removes
+  gmail.
 * Do something awesome for subject text of emails
   * Link sent from $PERSON to you
 
@@ -26,8 +28,6 @@ Tasks:
 
 * Ops - Gozer
   * Check if ready to handle load, monitoring in place.
-  * move system multiple nodes
-  * memcache replacement
   
 * extension: watch for 50* http errors in api calls (503 service unavailable), present user with nice message.
 
