@@ -22,7 +22,7 @@ else
 endif
 
 xpi_name := share-$(version)-$(xpi_type).xpi
-xpi_files := chrome.manifest chrome install.rdf defaults
+xpi_files := chrome.manifest chrome install.rdf defaults components modules
 dep_files := Makefile $(shell find $(srcdir) -type f)
 
 SLINK = ln -sf
@@ -38,7 +38,7 @@ xpi: $(xpi_dir)/$(xpi_name)
 $(xpi_dir):
 	mkdir -p $(xpi_dir)
 	
-stage_files = $(stage_dir)/defaults $(stage_dir)/chrome $(stage_dir)/install.rdf $(stage_dir)/chrome.manifest
+stage_files = $(stage_dir)/defaults $(stage_dir)/chrome $(stage_dir)/install.rdf $(stage_dir)/chrome.manifest $(stage_dir)/components $(stage_dir)/modules
 
 $(stage_dir):
 	mkdir -p $(stage_dir)
@@ -52,6 +52,12 @@ $(stage_dir)/install.rdf: $(srcdir)/install.rdf
 
 $(stage_dir)/chrome: $(srcdir)/chrome
 	$(SLINK) $(srcdir)/chrome $(stage_dir)/chrome
+
+$(stage_dir)/components: $(srcdir)/components
+	$(SLINK) $(srcdir)/components $(stage_dir)/components
+
+$(stage_dir)/modules: $(srcdir)/modules
+	$(SLINK) $(srcdir)/modules $(stage_dir)/modules
 
 $(stage_dir)/defaults: $(srcdir)/defaults
 	$(SLINK) $(srcdir)/defaults $(stage_dir)/defaults
