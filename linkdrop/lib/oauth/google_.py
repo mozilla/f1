@@ -233,13 +233,17 @@ Subject: %s
             return None, error
             
         feed = gdata.contacts.ContactsFeedFromString(content)
+        from pprint import pprint
         for entry in feed.entry:
             #print entry.group_membership_info
-            email = entry.email[0]
             p = {
-                'displayName': entry.title.text or email.address,
-                'emails': [{'value': email.address, 'primary': email.primary}]
+                'displayName': entry.title.text,
             }
+            if entry.email:
+                email = entry.email[0]
+                p['emails'] = [{'value': email.address, 'primary': email.primary}]
+                if not p['displayName']:
+                    p['displayName'] = email.address
             contacts.append(p)
         result = {
             'entry': contacts,

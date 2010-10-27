@@ -240,12 +240,14 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
                 data = [];
 
             entries.forEach(function (entry) {
-              entry.emails.forEach(function (email) {
-                data.push({
-                  displayName: entry.displayName,
-                  email: email.value
+              if (entry.emails && entry.emails.length) {
+                entry.emails.forEach(function (email) {
+                  data.push({
+                    displayName: entry.displayName,
+                    email: email.value
+                  });
                 });
-              });
+              }
             });
 
             localStorage.gmailContacts = JSON.stringify(data);
