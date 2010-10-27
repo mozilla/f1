@@ -231,7 +231,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
           username: svcAccount.username,
           userid: svcAccount.userid,
           startindex: 0,
-          maxresults: 200
+          maxresults: 500
         },
         success: function (json) {
           //Transform data to a form usable by autocomplete.
