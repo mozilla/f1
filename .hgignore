@@ -17,3 +17,4 @@ data\/sessions
 ^grinder/.*-file-store
 ^grinder/.*\$py.class
 web-static
+web/share-0.1-dev.xpi
