@@ -254,12 +254,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     createShareFrame: function () {
-      var parentNode = gBrowser.getBrowserForTab(this.tab).parentNode,
+      var browser = gBrowser.getBrowserForTab(this.tab),
           iframeNode = null, url, options;
-
-      // fx4 fix
-      while (parentNode.localName != 'notificationbox')
-        parentNode = parentNode.parentNode
+      var notificationBox = gBrowser.getNotificationBox(browser);
 
       if (iframeNode === null) {
         //Create the iframe.
@@ -295,7 +292,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
         iframeNode.setAttribute("type", "content");
         iframeNode.setAttribute("src", url);
-        parentNode.insertBefore(iframeNode, parentNode.firstChild);
+        notificationBox.insertBefore(iframeNode, notificationBox.firstChild);
       }
       return (this.shareFrame = iframeNode);
     },
@@ -571,12 +568,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onFirstRun: function () {
       // create a hidden iframe and get it to load the standard contents
       // to prefill the cache
+      var browser = gBrowser.getBrowserForTab(gBrowser.selectedTab);
+      var notificationBox = gBrowser.getNotificationBox(browser);
       var iframeNode = document.createElement("browser");
       iframeNode.setAttribute("type", "content");
       iframeNode.setAttribute("style", "width: 100px; height: 100px; background: pink;");
       iframeNode.setAttribute("src", this.shareUrl);
       iframeNode.setAttribute("style", "visibility: collapse;");
-      gBrowser.getBrowserForTab(gBrowser.selectedTab).parentNode.appendChild(iframeNode);
+      notificationBox.insertBefore(iframeNode, notificationBox.firstChild);
 
       //Taken from https://developer.mozilla.org/en/Code_snippets/Tabbed_browser
       function openAndReuseOneTabPerURL(url) {
