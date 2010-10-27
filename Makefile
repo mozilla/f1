@@ -67,7 +67,6 @@ $(xpi_dir)/$(xpi_name): $(xpi_dir) $(stage_dir) $(dep_files)
 	cd $(stage_dir) && zip -9r $(xpi_name) $(xpi_files)
 	mv $(stage_dir)/$(xpi_name) $(xpi_dir)/$(xpi_name)
 
-
 web: $(static_dir)
 
 $(static_dir):
