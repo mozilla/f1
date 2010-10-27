@@ -512,68 +512,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     autoCompleteData: function (data) {
       ffshareAutoCompleteData.set(data);
-    },
-
-    autoCompleteRect: function (rect) {
-      this.acRect = rect;
-    },
-
-    hideAutoComplete: function () {
-      var listNode = this.tab.ffshareAcList;
-      if (listNode) {
-        listNode.style.display = 'none';
-      }
-    },
-
-    autoComplete: function (text) {
-/*
-      //Store the autocomplete DOM on the tab object, so if the tab is
-      //destroyed, it will be too.
-      var listNode = this.tab.ffshareAcList,
-          matches, html = '', style, liNode, textNode;
-
-      if (!listNode) {
-        listNode = this.tab.ffshareAcList = document.createElementNS("http://www.w3.org/1999/xhtml", "html:ul");
-        style = listNode.style;
-        style.position = 'absolute';
-        style.display = 'none';
-        style.zIndex = 100;
-        //TODO: make sure this does not leak.
-        gBrowser.getBrowserForTab(this.tab).parentNode.appendChild(listNode);
-      }
-
-      //Fill in the autocomplete options.
-      matches = this.acData.filter(function (item) {
-        return item.label.indexOf(text) !== -1;
-      });
-
-      if (matches.length) {
-        //Clear previous children.
-        while (listNode.firstChild) {
-          listNode.removeChild(listNode.firstChild);
-        }
-
-        //Fill in new children.
-        matches.forEach(fn.bind(this, function (item) {
-          liNode = document.createElementNS("http://www.w3.org/1999/xhtml", "html:li");
-          liNode.matchValue = item.value;
-          textNode = document.createTextNode(item.label);
-          liNode.appendChild(textNode);
-          listNode.appendChild(liNode);
-          //html += '<li data-value="' + this.escapeHtml(item.value) + '">' +
-          //      this.escapeHtml(item.label) + '</li>';
-        }));
-
-        style = listNode.style;
-        if (style.display === 'none') {
-          style.top = this.acRect.top + this.acRect.height;
-          style.left = this.acRect.left;
-          style.display = 'block';
-        }
-      } else {
-        this.hideAutoComplete();
-      }
-*/
     }
   };
 

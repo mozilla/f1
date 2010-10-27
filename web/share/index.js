@@ -216,7 +216,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     }
 
     dispatch.pub('autoCompleteData', data);
-    //autoCompleteWidget.setData(data);
   }
 
   /**
