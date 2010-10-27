@@ -250,7 +250,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         this.shareFrame.parentNode.removeChild(this.shareFrame);
         this.shareFrame = null;
       }));
-      this.hideAutoComplete();
       this.visible = false;
     },
 
