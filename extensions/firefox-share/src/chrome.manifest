@@ -13,3 +13,5 @@ style chrome://global/content/customizeToolbar.xul chrome://ffshare/skin/overlay
 
 component {a7685da4-c42a-ed4b-ae53-2f19ac6164a3} components/nsFormFillOverride.js
 contract @mozilla.org/satchel/form-autocomplete;1 {a7685da4-c42a-ed4b-ae53-2f19ac6164a3}
+component {099b2bff-8b6e-7b48-a475-dbc09a53f24d} components/extensibleFormFiller.js
+contract @mozilla.org/satchel/inputlist-autocomplete;1 {099b2bff-8b6e-7b48-a475-dbc09a53f24d}

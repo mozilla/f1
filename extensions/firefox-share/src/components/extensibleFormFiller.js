@@ -33,6 +33,7 @@ __defineGetter__("FAC", function() {
     getService(Ci.nsIFormAutoComplete);
 });
 
+
 function FormAutocomplete() {
   _("new PAC FormAutocomplete");
   
@@ -75,11 +76,42 @@ FormAutocomplete.prototype = {
   }
 };
 
-let components = [FormAutocomplete];
+/**
+ * In firefox 4, we have to also override satchel/inputlist-autocomplete otherwise
+ * it will modify our search result in a way that prevents use of a rich
+ * autocomplete list.
+ */
+
+__defineGetter__("ILAC", function() {
+  _("get ILAC");
+  delete this.ILAC;
+  return this.ILAC = Components.classesByID["{bf1e01d0-953e-11df-981c-0800200c9a66}"].
+    getService(Ci.nsIInputListAutoComplete);
+});
+
+
+function InputListAutoComplete() {}
+InputListAutoComplete.prototype = {
+  contractID    : "@mozilla.org/satchel/inputlist-autocomplete",
+  classID       : Components.ID("{099b2bff-8b6e-7b48-a475-dbc09a53f24d}"),
+  QueryInterface: XPCOMUtils.generateQI([Ci.nsIInputListAutoComplete]),
+
+  autoCompleteSearch : function (formHistoryResult, aUntrimmedSearchString, aField) {
+    // if using a default autocompleteresult class, don't use satchel/inputlist-autocomplete
+    if (formHistoryResult.wrappedJSObject)
+      return ILAC.autoCompleteSearch(formHistoryResult, aUntrimmedSearchString, aField);
+    return formHistoryResult;
+  },
+
+  getListSuggestions : function (aField) {
+
+  }
+};
+
 if (XPCOMUtils.generateNSGetFactory)
-    var NSGetFactory = XPCOMUtils.generateNSGetFactory(components);
+    var NSGetFactory = XPCOMUtils.generateNSGetFactory([FormAutocomplete, InputListAutoComplete]);
 else
-    var NSGetModule = XPCOMUtils.generateNSGetModule(components);
+    var NSGetModule = XPCOMUtils.generateNSGetModule([FormAutocomplete]);
 
 
 
