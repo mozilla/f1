@@ -1,6 +1,5 @@
 Tasks:
 
-* Fix first run opening of tab - James
 * Change "settings" to "accounts", move button to the left. Add close button where settings button is currently - Andy
 * fix the session cookie - Shane
 * Make an amazing video - Andy
