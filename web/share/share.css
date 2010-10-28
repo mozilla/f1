@@ -17,7 +17,7 @@
 
 body {
   font-size: 11px;
-  font-family: "lucida grande";
+  font-family: "Lucida Grande", Verdana, sans-serif;
   max-height: 113px;
   overflow: hidden;
   background-color: #fff;
@@ -171,6 +171,21 @@ ul.nav li a.icon.settings {
   background-image: url("i/settingsIcon.png");
 }
 
+ul.nav span.close {
+  width: 16px;
+  height: 16px;
+  display: block;
+  position: absolute;
+  top: 10px;
+  right: 0;
+  cursor: pointer;
+  background-image: url("i/close_dim.png");
+}
+
+ul.nav span.close:hover {
+  background-image: url("i/close_strong.png");
+}
+
 /* === TAB TOOLTIP === */
 
 #tabToolTip {
@@ -239,15 +254,20 @@ ul.nav .user-info img.avatar {
 
 ul.nav li.settings,
 ul.nav li.settings.ui-tabs-selected  {
-  position: absolute;
-  right: 0;
-  top: 0;
   text-align: center;
   -moz-border-radius: 2px;
 }
 
 ul.nav li.settings {
   border: 1px solid #888;
+}
+
+ul.nav .navSpacer {
+  border-left: 1px dotted #888888;
+  display: inline-block;
+  min-height: 24px;
+  float: left;
+  margin: 4px 10px;
 }
 
 /* === TAB SELECTED === */
