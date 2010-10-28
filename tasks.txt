@@ -7,7 +7,6 @@ Tasks:
 * Remove first piece of user testing telling them what it's about (or move), get rid of "what service"" question - Andy
 * Add tagline to top of frontpage - Andy
 * show twitter urls? - Andy
-* make sure all errors are sharing the same UI - James
 ---
 * Speed of page display: - James
   * make sure files can be aggressively cached.
