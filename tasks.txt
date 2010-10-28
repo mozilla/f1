@@ -1,5 +1,16 @@
 Tasks:
 
+* Fix first run opening of tab
+* After you add a service, go directly to that service
+* Change "settings" to "accounts", move button to the left. Add close button where settings button is currently
+* fix the session cookie
+* Make an amazing video
+* Check server logs for errors
+* Remove first piece of user testing telling them what it's about (or move), get rid of "what service"" question
+* Add tagline to top of frontpage
+* show twitter urls?
+* make sure all errors are sharing the same UI
+---
 * remember last service used for share for next share -  Bryan/James
 * Make sure the overlay works with tab switching correctly. - Bryan/James
 * Speed of page display: - James
