@@ -179,6 +179,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                  aStateFlags & flags.STATE_STOP) {
         // This seems like an excessive check but works very well
         if (ffshare.firstRun) {
+          //Be sure to disable first run after one try. Even if it does
+          //not work, do not want to annoy the user with continual popping up
+          //of the frontpage.
+          ffshare.firstRun = false;
           ffshare.onFirstRun();
         }
       }
