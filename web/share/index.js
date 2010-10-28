@@ -42,6 +42,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         medium: 'twitter',
         name: 'Twitter',
         tabName: 'twitterTab',
+        selectionName: 'twitter',
         icon: 'i/twitterIcon.png',
         serviceUrl: 'http://twitter.com',
         revokeUrl: 'http://twitter.com/settings/connections',
@@ -54,6 +55,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         medium: 'facebook',
         name: 'Facebook',
         tabName: 'facebookTab',
+        selectionName: 'facebook',
         icon: 'i/facebookIcon.png',
         serviceUrl: 'http://facebook.com',
         revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
@@ -66,6 +68,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         medium: 'google',
         name: 'Gmail',
         tabName: 'gmailTab',
+        selectionName: 'gmail',
         icon: 'i/gmailIcon.png',
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
@@ -163,6 +166,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         else if (json.error) {
           showStatus('statusError', json.error.message);
         } else {
+          localStorage.lastSelection = actions[sendData.domain].selectionName;
           showStatusShared();
         }
       },
@@ -334,7 +338,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   }
 
   function updateAccounts(accounts, callback) {
-    var services = options.services,
+    var services = options.services, hasAccount = false,
       userAccounts = {}, twitter, selection, param;
 
     if ((accounts && accounts.length) || services) {
@@ -348,6 +352,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
             name = 'gmail';
           }
           userAccounts[name] = account;
+          hasAccount = true;
         }
       });
     }
@@ -393,25 +398,21 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     }
 
     if (updateTab) {
-      //Choose a tab to show. Use the first service found in services.
-      //Warning: this is not completely reliable given a for..in loop
-      //over an object, which does not guarantee key order across browsers.
-      if (services) {
-        for (param in services) {
-          if (param in svcOptions) {
-            selection = '#' + param;
-            break;
+      //Choose a tab to show.
+      if (hasAccount) {
+        if (localStorage.lastSelection) {
+          selection = '#' + localStorage.lastSelection;
+        } else {
+          for (param in userAccounts) {
+            hasAccount = true;
+            if (param in svcOptions) {
+              selection = '#' + param;
+              break;
+            }
           }
         }
       }
-      if (!selection) {
-        for (param in userAccounts) {
-          if (param in svcOptions) {
-            selection = '#' + param;
-            break;
-          }
-        }
-      }
+
       if (!selection) {
         selection = '#settings';
       }
@@ -662,6 +663,10 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       var node = evt.target,
         domain = node.getAttribute('data-domain');
 
+      //Make sure to bring the user back to this service if
+      //the auth is successful.
+      localStorage.lastSelection = actions[domain].selectionName;
+
       oauth(domain, function (success) {
         if (success) {
           location.reload();
@@ -698,6 +703,10 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       if (domain === 'google.com' && localStorage.gmailContacts) {
         delete localStorage.gmailContacts;
       }
+      if(actions[domain].selectionName === localStorage.lastSelection) {
+        delete localStorage.lastSelection;
+      };
+
     });
 
     $("form.messageForm")

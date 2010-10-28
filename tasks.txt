@@ -1,32 +1,23 @@
 Tasks:
 
-* Fix first run opening of tab
-* After you add a service, go directly to that service
-* Change "settings" to "accounts", move button to the left. Add close button where settings button is currently
-* fix the session cookie
-* Make an amazing video
-* Check server logs for errors
-* Remove first piece of user testing telling them what it's about (or move), get rid of "what service"" question
-* Add tagline to top of frontpage
-* show twitter urls?
-* make sure all errors are sharing the same UI
+* Fix first run opening of tab - James
+* Change "settings" to "accounts", move button to the left. Add close button where settings button is currently - Andy
+* fix the session cookie - Shane
+* Make an amazing video - Andy
+* Check server logs for errors - Shane
+* Remove first piece of user testing telling them what it's about (or move), get rid of "what service"" question - Andy
+* Add tagline to top of frontpage - Andy
+* show twitter urls? - Andy
+* make sure all errors are sharing the same UI - James
 ---
-* remember last service used for share for next share -  Bryan/James
-* Make sure the overlay works with tab switching correctly. - Bryan/James
 * Speed of page display: - James
   * make sure files can be aggressively cached.
 * Design for interface when system is running slowly (503 message) - Andy
-* Save all contacts to localstorage for autocomplete - Shane/James
-* Make sure localStorage/autocomplete data cache is cleared when user removes
-  gmail.
 * Do something awesome for subject text of emails
   * Link sent from $PERSON to you
 
 * Blog post - Andy
   * mention the constraints with email/contacts API
-
-* Frontpage work - Andy
-  * New video
 
 * David: get a privacy policy.
 
