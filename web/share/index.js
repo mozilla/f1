@@ -404,10 +404,12 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
           selection = '#' + localStorage.lastSelection;
         } else {
           for (param in userAccounts) {
-            hasAccount = true;
-            if (param in svcOptions) {
-              selection = '#' + param;
-              break;
+            if (userAccounts.hasOwnProperty(param)) {
+              hasAccount = true;
+              if (param in svcOptions) {
+                selection = '#' + param;
+                break;
+              }
             }
           }
         }
@@ -595,7 +597,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       })
       .delegate('#statusServerErrorButton', 'click', function (evt) {
         close();
-      });
+      })
+      .delegate('.nav .close', 'click', close);
 
     $('#authOkButton').click(function (evt) {
       oauth(sendData.domain, function (success) {
@@ -703,9 +706,9 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       if (domain === 'google.com' && localStorage.gmailContacts) {
         delete localStorage.gmailContacts;
       }
-      if(actions[domain].selectionName === localStorage.lastSelection) {
+      if (actions[domain].selectionName === localStorage.lastSelection) {
         delete localStorage.lastSelection;
-      };
+      }
 
     });
 

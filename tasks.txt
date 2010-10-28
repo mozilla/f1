@@ -1,6 +1,5 @@
 Tasks:
 
-* Change "settings" to "accounts", move button to the left. Add close button where settings button is currently - Andy
 * fix the session cookie - Shane
 * Make an amazing video - Andy
 * Check server logs for errors - Shane
