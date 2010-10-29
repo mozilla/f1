@@ -164,6 +164,16 @@ a#installClose:hover {
   display: none;
 }
 
+.row.headline {
+  margin: 20px 0;
+}
+
+.row.headline h1 {
+  color: #00A0FF; 
+  font-weight: normal;
+  font-size: 24px; 
+}
+
 #movie.c3 {
   -moz-box-shadow: 0 5px 10px 0 #666;
   -webkit-box-shadow: 0 5px 10px 0 #666;
