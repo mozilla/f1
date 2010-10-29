@@ -3,8 +3,6 @@ Tasks:
 * fix the session cookie - Shane
 * Make an amazing video - Andy
 * Check server logs for errors - Shane
-* Remove first piece of user testing telling them what it's about (or move), get rid of "what service"" question - Andy
-* Add tagline to top of frontpage - Andy
 * show twitter urls? - Andy
 ---
 * Speed of page display: - James
