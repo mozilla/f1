@@ -171,18 +171,24 @@ ul.nav li a.icon.settings {
   background-image: url("i/settingsIcon.png");
 }
 
-ul.nav span.close {
-  width: 16px;
-  height: 16px;
-  display: block;
+ul.nav .rightActions {
   position: absolute;
   top: 10px;
   right: 0;
+  height: 16px;
+  line-height: 16px;
+}
+
+ul.nav .rightActions span.close {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  margin-left: 3px;
   cursor: pointer;
   background-image: url("i/close_dim.png");
 }
 
-ul.nav span.close:hover {
+ul.nav .rightActions span.close:hover {
   background-image: url("i/close_strong.png");
 }
 
@@ -389,7 +395,7 @@ textarea, input[type="text"] {
   border-width: 1px; 
   border-style: solid;
   border-color: #888;
-  font-family: "lucida grande";
+  font-family: "Lucida Grande", Verdana, sans-serif;
   font-size: 12px;
   line-height: 18px;
   padding: 3px;
