@@ -186,9 +186,14 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         if (xhr.status === 403) {
           // XXX check for X-Error header == CSRF. if so, we need to
           // make a get request to get a new CSRF token, and then
-          // replay our api call
+          // replay our api call.
+          // Using a bad error stand-in for now
+          showStatus('statusError', err);
+        } else if (xhr.status === 503) {
+          showStatus('statusServerBusy');
+        } else {
+          showStatus('statusError', err);
         }
-        showStatus('statusError', err);
       }
     });
   }
@@ -510,8 +515,12 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
         updateLinks();
       },
-      error: function (xhr, textStatus, errorThrown) {
-        showStatus('statusServerError');
+      error: function (xhr, textStatus, err) {
+        if (xhr.status === 503) {
+          showStatus('statusServerBusyClose');
+        } else {
+          showStatus('statusServerError', err);
+        }
       }
     });
   }
@@ -604,10 +613,10 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       close();
     });
     bodyDom
-      .delegate('#statusAuthButton, #statusErrorButton', 'click', function (evt) {
+      .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
         cancelStatus();
       })
-      .delegate('#statusServerErrorButton', 'click', function (evt) {
+      .delegate('.statusErrorCloseButton', 'click', function (evt) {
         close();
       })
       .delegate('.nav .close', 'click', close);

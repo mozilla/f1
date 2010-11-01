@@ -183,22 +183,27 @@
 
 <div id="statusOAuthFailed" class="status hidden error">
   Sorry, we couldn't connect to your account. Please try again.
-  <button id="statusErrorButton" class="statusButton">ok</button>
+  <button class="statusButton statusErrorButton">ok</button>
 </div>
 
 <div id="statusError" class="status hidden error">
   We're really sorry, Linkdrop done goofed up. <span id="statusErrorMessage"></span>
-  <button id="statusErrorButton" class="statusButton">ok</button>
+  <button class="statusButton statusErrorButton">ok</button>
 </div>
 
 <div id="statusServerError" class="status hidden error">
   We're really sorry, the Linkdrop server is having problems. Please try again later. <span id="statusServerErrorMessage"></span>
-  <button id="statusServerErrorButton" class="statusButton">ok</button>
+  <button id="statusServerErrorButton" class="statusButton statusErrorCloseButton">ok</button>
 </div>
 
 <div id="statusServerBusy" class="status hidden warning">
   Sorry, Linkdrop is under heavy load right now, please try again later.
-  <button id="statusServerErrorButton" class="statusButton">ok</button>
+  <button class="statusButton statusErrorButton">ok</button>
+</div>
+
+<div id="statusServerBusyClose" class="status hidden warning">
+  Sorry, Linkdrop is under heavy load right now, please try again later.
+  <button class="statusButton statusErrorCloseButton">ok</button>
 </div>
 
 <div id="statusShared" class="status hidden">

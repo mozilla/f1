@@ -160,6 +160,10 @@ a#installClose:hover {
   color: #888;
 }
 
+#header.row #firefox {
+    display: none;
+}
+
 #header.row #noButton {
   display: none;
 }

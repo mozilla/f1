@@ -165,6 +165,10 @@ require.def(['require', 'jquery', 'hashDispatch'],
     });
 
     $(function () {
+        //Goofy test, but just need to weed out big non-Gecko browsers, not
+        //a critical check if it goes wrong.
+        var isGecko = !!navigator.buildID;
+
         $(window).bind('buttonX', function () {
           //If this is after an install, then show the "click the button" UI.
             var x = window.buttonX;
@@ -185,6 +189,13 @@ require.def(['require', 'jquery', 'hashDispatch'],
           $('#installed').fadeOut("fast");
         });
 
+        //Do not show install button for non-Gecko browsers. Even for Gecko
+        //browsers, the install may not work for all browser, but let AMO
+        //handle that notification.
+        if (!isGecko) {
+            $('#download').hide();
+            $('#firefox').show();
+        }
 
         $('body')
             .delegate('#installClose', 'click', function (evt) {
@@ -199,6 +210,9 @@ require.def(['require', 'jquery', 'hashDispatch'],
                                         .delay(10 * 1000)
                                         .fadeOut("slow");
                                 });
+            })
+            .delegate('#firefox', 'click', function (evt) {
+                location = 'http://getfirefox.com';
             });
 
         $(window).bind('load resize', function () {

@@ -20,8 +20,7 @@ Tasks:
   * what are the problems to solve? navigator.share.
     * privacy.
 
-* Check firefox version on the install button make sure only firefox 3.6+.
-    * Make sure we know if it can run in minefield, Linux has no icons? - James
+* Linux has no icon? - James
 
 * If session gets killed in the middle of a share, how to recover? - James
 
