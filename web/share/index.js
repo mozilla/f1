@@ -85,7 +85,19 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     },
     tabDom, bodyDom, clickBlockDom, twitterCounter,
     updateTab = true,
-    accounts, oldAccounts, gmailDom, autoCompleteWidget;
+    accounts, oldAccounts, gmailDom, autoCompleteWidget, store = localStorage;
+
+  //Capability detect for localStorage. At least on add-on does weird things
+  //with it, so even a concern in Gecko-only code.
+  try {
+    store.tempVar = 'temp';
+    if (store.tempVar === 'temp') {
+    }
+    delete store.tempVar;
+  } catch (e) {
+    //Just use a simple in-memory object. Not as nice, but code will still work.
+    store = {};
+  }
 
   jig.addFn({
     profilePic: function (photos) {
@@ -166,7 +178,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         else if (json.error) {
           showStatus('statusError', json.error.message);
         } else {
-          localStorage.lastSelection = actions[sendData.domain].selectionName;
+          store.lastSelection = actions[sendData.domain].selectionName;
           showStatusShared();
         }
       },
@@ -203,11 +215,11 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
   /**
    * Makes sure there is an autocomplete set up with the latest
-   * localstorage data.
+   * store data.
    */
   function updateAutoComplete() {
     var toNode = gmailDom.find('[name="to"]')[0],
-        data = localStorage.gmailContacts;
+        data = store.gmailContacts;
 
     if (data) {
       data = JSON.parse(data);
@@ -223,11 +235,11 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   }
 
   /**
-   * Use localStorage to save gmail contacts, but fetch from API
-   * server if there is no localStorage copy.
+   * Use store to save gmail contacts, but fetch from API
+   * server if there is no store copy.
    */
   function storeGmailContacts(account) {
-    if (!localStorage.gmailContacts) {
+    if (!store.gmailContacts) {
       var svcAccount = account.accounts[0];
 
       rdapi('contacts/' + svcAccount.domain, {
@@ -254,7 +266,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
               }
             });
 
-            localStorage.gmailContacts = JSON.stringify(data);
+            store.gmailContacts = JSON.stringify(data);
             updateAutoComplete();
           }
         }
@@ -391,8 +403,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       updateAccountButton('google.com');
 
       //Make sure there is no cached data hanging around.
-      if (localStorage.gmailContacts) {
-        delete localStorage.gmailContacts;
+      if (store.gmailContacts) {
+        delete store.gmailContacts;
         updateAutoComplete();
       }
     }
@@ -400,8 +412,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     if (updateTab) {
       //Choose a tab to show.
       if (hasAccount) {
-        if (localStorage.lastSelection) {
-          selection = '#' + localStorage.lastSelection;
+        if (store.lastSelection) {
+          selection = '#' + store.lastSelection;
         } else {
           for (param in userAccounts) {
             if (userAccounts.hasOwnProperty(param)) {
@@ -668,7 +680,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
       //Make sure to bring the user back to this service if
       //the auth is successful.
-      localStorage.lastSelection = actions[domain].selectionName;
+      store.lastSelection = actions[domain].selectionName;
 
       oauth(domain, function (success) {
         if (success) {
@@ -703,11 +715,11 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       });
 
       //Remove any cached data
-      if (domain === 'google.com' && localStorage.gmailContacts) {
-        delete localStorage.gmailContacts;
+      if (domain === 'google.com' && store.gmailContacts) {
+        delete store.gmailContacts;
       }
-      if (actions[domain].selectionName === localStorage.lastSelection) {
-        delete localStorage.lastSelection;
+      if (actions[domain].selectionName === store.lastSelection) {
+        delete store.lastSelection;
       }
 
     });
