@@ -417,9 +417,13 @@ textarea.message {
 }
 
 input[type="text"] {
-  height: 28px;
+  height: 33px;
   width: 100%;
   margin-bottom: 5px;
+}
+
+input[type="text"]:last-child {
+  margin-bottom: 0;
 }
 
 input[type="text"].placeholder,
@@ -636,7 +640,8 @@ div.status img {
   font-weight: bold;
 }
 
-div.status.error {
+div.status.error,
+div.status.warning {
   background-color: rgba(255,0,0,0.5);
   color: #fff;
 }
@@ -647,6 +652,10 @@ div.status.error {
   font-weight: normal;
   -moz-box-shadow: none;
   border-color: maroon;
+}
+
+.statusButton:active {
+  -moz-box-shadow: 0 0 1px #666666 inset, 0 1px 0 rgba(255,255,255,0.25);
 }
 
 #statusErrorMessage {
