@@ -1,8 +1,13 @@
+Some items from last user test:
+
+- check for firefox version, change install button if not 3.6
+- download button at bottom of page in additon to top?
+- make sure we're using https for site oauth pages
+- video should reflect real ui, not custom position for toolbar button
+- fix firstrun issues
+
 Tasks:
 
-* fix the session cookie - Shane
-* Make an amazing video - Andy
-* Check server logs for errors - Shane
 * show twitter urls? - Andy
 ---
 * Speed of page display: - James
