@@ -173,10 +173,15 @@ ul.nav li a.icon.settings {
 
 ul.nav .rightActions {
   position: absolute;
-  top: 10px;
+  top: 8px;
   right: 0;
   height: 16px;
   line-height: 16px;
+}
+
+ul.nav .rightActions a {
+  padding: 0 5px 0 0;
+  border-right: 1px dotted #888;
 }
 
 ul.nav .rightActions span.close {
