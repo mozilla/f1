@@ -1,35 +1,59 @@
-Some items from last user test:
-
-- check for firefox version, change install button if not 3.6
-- download button at bottom of page in additon to top?
-- make sure we're using https for site oauth pages
-- video should reflect real ui, not custom position for toolbar button
-- fix firstrun issues
-
 Tasks:
-
-* show twitter urls? - Andy
----
-* Speed of page display: - James
-  * make sure files can be aggressively cached.
-* Design for interface when system is running slowly (503 message) - Andy
-* Do something awesome for subject text of emails
-  * Link sent from $PERSON to you
-
-* Blog post - Andy
-  * mention the constraints with email/contacts API
 
 * David: get a privacy policy.
 
-* anonymized user analytics
-  * number of accounts setup
-  * number of accounts used
-  * (email) number of recipients
+* Name change? - David/Legal.
+    * Alternate name ideas?
+
+* Design for interface when system is running slowly (503 message) - Andy
+    * Fail whale
+
+* Double-check https urls for oauth. - Shane
+
+* Set up uservoice: Andy look for how to link
+
+* Move code to GitHub:
+    - linkdrop
+    - linkdrop-prod, private
+
+* Blog post - Andy
+  * mention the constraints with email/contacts API
+  * Talk about navigator.share/linkdrop.share?
+  * what are the problems to solve? navigator.share.
+    * privacy.
+
+* Check firefox version on the install button make sure only firefox 3.6+.
+    * Make sure we know if it can run in minefield, Linux has no icons? - James
+
+* If session gets killed in the middle of a share, how to recover? - James
+
+* Persistent sessions - Shane/Gozer
+
+* linkdrop.share() in the page?
+    * Idea or prototype?
 
 * Post the add-on on AMO. - Shane, Bryan review.
 
-* Ops - Gozer
-  * Check if ready to handle load, monitoring in place.
+--- optional ----
+
+* Set up page with analytics - Shane
+
+* Debug tab showing up in prod? - James
+* Make sure button shows up in same place in browsers across platforms. - James
+
+* Check server logs for errors: facebook error - Shane
+    * When facebook failed it got weird.
+
+* Gozer: Box for admin work.
+
+* If redo video: video should reflect real ui, not custom position for toolbar button
+
+-------------------------
+
+
+* Speed of page display: - James
+  * make sure files can be aggressively cached.
+
   
 * extension: watch for 50* http errors in api calls (503 service unavailable), present user with nice message.
 
