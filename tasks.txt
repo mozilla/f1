@@ -10,8 +10,6 @@ Tasks:
 
 * Double-check https urls for oauth. - Shane
 
-* Set up uservoice: Andy look for how to link
-
 * Move code to GitHub:
     - linkdrop
     - linkdrop-prod, private
