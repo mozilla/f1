@@ -9,6 +9,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 (function () {
 
   Components.utils.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
+  Components.utils.import("resource://ffshare/modules/injector.js");
 
   var slice = Array.prototype.slice,
       ostring = Object.prototype.toString, fn;
@@ -546,6 +547,19 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     };
   }
 
+  var ffapi = {
+    apibase: null, // null == 'navigator.mozilla.labs'
+    name: 'share', // builds to 'navigator.mozilla.labs.share'
+    script: null, // null == use injected default script
+    getapi: function() {
+      let share = ffshare;
+      return function() {
+        share.toggle();
+      }
+    }
+  }
+  Injector.register(ffapi);
+
   ffshare = {
 
     system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
@@ -658,10 +672,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     onMenuItemCommand: function (e) {
-      this.onToolbarButtonCommand(e);
+      this.toggle();
     },
 
     onToolbarButtonCommand: function (e) {
+      this.toggle();
+    },
+    
+    toggle: function() {
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
       if (!tabFrame) {
@@ -673,7 +691,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         tabFrame.hide();
       } else {
         tabFrame.show();
-      }
+      }      
     }
   };
 
