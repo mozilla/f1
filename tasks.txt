@@ -8,8 +8,6 @@ Tasks:
 * Design for interface when system is running slowly (503 message) - Andy
     * Fail whale
 
-* Double-check https urls for oauth. - Shane
-
 * Move code to GitHub:
     - linkdrop
     - linkdrop-prod, private
@@ -25,9 +23,11 @@ Tasks:
 * If session gets killed in the middle of a share, how to recover? - James
 
 * Persistent sessions - Shane/Gozer
+  - gozer is looking at membase, a persistent store that is memcached compatible
 
 * linkdrop.share() in the page?
     * Idea or prototype?
+    - prototype is available: navigator.mozilla.labs.share() to toggle the share panel
 
 * Post the add-on on AMO. - Shane, Bryan review.
 
@@ -113,4 +113,10 @@ to reconcile expectations.
 * Use google contacts API to enable gmail tab autocomplete for To: address
 
 
+
+DONE
+
+
+* Double-check https urls for oauth. - Shane
+  - fb redirects to http, but its POST url is https, LAME
 
