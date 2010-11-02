@@ -29,7 +29,7 @@
 require.def("send",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
          "placeholder", "TextCounter", "AutoComplete", "dispatch", "jquery.textOverflow"],
-function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
+function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           placeholder,   TextCounter,   AutoComplete,   dispatch) {
 
   var svcOptions = {
@@ -37,6 +37,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       'facebook': true,
       'gmail': true
     },
+    showStatus,
     actions = {
       'twitter.com': {
         medium: 'twitter',
@@ -108,7 +109,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
           if (!sendData.to || !sendData.to.trim()) {
             showStatus('statusToError');
             return false;
-          };
+          }
           return true;
         },
         getFormData: function () {
@@ -138,9 +139,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     },
     hash = location.href.split('#')[1],
     urlArgs, sendData,
-    options = {
-      services: null
-    },
+    options = {},
     tabDom, bodyDom, clickBlockDom, twitterCounter,
     updateTab = true,
     accounts, oldAccounts, gmailDom, autoCompleteWidget, store = localStorage;
@@ -167,6 +166,10 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     }
   });
 
+  function escapeHtml(text) {
+    return text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
   function close() {
     dispatch.pub('hide');
   }
@@ -178,7 +181,7 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     alert('error.msg');
   }
 
-  function showStatus(statusId, shouldCloseOrMessage) {
+  showStatus = function (statusId, shouldCloseOrMessage) {
     $('div.status').addClass('hidden');
     clickBlockDom.removeClass('hidden');
     $('#' + statusId).removeClass('hidden');
@@ -194,7 +197,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
     }
-  }
+  };
+
   //Make it globally visible for debug purposes
   window.showStatus = showStatus;
 
@@ -364,11 +368,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     }
   }
 
-  function getServiceUserName(serviceName) {
-    var service = options.services && options.services[serviceName];
-    return (service && service.usernames && service.usernames[0]) || null;
-  }
-
   function updateUserTab(evt, ui) {
     var imageUrl = '',
       userName = '',
@@ -392,15 +391,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     $(".user-info .status").toggleClass("inactive", inactive);
     $(".user-info .username").text(userName);
     $(".user-info").attr("data-domain", domain);
-  }
-
-  function updateServiceDisplayName(service) {
-    var userName = getServiceUserName(service);
-    if (userName) {
-      $(function () {
-        $('#' + service).find('.username').text(userName);
-      });
-    }
   }
 
   function updateAccountDisplay(service, account) {
@@ -434,11 +424,11 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   }
 
   function updateAccounts(accounts, callback) {
-    var services = options.services, hasAccount = false,
-      userAccounts = {}, twitter, selection, param,
-      sessionRestore = store.sessionRestore;
+    var hasAccount = false,
+        userAccounts = {}, selection, param,
+        sessionRestore = store.sessionRestore;
 
-    if ((accounts && accounts.length) || services) {
+    if ((accounts && accounts.length)) {
       //Figure out what accounts we do have
       accounts.forEach(function (account) {
         var name = account.accounts[0].domain;
@@ -457,25 +447,12 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     if (userAccounts.twitter) {
       updateAccountDisplay('twitter', userAccounts.twitter);
     } else {
-      //Try twitter API if have a twitter name
-      twitter = getServiceUserName('twitter');
-      if (twitter) {
-        $.getJSON('http://api.twitter.com/1/users/show.json?callback=?&screen_name=' +
-              encodeURIComponent(twitter), function (json) {
-          $(function () {
-            $('#twitter')
-              .find('img.avatar').attr('src', json.profile_image_url).end()
-              .find('.username').text(json.name);
-          });
-        });
-      }
       updateAccountButton('twitter.com');
     }
 
     if (userAccounts.facebook) {
       updateAccountDisplay('facebook', userAccounts.facebook);
     } else {
-      updateServiceDisplayName('facebook');
       updateAccountButton('facebook.com');
     }
 
@@ -484,7 +461,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       //Make sure we have contacts for auto-complete
       storeGmailContacts(userAccounts.gmail);
     } else {
-      updateServiceDisplayName('gmail');
       updateAccountButton('google.com');
 
       //Make sure there is no cached data hanging around.
@@ -677,11 +653,6 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     if (!options.title) {
       options.title = options.url;
     }
-    //For now disable guessing on accounts, since it is not reliable.
-    //TODO: remove the services stuff completely later, both here and
-    //in the extension if cannot get reliable account signed in detection in
-    //the browser via the browser cookies.
-    options.services = {};
   }
 
   getAccounts();
@@ -703,8 +674,10 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     }
 
     //Debug info on the data that was received.
-    $('#debugOutput').val(JSON.stringify(options));
-    $('#debugCurrentLocation').val(location.href);
+    if (options.system === 'dev') {
+      $('#debugOutput').val(JSON.stringify(options));
+      $('#debugCurrentLocation').val(location.href);
+    }
 
     //Hook up button for share history
     $('#shareHistoryButton').click(function (evt) {
@@ -773,9 +746,9 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
     //Set preview image for facebook
     if (options.previews && options.previews.length) {
       //TODO: set up all the image previews.
-      thumbImgDom.attr('src', options.previews[0]);
+      thumbImgDom.attr('src', escapeHtml(options.previews[0]));
     } else {
-      thumbImgDom.attr('src', options.thumbnail);
+      thumbImgDom.attr('src', escapeHtml(options.thumbnail));
     }
 
     //Create ellipsis for thumbnail section
