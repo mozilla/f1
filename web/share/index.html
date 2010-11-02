@@ -48,7 +48,7 @@
         </div>
       </div>
       <div class="message twitterCounter boxFlex">
-        <textarea class="message nourl" placeholder="What do you think of this page?" name="message"></textarea>
+        <textarea class="message" placeholder="What do you think of this page?" name="message"></textarea>
         <div class="counter"></div>
       </div>
       <button class="share" type="submit">share</button>
@@ -77,7 +77,7 @@
         </div>
       </div>
       <div class="message boxFlex">
-        <textarea class="message nourl" placeholder="What do you think of this page?" name="message"></textarea>
+        <textarea class="message" placeholder="What do you think of this page?" name="message"></textarea>
       </div>
       <button class="share" type="submit">share</button>
     </form>
@@ -190,6 +190,11 @@
 
 <div id="statusError" class="status hidden error">
   We're really sorry, Linkdrop done goofed up. <span id="statusErrorMessage"></span>
+  <button class="statusButton statusErrorButton">ok</button>
+</div>
+
+<div id="statusToError" class="status hidden error">
+  The 'to' field is required to send email.
   <button class="statusButton statusErrorButton">ok</button>
 </div>
 

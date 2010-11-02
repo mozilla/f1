@@ -49,6 +49,20 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         signOutUrl: 'http://twitter.com/logout',
         accountLink: function (account) {
           return 'http://twitter.com/' + account.username;
+        },
+        validate: function (sendData) {
+          return true;
+        },
+        getFormData: function () {
+          var message = $('#twitter').find('textarea.message').val().trim() || '';
+          return {
+            message: message
+          };
+        },
+        restoreFormData: function (data) {
+          if (data.message) {
+            $('#twitter').find('textarea.message').val(data.message);
+          }
         }
       },
       'facebook.com': {
@@ -62,6 +76,20 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         signOutUrl: 'http://facebook.com',
         accountLink: function (account) {
           return 'http://www.facebook.com/profile.php?id=' + account.userid;
+        },
+        validate: function (sendData) {
+          return true;
+        },
+        getFormData: function () {
+          var message = $('#facebook').find('textarea.message').val().trim() || '';
+          return {
+            message: message
+          };
+        },
+        restoreFormData: function (data) {
+          if (data.message) {
+            $('#facebook').find('textarea.message').val(data.message);
+          }
         }
       },
       'google.com': {
@@ -75,6 +103,36 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
         signOutUrl: 'http://google.com/preferences',
         accountLink: function (account) {
           return 'http://google.com/profiles/' + account.username;
+        },
+        validate: function (sendData) {
+          if (!sendData.to || !sendData.to.trim()) {
+            showStatus('statusToError');
+            return false;
+          };
+          return true;
+        },
+        getFormData: function () {
+          var dom = $('#gmail'),
+              to = dom.find('[name="to"]').val().trim() || '',
+              subject = dom.find('[name="subject"]').val().trim() || '',
+              message = dom.find('textarea.message').val().trim() || '';
+          return {
+            to: to,
+            subject: subject,
+            message: message
+          };
+        },
+        restoreFormData: function (data) {
+          var dom = $('#gmail');
+          if (data.to) {
+            dom.find('[name="to"]').val(data.to);
+          }
+          if (data.subject) {
+            dom.find('[name="subject"]').val(data.subject);
+          }
+          if (data.message) {
+            dom.find('textarea.message').val(data.message);
+          }
         }
       }
     },
@@ -143,6 +201,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   function cancelStatus() {
     clickBlockDom.addClass('hidden');
     $('div.status').addClass('hidden');
+    //Be sure form field placeholders are up to date.
+    placeholder();
   }
 
   function showStatusShared() {
@@ -160,6 +220,11 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
   function sendMessage() {
     showStatus('statusSharing');
 
+    //Allow for data validation before sending.
+    if (!actions[sendData.domain].validate(sendData)) {
+      return;
+    }
+
     rdapi('send', {
       type: 'POST',
       data: sendData,
@@ -174,13 +239,15 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
           } else {
             showStatus('statusError', json.error.message);
           }
-        }
-        else if (json.error) {
+        } else if (json.error) {
           showStatus('statusError', json.error.message);
         } else {
           store.lastSelection = actions[sendData.domain].selectionName;
           showStatusShared();
         }
+
+        //Be sure to delete sessionRestore data
+        delete store.sessionRestore;
       },
       error: function (xhr, textStatus, err) {
         if (xhr.status === 403) {
@@ -191,6 +258,15 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
           //it is hard to see how that might happen -- either all the cookies
           //are gone or they are all there.
           //var headerError = xhr.getResponseHeader('X-Error');
+
+          //First, save form state so their message can be recovered after
+          //binding accounts.
+          var data = {
+            "link": sendData.link,
+            "domain": sendData.domain,
+            "formData": actions[sendData.domain].getFormData()
+          };
+          store.sessionRestore = JSON.stringify(data);
           showStatus('statusCookiePukeError');
         } else if (xhr.status === 503) {
           showStatus('statusServerBusy');
@@ -359,7 +435,8 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
   function updateAccounts(accounts, callback) {
     var services = options.services, hasAccount = false,
-      userAccounts = {}, twitter, selection, param;
+      userAccounts = {}, twitter, selection, param,
+      sessionRestore = store.sessionRestore;
 
     if ((accounts && accounts.length) || services) {
       //Figure out what accounts we do have
@@ -414,6 +491,23 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       if (store.gmailContacts) {
         delete store.gmailContacts;
         updateAutoComplete();
+      }
+    }
+
+    //Session restore, do after form setting above.
+    if (sessionRestore) {
+      sessionRestore = JSON.parse(sessionRestore);
+
+      //If this share is for a different URL, dump the sessionRestore
+      if (options.link !== sessionRestore.link) {
+        sessionRestore = null;
+        delete store.sessionRestore;
+      }
+
+      if (sessionRestore) {
+        actions[sessionRestore.domain].restoreFormData(sessionRestore.formData);
+        //Make sure placeholder text is updated.
+        placeholder();
       }
     }
 
@@ -476,22 +570,24 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
 
   //Set up the URL in all the message containers
   function updateLinks() {
-    $('textarea.message').each(function (i, node) {
-      var dom = $(node),
-          val = dom.val() + '\n';
-      //If the message containder doesn't want URLs then respect that.
-      if (dom.hasClass('nourl')) {
-      } else if (dom.hasClass('short')) {
-        dom.val(val + options.shortUrl || options.url);
-      } else if (dom.hasClass('urlWithSpace')) {
-        dom.val(val + (options.canonicalUrl || options.url) + "\n");
-      } else {
-        dom.val(val + options.canonicalUrl || options.url);
-      }
-    });
+    //Update gmail message to contain the link, but only do that if
+    //no session restore.
+    var dom = $('textarea.message.urlWithSpace'),
+        val = dom.val() + '\n',
+        sessionRestore = store.sessionRestore;
+
+    //If the message containder doesn't want URLs then respect that.
+    //However, skip this if session restore is involved.
+    if (sessionRestore) {
+      sessionRestore = JSON.parse(sessionRestore);
+    }
+    if (!sessionRestore || sessionRestore.domain !== 'google.com') {
+      dom.val(val + (options.canonicalUrl || options.url) + "\n");
+    }
+
+    //Update static displays
     $(".meta .url").text(options.url);
     $(".meta .surl").text(options.shortUrl || options.url);
-
 
     //Set up twitter text counter
     if (!twitterCounter) {
