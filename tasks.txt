@@ -7,6 +7,8 @@ Tasks:
 
 * Design for interface when system is running slowly (503 message) - Andy
     * Fail whale
+* New Logo
+    * Update frontpage and video
 
 * Move code to GitHub:
     - linkdrop
