@@ -258,9 +258,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.visible = false;
     },
 
-    createShareFrame: function () {
+    createShareFrame: function (options) {
+      if (!options) options = {};
       var browser = gBrowser.getBrowserForTab(this.tab),
-          iframeNode = null, url, options;
+          iframeNode = null, url;
       var notificationBox = gBrowser.getNotificationBox(browser);
 
       if (iframeNode === null) {
@@ -276,22 +277,19 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         //Make sure it can go all the way to zero.
         iframeNode.style.minHeight = 0;
 
-        options = {
-          title: this.getPageTitle(),
-          description : this.getPageDescription(),
-          medium : this.getPageMedium(),
-          url: gBrowser.currentURI.spec,
-          canonicalUrl: this.getCanonicalURL(),
-          shortUrl: this.getShortURL(),
-          previews: this.previews(),
-          system: ffshare.system
-        };
+        if (!options.title) options.title = this.getPageTitle();
+        if (!options.description) options.description = this.getPageDescription();
+        if (!options.medium) options.medium = this.getPageMedium();
+        if (!options.url) options.url = gBrowser.currentURI.spec;
+        if (!options.canonicalUrl) options.canonicalUrl = this.getCanonicalURL();
+        if (!options.shortUrl) options.shortUrl = this.getShortURL();
+        if (!options.previews) options.previews = this.previews();
+        if (!options.system) options.system = ffshare.system;
 
-        if (! options.previews.length) {
+        if (! options.previews.length && ! options.thumbnail) {
           // then we need to make our own thumbnail
           options.thumbnail = this.getThumbnailData();
         }
-
         url = ffshare.shareUrl +
                   '#options=' + encodeURIComponent(JSON.stringify(options));
 
@@ -302,8 +300,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       return (this.shareFrame = iframeNode);
     },
 
-    show: function () {
-      var iframeNode = this.shareFrame || this.createShareFrame();
+    show: function (options) {
+      var iframeNode = this.shareFrame || this.createShareFrame(options);
 
       if (ffshare.frontpageUrl === gBrowser.getBrowserForTab(this.tab).currentURI.spec) {
         var browser = gBrowser.getBrowserForTab(this.tab);
@@ -547,19 +545,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     };
   }
 
-  var ffapi = {
-    apibase: null, // null == 'navigator.mozilla.labs'
-    name: 'share', // builds to 'navigator.mozilla.labs.share'
-    script: null, // null == use injected default script
-    getapi: function() {
-      let share = ffshare;
-      return function() {
-        share.toggle();
-      }
-    }
-  }
-  Injector.register(ffapi);
-
   ffshare = {
 
     system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
@@ -679,7 +664,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.toggle();
     },
     
-    toggle: function() {
+    toggle: function(options) {
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
       if (!tabFrame) {
@@ -690,7 +675,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (tabFrame.visible) {
         tabFrame.hide();
       } else {
-        tabFrame.show();
+        tabFrame.show(options);
       }      
     }
   };
@@ -710,6 +695,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ffshare.frontpageUrl = 'https://linkdrop.mozillamessaging.com/frontpage/';
     }
   }
+
+
+  var ffapi = {
+    apibase: null, // null == 'navigator.mozilla.labs'
+    name: 'share', // builds to 'navigator.mozilla.labs.share'
+    script: null, // null == use injected default script
+    getapi: function() {
+      let share = ffshare;
+      return function(options) {
+        share.toggle(options);
+      }
+    }
+  }
+  Injector.register(ffapi);
 
   window.addEventListener("load", fn.bind(ffshare, "onLoad"), false);
   window.addEventListener("unload", fn.bind(ffshare, "onUnload"), false);
