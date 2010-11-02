@@ -646,6 +646,14 @@ div.status.warning {
   color: #fff;
 }
 
+div.status.intermediate.error {
+  background-color: rgba(255,115,0,0.75);
+}
+
+div.status.intermediate.error .statusButton {
+  border-color: #AB4D00;
+}
+
 .statusButton {
   font-size: 11px;
   vertical-align: baseline;
