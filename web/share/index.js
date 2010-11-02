@@ -184,11 +184,14 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       },
       error: function (xhr, textStatus, err) {
         if (xhr.status === 403) {
-          // XXX check for X-Error header == CSRF. if so, we need to
-          // make a get request to get a new CSRF token, and then
-          // replay our api call.
-          // Using a bad error stand-in for now
-          showStatus('statusError', err);
+          //header error will be "CSRF" if missing CSRF token. This usually
+          //means we lost all our cookies, or the server lost our session.
+          //We could get more granular, to try to distinguish CSRF missing
+          //token from just missing other cookine info, but in practice,
+          //it is hard to see how that might happen -- either all the cookies
+          //are gone or they are all there.
+          //var headerError = xhr.getResponseHeader('X-Error');
+          showStatus('statusCookiePukeError');
         } else if (xhr.status === 503) {
           showStatus('statusServerBusy');
         } else {
@@ -618,6 +621,9 @@ function (require,   $,    fn,     rdapi,   oauth,   jig,     url,
       })
       .delegate('.statusErrorCloseButton', 'click', function (evt) {
         close();
+      })
+      .delegate('.statusResetErrorButton', 'click', function (evt) {
+        location.reload();
       })
       .delegate('.nav .close', 'click', close);
 
