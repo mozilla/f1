@@ -337,7 +337,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.hide();
 
       if (ffshare.useBookmarking) {
-        var tags = ['shared', 'linkdrop'];
+        var tags = ['shared', 'f1'];
         if (data.domain === 'twitter.com') {
           tags.push("twitter");
         }

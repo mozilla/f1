@@ -4,8 +4,6 @@ syntax:regexp
 \.pyc
 \.pyo
 \.swp
-linkdrop.kpf
-lenv
 env
 tmp
 dist

@@ -24,10 +24,10 @@ function FFShareAutoComplete() {
 
 FFShareAutoComplete.prototype = {
   classDescription: "FFShare AutoComplete",
-  contractID: "@labs.mozilla.com/linkdrop/form-autocomplete;1",
-  classID: Components.ID("{53687491-6055-2842-8751-bc27ddf21fd6}"),
+  contractID: "@labs.mozilla.com/f1/form-autocomplete;1",
+  classID: Components.ID("{372610e5-5979-3b49-b69f-781ebac2e9d1}"),
   _xpcom_categories: [{category: "form-autocomplete-handler",
-                       entry: "linkdrop"}],
+                       entry: "f1"}],
   QueryInterface: XPCOMUtils.generateQI([Ci.nsIFormAutoComplete]),
 
   isShareType: function (name, field) {

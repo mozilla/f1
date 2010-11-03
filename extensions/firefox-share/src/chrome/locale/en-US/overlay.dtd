@@ -3,4 +3,4 @@
 <!ENTITY ffshareMenu.label "Share Page..">
 <!ENTITY ffshareMenu.accesskey "h">
 <!ENTITY ffshareToolbarButton.label "Share This Page">
-<!ENTITY ffshareToolbarButton.tooltip "Use Linkdrop to share the current page via Twitter or Facebook">
+<!ENTITY ffshareToolbarButton.tooltip "Use F1 to share the current page via Twitter or Facebook">

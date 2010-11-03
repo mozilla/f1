@@ -18,12 +18,10 @@ Tasks:
     * Update frontpage and video
 
 * Move code to GitHub:
-    - linkdrop
-    - linkdrop-prod, private
 
 * Blog post - Andy
   * mention the constraints with email/contacts API
-  * Talk about navigator.share/linkdrop.share?
+  * Talk about navigator.share/f1.share?
   * what are the problems to solve? navigator.share.
     * privacy.
 
@@ -32,7 +30,7 @@ Tasks:
 * Persistent sessions - Shane/Gozer
   - gozer is looking at membase, a persistent store that is memcached compatible
 
-* linkdrop.share() in the page?
+* f1.share() in the page?
     * Idea or prototype?
     - prototype is available: navigator.mozilla.labs.share() to toggle the share panel
 
@@ -60,11 +58,6 @@ Tasks:
   
 * extension: watch for 50* http errors in api calls (503 service unavailable), present user with nice message.
 
-
-* Time for a new name, avoid conflict with linkdrop.com
-  * Consistent Branding! across extension, OAUTH app names, front page, extension ID, etc...  - Bryan (coordinate)
-  * Twitter OAuth - "Linkdrop" is taken, probably by linkdrop.com, so we have to use "Mozilla Linkdrop"
-
 * make config files inherit a 'default' so we can have some values for the
   production server (they may already support this) - Shane
 
@@ -79,7 +72,7 @@ Tasks:
 
 * Hide the "Congratulations" bar after people click the toolbar button.
 
-* Save persistent cookie for linkdrop session? Video says only need to save the name once, need
+* Save persistent cookie for f1 session? Video says only need to save the name once, need
 to reconcile expectations.
 
 ----------------------
@@ -95,7 +88,7 @@ to reconcile expectations.
       /api/account/authorize. For google, add 'pape_max_auth_age=0'.
 
 * Bugs
-  * Share per tab can possibly close the wrong (or not close the shared) linkdrop if you've switched tabs
+  * Share per tab can possibly close the wrong (or not close the shared) f1 if you've switched tabs
 
 * Reconsider the long and short URL being shown next to the text input.
 

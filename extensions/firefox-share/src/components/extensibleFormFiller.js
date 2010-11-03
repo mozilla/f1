@@ -5,7 +5,7 @@
  * autocomplete request.  If none do, it falls back to the original handler.
  *
  * This override is a bit hacky, should be a part of the internal satchel
- * implementation.  Since at least two labs projects (contacts and linkdrop)
+ * implementation.  Since at least two labs projects (contacts and f1)
  * want to provide autocomplete this had to be done to allow both to work
  * if both were installed.
  *

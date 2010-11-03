@@ -3,11 +3,11 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>ffshare@mozilla.org</em:id>
     <em:type>2</em:type>
-    <em:name>Linkdrop by Mozilla Labs</em:name>
+    <em:name>F1 by Mozilla Labs</em:name>
     <em:version>0.6</em:version>
     <em:creator>Mozilla</em:creator>
     <em:contributor></em:contributor>
-    <em:homepageURL>http://linkdrop.mozillamessaging.com/</em:homepageURL>
+    <em:homepageURL>http://f1.mozillamessaging.com/</em:homepageURL>
     <em:iconURL>chrome://ffshare/skin/extension-icon.png</em:iconURL>
     <em:aboutURL>chrome://ffshare/content/about.xul</em:aboutURL>
     <em:targetApplication>
