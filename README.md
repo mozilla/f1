@@ -16,7 +16,7 @@ Some directory explanations:
 
 ## Installation and Setup
 
-### Get the ``f1`` repository:
+### Get the f1 repository:
 
     git clone https://github.com/mozilla/f1.git
     cd f1

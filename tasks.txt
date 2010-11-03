@@ -3,9 +3,6 @@ Tasks:
 * David: get a privacy policy:
     Working draft: http://etherpad.mozilla.com:9000/f1-data-privacy
 
-* Name change? - David/Legal.
-    * F1: waiting on confirmation from legal.
-
 * Design for interface when system is running slowly - Andy/James
     * Fail whale
     * Small messaging for the extension's frame: serve from server but also
@@ -14,10 +11,16 @@ Tasks:
       served from the server, with a div Gozer can change contents of with
       custom error message.
 
+* Add license - James
+
+* Add "selected" style to share button when tabbed over to it. - James/Andy
+
 * New Logo
     * Update frontpage and video
 
-* Move code to GitHub:
+* Move code to GitHub
+  * Make sure f1.mozillamessaging.com pulls from production clone.
+  * Make sure to finish all linkdrop->f1 renames?
 
 * Blog post - Andy
   * mention the constraints with email/contacts API
