@@ -10,19 +10,15 @@ Tasks:
       served from the server, with a div Gozer can change contents of with
       custom error message.
 
-* Add "selected" style to share button when tabbed over to it. - James/Andy
-
-
 * What if bitly breaks? reaches API limits?
 
-* New Logo
-    * Update frontpage and video
+* New video -Andy
 
 * Move code to GitHub
   * Make sure f1.mozillamessaging.com pulls from production clone.
   * Make sure to finish all linkdrop->f1 renames?
 
-* Blog post - Andy
+* Blog post
   * mention the constraints with email/contacts API
   * Talk about navigator.share/f1.share?
   * what are the problems to solve? navigator.share.
@@ -67,8 +63,6 @@ Tasks:
 * define branching/tagging used for production server, limit production server
   to updating on those tags, and are there any controls we can do to ensure
   the server does not update via unauthorized commits? - Gozer/Mark/Shane
-
-* Maybe consider something different for the settings tab icon and button. -Andy
 
 * Store info on if first share, and if so after first share, give them a link to the service to see if it shared. - Bryan
   * Done, but not pushed until after this round of user testing.
