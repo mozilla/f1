@@ -27,7 +27,7 @@ from uuid import uuid1
 from sqlalchemy import Column, Integer, String, Boolean, UniqueConstraint, Text
 
 from linkdrop.model.meta import Base, Session, make_table_args
-from linkdrop.model.types import RDUnicode
+from linkdrop.model.types import RDUnicode, UTCDateTime
 from linkdrop.model.expando_mixin import JsonExpandoMixin
 from linkdrop.model.serializer_mixin import SerializerMixin
 
@@ -42,8 +42,11 @@ class Account(JsonExpandoMixin, SerializerMixin, Base):
     domain = Column(RDUnicode(64), nullable=False)
     username = Column(RDUnicode(64), nullable=False)
     userid = Column(RDUnicode(64), index=True, nullable=False)
+    created = Column(UTCDateTime)
+    updated = Column(UTCDateTime)
 
     def __init__(self):
         # can be overridden later, but always have a default for new accounts
         self.key = str(uuid1())
+        self.updated = self.created = UTCDateTime.now()
 
