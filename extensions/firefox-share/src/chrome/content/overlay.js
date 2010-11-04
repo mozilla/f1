@@ -707,7 +707,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     if (ffshare.system === 'dev') {
       ffshare.shareUrl = 'http://linkdrop.caraveo.com:5000/share/';
     } else {
-      ffshare.shareUrl = 'https://linkdrop.mozillamessaging.com/share/';
+      ffshare.shareUrl = 'https://f1.mozillamessaging.com/share/';
     }
   }
 
@@ -715,10 +715,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     if (ffshare.system === 'dev') {
       ffshare.frontpageUrl = 'http://linkdrop.caraveo.com:5000/frontpage/';
     } else {
-      ffshare.frontpageUrl = 'https://linkdrop.mozillamessaging.com/frontpage/';
+      ffshare.frontpageUrl = 'https://f1.mozillamessaging.com/frontpage/';
     }
   }
-
 
   var ffapi = {
     apibase: null, // null == 'navigator.mozilla.labs'

@@ -167,7 +167,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   });
 
   function escapeHtml(text) {
-    return text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : text;
   }
 
   function close() {
