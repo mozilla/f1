@@ -28,6 +28,43 @@
 require.def("stats",
         ["require", "jquery", "rdapi", "blade/jig"],
 function (require,   $,        rdapi,   jig) {
+    rdapi('stats/accounts', {
+        data: {
+            opts: 'domain'
+        },
+        success: function (json) {
+            if (json.error) {
+                $('#notifications').append(jig('#error', json.error));
+            } else {
+                $('#notifications').append(jig('#error', json.result));
+
+                var w = 200,
+                h = 200,
+                r = w / 2
+                
+                var sum = pv.sum(json.map(function (d) d[0]));
+                
+                var vis = new pv.Panel()
+                    .width(w)
+                    .height(h)
+                    .canvas("accounts_per_domain");
+                
+                vis.add(pv.Wedge)
+                    .data(json)
+                    .left(w/2)
+                    .bottom(w/2)
+                    .outerRadius(r)
+                    .angle(function(d) d[0] / sum * 2 * Math.PI)
+                    .strokeStyle("white")
+                    .lineWidth(4)
+                  .anchor("center").add(pv.Label)
+                    .text(function(d) d[1]+": "+(d[0] / sum * 100).toFixed(2)+"%");
+                vis.render();
+
+           }
+        }
+    });
+
     rdapi('stats/history', {
         data: {
             opts: 'domain'
