@@ -181,15 +181,21 @@ ul.nav li a.icon {
 }
 
 ul.nav li a.icon.twitter {
-  background-image: url("i/twitterIcon.png");
+  background-image: url("i/sprite.png");
+  background-position: left -32px;
+  background-repeat: no-repeat;
 }
 
 ul.nav li a.icon.facebook {
-  background-image: url("i/facebookIcon.png");
+  background-image: url("i/sprite.png");
+  background-position: left -104px;
+  background-repeat: no-repeat;
 }
 
 ul.nav li a.icon.gmail {
-  background-image: url("i/gmailIcon.png");
+  background-image: url("i/sprite.png");
+  background-position: left -176px;
+  background-repeat: no-repeat;
 }
 
 ul.nav li a.icon.debug {
@@ -197,7 +203,9 @@ ul.nav li a.icon.debug {
 }
 
 ul.nav li a.icon.settings {
-  background-image: url("i/settingsIcon.png");
+  background-image: url("i/sprite.png");
+  background-position: left 4px;
+  background-repeat: no-repeat;
 }
 
 ul.nav .rightActions {
@@ -219,11 +227,15 @@ ul.nav .rightActions span.close {
   display: inline-block;
   margin-left: 3px;
   cursor: pointer;
-  background-image: url("i/close_dim.png");
+  background-image: url("i/sprite.png");
+  background-position: left -288px;
+  background-repeat: no-repeat;
 }
 
 ul.nav .rightActions span.close:hover {
-  background-image: url("i/close_strong.png");
+  background-image: url("i/sprite.png");
+  background-position: left -252px;
+  background-repeat: no-repeat;
 }
 
 /* === TAB TOOLTIP === */
@@ -319,15 +331,21 @@ ul.nav li.ui-tabs-selected {
 }
 
 ul.nav li.ui-tabs-selected a.twitter {
-  background-image: url("i/twitterIconColor.png");
+  background-image: url("i/sprite.png");
+  background-position: left -68px;
+  background-repeat: no-repeat;
 }
 
 ul.nav li.ui-tabs-selected a.facebook {
-  background-image: url("i/facebookIconColor.png");
+  background-image: url("i/sprite.png");
+  background-position: left -140px;
+  background-repeat: no-repeat;
 }
 
 ul.nav li.ui-tabs-selected a.gmail {
-  background-image: url("i/gmailIconColor.png");
+  background-image: url("i/sprite.png");
+  background-position: left -212px;
+  background-repeat: no-repeat;
 }
 
 ul.nav li.ui-tabs-selected a.debug {
@@ -573,6 +591,30 @@ ul.ui-autocomplete li.ui-menu-item a.ui-state-hover {
 
 #settings ul li h1 {
   margin: 0 0 10px 0;
+}
+
+#settings ul li h1 span.accountIcon {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+}
+
+#settings ul li h1 .twitterIcon {
+  background-image: url("i/sprite.png");
+  background-position: left -37px;
+  background-repeat: no-repeat;
+}
+
+#settings ul li h1 .facebookIcon {
+  background-image: url("i/sprite.png");
+  background-position: left -109px;
+  background-repeat: no-repeat;
+}
+
+#settings ul li h1 .gmailIcon {
+  background-image: url("i/sprite.png");
+  background-position: left -181px;
+  background-repeat: no-repeat;
 }
 
 h1 {
