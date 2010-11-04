@@ -32,6 +32,7 @@ from pylons.decorators.util import get_pylons
 from linkdrop.lib.base import BaseController, render
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
 from linkdrop.lib.oauth import get_provider
+from linkdrop.model.types import UTCDateTime
 
 from linkdrop.model.meta import Session
 from linkdrop.model.account import Account
@@ -123,6 +124,7 @@ OAuth authorization api.
             acct.oauth_token = user.get('oauth_token', None)
             if 'oauth_token_secret' in user:
                 acct.oauth_token_secret = user['oauth_token_secret']
+            acct.updated = UTCDateTime.now()
             Session.commit()
             # XXX argh, this is also done in get_or_create above, but we have to
             # ensure we have the updated data

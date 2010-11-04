@@ -35,51 +35,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   Components.utils.import("resource://ffshare/modules/injector.js");
 
   var slice = Array.prototype.slice,
-      ostring = Object.prototype.toString, fn;
+      ostring = Object.prototype.toString,
+      empty = {}, fn;
 
-  var queryToObject = function (/*String*/ str) {
-    // summary:
-    //        Create an object representing a de-serialized query section of a
-    //        URL. Query keys with multiple values are returned in an array.
-    //
-    // example:
-    //        This string:
-    //
-    //    |        "foo=bar&foo=baz&thinger=%20spaces%20=blah&zonk=blarg&"
-    //
-    //        results in this object structure:
-    //
-    //    |        {
-    //    |            foo: [ "bar", "baz" ],
-    //    |            thinger: " spaces =blah",
-    //    |            zonk: "blarg"
-    //    |        }
-    //
-    //        Note that spaces and other urlencoded entities are correctly
-    //        handled.
-    var ret = {},
-        qp = str.split('&'),
-        dec = decodeURIComponent,
-        parts, name, val;
-
-    qp.forEach(function (item) {
-      if (item.length) {
-        parts = item.split('=');
-        name = dec(parts.shift());
-        val = dec(parts.join('='));
-        if (typeof ret[name] === 'string') {
-          ret[name] = [ret[name]];
-        }
-
-        if (ostring.call(ret[name]) === '[object Array]') {
-          ret[name].push(val);
-        } else {
-          ret[name] = val;
-        }
+  function mixin(target, source, override) {
+    //TODO: consider ES5 getters and setters in here.
+    for (var prop in source) {
+      if (!(prop in empty) && (!(prop in target) || override)) {
+        target[prop] = source[prop];
       }
-    });
-    return ret;
-  };
+    }
+  }
 
   function log(msg) {
     Application.console.log('.' + msg); // avoid clearing on empty log
@@ -151,39 +117,58 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var flags = Components.interfaces.nsIWebProgressListener;
       if (aStateFlags & flags.STATE_IS_WINDOW &&
                  aStateFlags & flags.STATE_STOP) {
+        var status;
 
-        this.tabFrame.shareFrame.contentWindow.wrappedJSObject.addEventListener("message", fn.bind(this, function (evt) {
-          //Make sure we only act on messages from the page we expect.
-          if (ffshare.shareUrl.indexOf(evt.origin) === 0) {
-            //Mesages have the following properties:
-            //name: the string name of the messsage
-            //data: the JSON structure of data for the message.
-            var message = evt.data, skip = false, topic, data;
-            try {
-              //Only some messages are valid JSON, only care about the ones
-              //that are.
-              message = JSON.parse(message);
-            } catch (e) {
-              skip = true;
-            }
+        try {
+          status = aRequest.nsIHttpChannel.responseStatus;
+        } catch (e) {
+          //Could be just an invalid URL or not an http thing. Need to be sure to not endlessly
+          //load error page if it is already loaded.
+          if (this.tabFrame.shareFrame.contentWindow.location.href !== ffshare.errorPage) {
+            status = 1000;
+          } else {
+            status = 200;
+          }
+        }
 
-            if (!skip) {
-              topic = message.topic;
-              data = message.data;
+        if (status < 200 || status > 399) {
+          this.tabFrame.shareFrame.contentWindow.location = ffshare.errorPage;
+        } else {
+          this.tabFrame.shareFrame.contentWindow.wrappedJSObject.addEventListener("message", fn.bind(this, function (evt) {
+            //Make sure we only act on messages from the page we expect.
+            if (ffshare.shareUrl.indexOf(evt.origin) === 0) {
+              //Mesages have the following properties:
+              //name: the string name of the messsage
+              //data: the JSON structure of data for the message.
+              var message = evt.data, skip = false, topic, data;
+              try {
+                //Only some messages are valid JSON, only care about the ones
+                //that are.
+                message = JSON.parse(message);
+              } catch (e) {
+                skip = true;
+              }
   
-              if (topic && this.tabFrame[topic]) {
-                this.tabFrame[topic](data);
+              if (!skip) {
+                topic = message.topic;
+                data = message.data;
+    
+                if (topic && this.tabFrame[topic]) {
+                  this.tabFrame[topic](data);
+                }
               }
             }
-          }
-        }), false);
+          }), false);
+        }
       }
     },
 
     onLocationChange: function (aWebProgress, aRequest, aLocation) {},
     onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
     onSecurityChange: function (aWebProgress, aRequest, aState) {},
-    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
+    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {
+        //log("onStatus Change: " + aRequest.nsIHttpChannel.responseStatus + ": " + aRequest.loadFlags + ", " + aRequest + ", " + aMessage);
+    }
   };
 
   var firstRunProgressListener = {
@@ -282,7 +267,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     createShareFrame: function (options) {
-      if (!options) options = {};
+      options = options || {};
+
       var browser = gBrowser.getBrowserForTab(this.tab),
           iframeNode = null, url;
       var notificationBox = gBrowser.getNotificationBox(browser);
@@ -300,16 +286,18 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         //Make sure it can go all the way to zero.
         iframeNode.style.minHeight = 0;
 
-        if (!options.title) options.title = this.getPageTitle();
-        if (!options.description) options.description = this.getPageDescription();
-        if (!options.medium) options.medium = this.getPageMedium();
-        if (!options.url) options.url = gBrowser.currentURI.spec;
-        if (!options.canonicalUrl) options.canonicalUrl = this.getCanonicalURL();
-        if (!options.shortUrl) options.shortUrl = this.getShortURL();
-        if (!options.previews) options.previews = this.previews();
-        if (!options.system) options.system = ffshare.system;
+        mixin(options, {
+          title: this.getPageTitle(),
+          description: this.getPageDescription(),
+          medium: this.getPageMedium(),
+          url: gBrowser.currentURI.spec,
+          canonicalUrl: this.getCanonicalURL(),
+          shortUrl: this.getShortURL(),
+          previews: this.previews(),
+          system: ffshare.system
+        });
 
-        if (! options.previews.length && ! options.thumbnail) {
+        if (!options.previews.length && !options.thumbnail) {
           // then we need to make our own thumbnail
           options.thumbnail = this.getThumbnailData();
         }
@@ -576,6 +564,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
     firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", true),
 
+    errorPage: 'chrome://ffshare/content/down.html',
+
     onLoad: function () {
       // initialization code
       if (this.firstRun) {
@@ -687,7 +677,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.toggle();
     },
     
-    toggle: function(options) {
+    toggle: function (options) {
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
       if (!tabFrame) {
@@ -723,13 +713,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     apibase: null, // null == 'navigator.mozilla.labs'
     name: 'share', // builds to 'navigator.mozilla.labs.share'
     script: null, // null == use injected default script
-    getapi: function() {
-      let share = ffshare;
-      return function(options) {
+    getapi: function () {
+      var share = ffshare;
+      return function (options) {
         share.toggle(options);
-      }
+      };
     }
-  }
+  };
+
   Injector.register(ffapi);
 
   window.addEventListener("load", fn.bind(ffshare, "onLoad"), false);
