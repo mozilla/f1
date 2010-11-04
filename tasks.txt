@@ -3,11 +3,6 @@ Tasks:
 * David: get a privacy policy:
     Working draft: http://etherpad.mozilla.com:9000/f1-data-privacy
 
-* Design for interface when system is running slowly - James
-    * A little bit larger messaging when a full page outage, that will be
-      served from the server, with a div Gozer can change contents of with
-      custom error message.
-
 * Add "selected" style to share button when tabbed over to it. - James/Andy
 
 * Align done goofed up error messages. - James
