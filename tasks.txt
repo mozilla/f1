@@ -5,6 +5,9 @@ Tasks:
 
 * What if bitly breaks? reaches API limits?
 
+* APIs are not forcing https - Gozer
+* https://f1.mozillamessaging.com/scripts/requireplugins-jquery-1.4.2.js is not being served gzipped - Gozer
+
 * New video -Andy
 
 * Move code to GitHub

@@ -46,6 +46,8 @@ def make_map(config):
     map.connect('/send', controller='send', action="send")
     map.connect('/account/get', controller='account', action="get")
     map.connect('/contacts/{domain}', controller='contacts', action="get")
+    map.connect('/stats/accounts', controller='stats', action="accounts")
+    map.connect('/stats/history', controller='stats', action="history")
 
     map.connect('/{controller}/{action}')
     map.connect('/{controller}/{action}/{id}')
