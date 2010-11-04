@@ -142,6 +142,12 @@ ul.nav li {
   position: relative;
 }
 
+ul.nav li.ui-state-focus {
+  -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
+  z-index: 1000;
+  position: relative;
+}
+
 ul.nav li:nth-child(n+2) {
   border-left: none;
   -moz-border-radius: 0;
@@ -419,6 +425,10 @@ button.share {
   margin-left: 0;
 }
 
+button.share:focus {
+  -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
+} 
+
 /* Disable user resizing of text area since it covers the twitter count. */
 textarea {
     resize: none;
@@ -437,6 +447,11 @@ textarea, input[type="text"] {
   -moz-border-radius: 2px;
   -moz-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
 }
+
+textarea:focus, input[type="text"]:focus {
+  -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25) inset,  0 1px 0 #fff;
+}  
+  
 
 textarea.message {
   -moz-border-radius: 2px 0 0 2px;
@@ -696,7 +711,6 @@ div.status.intermediate.error .statusButton {
 
 #statusErrorMessage {
     display: inline-block;
-    margin-top: 3px;
 }
 
 #statusServerError {
