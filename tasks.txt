@@ -22,13 +22,6 @@ Tasks:
 
 * Linux has no icon? - James
 
-* Persistent sessions - Shane/Gozer
-  - gozer is looking at membase, a persistent store that is memcached compatible
-
-* f1.share() in the page?
-    * Idea or prototype?
-    - prototype is available: navigator.mozilla.labs.share() to toggle the share panel
-
 * Post the add-on on AMO. - Shane, Bryan review.
 
 --- optional ----
@@ -111,4 +104,11 @@ DONE
 
 * Double-check https urls for oauth. - Shane
   - fb redirects to http, but its POST url is https, LAME
+
+* Persistent sessions - Shane/Gozer
+  - gozer is looking at membase, a persistent store that is memcached compatible
+
+* f1.share() in the page?
+    * Idea or prototype?
+    - prototype is available: navigator.mozilla.labs.share() to toggle the share panel
 
