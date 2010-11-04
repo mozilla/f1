@@ -35,7 +35,7 @@ require.def('blade/object', ['blade/fn'], function (fn) {
          * @returns {Function} a constructor function.
          */
         object = function (base, mixins, objPropertyFunc) {
-            base |= {};
+            base = base || {};
             var constructor,
 
                 //Create the parent and its parentFunc calling wrapper.
@@ -122,7 +122,6 @@ require.def('blade/object', ['blade/fn'], function (fn) {
                 target[prop] = source[prop];
             }
         }
-        return require;
     };
 
     return object;
