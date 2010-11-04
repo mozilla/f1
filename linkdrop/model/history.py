@@ -52,6 +52,8 @@ class History(JsonExpandoMixin, SerializerMixin, Base):
     id = Column(Integer, primary_key=True)
     account_id = Column(None, ForeignKey(Account.id), index=True)
     published = Column(UTCDateTime, nullable=False)
+    link = Column(RDUnicode(128))
+    domain = Column(RDUnicode(64))
     
     account = relationship('Account')
     
