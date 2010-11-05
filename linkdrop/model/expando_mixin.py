@@ -27,6 +27,7 @@
 # they were real properties.
 
 import json
+import copy
 from sqlalchemy.orm.interfaces import MapperExtension, EXT_CONTINUE
 from sqlalchemy import Column, Text
 from sqlalchemy import types
@@ -40,9 +41,15 @@ class Json(types.TypeDecorator, types.MutableType):
     def process_result_value(self, value, dialect):
         return value and json.loads(value) or {}
 
+    def copy_value(self, value):
+        return copy.copy(value)
+
+    def is_mutable(self):
+        return True
+
 # The actual mixin class
 class JsonExpandoMixin(object):
-    json_attributes = Column(Json)
+    json_attributes = Column(Json())
 
     def __getattr__(self, name):
         if name.startswith('_'):
@@ -60,8 +67,8 @@ class JsonExpandoMixin(object):
         # assume it is an 'expando' object
         # Set json attributes to itself simply so the object is marked as
         # 'dirty' for subsequent updates.
-        self.json_attributes = self.json_attributes or {}
-        self.json_attributes[name] = value
+        self.__dict__['json_attributes'] = self.json_attributes or {}
+        self.__dict__['json_attributes'][name] = value
 
     def __delattr__(self, name):
         try:
