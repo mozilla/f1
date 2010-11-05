@@ -6,6 +6,8 @@ content   ffshare                 chrome/content/
 content   ffshare-web             chrome/skin/web/ contentaccessible=yes
 skin      ffshare   classic/1.0   chrome/skin/ appversion<=3.7
 skin      ffshare   classic/1.0   chrome/skin/minefield/ appversion>=3.7
+skin      ffshare   classic/1.0   chrome/skin/minefield/ os=WINNT appversion<=3.7
+skin      ffshare   classic/1.0   chrome/skin/minefield-win/ os=WINNT appversion>=3.7
 locale    ffshare   en-US         chrome/locale/en-US/
 
 overlay   chrome://browser/content/browser.xul   chrome://ffshare/content/ff-overlay.xul
