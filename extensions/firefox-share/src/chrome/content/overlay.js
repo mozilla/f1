@@ -190,7 +190,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         if (ffshare.firstRun) {
           //Be sure to disable first run after one try. Even if it does
           //not work, do not want to annoy the user with continual popping up
-          //of the frontpage.
+          //of the front page.
           ffshare.firstRun = false;
           ffshare.onFirstRun();
         }
@@ -703,9 +703,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   if (!ffshare.frontpageUrl) {
     if (ffshare.system === 'dev') {
-      ffshare.frontpageUrl = 'http://linkdrop.caraveo.com:5000/frontpage/';
+      ffshare.frontpageUrl = 'http://linkdrop.caraveo.com:5000/';
     } else {
-      ffshare.frontpageUrl = 'https://f1.mozillamessaging.com/frontpage/';
+      ffshare.frontpageUrl = 'https://f1.mozillamessaging.com/';
     }
   }
 

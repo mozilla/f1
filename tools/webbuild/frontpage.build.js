@@ -1,10 +1,10 @@
 {
     baseUrl: "../../web-static/scripts/",
     paths: {
-        "index": "../frontpage/index",
+        "index": "../index",
         "jquery": "requireplugins-jquery-1.4.2"
     },
     name: "index",
     exclude: ['jquery'],
-    out: '../../web-static/frontpage/index.js'
+    out: '../../web-static/index.js'
 }

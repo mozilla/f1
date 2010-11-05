@@ -3,8 +3,6 @@ Tasks:
 * David: get a privacy policy:
     Working draft: http://etherpad.mozilla.com:9000/f1-data-privacy
 
-* Move /frontpage to /.
-
 * What if bitly breaks? reaches API limits?
 
 * APIs are not forcing https? - Gozer
