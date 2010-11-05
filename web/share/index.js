@@ -654,6 +654,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (!options.title) {
       options.title = options.url;
     }
+    if (!options.system) {
+        options.system = 'prod';
+    }
   }
 
   getAccounts();

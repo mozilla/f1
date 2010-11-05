@@ -21,6 +21,10 @@ Tasks:
 
 * Linux has no icon? - James
 
+* Weird tab behavior? add, then remove a service, and page redirects, losing options settings?
+
+* ffshare is undefined
+
 * A proper robots.txt? What should we exclude? Do something just to avoid
   hammering by search engines?
 
