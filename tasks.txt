@@ -19,9 +19,7 @@ Tasks:
   * what are the problems to solve? navigator.share.
     * privacy.
 
-* Weird tab behavior? add, then remove a service, and page redirects, losing options settings? - James
-
-* ffshare is undefined?
+* ffshare is undefined, from ffapi section?
 
 * A proper robots.txt? What should we exclude? Do something just to avoid
   hammering by search engines?

@@ -143,7 +143,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     options = {},
     tabDom, bodyDom, clickBlockDom, twitterCounter,
     updateTab = true,
-    accounts, oldAccounts, gmailDom, autoCompleteWidget, store = localStorage;
+    accounts, gmailDom, autoCompleteWidget, store = localStorage;
 
   //Capability detect for localStorage. At least on add-on does weird things
   //with it, so even a concern in Gecko-only code.
@@ -282,26 +282,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     });
   }
 
-  function showTabToolTip(domain) {
-    var tabClass = actions[domain].tabName,
-        tabNode = $('.' + tabClass)[0],
-        rect = tabNode.getBoundingClientRect(),
-        top = rect.top + 3,
-        left = rect.left + rect.width + 7,
-        tipDom = $('#tabToolTip');
-
-    setTimeout(function () {
-      tipDom.css({
-        top: top,
-        left: left
-      }).fadeIn(200, function () {
-        setTimeout(function () {
-          tipDom.fadeOut(200);
-        }, 5000);
-      });
-    }, 1000);
-  }
-
   /**
    * Makes sure there is an autocomplete set up with the latest
    * store data.
@@ -424,8 +404,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     $('#settings span[data-domain="' + domain + '"]').empty().append(jig('#addAccountTemplate', domain));
   }
 
-  function updateAccounts(accounts, callback) {
+  function updateAccounts(accounts) {
     var hasAccount = false,
+        hasLastSelectionMatch = false,
         userAccounts = {}, selection, param,
         sessionRestore = store.sessionRestore;
 
@@ -434,6 +415,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       accounts.forEach(function (account) {
         var name = account.accounts[0].domain;
         if (name) {
+          //Make sure to see if there is a match for last selection
+          if (!hasLastSelectionMatch) {
+            hasLastSelectionMatch = actions[name].selectionName === store.lastSelection;
+          }
           name = name.split('.');
           name = name[name.length - 2];
           if (name === 'google') {
@@ -443,6 +428,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           hasAccount = true;
         }
       });
+    }
+
+    //If no matching accounts match the last selection clear it.
+    if (!hasLastSelectionMatch) {
+      delete store.lastSelection;
     }
 
     if (userAccounts.twitter) {
@@ -539,10 +529,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //Apply the new first and last
       .first().addClass('first').end()
       .last().addClass('last');
-
-    if (callback) {
-      callback();
-    }
   }
 
   //Set up the URL in all the message containers
@@ -580,14 +566,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     placeholder();
   }
 
-  function getAccounts(callback) {
+  function getAccounts() {
     rdapi('account/get', {
       success: function (json) {
         if (json.error) {
           json = [];
         }
         accounts = json;
-        updateAccounts(json, callback);
+        updateAccounts(json);
 
         updateLinks();
       },
@@ -604,46 +590,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   function accountsUpdated() {
     //The accounts were updated in the settings page.
     //Update the account display to reflect the choices appropriately.
-    
-    //Remember the old accounts, so if there is a new one that shows up,
-    //show the tooltip for that account.
-    oldAccounts = accounts;
-    
+
     //Turn off tab updating
     updateTab = false;
 
     //Hide the tab buttons, the getAccounts will show the ones available.
     $('.leftTab').addClass('hidden');
 
-    getAccounts(function () {
-      //Compare the old accounts with new accounts to see if one was added.
-      var oldMap = {}, newMap = {}, domains = [], domain;
-      oldAccounts.forEach(function (account) {
-        oldMap[account.accounts[0].domain] = true;
-        
-      });
-      accounts.forEach(function (account) {
-        domain = account.accounts[0].domain;
-        if (!newMap[domain]) {
-          newMap[domain] = true;
-          domains.push(domain);
-        }
-      });
-
-      //Find the missing domain from the old map.
-      domain = null;
-      domains.some(function (d) {
-        if (!oldMap[d]) {
-          domain = d;
-          return true;
-        }
-        return false;
-      });
-
-      if (domain) {
-        showTabToolTip(domain);
-      }
-    });
+    getAccounts();
   }
 
   if (hash) {
@@ -655,7 +609,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       options.title = options.url;
     }
     if (!options.system) {
-        options.system = 'prod';
+      options.system = 'prod';
     }
   }
 
@@ -810,6 +764,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         delete store.lastSelection;
       }
 
+      evt.preventDefault();
     });
 
     $("form.messageForm")
