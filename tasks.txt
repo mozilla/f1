@@ -19,11 +19,9 @@ Tasks:
   * what are the problems to solve? navigator.share.
     * privacy.
 
-* Linux has no icon? - James
+* Weird tab behavior? add, then remove a service, and page redirects, losing options settings? - James
 
-* Weird tab behavior? add, then remove a service, and page redirects, losing options settings?
-
-* ffshare is undefined
+* ffshare is undefined?
 
 * A proper robots.txt? What should we exclude? Do something just to avoid
   hammering by search engines?
@@ -33,8 +31,6 @@ Tasks:
 --- optional ----
 
 * Set up page with analytics - Shane
-
-* Make sure button shows up in same place in browsers across platforms. - James
 
 * Check server logs for errors: facebook error - Shane
     * When facebook failed it got weird.
