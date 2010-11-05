@@ -13,9 +13,26 @@ from linkdrop.model.history import History
 log = logging.getLogger(__name__)
 
 class StatsController(BaseController):
+    """F1 Statistics API"""
+    __api_controller__ = True # for docs
 
     @api_response
     @json_exception_response
+    @api_entry(
+        doc="""
+accounts
+--------
+
+Get statistics about accounts on F1.
+""",
+        queryargs=[
+            # name, type, required, default, allowed, doc
+            api_arg('opts', 'string', False, None, None, """
+comma seperated values that can be [domain,perday]
+"""),
+        ],
+        response={'type': 'list', 'doc': 'raw data list'}
+    )
     def accounts(self):
         limit = int(request.params.get('limit','5'))
         opts = request.params.get('opts','').split(',')
@@ -42,6 +59,21 @@ class StatsController(BaseController):
 
     @api_response
     @json_exception_response
+    @api_entry(
+        doc="""
+history
+-------
+
+Get statistics about shares on F1.
+""",
+        queryargs=[
+            # name, type, required, default, allowed, doc
+            api_arg('opts', 'string', False, None, None, """
+comma seperated values that can be [domain,perday]
+"""),
+        ],
+        response={'type': 'list', 'doc': 'raw data list'}
+    )
     def history(self):
         limit = int(request.params.get('limit','5'))
         opts = request.params.get('opts','').split(',')

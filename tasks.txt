@@ -7,8 +7,7 @@ Tasks:
 
 * What if bitly breaks? reaches API limits?
 
-* APIs are not forcing https - Gozer
-* https://f1.mozillamessaging.com/scripts/requireplugins-jquery-1.4.2.js is not being served gzipped - Gozer
+* APIs are not forcing https? - Gozer
 
 * New video -Andy
 
@@ -26,13 +25,6 @@ Tasks:
 
 * A proper robots.txt? What should we exclude? Do something just to avoid
   hammering by search engines?
-
-* Persistent sessions - Shane/Gozer
-  - gozer is looking at membase, a persistent store that is memcached compatible
-
-* f1.share() in the page?
-    * Idea or prototype?
-    - prototype is available: navigator.mozilla.labs.share() to toggle the share panel
 
 * Post the add-on on AMO. - Shane, Bryan review.
 
@@ -116,4 +108,11 @@ DONE
 
 * Double-check https urls for oauth. - Shane
   - fb redirects to http, but its POST url is https, LAME
+
+* Persistent sessions - Shane/Gozer
+  - gozer is looking at membase, a persistent store that is memcached compatible
+
+* f1.share() in the page?
+    * Idea or prototype?
+    - prototype is available: navigator.mozilla.labs.share() to toggle the share panel
 

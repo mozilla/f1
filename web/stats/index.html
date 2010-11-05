@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Share History</title>
+
+  <link rel="stylesheet" type="text/css" href="stats.css">
+
+  <script src="/scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+  <script src="/scripts/protovis/protovis-r3.2.js"></script>
+  <script>require(["index.js"]);</script>
+  
+  <style type='text/css'>
+.wrapper{
+   position: relative;
+   margin-bottom: 4px;
+ }
+  </style>
+</head>
+<body>
+<h2>Statistics</h2>
+
+    <div id="error" class="template">There was an error: {message}</div>
+    <div class="wrapper">
+        <div>Accounts per domain</div>
+        <div id="accounts_per_domain" />
+    </div>
+    <div class="wrapper">
+        <div>Shares per domain</div>
+        <div id="shares_per_domain" />
+    </div>
+    <div class="wrapper">
+        <div>Shares per day</div>
+        <div id="shares_per_day" />
+    </div>
+    <div class="wrapper">
+        <div id="shares_per_day2" />
+    </div>
+</body>
+</html>
