@@ -3,6 +3,8 @@ Tasks:
 * David: get a privacy policy:
     Working draft: http://etherpad.mozilla.com:9000/f1-data-privacy
 
+* Move /frontpage to /.
+
 * What if bitly breaks? reaches API limits?
 
 * APIs are not forcing https - Gozer
@@ -21,6 +23,9 @@ Tasks:
     * privacy.
 
 * Linux has no icon? - James
+
+* A proper robots.txt? What should we exclude? Do something just to avoid
+  hammering by search engines?
 
 * Persistent sessions - Shane/Gozer
   - gozer is looking at membase, a persistent store that is memcached compatible

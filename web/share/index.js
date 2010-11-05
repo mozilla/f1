@@ -28,7 +28,8 @@
 
 require.def("send",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
-         "placeholder", "TextCounter", "AutoComplete", "dispatch", "jquery.textOverflow"],
+         "placeholder", "TextCounter", "AutoComplete", "dispatch",
+         "jquery-ui-1.8.6.custom.min", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           placeholder,   TextCounter,   AutoComplete,   dispatch) {
 
