@@ -203,7 +203,7 @@ require.def(['require', 'jquery', 'hashDispatch'],
                 installedDom.fadeOut(500);
             })
             .delegate('#download', 'click', function (evt) {
-                $('#installFrame').attr('src', '../share-0.1-dev.xpi')
+                $('#installFrame').attr('src', 'share-0.1-dev.xpi')
                                   .ready(function () {
                                     $("#allow_helper")
                                         .fadeIn("slow")
