@@ -103,6 +103,9 @@ function (require,   $,        rdapi,   jig) {
     });
 
     rdapi('stats/history', {
+        data: {
+            opts: 'perday'
+        },
         success: function (json) {
             if (json.error) {
                 $('#notifications').append(jig('#error', json.error));
@@ -116,7 +119,7 @@ function (require,   $,        rdapi,   jig) {
                 var w = 400,
                     h = 350,
                     btm = 100,
-                    bsp = 2
+                    bsp = 2,
                     bw = (w/json.length-1) - bsp;
                 
                 /* The root panel. */

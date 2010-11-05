@@ -112,7 +112,16 @@ The 'send' namespace is used to send updates to our supported services.
             args['shorturl'] = shorturl
 
         # send the item.
-        result, error = provider.api(acct).sendmessage(message, args)
+        try:
+            result, error = provider.api(acct).sendmessage(message, args)
+        except ValueError, e:
+            # XXX we need to handle this better, but if for some reason the
+            # oauth values are bad we will get a ValueError raised
+            error = {'provider': domain,
+                     'message': "not logged in or no user account for that domain",
+                     'status': 401
+            }
+            return {'result': result, 'error': error}
 
         if error:
             assert not result
