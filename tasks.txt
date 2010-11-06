@@ -7,11 +7,7 @@ Tasks:
 
 * APIs are not forcing https? - Gozer
 
-* New video -Andy
-
-* Move code to GitHub
-  * Make sure f1.mozillamessaging.com pulls from production clone.
-  * Make sure to finish all linkdrop->f1 renames?
+* Move code to GitHub: Gozer's admin thingy.
 
 * Blog post
   * mention the constraints with email/contacts API
