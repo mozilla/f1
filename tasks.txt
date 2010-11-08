@@ -1,28 +1,40 @@
 Tasks:
 
-* David: get a privacy policy:
-    Working draft: http://etherpad.mozilla.com:9000/f1-data-privacy
+* What if bitly breaks? reaches API limits? Make sure error mentions bitly api thing. - shane/James
 
-* What if bitly breaks? reaches API limits?
+* Alerts for server having problems, tracebacks in error logs. - Gozer
 
 * APIs are not forcing https? - Gozer
 
 * Move code to GitHub: Gozer's admin thingy.
 
-* Blog post
+* Blog post - Bryan
   * mention the constraints with email/contacts API
   * Talk about navigator.share/f1.share?
   * what are the problems to solve? navigator.share.
     * privacy.
+  * move blog post to wordpress, make sure video embed works.
 
-* ffshare is undefined, from ffapi section?
+* video served on https:: embed vs. iframe? or https, if that does not work
+  use http for the front page, update extension. - James
 
-* A proper robots.txt? What should we exclude? Do something just to avoid
-  hammering by search engines?
+* ffshare is undefined, from ffapi section? James/Bryan
+
+* email staff, heads up on the launch - David.
 
 * Post the add-on on AMO. - Shane, Bryan review.
 
+* Test flow from installing from add-on. Do testing.
+
 --- optional ----
+
+* automated xpi build for AMO that increments version number.
+  * no longer need web server to build extension?
+
+* JS error tracebacks/server pings.
+
+* A proper robots.txt? What should we exclude? Do something just to avoid
+  hammering by search engines?
 
 * Set up page with analytics - Shane
 
