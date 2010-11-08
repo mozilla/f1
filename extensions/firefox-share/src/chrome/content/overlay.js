@@ -705,7 +705,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     if (ffshare.system === 'dev') {
       ffshare.frontpageUrl = 'http://linkdrop.caraveo.com:5000/';
     } else {
-      ffshare.frontpageUrl = 'https://f1.mozillamessaging.com/';
+      ffshare.frontpageUrl = 'http://f1.mozillamessaging.com/';
     }
   }
 

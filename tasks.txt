@@ -4,8 +4,6 @@ Tasks:
 
 * Alerts for server having problems, tracebacks in error logs. - Gozer
 
-* APIs are not forcing https? - Gozer
-
 * Move code to GitHub: Gozer's admin thingy.
 
 * Blog post - Bryan
@@ -15,14 +13,14 @@ Tasks:
     * privacy.
   * move blog post to wordpress, make sure video embed works.
 
-* video served on https:: embed vs. iframe? or https, if that does not work
-  use http for the front page, update extension. - James
-
-* ffshare is undefined, from ffapi section? James/Bryan
-
-* email staff, heads up on the launch - David.
+* ffshare is undefined, from ffapi section? James/Shane
+  * Steps to reproduce: Close browser, reopen, make sure to just have one tab open.
+  * Open a new window. Close the window.
+  * Now open a new tab, get ffshare undefined error in error console.
 
 * Post the add-on on AMO. - Shane, Bryan review.
+
+* Make sure privacy policy is live!
 
 * Test flow from installing from add-on. Do testing.
 
