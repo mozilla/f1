@@ -115,6 +115,8 @@ The 'send' namespace is used to send updates to our supported services.
         try:
             result, error = provider.api(acct).sendmessage(message, args)
         except ValueError, e:
+            import traceback
+            traceback.print_exc()
             # XXX we need to handle this better, but if for some reason the
             # oauth values are bad we will get a ValueError raised
             error = {'provider': domain,
