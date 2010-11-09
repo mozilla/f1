@@ -65,8 +65,6 @@ def extract_fb_data(data):
      # Setup the normalized poco contact object
      nick = None
      
-     # temporary logging to see what fb is sending us
-     import sys; print >> sys.stderr, data
      # Setup the nick and preferred username to the last portion of the
      # FB link URL if its not their ID
      # if a user sets up their personal link, they get a url that looks like:
@@ -154,7 +152,6 @@ class responder(OAuth2):
           profile = extract_fb_data(fb_profile)
           result_data = {'profile': profile,
                          'oauth_token': access_token}
-          import sys; print >> sys.stderr, result_data
           
           return result_data
 
