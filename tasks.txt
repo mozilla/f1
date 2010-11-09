@@ -1,8 +1,5 @@
 Tasks:
 
-* Support link on https://addons.mozilla.org/en-US/firefox/addon/252539/ should point to user voice instead
-  of the google group?
-
 * What if bitly breaks? reaches API limits? Make sure error mentions bitly api thing. - shane/James
   This page: http://code.google.com/p/bitly-api/wiki/ApiBestPractices#HTTP_Response_Status_Codes
   seems to indicate we will get a status 200, but the json response's status_code
@@ -13,8 +10,6 @@ Tasks:
 * Move code to GitHub: Gozer's admin thingy.
 
 * Blog post - Bryan
-
-* Post the add-on on AMO. - Shane, Bryan review.
 
 * Update home page to link to AMO for installation.
     https://addons.mozilla.org/services/install.php?addon_id=252539&src=external-f1home
