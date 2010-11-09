@@ -57,7 +57,7 @@ def encode_multipart_formdata(body):
     L.append('')
     body = CRLF.join(L)
     content_type = 'multipart/form-data; boundary=%s' % BOUNDARY
-    return content_type, body
+    return content_type, body.encode('utf-8')
 
 # borrowed from velruse
 def extract_fb_data(data):
