@@ -99,7 +99,7 @@ def extract_fb_data(data):
                h, m = parts
           else:
                h, m = parts[0], '00'
-          if len(h) < 3:
+          if len(h) >= 2:
                h = '%s0%s' % (h[0], h[1])
           data['utfOffset'] = ':'.join([h, m])
      bday = data.get('birthday')
