@@ -13,6 +13,8 @@ Tasks:
 
 * Post the add-on on AMO. - Shane, Bryan review.
 
+* Update home page to link to AMO for installation.
+
 * Test flow from installing from add-on. Do testing.
 
 * Twitter application ID is "Mozilla f1" instead of "Mozilla F1"?
