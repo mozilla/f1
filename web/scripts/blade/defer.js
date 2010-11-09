@@ -89,9 +89,7 @@ require.def('blade/defer', ['blade/fn', 'blade/dispatch'], function (fn, bladeDi
     }
 
     defer.onErrorDefault = function (err) {
-        if (typeof console !== 'undefined') {
-            console.error(err);
-        }
+        throw err;
     }
 
     return defer;

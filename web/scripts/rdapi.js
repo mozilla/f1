@@ -113,7 +113,7 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
             message_limit: 3,
             dataType: 'json',
             error: function (xhr, textStatus, errorThrown) {
-                console.log(errorThrown);
+                throw errorThrown;
             }
         });
 

@@ -720,11 +720,7 @@ function (require,   object) {
     /**
      * Track errors by logging to console if available.
      */
-    jig.error = typeof console !== 'undefined' && console.error ?
-            function (msg) {
-                console.error(msg);
-            }
-        : function () {};
+    jig.error = function (msg) { throw msg; };
 
     /**
      * Adds functions to the default set of functions that can be used inside
