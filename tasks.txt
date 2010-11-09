@@ -1,6 +1,9 @@
 Tasks:
 
 * What if bitly breaks? reaches API limits? Make sure error mentions bitly api thing. - shane/James
+  This page: http://code.google.com/p/bitly-api/wiki/ApiBestPractices#HTTP_Response_Status_Codes
+  seems to indicate we will get a status 200, but the json response's status_code
+  will be 403 for api limit reached?
 
 * Alerts for server having problems, tracebacks in error logs. - Gozer
 
@@ -24,6 +27,8 @@ Tasks:
 
 * Test flow from installing from add-on. Do testing.
 
+* Twitter application ID is "Mozilla f1" instead of "Mozilla F1"?
+
 --- optional ----
 
 * automated xpi build for AMO that increments version number.
@@ -33,6 +38,10 @@ Tasks:
 
 * A proper robots.txt? What should we exclude? Do something just to avoid
   hammering by search engines?
+
+* Update f1 home page image -- the top one shows twitter with the link
+  under the title, but we have since then removed showing the link in that area,
+  and Accounts is now on the far left.
 
 * Set up page with analytics - Shane
 

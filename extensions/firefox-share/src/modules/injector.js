@@ -44,7 +44,7 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-let EXPORTED_SYMBOLS = ["Injector"];
+let EXPORTED_SYMBOLS = ["InjectorInit"];
 
 const ALL_GROUP_CONSTANT = "___all___";
 let refreshed;
@@ -64,27 +64,13 @@ let Injector = {
   //      }
   //    }
   //  }
-  //  Injector.register(someapiprovider);
+  //  InjectorInit(window); // set injector on window
+  //  injector.register(someapiprovider);
   //
   //  With the above object, there would be a new api in content that can
   //  be used from any webpage like:
   //
   //  navigator.mozilla.labs.my_fn_name();
-  
-  providers: [],
-
-  observe: function(aSubject, aTopic, aData) {
-    if (!aSubject.location.href) return;
-    for (var i in this.providers) {
-      //dump("injecting api "+this.providers[i].name+"\n");
-      this._inject(aSubject, this.providers[i]);
-    }
-  },
-  
-  register: function(provider) {
-    //dump("registering api "+provider.name+"\n");
-    this.providers.push(provider);
-  },
 
   //**************************************************************************//
   // 
@@ -145,6 +131,47 @@ let Injector = {
 
 };
 
-var obs = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
-obs.addObserver(Injector, 'content-document-global-created', false);
+// hook up a seperate listener for each xul window
+function InjectorInit(window) {
+  if (window.injector) return;
+  window.injector = {
+    providers: [],
+    onLoad: function() {
+      var obs = Components.classes["@mozilla.org/observer-service;1"].
+                            getService(Components.interfaces.nsIObserverService);
+      obs.addObserver(this, 'content-document-global-created', false);
+    },
+  
+    onUnload: function() {
+      var obs = Components.classes["@mozilla.org/observer-service;1"].
+                            getService(Components.interfaces.nsIObserverService);
+      obs.removeObserver(this, 'content-document-global-created');
+    },
+
+    register: function(provider) {
+      //dump("registering api "+provider.name+"\n");
+      this.providers.push(provider);
+    },
+
+    observe: function(aSubject, aTopic, aData) {
+      if (!aSubject.location.href) return;
+      // is this window a child of OUR XUL window?
+      var mainWindow = aSubject.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                     .getInterface(Components.interfaces.nsIWebNavigation)
+                     .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+                     .rootTreeItem
+                     .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                     .getInterface(Components.interfaces.nsIDOMWindow); 
+      if (mainWindow != window) {
+        return;
+      }
+      for (var i in this.providers) {
+        //dump("injecting api "+this.providers[i].name+"\n");
+        Injector._inject(aSubject, this.providers[i]);
+      }
+    }
+  };
+  window.injector.onLoad();
+  window.addEventListener("unload", function() window.injector.onUnload(), false);
+}
 
