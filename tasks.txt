@@ -1,23 +1,26 @@
 Tasks:
 
-- timezone fix? - Shane
-- injector code review: David ask Myk?
+- injector code review, minefield issue?: Shane follow up with Myk?
+- update xpi link to have src. - James
+- respin the xpi - Shane, James check the commits logs for xpi changes.
 
-- Talk to ludo - Shane
-- reproduced first time facebook add error case.
-- Use "F1" instead of "f1" in the twitter/facebook/gmail app IDs?
+- Use "F1" instead of "f1" in the twitter/facebook/gmail app IDs? - Shane
 
-- Autcomplete on ff beta 6 does not work
-- Get currentURI error thing on about:home after being on a successful http page.
-- aTab is null in minefied
-- script error for injector, in minefield
-- Ludo: Sorry you need to authenticate: got a 401 or 503 on api/send call.
+- unicode account creation - Shane
 
-http://pastebin.mozilla.org/844443
-http://pastebin.mozilla.org/844446
-http://pastebin.mozilla.org/844494
+- Ludo: Sorry you need to authenticate: got a 401 or 535 on api/send call. - Shane to look at Ludo's record.
+  - Try with a completely new gmail account, to confirm ok.
+
+- "Spinner, background, Connecting to domain" message in auth.html to help blank window.
+
+- Wipe tables, clear session cache.
+
+- Email folks
 
 Thursday morning 10am.
+
+* aTab is null in minefied
+    notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
 
 * What if bitly breaks? reaches API limits? Make sure error mentions bitly api thing. - shane/James
   This page: http://code.google.com/p/bitly-api/wiki/ApiBestPractices#HTTP_Response_Status_Codes
@@ -38,7 +41,13 @@ Thursday morning 10am.
 
 * Twitter application ID is "Mozilla f1" instead of "Mozilla F1"?
 
+* Autcomplete on ff beta 6 does not work. Need to talk to satchel owner to
+  make automcomplete provider more robust and officially supported.
+
+
 --- optional ----
+
+* Look at html5 autocomplete, for minefield. Did they change the stachel UUID?
 
 * add F1 logo in the share frame so users know where the feature came from/what
   to tell others.

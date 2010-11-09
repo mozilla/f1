@@ -312,9 +312,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     show: function (options) {
-      var iframeNode = this.shareFrame || this.createShareFrame(options);
+      var tabUrl = gBrowser.getBrowserForTab(this.tab).currentURI.spec,
+          iframeNode;
 
-      if (ffshare.frontpageUrl === gBrowser.getBrowserForTab(this.tab).currentURI.spec) {
+      //Only open it for http/https urls
+      if (tabUrl.indexOf('http') !== 0) {
+        return;
+      }
+
+      iframeNode = this.shareFrame || this.createShareFrame(options);
+
+      if (ffshare.frontpageUrl === tabUrl) {
         var browser = gBrowser.getBrowserForTab(this.tab);
         // If we're looking at the front page we should clear the first run helper
         var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
@@ -476,7 +484,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // work but currently don't provide the right kind of meta data
     getURLHacks: function () {
       // Google Maps Hack :( obviously this regex isn't robust
-      if (/^maps\.google.*/.test(gBrowser.currentURI.host)) {
+      if (/^maps\.google.*/.test(gBrowser.currentURI.spec)) {
         return gBrowser.contentDocument.getElementById("link").getAttribute("href");
       }
 
