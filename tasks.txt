@@ -1,5 +1,14 @@
 Tasks:
 
+- timezone fix? - Shane
+- injector code review: David ask Myk?
+- Talk to protz - James
+- Talk to ludo - Shane
+- Talk blake - James
+- staff and labs: mail, talk to irc - Bryan.
+
+Thursday morning 10am.
+
 * What if bitly breaks? reaches API limits? Make sure error mentions bitly api thing. - shane/James
   This page: http://code.google.com/p/bitly-api/wiki/ApiBestPractices#HTTP_Response_Status_Codes
   seems to indicate we will get a status 200, but the json response's status_code
@@ -20,6 +29,9 @@ Tasks:
 * Twitter application ID is "Mozilla f1" instead of "Mozilla F1"?
 
 --- optional ----
+
+* add F1 logo in the share frame so users know where the feature came from/what
+  to tell others.
 
 * automated xpi build for AMO that increments version number.
   * no longer need web server to build extension?

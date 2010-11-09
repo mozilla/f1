@@ -67,8 +67,8 @@ class JsonExpandoMixin(object):
         # assume it is an 'expando' object
         # Set json attributes to itself simply so the object is marked as
         # 'dirty' for subsequent updates.
-        self.__dict__['json_attributes'] = self.json_attributes or {}
-        self.__dict__['json_attributes'][name] = value
+        self.json_attributes = self.json_attributes or {}
+        self.json_attributes[name] = value
 
     def __delattr__(self, name):
         try:
