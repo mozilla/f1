@@ -8,10 +8,10 @@ Tasks:
 - Use "F1" instead of "f1" in the twitter/facebook/gmail app IDs?
 
 - Autcomplete on ff beta 6 does not work
-- Get currentURI error thing on about:home after being on a successful http page.
 - aTab is null in minefied
+    notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
 - script error for injector, in minefield
-- Ludo: Sorry you need to authenticate: got a 401 or 503 on api/send call.
+- Ludo: Sorry you need to authenticate: got a 401 or 535 on api/send call.
 
 http://pastebin.mozilla.org/844443
 http://pastebin.mozilla.org/844446
