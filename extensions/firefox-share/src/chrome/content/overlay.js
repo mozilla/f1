@@ -714,14 +714,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     name: 'share', // builds to 'navigator.mozilla.labs.share'
     script: null, // null == use injected default script
     getapi: function () {
-      var share = ffshare;
       return function (options) {
-        share.toggle(options);
+        ffshare.toggle(options);
       };
     }
   };
-
-  Injector.register(ffapi);
+  InjectorInit(window);
+  injector.register(ffapi);
 
   window.addEventListener("load", fn.bind(ffshare, "onLoad"), false);
   window.addEventListener("unload", fn.bind(ffshare, "onUnload"), false);
