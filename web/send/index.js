@@ -74,7 +74,7 @@ function (require,   $,        fn,         rdapi,   placeholder,   url) {
     function reauthorize() {
         document.authForm.domain.value = localStorage['X-Send-Domain']
         document.authForm.submit()
-        console.log("submitted auth form...")
+        //console.log("submitted auth form...")
     }
 
     function sendMessage() {
