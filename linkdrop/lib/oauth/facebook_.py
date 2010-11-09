@@ -154,6 +154,7 @@ class responder(OAuth2):
           profile = extract_fb_data(fb_profile)
           result_data = {'profile': profile,
                          'oauth_token': access_token}
+          import sys; print >> sys.stderr, result_data
           
           return result_data
 
