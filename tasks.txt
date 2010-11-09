@@ -1,8 +1,7 @@
 Tasks:
 
 - injector code review, minefield issue?: Shane follow up with Myk?
-- update xpi link to have src. - James
-- respin the xpi - Shane, James check the commits logs for xpi changes.
+- respin the xpi - Shane
 
 - Use "F1" instead of "f1" in the twitter/facebook/gmail app IDs? - Shane
 
@@ -48,6 +47,10 @@ Thursday morning 10am.
 --- optional ----
 
 * Look at html5 autocomplete, for minefield. Did they change the stachel UUID?
+
+* Support long URLs better:
+  * Make sure db can deal with long urls better (used to minimize bitly shortenings)
+  * Consider not using fragment ID communication to the web page, maybe use postMessage
 
 * add F1 logo in the share frame so users know where the feature came from/what
   to tell others.
