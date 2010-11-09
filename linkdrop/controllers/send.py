@@ -65,6 +65,7 @@ The 'send' namespace is used to send updates to our supported services.
         error = None
         # If we don't have a key in our session we bail early with a
         # 401
+        print request.headers
         domain = request.POST.get('domain')
         message = request.POST.get('message', '')
         username = request.POST.get('username')
@@ -113,12 +114,15 @@ The 'send' namespace is used to send updates to our supported services.
 
         # send the item.
         try:
+            print repr(unicode.encode(message, 'utf-8'))
             result, error = provider.api(acct).sendmessage(message, args)
         except ValueError, e:
+            import traceback
+            traceback.print_exc()
             # XXX we need to handle this better, but if for some reason the
             # oauth values are bad we will get a ValueError raised
             error = {'provider': domain,
-                     'message': "not logged in or no user account for that domain",
+                     'message': str(e),
                      'status': 401
             }
             return {'result': result, 'error': error}
