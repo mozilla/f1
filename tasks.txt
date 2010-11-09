@@ -2,10 +2,20 @@ Tasks:
 
 - timezone fix? - Shane
 - injector code review: David ask Myk?
-- Talk to protz - James
+
 - Talk to ludo - Shane
-- Talk blake - James
-- staff and labs: mail, talk to irc - Bryan.
+- reproduced first time facebook add error case.
+- Use "F1" instead of "f1" in the twitter/facebook/gmail app IDs?
+
+- Autcomplete on ff beta 6 does not work
+- Get currentURI error thing on about:home after being on a successful http page.
+- aTab is null in minefied
+- script error for injector, in minefield
+- Ludo: Sorry you need to authenticate: got a 401 or 503 on api/send call.
+
+http://pastebin.mozilla.org/844443
+http://pastebin.mozilla.org/844446
+http://pastebin.mozilla.org/844494
 
 Thursday morning 10am.
 
