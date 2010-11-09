@@ -755,10 +755,6 @@ div.status.intermediate.error .statusButton {
     display: inline-block;
 }
 
-#statusServerError {
-    line-height: 20px;
-}
-
 /* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
 /* hbox and vbox classes */
  
