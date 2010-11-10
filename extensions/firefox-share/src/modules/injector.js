@@ -75,41 +75,37 @@ let Injector = {
   //**************************************************************************//
   // 
 
-  SCRIPT_TO_INJECT_URI: "resource://ffshare/modules/injected.js",
-
-  get _theScript() {
-    delete this._theScript;
-    ioSvc = Cc["@mozilla.org/network/io-service;1"].
-                        getService(Ci.nsIIOService);
-    let uri = ioSvc.newURI(this.SCRIPT_TO_INJECT_URI, null, null).QueryInterface(Ci.nsIFileURL);
-
-    // Slurp the contents of the file into a string.
-    let inputStream = Cc["@mozilla.org/network/file-input-stream;1"].
-                      createInstance(Ci.nsIFileInputStream);
-    inputStream.init(uri.file, 0x01, -1, null); // RD_ONLY
-    let lineStream = inputStream.QueryInterface(Ci.nsILineInputStream);
-    let line = { value: "" }, hasMore, scriptToInject = "";
-    do {
-        hasMore = lineStream.readLine(line);
-        scriptToInject += line.value + "\n";
-    } while (hasMore);
-    lineStream.close();
-
-    return this._theScript = scriptToInject;
-  },
-  
   _scriptToInject: function(provider) {
     // a provider may use it's own script to inject its api
     if (provider.script)
       return provider.script;
-    // otherwise, use a builtin injector script that we load above
-    let script = this._theScript;
+
+    // otherwise, use a builtin injector script that we load from this
+    // function object:
+    let script =  (function () {
+      // __API_* strings are replaced in injector.js with specifics from
+      // the provider class
+      let apibase = '__API_BASE__';
+      let fname = '__API_NAME__';
+      let api_ns = apibase.split('.');
+      let api = this;
+      for (let i in api_ns) {
+        if (!api[api_ns[i]]) 
+          api[api_ns[i]] = {}
+        api = api[api_ns[i]]
+      }
+      api[fname] = this['__API_INJECTED__'];
+      delete this['__API_INJECTED__'];
+      //dump("injected: "+eval(apibase+'.'+fname)+"\n");
+    }).toString();
+
     let apibase = provider.apibase ? provider.apibase : 'navigator.mozilla.labs';
     script = script.replace(/__API_BASE__/g, apibase)
                   .replace(/__API_NAME__/g, provider.name)
                   .replace(/__API_INJECTED__/g, '__mozilla_injected_api_'+provider.name+'__');
     //dump(script+"\n");
-    return script;
+    // return a wrapped script that executes the function
+    return "("+script+")();";
   },
 
   /*
