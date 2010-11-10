@@ -27,6 +27,7 @@ import re
 from openid.consumer import consumer
 from openid.extensions import ax, sreg, pape
 from openid.store import memstore, filestore, sqlstore
+from openid import oidutil
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -34,6 +35,15 @@ from pylons.controllers.util import abort, redirect
 from linkdrop.lib.oauth.base import get_oauth_config
 
 log = logging.getLogger(__name__)
+
+# overwrite the openid logger so we can manage what log level is used
+# currently openid however does not define a log level, so everything
+# goes to debug.  if we set our log level in the ini file, we'll get
+# openid logging
+def openid_logger(message, level=logging.DEBUG):
+    log.debug(message)
+
+oidutil.log = openid_logger
 
 __all__ = ['OpenIDResponder']
 

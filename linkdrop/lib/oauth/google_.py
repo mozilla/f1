@@ -39,6 +39,7 @@ import gdata.contacts
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
+from paste.deploy.converters import asbool
 
 from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
@@ -170,7 +171,9 @@ class api():
         url = "https://mail.google.com/mail/b/%s/smtp/" % from_
         to_ = options['to']
         server = SMTP(self.host, self.port)
-        server.set_debuglevel(True)
+        # in the app:main set debug = true to enable
+        if asbool(config.get('debug', False)):
+            server.set_debuglevel(True)
         
         subject = options.get('subject')
         
