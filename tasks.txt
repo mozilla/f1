@@ -5,12 +5,8 @@ Tasks:
 
 - Use "F1" instead of "f1" in the twitter/facebook/gmail app IDs? - Shane
 
-- unicode account creation - Shane
-
 - Ludo: Sorry you need to authenticate: got a 401 or 535 on api/send call. - Shane to look at Ludo's record.
   - Try with a completely new gmail account, to confirm ok.
-
-- "Spinner, background, Connecting to domain" message in auth.html to help blank window.
 
 - Wipe tables, clear session cache.
 

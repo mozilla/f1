@@ -73,7 +73,7 @@ function () {
       lastDomainTime = currentTime;
       win = window.open(url + "?domain=" + domain,
         "ffshareOAuth",
-        "dialog=yes, modal=yes, width=800, height=480");
+        "dialog=yes, modal=yes, width=900, height=500, scrollbars=yes");
       win.focus();
     } else if (win) {
       win.focus();
