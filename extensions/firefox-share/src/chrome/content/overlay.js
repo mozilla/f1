@@ -315,8 +315,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var tabUrl = gBrowser.getBrowserForTab(this.tab).currentURI.spec,
           iframeNode;
 
-      //Only open it for http/https urls
-      if (tabUrl.indexOf('http') !== 0) {
+      //Only open it for http/https urls, file urls for testing.
+      if (tabUrl.indexOf('http') !== 0 && tabUrl.indexOf('file') !== 0) {
         return;
       }
 

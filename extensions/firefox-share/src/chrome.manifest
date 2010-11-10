@@ -12,7 +12,10 @@ locale    ffshare   en-US         chrome/locale/en-US/
 overlay   chrome://browser/content/browser.xul   chrome://ffshare/content/ff-overlay.xul
 style chrome://global/content/customizeToolbar.xul chrome://ffshare/skin/overlay.css
 
-component {a7685da4-c42a-ed4b-ae53-2f19ac6164a3} components/nsFormFillOverride.js
-contract @mozilla.org/satchel/form-autocomplete;1 {a7685da4-c42a-ed4b-ae53-2f19ac6164a3}
+component {372610e5-5979-3b49-b69f-781ebac2e9d1} components/nsFormFillOverride.js
+contract @labs.mozilla.com/f1/form-autocomplete;1 {372610e5-5979-3b49-b69f-781ebac2e9d1}
+category form-autocomplete-handler f1 @labs.mozilla.com/f1/form-autocomplete;1
 component {099b2bff-8b6e-7b48-a475-dbc09a53f24d} components/extensibleFormFiller.js
 contract @mozilla.org/satchel/inputlist-autocomplete;1 {099b2bff-8b6e-7b48-a475-dbc09a53f24d}
+component {a90ef7fd-ef96-6f4a-bb0e-075fc2f06e23} components/extensibleFormFiller.js
+contract @mozilla.org/satchel/form-autocomplete;1 {a90ef7fd-ef96-6f4a-bb0e-075fc2f06e23}
