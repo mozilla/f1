@@ -159,11 +159,16 @@ class api():
             result = self.api().statuses.update(status=message)
             result[domain] = result['id']
         except TwitterHTTPError, exc:
-            details = json.load(exc.e)
-            if 'error' in details:
-                msg = details['error']
-            else:
-                msg = str(details)
+            try:
+                details = json.load(exc.e)
+                if 'error' in details:
+                    msg = details['error']
+                else:
+                    msg = str(details)
+            except ValueError, ee:
+                # sometimes the error does not contain a json object, lets
+                # try to see what it is
+                msg = str(exc)
             error = {'provider': domain,
                      'message': msg,
                      'status': exc.e.code
