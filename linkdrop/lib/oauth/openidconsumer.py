@@ -321,6 +321,8 @@ class OpenIDResponder():
         
         if info.status == consumer.FAILURE:
             msg = "OpenID authentication/authorization failure"
+            if hasattr('message', info):
+                msg = "%s: %s" % (msg, info.message)
             log.info("%s: %s", self.provider, msg)
             raise AccessException(msg)
         elif info.status == consumer.CANCEL:
