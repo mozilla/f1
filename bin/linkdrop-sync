@@ -6,7 +6,7 @@ ARGS=$*
 
 for h in $HOSTS; do
   if [ "$ME" != "$h" ]; then  
-    rsync --exclude=.ssh/id_rsa --exclude=.bash_history -av --delete --checksum $HOME/ $h:$HOME/ $ARGS
+    rsync --exclude='*.pyc' --exclude=.ssh/id_rsa --exclude=.bash_history -av --delete --checksum $HOME/ $h:$HOME/ $ARGS
     echo "[$h] Restarting httpd"
     ssh $h "sudo /etc/rc.d/init.d/httpd graceful"
   fi
