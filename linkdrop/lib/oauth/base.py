@@ -8,11 +8,16 @@ except ImportError:
 import json
 import httplib2
 import oauth2 as oauth
+import logging
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
 
+log = logging.getLogger("oauth.base")
+
+class AccessException(Exception):
+    pass
 
 def get_oauth_config(provider):
     key = 'oauth.'+provider+'.'
@@ -59,9 +64,9 @@ class OAuth1():
         oauth_request.sign_request(self.sigmethod, self.consumer, None)
         resp, content = httplib2.Http.request(client, self.request_token_url, method='GET',
             headers=oauth_request.to_header())
-                    
+            
         if resp['status'] != '200':
-            raise Exception("Error status: %r", resp['status'])
+            raise AccessException("Error status: %r", resp['status'])
         
         request_token = oauth.Token.from_string(content)
         
@@ -92,6 +97,7 @@ class OAuth1():
 
 class OAuth2():
     def __init__(self, provider):
+        self.provider = provider
         self.config = get_oauth_config(provider)
         self.access_token_url = self.config.get('access')
         self.authorization_url = self.config.get('authorize')
@@ -116,7 +122,12 @@ class OAuth2():
     def verify(self):
         code = request.GET.get('code')
         if not code:
-            raise Exception("No oauth code received")
+            error = request.params.get('error', '')
+            reason = request.params.get('error_reason', '')
+            desc = request.params.get('error_description', 'No oauth code received')
+            err = "%s - %s - %s" % (error, reason, desc)
+            log.info("%s: %s", self.provider, err)
+            raise AccessException(err)
         
         return_to = url(controller='account', action="verify",
                            qualified=True)
