@@ -32,6 +32,7 @@ from pylons.decorators.util import get_pylons
 from linkdrop.lib.base import BaseController, render
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
 from linkdrop.lib.oauth import get_provider
+from linkdrop.lib.oauth.base import AccessException
 from linkdrop.model.types import UTCDateTime
 
 from linkdrop.model.meta import Session
@@ -130,10 +131,15 @@ OAuth authorization api.
             # ensure we have the updated data
             session[acct.key] = acct.to_dict()
             session.save()
+        except AccessException, e:
+            self._redirectException(e)
         except Exception, e:
             import traceback
             traceback.print_exc()
-            err = urllib.urlencode([('error',str(e))])
-            url = session.get('end_point_auth_failure',config.get('oauth_failure')).split('#')
-            return redirect('%s?%s#%s' % (url[0], err, url[1]))
+            self._redirectException(e)
         return redirect(session.get('end_point_success', config.get('oauth_success')))
+
+    def _redirectException(self, e):
+        err = urllib.urlencode([('error',str(e))])
+        url = session.get('end_point_auth_failure',config.get('oauth_failure')).split('#')
+        return redirect('%s?%s#%s' % (url[0], err, url[1]))
