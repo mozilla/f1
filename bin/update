@@ -1,0 +1,30 @@
+#!/bin/sh
+
+source ~/linkdrop-env/bin/activate
+
+#if run from a hook, GIT_DIR is set
+
+unset GIT_DIR
+export PATH=$PATH:$HOME/bin
+
+cd ~/linkdrop;
+
+PRE=`git show --pretty=format:"%H|%ci" --quiet`
+
+(
+git pull
+) 2>&1 > git.log
+
+POST=`git show --pretty=format:"%H|%ci" --quiet`
+
+if [ "$PRE" != "$POST" ]; then
+  echo "Update from $PRE to $POST"
+  HOST=`hostname -s`
+  echo "$POST $HOST" > web/version.txt
+  make all
+  make -B web
+  cat git.log
+  git diff | perl -pi -e's[(oauth.(google|facebook|twitter).com.(consumer_secret|app_secret)\s+=\s+)(.*)][$1XXXXXXXXXXXX]g' | perl -pi -e's[(sqlalchemy.url = mysql://linkdrop:)(.*)(@.*)][$1XXXXXXXX$3]g'
+  python setup.py develop 
+  linkdrop-sync
+fi

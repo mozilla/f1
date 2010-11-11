@@ -27,6 +27,7 @@ import urlparse
 import json
 import httplib2
 import oauth2 as oauth
+import logging
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -37,7 +38,7 @@ from twitter.oauth import OAuth
 from twitter.api import Twitter, TwitterHTTPError
 
 domain = 'twitter.com'
-
+log = logging.getLogger(domain)
 
 def twitter_to_poco(user):
     # example record
@@ -159,11 +160,17 @@ class api():
             result = self.api().statuses.update(status=message)
             result[domain] = result['id']
         except TwitterHTTPError, exc:
-            details = json.load(exc.e)
-            if 'error' in details:
-                msg = details['error']
-            else:
-                msg = str(details)
+            try:
+                details = json.load(exc.e)
+                if 'error' in details:
+                    msg = details['error']
+                else:
+                    msg = str(details)
+            except ValueError, ee:
+                # sometimes the error does not contain a json object, lets
+                # try to see what it is
+                msg = "%r" % (exc,)
+                log.exception(exc)
             error = {'provider': domain,
                      'message': msg,
                      'status': exc.e.code

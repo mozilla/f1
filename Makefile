@@ -11,7 +11,7 @@ static_dir=$(TOPSRCDIR)/web-static
 webbuild_dir=$(TOPSRCDIR)/tools/webbuild
 requirejs_dir=$(webbuild_dir)/requirejs
 
-version := 0.7.0
+version := 0.7.1
 
 ifeq ($(release_build),)
   xpi_type := dev

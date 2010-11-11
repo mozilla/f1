@@ -39,6 +39,7 @@ import gdata.contacts
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
+from paste.deploy.converters import asbool
 
 from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
@@ -170,14 +171,17 @@ class api():
         url = "https://mail.google.com/mail/b/%s/smtp/" % from_
         to_ = options['to']
         server = SMTP(self.host, self.port)
-        server.set_debuglevel(True)
+        # in the app:main set debug = true to enable
+        if asbool(config.get('debug', False)):
+            server.set_debuglevel(True)
         
         subject = options.get('subject')
         
         # XXX TODO: fix headers, etc
-        body = """To: %s
+        body = u"""To: %s
 From: %s
 Subject: %s
+Content-Type: text/plain; charset=UTF-8
 
 %s
 """ % (to_, from_, subject, message)
@@ -200,7 +204,7 @@ Subject: %s
                 try:
                     server.ehlo_or_helo_if_needed()
                     server.authenticate(url, self.consumer, self.oauth_token)
-                    server.sendmail(from_, to_, body)
+                    server.sendmail(from_, to_, body.encode('utf-8'))
                 except ValueError, e:
                     error = {"provider": self.host,
                              "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),

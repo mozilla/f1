@@ -27,13 +27,23 @@ import re
 from openid.consumer import consumer
 from openid.extensions import ax, sreg, pape
 from openid.store import memstore, filestore, sqlstore
+from openid import oidutil
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
-from linkdrop.lib.oauth.base import get_oauth_config
+from linkdrop.lib.oauth.base import get_oauth_config, AccessException
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("oauth.openid")
+
+# overwrite the openid logger so we can manage what log level is used
+# currently openid however does not define a log level, so everything
+# goes to debug.  if we set our log level in the ini file, we'll get
+# openid logging
+def openid_logger(message, level=logging.DEBUG):
+    log.debug(message)
+
+oidutil.log = openid_logger
 
 __all__ = ['OpenIDResponder']
 
@@ -184,6 +194,7 @@ class OpenIDResponder():
     """
 
     def __init__(self, provider):
+        self.provider = provider
         self.log_debug = logging.DEBUG >= log.getEffectiveLevel()
 
         self.config = get_oauth_config(provider)
@@ -300,22 +311,24 @@ class OpenIDResponder():
         
         openid_session = session['openid_session']
         if not openid_session:
-            raise Exception("openid session missing")
+            raise AccessException("openid session missing")
         
         # Setup the consumer and parse the information coming back
         oidconsumer = consumer.Consumer(openid_session, self.openid_store)
         return_to = url(controller='account', action="verify",
                            qualified=True)
-        params={}
-        # these sometimes come in as unicode, which later causes compare failures
-        for k,v in request.params.items():
-            params[k]=str(v)
-        info = oidconsumer.complete(params, return_to)
+        info = oidconsumer.complete(request.params, return_to)
         
         if info.status == consumer.FAILURE:
-            raise Exception("consumer failure: "+info.message)
+            msg = "OpenID authentication/authorization failure"
+            if hasattr('message', info):
+                msg = "%s: %s" % (msg, info.message)
+            log.info("%s: %s", self.provider, msg)
+            raise AccessException(msg)
         elif info.status == consumer.CANCEL:
-            raise Exception("consumer canceled: "+info.message)
+            msg = "User denied application access to their account"
+            log.info("%s: %s", self.provider, msg)
+            raise AccessException(msg)
         elif info.status == consumer.SUCCESS:
             openid_identity = info.identity_url
             if info.endpoint.canonicalID:
@@ -337,7 +350,7 @@ class OpenIDResponder():
                     
             return self._get_credentials(result_data)
         else:
-            raise Exception("unknown openid failure")
+            raise Exception("Unknown OpenID Failure")
 
     def _get_credentials(self, access_token):
         return access_token
