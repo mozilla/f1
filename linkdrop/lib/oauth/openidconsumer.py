@@ -316,11 +316,7 @@ class OpenIDResponder():
         oidconsumer = consumer.Consumer(openid_session, self.openid_store)
         return_to = url(controller='account', action="verify",
                            qualified=True)
-        params={}
-        # these sometimes come in as unicode, which later causes compare failures
-        for k,v in request.params.items():
-            params[k]=str(v)
-        info = oidconsumer.complete(params, return_to)
+        info = oidconsumer.complete(request.params, return_to)
         
         if info.status == consumer.FAILURE:
             raise Exception("consumer failure: "+info.message)

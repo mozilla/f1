@@ -1,9 +1,6 @@
 Tasks:
 
-- injector code review, minefield issue?: Shane follow up with Myk?
 - respin the xpi - Shane
-
-- Use "F1" instead of "f1" in the twitter/facebook/gmail app IDs? - Shane
 
 - Ludo: Sorry you need to authenticate: got a 401 or 535 on api/send call. - Shane to look at Ludo's record.
   - Try with a completely new gmail account, to confirm ok.
@@ -12,7 +9,11 @@ Tasks:
 
 - Email folks
 
+- Getting emails with "None" for the subject if email is shared with no subject: Python None?
+
 Thursday morning 10am.
+
+* Cannot move the button in the toolbar. Huh. Cannot remove it either?
 
 * aTab is null in minefied
     notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
@@ -39,8 +40,17 @@ Thursday morning 10am.
 * Autcomplete on ff beta 6 does not work. Need to talk to satchel owner to
   make automcomplete provider more robust and officially supported.
 
+--- launch feedback ---
+
+* Use a popover, like the security popover: http://cl.ly/5927ca6ab06dd43f90a9
+
+* Keyboard shortcut, multiple accounts
+
+* Shorter delay on the green share OK message. Maybe 1-2 seconds?
 
 --- optional ----
+
+* disable button if on a non-shareable url
 
 * Look at html5 autocomplete, for minefield. Did they change the stachel UUID?
 
