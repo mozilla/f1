@@ -1,22 +1,14 @@
 Tasks:
 
-- respin the xpi - Shane
-
-- Ludo: Sorry you need to authenticate: got a 401 or 535 on api/send call. - Shane to look at Ludo's record.
-  - Try with a completely new gmail account, to confirm ok.
-
-- Wipe tables, clear session cache.
-
-- Email folks
-
-- Getting emails with "None" for the subject if email is shared with no subject: Python None?
-
-Thursday morning 10am.
+* Getting emails with "None" for the subject if email is shared with no subject: Python None?
 
 * Cannot move the button in the toolbar. Huh. Cannot remove it either?
 
 * aTab is null in minefied
     notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
+
+* File does not exist: /home/linkdrop/linkdrop/web-static/step-03.png, referer: http://f1.mozillamessaging.com/ ...
+* File does not exist: /home/linkdrop/linkdrop/web-static/images, referer: http://f1.mozillamessaging.com/ ...
 
 * What if bitly breaks? reaches API limits? Make sure error mentions bitly api thing. - shane/James
   This page: http://code.google.com/p/bitly-api/wiki/ApiBestPractices#HTTP_Response_Status_Codes
@@ -25,28 +17,41 @@ Thursday morning 10am.
 
 * Alerts for server having problems, tracebacks in error logs. - Gozer
 
-* Move code to GitHub: Gozer's admin thingy.
-
-* Blog post - Bryan
-
-* Update home page to link to AMO for installation.
-    https://addons.mozilla.org/services/install.php?addon_id=252539&src=external-f1home
-    may be an option, but need to register that src="" url?
-
-* Test flow from installing from add-on. Do testing.
-
-* Twitter application ID is "Mozilla f1" instead of "Mozilla F1"?
-
 * Autcomplete on ff beta 6 does not work. Need to talk to satchel owner to
   make automcomplete provider more robust and officially supported.
 
+
 --- launch feedback ---
+
+***** MAKE THE ICON MOVABLE ******
+
+* Read GitHub issues
 
 * Use a popover, like the security popover: http://cl.ly/5927ca6ab06dd43f90a9
 
 * Keyboard shortcut, multiple accounts
 
 * Shorter delay on the green share OK message. Maybe 1-2 seconds?
+
+* Surface the bookmarking better?
+
+* Jen: the tab selection not clear?
+  * When configuring Gmail account, it says that F1 is looking for four things from my Google account.
+  * The fourth is "Gmail". What does that mean? Does it mean "Gmail address (if different from Google account")
+
+* HTML5/FF friendly option for the video
+
+* A tweak in the text: "Configure your Twitter, Facebook, or Gmail account to share with F1. "
+  to say "Configure your Twitter, Facebook, and/or Google account to share with F1. "
+
+* Change "Add Gmail" to "Add Google Account" - remember, there are people
+  outside of the USA who don't use @gmail.com but ho have google accounts...
+
+* Toolbar icon too dark for dark themes?
+
+* HTTPS-Everywhere conflict?
+
+* Configure short url service?
 
 --- optional ----
 
