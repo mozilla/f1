@@ -1,14 +1,73 @@
-Tasks:
+# Perf release
 
+* FE perf
+  * appcache
+  * versioned resources
+  * cache account/get, assume good
+  * reduce jquery transition visible for tabs.
+* Shorter delay on the green share OK message. Maybe 1-2 seconds?
+* bugs
+  * move icon
+  * switch to post for contacts api(#14) - James  
+* HTML5/FF friendly option for the video
 * Getting emails with "None" for the subject if email is shared with no subject: Python None?
+* Support long URLs better:
+  * Make sure db can deal with long urls better (used to minimize bitly shortenings)
+  * Consider not using fragment ID communication to the web page, maybe use postMessage
+* optional bugs
+  * disable button if on a non-shareable url (#2)
+  * Can't switch dictionaries in the input field (#3)
+  * Add support for google app domains (#5) - Shane BE work
+  * HTML5 autocomplete - James
+    * May need to talk to satchel owner for FF4 if does not work out, to
+      make autocomplete provider more robust and officially supported.
+  * no longer need web server to build extension? - Gozer
+  * aTab is null in minefied
+    * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
+  * share complete message: use domain instead of page title - Bryan.
+  * A tweak in the text: "Configure your Twitter, Facebook, or Gmail account to share with F1. "
+    to say "Configure your Twitter, Facebook, and/or Google account to share with F1. "
+  * The 'Share Page...' option in the Contextual Menu is very annoying.
+    It should be after 'Select all' and not on top 'Copy' as today.
+    I always hitting share page when I just want to copy the text.
 
-* Cannot move the button in the toolbar. Huh. Cannot remove it either?
+# Better settings/choice release
 
-* aTab is null in minefied
-    notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
+* A way to surface settings, accounts - Andy and Bryan
+* Surface the bookmarking better?
+* f1 keybinding
 
-* File does not exist: /home/linkdrop/linkdrop/web-static/step-03.png, referer: http://f1.mozillamessaging.com/ ...
-* File does not exist: /home/linkdrop/linkdrop/web-static/images, referer: http://f1.mozillamessaging.com/ ...
+# Work out common share icon
+
+* Andy
+* add F1 logo in the share frame so users know where the feature came from/what
+  to tell others.
+* Update f1 home page image -- the top one shows twitter with the link
+  under the title, but we have since then removed showing the link in that area,
+  and Accounts is now on the far left.
+
+# Analytics release
+
+* blog post, but after settings in place for opt out
+* Set up page with analytics - Shane
+* Set up dedicated analytics box? - Gozer/Shane
+
+# Server stuff
+
+* async calls for apis
+* own url shortener?
+* better tests with real oauth calls?
+* no mysql?
+
+# Backlog
+
+* iframe embedding for web sites
+  * Aggregate analytics per domain.
+    * opt out metrics pref.
+* Statistics blog post
+
+* Jen: how would she do it: When configuring Gmail account, it says that F1 is looking for four things from my Google account.
+  The fourth is "Gmail". What does that mean? Does it mean "Gmail address (if different from Google account")
 
 * What if bitly breaks? reaches API limits? Make sure error mentions bitly api thing. - shane/James
   This page: http://code.google.com/p/bitly-api/wiki/ApiBestPractices#HTTP_Response_Status_Codes
@@ -17,148 +76,10 @@ Tasks:
 
 * Alerts for server having problems, tracebacks in error logs. - Gozer
 
-* Autcomplete on ff beta 6 does not work. Need to talk to satchel owner to
-  make automcomplete provider more robust and officially supported.
+* JS error tracebacks/server pings. - James
 
-
---- launch feedback ---
-
-***** MAKE THE ICON MOVABLE ******
-
-* Read GitHub issues
-
-* Use a popover, like the security popover: http://cl.ly/5927ca6ab06dd43f90a9
-
-* Keyboard shortcut, multiple accounts
-
-* Shorter delay on the green share OK message. Maybe 1-2 seconds?
-
-* Surface the bookmarking better?
-
-* Jen: the tab selection not clear?
-  * When configuring Gmail account, it says that F1 is looking for four things from my Google account.
-  * The fourth is "Gmail". What does that mean? Does it mean "Gmail address (if different from Google account")
-
-* HTML5/FF friendly option for the video
-
-* A tweak in the text: "Configure your Twitter, Facebook, or Gmail account to share with F1. "
-  to say "Configure your Twitter, Facebook, and/or Google account to share with F1. "
-
-* Change "Add Gmail" to "Add Google Account" - remember, there are people
-  outside of the USA who don't use @gmail.com but ho have google accounts...
-
-* Toolbar icon too dark for dark themes?
-
-* HTTPS-Everywhere conflict?
-
-* Configure short url service?
-
---- optional ----
-
-* disable button if on a non-shareable url
-
-* Look at html5 autocomplete, for minefield. Did they change the stachel UUID?
-
-* Support long URLs better:
-  * Make sure db can deal with long urls better (used to minimize bitly shortenings)
-  * Consider not using fragment ID communication to the web page, maybe use postMessage
-
-* add F1 logo in the share frame so users know where the feature came from/what
-  to tell others.
+* If redo video:
+  * make it clear do not have to login in every time
+  * user test the video
 
 * automated xpi build for AMO that increments version number.
-  * no longer need web server to build extension?
-
-* JS error tracebacks/server pings.
-
-* A proper robots.txt? What should we exclude? Do something just to avoid
-  hammering by search engines?
-
-* Update f1 home page image -- the top one shows twitter with the link
-  under the title, but we have since then removed showing the link in that area,
-  and Accounts is now on the far left.
-
-* Set up page with analytics - Shane
-
-* Check server logs for errors: facebook error - Shane
-    * When facebook failed it got weird.
-
-* Gozer: Box for admin work.
-
-* If redo video: video should reflect real ui, not custom position for toolbar button
-
--------------------------
-
-
-* Speed of page display: - James
-  * make sure files can be aggressively cached.
-
-  
-* extension: watch for 50* http errors in api calls (503 service unavailable), present user with nice message.
-
-* make config files inherit a 'default' so we can have some values for the
-  production server (they may already support this) - Shane
-
-* define branching/tagging used for production server, limit production server
-  to updating on those tags, and are there any controls we can do to ensure
-  the server does not update via unauthorized commits? - Gozer/Mark/Shane
-
-* Store info on if first share, and if so after first share, give them a link to the service to see if it shared. - Bryan
-  * Done, but not pushed until after this round of user testing.
-
-* Hide the "Congratulations" bar after people click the toolbar button.
-
-* Save persistent cookie for f1 session? Video says only need to save the name once, need
-to reconcile expectations.
-
-----------------------
-
-* NEED BETTER ERROR MESSAGES from extension for when it cannot work, like:
-  * going to an ip address URL
-  * going to an about: URL
-
-  * If user clicks remove link, then add, always use OAuth forceLogin, but only for
-    the remove/add case, not for first adds.
-    - in the backend, this is done for the services that support it, for
-      twitter, you must add 'force_login=true' to the post data when calling
-      /api/account/authorize. For google, add 'pape_max_auth_age=0'.
-
-* Bugs
-  * Share per tab can possibly close the wrong (or not close the shared) f1 if you've switched tabs
-
-* Reconsider the long and short URL being shown next to the text input.
-
-## Smaller Changes
-
-* Chrome to phone
-* Give another way to access history page outside of the "shared!" status.
-* If browser goes to about:config (non-web pages), do not show the share UI, or show a "not allowed" UI.
-  At the very least, check for exceptions on these pages, about:config has a canvas error at the moment.
-* Change extension to start reveal animation right away instead of waiting for iframe onload. Difficult,
-  since animating while the browser component loads means the animation is choppy. Perhaps put in a placeholder
-  xul element and have the browser page load in the background, then swap them once the page loads. Or,
-  pre-seed the browser cache with the page, by requesting it after first install?
-
-
-# OTHER TASKS
-
-* Set up testing/benchmarking
-  * Set up a mock service that we can use for testing send API?
-* Switch to async/queue-based send API
-* Use google contacts API to enable gmail tab autocomplete for To: address
-
-
-
-DONE
-
-
-* Double-check https urls for oauth. - Shane
-  - fb redirects to http, but its POST url is https, LAME
-
-* Persistent sessions - Shane/Gozer
-  - gozer is looking at membase, a persistent store that is memcached compatible
-
-* f1.share() in the page?
-    * Idea or prototype?
-    - prototype is available: navigator.mozilla.labs.share() to toggle the share panel
-
