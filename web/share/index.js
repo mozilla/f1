@@ -526,41 +526,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       .last().addClass('last');
   }
 
-  //Set up the URL in all the message containers
-  function updateLinks() {
-    //Update gmail message to contain the link, but only do that if
-    //no session restore.
-    var dom = $('textarea.message.urlWithSpace'),
-        val = dom.val() + '\n',
-        sessionRestore = store.sessionRestore;
-
-    //If the message containder doesn't want URLs then respect that.
-    //However, skip this if session restore is involved.
-    if (sessionRestore) {
-      sessionRestore = JSON.parse(sessionRestore);
-    }
-    if (!sessionRestore || sessionRestore.domain !== 'google.com') {
-      dom.val(val + (options.canonicalUrl || options.url) + "\n");
-    }
-
-    //Update static displays
-    $(".meta .url").text(options.url);
-    $(".meta .surl").text(options.shortUrl || options.url);
-
-    //Set up twitter text counter
-    if (!twitterCounter) {
-      twitterCounter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 114);
-    }
-
-    //Update counter. If using a short url from the web page itself, it could potentially be a different
-    //length than a bit.ly url so account for that.
-    //The + 1 is to account for a space before adding the URL to the tweet.
-    twitterCounter.updateLimit(options.shortUrl ? (140 - (options.shortUrl.length + 1)) : 114);
-
-    //Make sure placeholder text is updated.
-    placeholder();
-  }
-
   function onGetAccounts(json) {
     if (json.error) {
       json = [];
@@ -571,7 +536,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     store.accountCache = JSON.stringify(json);
 
     updateAccounts(json);
-    updateLinks();
   }
 
   function getAccounts(onSuccess) {
@@ -617,7 +581,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
       twitterDom = $('#twitter'),
-      picture;
+      picture, val,
+      dom = $('textarea.message.urlWithSpace'),
+      sessionRestore = store.sessionRestore;
 
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
@@ -712,16 +678,47 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (options.url) {
       twitterDom.find('[name="link"]').val(options.url);
       facebookDom.find('[name="link"]').val(options.url);
+      gmailDom.find('[name="link"]').val(options.url);
     }
 
     if (options.title) {
       facebookDom.find('[name="name"]').val(options.title);
       gmailDom.find('[name="message"]').val(options.title);
+      gmailDom.find('[name="title"]').val(options.title);
     }
 
     if (options.description) {
       facebookDom.find('[name="caption"]').val(options.description);
+      gmailDom.find('[name="description"]').val(options.description);
     }
+
+    val = dom.val() + '\n';
+
+    //If the message containder doesn't want URLs then respect that.
+    //However, skip this if session restore is involved.
+    if (sessionRestore) {
+      sessionRestore = JSON.parse(sessionRestore);
+    }
+    //Update gmail message to contain the link, but only do that if
+    //no session restore.
+    if (!sessionRestore || sessionRestore.domain !== 'google.com') {
+      dom.val(val + (options.canonicalUrl || options.url) + "\n");
+    }
+
+    //Update static displays
+    $(".meta .url").text(options.url);
+    $(".meta .surl").text(options.shortUrl || options.url);
+
+    //Set up twitter text counter
+    if (!twitterCounter) {
+      twitterCounter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 114);
+    }
+
+    //Update counter. If using a short url from the web page itself, it could potentially be a different
+    //length than a bit.ly url so account for that.
+    //The + 1 is to account for a space before adding the URL to the tweet.
+    twitterCounter.updateLimit(options.shortUrl ? (140 - (options.shortUrl.length + 1)) : 114);
+
 
     //For the title in facebook/subject in email, set it to the page title
     if (options.title) {

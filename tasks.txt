@@ -1,25 +1,25 @@
 # Perf release
 
-* FE perf
+* FE perf - James
   * appcache
   * versioned resources
-* Shorter delay on the green share OK message. Maybe 1-2 seconds?
+* Shorter delay on the green share OK message. Maybe 1-2 seconds? - James
 * bugs
-  * move icon 
-* HTML5/FF friendly option for the video
-* Getting emails with "None" for the subject if email is shared with no subject: Python None?
-* Support long URLs better:
+  * move icon - James
+* HTML5/FF friendly option for the video - Bryan
+* Getting emails with "None" for the subject if email is shared with no subject: Python None? - Shane
+* Support long URLs better: - Shane
   * Make sure db can deal with long urls better (used to minimize bitly shortenings)
   * Consider not using fragment ID communication to the web page, maybe use postMessage
 * optional bugs
-  * disable button if on a non-shareable url (#2)
-  * Can't switch dictionaries in the input field (#3)
+  * disable button if on a non-shareable url (#2) - Bryan/James
+  * Can't switch dictionaries in the input field (#3) - Bryan/James
   * Add support for google app domains (#5) - Shane BE work
   * HTML5 autocomplete - James
     * May need to talk to satchel owner for FF4 if does not work out, to
       make autocomplete provider more robust and officially supported.
   * no longer need web server to build extension? - Gozer
-  * aTab is null in minefied
+  * aTab is null in minefied - James
     * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
 
 # Better settings/choice release
