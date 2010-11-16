@@ -26,7 +26,8 @@
   list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
   -moz-image-region: rect(0px, 35px, 23px, 0px);
 }
-#ffshare-toolbar-button[disabled="true"]
+#ffshare-toolbar-button[disabled="true"],
+#ffshare-toolbar-button[disabled="true"]:active
 {
   -moz-image-region: rect(23px, 35px, 46px, 0px);
 }
