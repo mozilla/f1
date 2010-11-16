@@ -265,6 +265,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
         //Allow the rich autocomplete, something built into gecko.
         iframeNode.setAttribute('autocompletepopup', 'PopupAutoCompleteRichResult');
+        //Use the Firefox global context menu so we get spellcheck and such
+        iframeNode.setAttribute("contextmenu", "contentAreaContextMenu");
  
         iframeNode.className = 'ffshare-frame';
         iframeNode.style.width = '100%';
