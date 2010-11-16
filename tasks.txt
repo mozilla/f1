@@ -24,8 +24,6 @@
   * no longer need web server to build extension? - Gozer
   * aTab is null in minefied
     * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
-  * A tweak in the text: "Configure your Twitter, Facebook, or Gmail account to share with F1. "
-    to say "Configure your Twitter, Facebook, and/or Google account to share with F1. "
   * The 'Share Page...' option in the Contextual Menu is very annoying.
     It should be after 'Select all' and not on top 'Copy' as today.
     I always hitting share page when I just want to copy the text.
