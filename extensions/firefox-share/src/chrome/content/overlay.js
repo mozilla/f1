@@ -25,7 +25,7 @@
 /*jslint indent: 2, es5: true, plusplus: false, onevar: false */
 /*global document: false, setInterval: false, clearInterval: false,
   Application: false, gBrowser: false, window: false, Components: false,
-  Cc: false, Ci: false, PlacesUtils: false */
+  Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false */
 
 var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
@@ -580,6 +580,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
         this.addedFirstRunProgressListener = true;
       }
+      document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
     },
 
     onUnload: function () {
@@ -587,6 +588,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (this.addedFirstRunProgressListener) {
         gBrowser.getBrowserForTab(gBrowser.selectedTab).removeProgressListener(firstRunProgressListener);
       }
+      document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
     },
 
     onFirstRun: function () {
@@ -675,6 +677,27 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       // curse you first install prefs!
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
+    },
+
+    onContextMenuItemShowing: function (e) {
+      try {
+        var hide = (gContextMenu.onTextInput || gContextMenu.onLink ||
+                    gContextMenu.onImage || gContextMenu.isContentSelected ||
+                    gContextMenu.onCanvas || gContextMenu.onVideo ||
+                    gContextMenu.onAudio),
+            hideSelected = (gContextMenu.onTextInput || gContextMenu.onLink ||
+                            !gContextMenu.isContentSelected ||
+                            gContextMenu.onImage || gContextMenu.onCanvas ||
+                            gContextMenu.onVideo || gContextMenu.onAudio);
+
+        // Always hide the send page... menu item
+        document.getElementById("context-sendpage").hidden = true;
+
+        document.getElementById("context-ffshare").hidden = hide;
+
+        document.getElementById("context-selected-ffshare").hidden = hideSelected;
+        document.getElementById("context-selected-ffshare-sepatartor").hidden = hideSelected;
+      } catch (ignore) { }
     },
 
     onMenuItemCommand: function (e) {
