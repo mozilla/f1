@@ -484,7 +484,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // work but currently don't provide the right kind of meta data
     getURLHacks: function () {
       // Google Maps Hack :( obviously this regex isn't robust
-      if (/^maps\.google.*/.test(gBrowser.currentURI.spec)) {
+      if (/^maps\.google\.[a-zA-Z]{2,5}/.test(gBrowser.currentURI.host)) {
         return gBrowser.contentDocument.getElementById("link").getAttribute("href");
       }
 
