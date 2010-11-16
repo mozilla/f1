@@ -189,7 +189,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           username: sendData.username,
           userid: sendData.userid
         });
-      }, 4000);
+      }, 2000);
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
     }
@@ -309,6 +309,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       var svcAccount = account.accounts[0];
 
       rdapi('contacts/' + svcAccount.domain, {
+        type: 'POST',
         data: {
           username: svcAccount.username,
           userid: svcAccount.userid,

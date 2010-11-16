@@ -3,12 +3,9 @@
 * FE perf
   * appcache
   * versioned resources
-  * cache account/get, assume good
-  * reduce jquery transition visible for tabs.
 * Shorter delay on the green share OK message. Maybe 1-2 seconds?
 * bugs
-  * move icon
-  * switch to post for contacts api(#14) - James  
+  * move icon 
 * HTML5/FF friendly option for the video
 * Getting emails with "None" for the subject if email is shared with no subject: Python None?
 * Support long URLs better:
