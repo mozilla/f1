@@ -3,12 +3,9 @@
 * FE perf
   * appcache
   * versioned resources
-  * cache account/get, assume good
-  * reduce jquery transition visible for tabs.
 * Shorter delay on the green share OK message. Maybe 1-2 seconds?
 * bugs
-  * move icon
-  * switch to post for contacts api(#14) - James  
+  * move icon 
 * HTML5/FF friendly option for the video
 * Getting emails with "None" for the subject if email is shared with no subject: Python None?
 * Support long URLs better:
@@ -24,9 +21,6 @@
   * no longer need web server to build extension? - Gozer
   * aTab is null in minefied
     * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
-  * The 'Share Page...' option in the Contextual Menu is very annoying.
-    It should be after 'Select all' and not on top 'Copy' as today.
-    I always hitting share page when I just want to copy the text.
 
 # Better settings/choice release
 

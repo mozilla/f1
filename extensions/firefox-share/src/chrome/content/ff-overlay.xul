@@ -36,13 +36,19 @@
   <popupset id="mainPopupSet">
     <!--  Right click / context menu share option -->
     <popup id="contentAreaContextMenu">
-      <!-- XXX this menuitem is dynamically shown so we have to dynamically hide it -->
-      <!--<menuitem id="context-sendpage" hidden="true"/>-->
       <menuitem id="context-ffshare"
                 insertbefore="context-sendpage"
                 label="&ffshareContext.label;"
                 accesskey="&ffshareContext.accesskey;"
                 oncommand="ffshare.onMenuItemCommand(event)"/>
+      <menuitem id="context-selected-ffshare"
+                insertafter="context-sep-selectall"
+                label="&ffshareContext.label;"
+                accesskey="&ffshareContext.accesskey;"
+                oncommand="ffshare.onMenuItemCommand(event)"/>
+      <menuseparator id="context-selected-ffshare-sepatartor"
+                     insertbefore="context-keywordfield"
+                     hidden="true"/>
     </popup>
   </popupset>
 

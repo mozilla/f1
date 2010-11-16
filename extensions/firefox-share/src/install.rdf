@@ -10,6 +10,7 @@
     <em:homepageURL>http://f1.mozillamessaging.com/</em:homepageURL>
     <em:iconURL>chrome://ffshare/skin/extension-icon.png</em:iconURL>
     <em:aboutURL>chrome://ffshare/content/about.xul</em:aboutURL>
+    <em:optionsURL>chrome://ffshare/content/options.xul</em:optionsURL>
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id> <!-- Firefox -->
