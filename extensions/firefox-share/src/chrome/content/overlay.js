@@ -33,6 +33,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   Components.utils.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
   Components.utils.import("resource://ffshare/modules/injector.js");
+  Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
   var slice = Array.prototype.slice,
       ostring = Object.prototype.toString,
@@ -104,14 +105,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   
   StateProgressListener.prototype = {
     // detect communication from the iframe via location setting
-    QueryInterface: function (aIID) {
-      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-          aIID.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    },
+    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
+                                           Components.interfaces.nsISupportsWeakReference,
+                                           Components.interfaces.nsISupports]),
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       var flags = Components.interfaces.nsIWebProgressListener;
@@ -172,14 +168,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   };
 
   var firstRunProgressListener = {
-    QueryInterface: function (iid) {
-      if (iid.equals(Components.interfaces.nsIWebProgressListener) ||
-          iid.equals(Components.interfaces.nsISupportsWeakReference) ||
-          iid.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    },
+    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
+                                           Components.interfaces.nsISupportsWeakReference,
+                                           Components.interfaces.nsISupports]),
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       // maybe can just use onLocationChange, but I don't think so?
@@ -210,14 +201,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   NavProgressListener.prototype = {
     // detect navigational events for the tab, so we can close
 
-    QueryInterface: function (aIID) {
-      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-          aIID.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    },
+    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
+                                           Components.interfaces.nsISupportsWeakReference,
+                                           Components.interfaces.nsISupports]),
 
     onLocationChange: function (/*in nsIWebProgress*/ aWebProgress,
                           /*in nsIRequest*/ aRequest,
