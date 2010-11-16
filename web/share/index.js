@@ -211,11 +211,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   function showStatusShared() {
-    var domain = (sendData && sendData.domain) || 'twitter.com';
+    var sendDomain = (sendData && sendData.domain) || 'twitter.com',
+        url = options.url || "",
+        doubleSlashIndex = url.indexOf("//") + 2;
     $('#statusShared').empty().append(jig('#sharedTemplate', {
-      title: options.title,
-      service: actions[domain].name,
-      href: actions[domain].serviceUrl
+      domain: url.slice(doubleSlashIndex, url.indexOf("/", doubleSlashIndex)),
+      service: actions[sendDomain].name,
+      href: actions[sendDomain].serviceUrl
     })).find('.shareTitle').textOverflow(null, true);
     showStatus('statusShared', true);
   }
