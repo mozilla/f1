@@ -175,7 +175,7 @@ class api():
         if asbool(config.get('debug', False)):
             server.set_debuglevel(True)
         
-        subject = options.get('subject')
+        subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
         
         # XXX TODO: fix headers, etc
         body = u"""To: %s
