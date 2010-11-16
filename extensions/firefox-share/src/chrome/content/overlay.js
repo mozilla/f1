@@ -25,7 +25,7 @@
 /*jslint indent: 2, es5: true, plusplus: false, onevar: false */
 /*global document: false, setInterval: false, clearInterval: false,
   Application: false, gBrowser: false, window: false, Components: false,
-  Cc: false, Ci: false, PlacesUtils: false */
+  Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false */
 
 var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
@@ -33,6 +33,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   Components.utils.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
   Components.utils.import("resource://ffshare/modules/injector.js");
+  Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
   var slice = Array.prototype.slice,
       ostring = Object.prototype.toString,
@@ -104,14 +105,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   
   StateProgressListener.prototype = {
     // detect communication from the iframe via location setting
-    QueryInterface: function (aIID) {
-      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-          aIID.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    },
+    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
+                                           Components.interfaces.nsISupportsWeakReference,
+                                           Components.interfaces.nsISupports]),
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       var flags = Components.interfaces.nsIWebProgressListener;
@@ -172,14 +168,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   };
 
   var firstRunProgressListener = {
-    QueryInterface: function (iid) {
-      if (iid.equals(Components.interfaces.nsIWebProgressListener) ||
-          iid.equals(Components.interfaces.nsISupportsWeakReference) ||
-          iid.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    },
+    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
+                                           Components.interfaces.nsISupportsWeakReference,
+                                           Components.interfaces.nsISupports]),
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       // maybe can just use onLocationChange, but I don't think so?
@@ -210,14 +201,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   NavProgressListener.prototype = {
     // detect navigational events for the tab, so we can close
 
-    QueryInterface: function (aIID) {
-      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-          aIID.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    },
+    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
+                                           Components.interfaces.nsISupportsWeakReference,
+                                           Components.interfaces.nsISupports]),
 
     onLocationChange: function (/*in nsIWebProgress*/ aWebProgress,
                           /*in nsIRequest*/ aRequest,
@@ -484,7 +470,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // work but currently don't provide the right kind of meta data
     getURLHacks: function () {
       // Google Maps Hack :( obviously this regex isn't robust
-      if (/^maps\.google.*/.test(gBrowser.currentURI.spec)) {
+      if (/^maps\.google\.[a-zA-Z]{2,5}/.test(gBrowser.currentURI.host)) {
         return gBrowser.contentDocument.getElementById("link").getAttribute("href");
       }
 
@@ -580,6 +566,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
         this.addedFirstRunProgressListener = true;
       }
+      document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
     },
 
     onUnload: function () {
@@ -587,6 +574,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (this.addedFirstRunProgressListener) {
         gBrowser.getBrowserForTab(gBrowser.selectedTab).removeProgressListener(firstRunProgressListener);
       }
+      document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
     },
 
     onFirstRun: function () {
@@ -675,6 +663,27 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       // curse you first install prefs!
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
+    },
+
+    onContextMenuItemShowing: function (e) {
+      try {
+        var hide = (gContextMenu.onTextInput || gContextMenu.onLink ||
+                    gContextMenu.onImage || gContextMenu.isContentSelected ||
+                    gContextMenu.onCanvas || gContextMenu.onVideo ||
+                    gContextMenu.onAudio),
+            hideSelected = (gContextMenu.onTextInput || gContextMenu.onLink ||
+                            !gContextMenu.isContentSelected ||
+                            gContextMenu.onImage || gContextMenu.onCanvas ||
+                            gContextMenu.onVideo || gContextMenu.onAudio);
+
+        // Always hide the send page... menu item
+        document.getElementById("context-sendpage").hidden = true;
+
+        document.getElementById("context-ffshare").hidden = hide;
+
+        document.getElementById("context-selected-ffshare").hidden = hideSelected;
+        document.getElementById("context-selected-ffshare-sepatartor").hidden = hideSelected;
+      } catch (ignore) { }
     },
 
     onMenuItemCommand: function (e) {
