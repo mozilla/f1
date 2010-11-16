@@ -33,12 +33,7 @@ require.def("send",
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           placeholder,   TextCounter,   AutoComplete,   dispatch) {
 
-  var svcOptions = {
-      'twitter': true,
-      'facebook': true,
-      'gmail': true
-    },
-    showStatus,
+  var showStatus,
     actions = {
       'twitter.com': {
         medium: 'twitter',
@@ -142,8 +137,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     urlArgs, sendData,
     options = {},
     tabDom, bodyDom, clickBlockDom, twitterCounter,
-    updateTab = true,
-    accounts, gmailDom, autoCompleteWidget, store = localStorage;
+    updateTab = true, accountCache, tabSelection,
+    gmailDom, autoCompleteWidget, store = localStorage;
 
   //Capability detect for localStorage. At least on add-on does weird things
   //with it, so even a concern in Gecko-only code.
@@ -402,12 +397,31 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   function updateAccountButton(domain) {
     $('#settings span[data-domain="' + domain + '"]').empty().append(jig('#addAccountTemplate', domain));
+
+    //Also be sure the account tab is hidden.
+    $('.' + actions[domain].tabName).addClass('hidden');
+  }
+
+  function determineTab() {
+    var selection = '#settings', selectionName;
+
+    if (store.lastSelection) {
+      selection = '#' + store.lastSelection;
+    } else {
+      if (accountCache && accountCache.length) {
+        selectionName = actions[accountCache[0].accounts[0].domain].selectionName;
+        if (selectionName) {
+          selection = '#' + selectionName;
+        }
+      }
+    }
+
+    return selection;
   }
 
   function updateAccounts(accounts) {
-    var hasAccount = false,
-        hasLastSelectionMatch = false,
-        userAccounts = {}, selection, param,
+    var hasLastSelectionMatch = false,
+        userAccounts = {}, selection,
         sessionRestore = store.sessionRestore;
 
     if ((accounts && accounts.length)) {
@@ -425,14 +439,18 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             name = 'gmail';
           }
           userAccounts[name] = account;
-          hasAccount = true;
         }
       });
     }
 
     //If no matching accounts match the last selection clear it.
-    if (!hasLastSelectionMatch) {
+    if (!hasLastSelectionMatch && !store.accountAdded && store.lastSelection) {
       delete store.lastSelection;
+    }
+
+    //Reset the just added state now that accounts have been configured one time.
+    if (store.accountAdded) {
+      delete store.accountAdded;
     }
 
     if (userAccounts.twitter) {
@@ -480,36 +498,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     if (updateTab) {
       //Choose a tab to show.
-      if (hasAccount) {
-        if (store.lastSelection) {
-          selection = '#' + store.lastSelection;
-        } else {
-          for (param in userAccounts) {
-            if (userAccounts.hasOwnProperty(param)) {
-              hasAccount = true;
-              if (param in svcOptions) {
-                selection = '#' + param;
-                break;
-              }
-            }
-          }
-        }
-      }
-
-      if (!selection) {
-        selection = '#settings';
-      }
+      selection = determineTab();
       tabDom.tabs('select', selection);
-      //Make the body visible now to the user, now that tabs have been set up.
-      //TODO: on first run, just need the tab selection to go without the
-      //jQuery animation transition, then this setTimeout can be removed.
-      setTimeout(function () {
-        bodyDom.removeClass('loading');
-        tabDom.removeClass('invisible');
-      }, 100);
 
-  
-      //TODO: HACK, clean this up later.
+      //Update the profile pic/account name text for the tab.
       updateUserTab(null, {panel: $(selection)[0]});
     }
 
@@ -566,17 +558,22 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     placeholder();
   }
 
-  function getAccounts() {
-    rdapi('account/get', {
-      success: function (json) {
-        if (json.error) {
-          json = [];
-        }
-        accounts = json;
-        updateAccounts(json);
+  function onGetAccounts(json) {
+    if (json.error) {
+      json = [];
+    }
 
-        updateLinks();
-      },
+    //Store the JSON for the next page load.
+    accountCache = json;
+    store.accountCache = JSON.stringify(json);
+
+    updateAccounts(json);
+    updateLinks();
+  }
+
+  function getAccounts(onSuccess) {
+    rdapi('account/get', {
+      success: onSuccess || onGetAccounts,
       error: function (xhr, textStatus, err) {
         if (xhr.status === 503) {
           showStatus('statusServerBusyClose');
@@ -612,8 +609,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       options.system = 'prod';
     }
   }
-
-  getAccounts();
 
   $(function () {
     var thumbImgDom = $('img.thumb'),
@@ -664,10 +659,44 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       });
     });
 
-    //Set up tabs.
+    //Use cached account info to speed up startup, but then
+    //call API service to be sure data is up to date.
+    accountCache = (store.accountCache && JSON.parse(store.accountCache)) || [];
+    
+    //No need to update tab since that will be done inline below.
+    updateTab = false;
+    onGetAccounts(accountCache);
+    updateTab = true;
+
+    getAccounts(function (json) {
+
+      //If json differs from accountCache, then save and reload
+      var same = json.length === accountCache.length;
+      if (same) {
+        same = !json.some(function (account, i) {
+          return account.identifier !== accountCache[i].identifier;
+        });
+      }
+
+      if (!same) {
+        onGetAccounts(json);
+      }
+    });
+
+    //Set up HTML so initial jquery UI tabs will not flash away from the selected
+    //tab as we show it. Done for performance and to remove a flash of tab content
+    //that is not the current tab.
+    tabSelection = determineTab();
+    $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
+    $(tabSelection).removeClass('ui-tabs-hide');
+
+    //Set up jQuery UI tabs.
     tabDom = $("#tabs");
     tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
     tabDom.bind("tabsselect", updateUserTab);
+    //Make the tabs visible now to the user, now that tabs have been set up.
+    tabDom.removeClass('invisible');
+    bodyDom.removeClass('loading');
 
     //Set up hidden form fields for facebook
     //TODO: try sending data urls via options.thumbnail if no
@@ -723,6 +752,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //Make sure to bring the user back to this service if
       //the auth is successful.
       store.lastSelection = actions[domain].selectionName;
+      //Mark that this account was just added, so that on reload,
+      //the auto-cleanup of lastSelection does not occur right away.
+      store.accountAdded = true;
 
       oauth(domain, function (success) {
         if (success) {
