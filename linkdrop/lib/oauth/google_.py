@@ -28,7 +28,7 @@ can use OpenId+OAuth hybrid protocol to request access to Google Apps using OAut
 
 """
 import urlparse
-
+import re
 from openid.extensions import ax, pape
 import oauth2 as oauth
 #from oauth2.clients.smtp import SMTP
@@ -36,16 +36,21 @@ import smtplib
 import base64
 import gdata.contacts
 
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
+from linkdrop.lib.base import render
 
 from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
 from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attributes, attributes
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
 from linkdrop.lib.oauth.base import get_oauth_config
+
+re_url = re.compile(r'(http://[^\s]*)')
 
 GOOGLE_OAUTH = 'https://www.google.com/accounts/OAuthGetAccessToken'
 
@@ -167,7 +172,13 @@ class api():
 
     def sendmessage(self, message, options={}):
         result = error = None
-        from_ = self.account.get('profile',{}).get('verifiedEmail')
+
+        profile = self.account.get('profile', {})
+        from_email = from_ = profile.get('verifiedEmail')
+        fullname = profile.get('displayName', None)
+        if fullname:
+            from_email = ("%s <%s>" % (fullname, from_)).encode('utf-8')
+        
         url = "https://mail.google.com/mail/b/%s/smtp/" % from_
         to_ = options['to']
         server = SMTP(self.host, self.port)
@@ -177,23 +188,34 @@ class api():
         
         subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
         
-        # XXX TODO: fix headers, etc
-        body = u"""To: %s
-From: %s
-Subject: %s
-Content-Type: text/plain; charset=UTF-8
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = from_email
+        msg['To'] = to_
+        msg.set_charset('utf-8')
 
-%s
-""" % (to_, from_, subject, message)
+        c.options = options
+        c.from_name = fullname
+        c.subject = subject
+        c.from_header = from_
+        c.to_header = to_
+        c.message = message
 
         # insert the url if it is not already in the message
-        longurl = options.get('link')
-        shorturl = options.get('shorturl')
-        if shorturl:
-            if shorturl not in message:
-                message += "\n\n%s\n" % shorturl
-        elif longurl and longurl not in message:
-            message += "\n\n%s\n" % longurl
+        c.longurl = options.get('link')
+        c.shorturl = options.get('shorturl')
+
+        part1 = MIMEText(render('/text_email.mako').encode('utf-8'), 'plain')
+        part1.set_charset('utf-8')
+        
+        # if a url is in the text, make it an html link now, this will messup
+        # if the user has done the html themselves
+        c.message = re_url.sub(r'<a href="\1">\1</a>', message)
+        
+        part2 = MIMEText(render('/html_email.mako').encode('utf-8'), 'html')
+        part2.set_charset('utf-8')
+        msg.attach(part1)
+        msg.attach(part2)
 
         try:
             try:
@@ -204,8 +226,10 @@ Content-Type: text/plain; charset=UTF-8
                 try:
                     server.ehlo_or_helo_if_needed()
                     server.authenticate(url, self.consumer, self.oauth_token)
-                    server.sendmail(from_, to_, body.encode('utf-8'))
-                except ValueError, e:
+                    server.sendmail(from_, to_, msg.as_string())
+                except UnicodeEncodeError, exc:
+                    raise
+                except ValueError, exc:
                     error = {"provider": self.host,
                              "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
                              "status": exc.smtp_code
