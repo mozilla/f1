@@ -194,6 +194,21 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
   };
 
+   var canShareProgressListener = {
+     QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
+                                           Components.interfaces.nsISupportsWeakReference,
+                                           Components.interfaces.nsISupports]),
+
+     onLocationChange: function (aWebProgress, aRequest, aLocation) {
+       ffshare.canShareURL(aLocation.spec);
+     },
+
+     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
+     onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
+     onSecurityChange: function (aWebProgress, aRequest, aState) {},
+     onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
+   };
+
   function NavProgressListener(tabFrame) {
     this.tabFrame = tabFrame;
   }
@@ -303,10 +318,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var tabUrl = gBrowser.getBrowserForTab(this.tab).currentURI.spec,
           iframeNode;
 
-      //Only open it for http/https urls, file urls for testing.
-      if (tabUrl.indexOf('http') !== 0 && tabUrl.indexOf('file') !== 0) {
+      if (!ffshare.isValidURL(tabUrl))
         return;
-      }
 
       iframeNode = this.shareFrame || this.createShareFrame(options);
 
@@ -568,6 +581,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
         this.addedFirstRunProgressListener = true;
       }
+
+      try {
+        gBrowser.addProgressListener(canShareProgressListener);
+      } catch (e) { error(e); }
+
       document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
     },
 
@@ -576,6 +594,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (this.addedFirstRunProgressListener) {
         gBrowser.getBrowserForTab(gBrowser.selectedTab).removeProgressListener(firstRunProgressListener);
       }
+
+      try {
+        gBrowser.removeProgressListener(canShareProgressListener);
+      } catch (e) { error(e); }
+
       document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
     },
 
@@ -665,6 +688,22 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       // curse you first install prefs!
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
+    },
+
+    isValidURL: function(url) {
+      //Only open the share frame for http/https urls, file urls for testing.
+      return (url.indexOf('http') === 0 || url.indexOf('file') === 0);
+    },
+
+    canShareURL: function(url) {
+      try {
+        var valid = this.isValidURL(url);
+        document.getElementById("menu_ffshare").hidden = (!valid);
+        document.getElementById("context-ffshare").hidden = (!valid);
+        document.getElementById("context-selected-ffshare").hidden = (!valid);
+        document.getElementById("context-selected-ffshare-sepatartor").hidden = (!valid);
+        document.getElementById("ffshare-toolbar-button").disabled = (!valid);
+      } catch(e) { throw e; }
     },
 
     onContextMenuItemShowing: function (e) {
