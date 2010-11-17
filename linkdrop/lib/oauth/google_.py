@@ -38,6 +38,7 @@ import gdata.contacts
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.header import Header
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -177,8 +178,8 @@ class api():
         from_email = from_ = profile.get('verifiedEmail')
         fullname = profile.get('displayName', None)
         if fullname:
-            from_email = ("%s <%s>" % (fullname, from_)).encode('utf-8')
-        
+            from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), from_,)
+
         url = "https://mail.google.com/mail/b/%s/smtp/" % from_
         to_ = options['to']
         server = SMTP(self.host, self.port)
@@ -189,10 +190,10 @@ class api():
         subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
         
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = subject
-        msg['From'] = from_email
-        msg['To'] = to_
         msg.set_charset('utf-8')
+        msg.add_header('Subject', Header(subject, 'utf-8').encode())
+        msg.add_header('From', from_email)
+        msg.add_header('To', to_)
 
         c.options = options
         c.from_name = fullname
