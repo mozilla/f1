@@ -3,11 +3,17 @@
 source ~/linkdrop-env/bin/activate
 
 #if run from a hook, GIT_DIR is set
-
 unset GIT_DIR
-export PATH=$PATH:$HOME/bin
 
-cd ~/linkdrop;
+#find ourselves
+SELF=`readlink -f $0`
+WORKDIR=`dirname $SELF`
+
+LINKDROP_HOME=`cd $WORKDIR/.. && pwd`
+
+export PATH=$PATH:$LINKDROP_HOME/bin
+
+cd $LINKDROP_HOME
 
 PRE=`git show --pretty=format:"%H|%ci" --quiet`
 

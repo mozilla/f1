@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ME=`hostname -s`
-HOSTS="rd-linkdrop-01 rd-linkdrop-02"
+HOSTS="rd-linkdrop-01 rd-linkdrop-02 rd-linkdrop-stage-01"
 ARGS=$*
 
 for h in $HOSTS; do
