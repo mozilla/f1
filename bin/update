@@ -21,7 +21,6 @@ if [ "$PRE" != "$POST" ]; then
   echo "Update from $PRE to $POST"
   HOST=`hostname -s`
   echo "$POST $HOST" > web/version.txt
-  make all
   make -B web
   cat git.log
   git diff | perl -pi -e's[(oauth.(google|facebook|twitter).com.(consumer_secret|app_secret)\s+=\s+)(.*)][$1XXXXXXXXXXXX]g' | perl -pi -e's[(sqlalchemy.url = mysql://linkdrop:)(.*)(@.*)][$1XXXXXXXX$3]g'
