@@ -3,7 +3,6 @@
 * FE perf - James
   * appcache
   * versioned resources
-* Shorter delay on the green share OK message. Maybe 1-2 seconds? - James
 * bugs
   * move icon - James
 * HTML5/FF friendly option for the video - Bryan
