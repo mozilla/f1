@@ -3,8 +3,6 @@
 * FE perf - James
   * appcache
   * versioned resources
-* bugs
-  * move icon - James
 * HTML5/FF friendly option for the video - Bryan
 * Support long URLs better: - Shane
   * Make sure db can deal with long urls better (used to minimize bitly shortenings)
