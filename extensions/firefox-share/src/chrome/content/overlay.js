@@ -587,6 +587,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
     useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
     previousVersion: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".previous_version", ""),
+    firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", ""),
 
     errorPage: 'chrome://ffshare/content/down.html',
 
@@ -627,9 +628,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
       catch (e) {}
 
-      //Register first run listener.
-      gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
-      this.addedFirstRunProgressListener = true;
+      if (ffshare.firstRun) {
+        //Make sure to set the pref first to avoid bad things if later code
+        //throws and we cannot set the pref.
+        ffshare.firstRun = false;
+        Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
+
+        //Register first run listener.
+        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
+        this.addedFirstRunProgressListener = true;
+      }
     },
 
     onLoad: function () {
@@ -776,8 +784,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         var valid = this.isValidURL(url), buttonNode;
         document.getElementById("menu_ffshare").hidden = (!valid);
         document.getElementById("context-ffshare").hidden = (!valid);
+        document.getElementById("context-ffshare-separator").hidden = (!valid);
         document.getElementById("context-selected-ffshare").hidden = (!valid);
-        document.getElementById("context-selected-ffshare-sepatartor").hidden = (!valid);
+        document.getElementById("context-selected-ffshare-separator").hidden = (!valid);
         buttonNode = document.getElementById(buttonId);
         if (buttonNode) {
           buttonNode.disabled = (!valid);
@@ -798,13 +807,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                             gContextMenu.onImage || gContextMenu.onCanvas ||
                             gContextMenu.onVideo || gContextMenu.onAudio);
 
-        // Always hide the send page... menu item
-        document.getElementById("context-sendpage").hidden = true;
-
         document.getElementById("context-ffshare").hidden = hide;
+        document.getElementById("context-ffshare-separator").hidden = hide;
 
         document.getElementById("context-selected-ffshare").hidden = hideSelected;
-        document.getElementById("context-selected-ffshare-sepatartor").hidden = hideSelected;
+        document.getElementById("context-selected-ffshare-separator").hidden = hideSelected;
       } catch (ignore) { }
     },
 

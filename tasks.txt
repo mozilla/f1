@@ -11,6 +11,7 @@
   * HTML5 autocomplete - James
     * May need to talk to satchel owner for FF4 if does not work out, to
       make autocomplete provider more robust and officially supported.
+    * >> Contacts Addon messes up HTML5 autocomplete!
   * aTab is null in minefied - James
     * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
 
@@ -20,8 +21,6 @@ New feedback:
   https://github.com/mozilla/f1/issues#issue/16
 * Make youtube videos playable in Facebook
   https://github.com/mozilla/f1/issues#issue/17
-* Leave Send Link menu option in there.
-  https://github.com/mozilla/f1/issues#issue/18
 * Privacy policy update?
   * Make the policy and link clear it is F1 privacy policy, put link under install button?
 * Meta tag changes for facebook: Facebook changed their meta tag requirements

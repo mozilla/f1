@@ -34,33 +34,61 @@
   </stringbundleset>
 
   <popupset id="mainPopupSet">
-    <!--  Right click / context menu share option -->
+    <!--
+      General Right click / context menu share option
+
+      Send Link...
+      ==============
+      Share Page...
+      ==============
+      View Background Image
+    -->
     <popup id="contentAreaContextMenu">
       <menuitem id="context-ffshare"
-                insertbefore="context-sendpage"
+                insertafter="context-sendpage"
                 label="&ffshareContext.label;"
                 accesskey="&ffshareContext.accesskey;"
                 oncommand="ffshare.onMenuItemCommand(event)"/>
+      <menuseparator id="context-ffshare-separator"
+                     insertafter="context-sendpage"/>
+      <!--
+        Selected Text Right click / context menu share option
+
+        Select All
+        ==============
+        Share Page...
+        ==============
+        Search $SEARCH_ENGINE for $SELECTED_TEXT
+      -->
+      <menuseparator id="context-selected-ffshare-separator"
+                     insertafter="context-sep-selectall"
+                     hidden="true"/>
       <menuitem id="context-selected-ffshare"
                 insertafter="context-sep-selectall"
                 label="&ffshareContext.label;"
                 accesskey="&ffshareContext.accesskey;"
                 oncommand="ffshare.onMenuItemCommand(event)"/>
-      <menuseparator id="context-selected-ffshare-sepatartor"
-                     insertbefore="context-keywordfield"
-                     hidden="true"/>
     </popup>
   </popupset>
 
 
-  <!--  Take over the file menu share option -->
+  <!--
+    Insert ourselves into the file menu after send link
+    File ->
+      Send Link...
+      ==============
+      Share Page...
+      ==============
+      Page Setup...
+  -->
   <menupopup id="menu_FilePopup">
-    <menuitem id="menu_sendLink" hidden="true"/>
     <menuitem id="menu_ffshare"
-              insertbefore="menu_sendLink"
+              insertafter="menu_sendLink"
               label="&ffshareMenu.label;"
               accesskey="&ffshareMenu.accesskey;"
               oncommand="ffshare.onMenuItemCommand(event)"/>
+    <menuseparator id="context-selected-ffshare-separator"
+                   insertafter="menu_sendLink"/>
   </menupopup>
 
   <hbox id="urlbar-icons">
