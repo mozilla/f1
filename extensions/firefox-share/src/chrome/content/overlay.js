@@ -37,6 +37,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   Components.utils.import("resource://ffshare/modules/injector.js");
   Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
+  // This add-on manager is only available in Firefox 4+
+  try {
+    Components.utils.import("resource://gre/modules/AddonManager.jsm");
+  } catch (e) {   
+  }
+
   var slice = Array.prototype.slice,
       ostring = Object.prototype.toString,
       empty = {}, fn,
@@ -583,37 +589,49 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     errorPage: 'chrome://ffshare/content/down.html',
 
+    addButton: function () {
+      // Place the button in the toolbar. This should only be called
+      // on first install or upgrade.
+      try {
+        //Not needed since we add to the end.
+        //var afterId = "urlbar-container";   // ID of element to insert after
+        var navBar  = document.getElementById("nav-bar"),
+            curSet  = navBar.currentSet.split(","), set;
+
+        if (curSet.indexOf(buttonId) === -1) {
+          //The next two lines place it between url and search bars.
+          //pos = curSet.indexOf(afterId) + 1 || curSet.length;
+          //var set = curSet.slice(0, pos).concat(buttonId).concat(curSet.slice(pos));
+          //Add it to the end of the toolbar.
+          set = curSet.concat(buttonId).join(",");
+
+          navBar.setAttribute("currentset", set);
+          navBar.currentSet = set;
+          document.persist(navBar.id, "currentset");
+          try {
+            BrowserToolboxCustomizeDone(true);
+          }
+          catch (e) {}
+        }
+      }
+      catch (e) {}
+    },
+
     onLoad: function () {
       // initialization code
       if (this.firstRun) {
-        // Place the button in the toolbar on first load.
-        try {
-          //Not needed since we add to the end.
-          //var afterId = "urlbar-container";   // ID of element to insert after
-          var navBar  = document.getElementById("nav-bar"),
-              curSet  = navBar.currentSet.split(","), set;
-
-          if (curSet.indexOf(buttonId) === -1) {
-            //The next two lines place it between url and search bars.
-            //pos = curSet.indexOf(afterId) + 1 || curSet.length;
-            //var set = curSet.slice(0, pos).concat(buttonId).concat(curSet.slice(pos));
-            //Add it to the end of the toolbar.
-            set = curSet.concat(buttonId).join(",");
-
-            navBar.setAttribute("currentset", set);
-            navBar.currentSet = set;
-            document.persist(navBar.id, "currentset");
-            try {
-              BrowserToolboxCustomizeDone(true);
-            }
-            catch (e) {}
-          }
-        }
-        catch (e) {}
+        this.addButton();
 
         //Register first run listener.
         gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
         this.addedFirstRunProgressListener = true;
+      }
+
+      //Figure out if this is a first install/upgrade case.
+      if (typeof AddonManager !== 'undefined') {
+        AddonManager.getAddonByID(FFSHARE_EXT_ID, function (addon) {  
+          log("My extension's version is [" + addon.version + "]");
+        });
       }
 
       try {
@@ -805,6 +823,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   if (!ffshare.shareUrl) {
     if (ffshare.system === 'dev') {
       ffshare.shareUrl = 'http://linkdrop.caraveo.com:5000/share/';
+    } else if (ffshare.system === 'staging') {
+      ffshare.shareUrl = 'https://f1-staging.mozillamessaging.com/share/';
     } else {
       ffshare.shareUrl = 'https://f1.mozillamessaging.com/share/';
     }
@@ -813,6 +833,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   if (!ffshare.frontpageUrl) {
     if (ffshare.system === 'dev') {
       ffshare.frontpageUrl = 'http://linkdrop.caraveo.com:5000/';
+    } else if (ffshare.system === 'staging') {
+      ffshare.frontpageUrl = 'http://f1-staging.mozillamessaging.com/';
     } else {
       ffshare.frontpageUrl = 'http://f1.mozillamessaging.com/';
     }

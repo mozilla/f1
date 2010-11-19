@@ -7,6 +7,8 @@
 * HTML5/FF friendly option for the video - Bryan
 * Support long URLs better: - Shane
   * Make sure db can deal with long urls better (used to minimize bitly shortenings)
+* Build xpi on staging box - Gozer
+* For staging box, reference staging xpi for the install button.
 * Email template design - Andy
 * optional bugs
   * HTML5 autocomplete - James
