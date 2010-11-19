@@ -1,4 +1,4 @@
-# Perf release
+# Perf release (wednesday)
 
 * FE perf - James
   * appcache
@@ -9,13 +9,11 @@
 * HTML5/FF friendly option for the video - Bryan
 * Support long URLs better: - Shane
   * Make sure db can deal with long urls better (used to minimize bitly shortenings)
-  * Consider not using fragment ID communication to the web page, maybe use postMessage
+* Email template design - Andy
 * optional bugs
-  * Add support for google app domains (#5) - Shane BE work
   * HTML5 autocomplete - James
     * May need to talk to satchel owner for FF4 if does not work out, to
       make autocomplete provider more robust and officially supported.
-  * no longer need web server to build extension? - Gozer
   * aTab is null in minefied - James
     * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
 
@@ -83,6 +81,8 @@ New feedback:
   will be 403 for api limit reached?
 
 * Alerts for server having problems, tracebacks in error logs. - Gozer
+
+* Add support for google app domains (#5) - Shane BE work
 
 * JS error tracebacks/server pings. - James
 
