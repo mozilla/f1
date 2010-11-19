@@ -3,8 +3,6 @@
 * FE perf - James
   * appcache
   * versioned resources
-* Use install.php to install the plugin from the main site?
-  https://addons.mozilla.org/services/install.php?addon_id=252539&src=external-f1home
 * Extension upgrade problem where button will not show up? - James
 * HTML5/FF friendly option for the video - Bryan
 * Support long URLs better: - Shane
