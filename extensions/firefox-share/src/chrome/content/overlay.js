@@ -587,6 +587,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
     useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
     previousVersion: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".previous_version", ""),
+    firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", ""),
 
     errorPage: 'chrome://ffshare/content/down.html',
 
@@ -627,9 +628,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
       catch (e) {}
 
-      //Register first run listener.
-      gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
-      this.addedFirstRunProgressListener = true;
+      if (ffshare.firstRun) {
+        //Make sure to set the pref first to avoid bad things if later code
+        //throws and we cannot set the pref.
+        ffshare.firstRun = false;
+        Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
+
+        //Register first run listener.
+        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
+        this.addedFirstRunProgressListener = true;
+      }
     },
 
     onLoad: function () {
