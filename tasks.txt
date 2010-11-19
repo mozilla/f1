@@ -3,6 +3,9 @@
 * FE perf - James
   * appcache
   * versioned resources
+* Use install.php to install the plugin from the main site?
+  https://addons.mozilla.org/services/install.php?addon_id=252539&src=external-f1home
+* Extension upgrade problem where button will not show up? - James
 * HTML5/FF friendly option for the video - Bryan
 * Support long URLs better: - Shane
   * Make sure db can deal with long urls better (used to minimize bitly shortenings)
@@ -15,6 +18,26 @@
   * no longer need web server to build extension? - Gozer
   * aTab is null in minefied - James
     * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
+
+New feedback:
+
+* noscript breaks the UI
+  https://github.com/mozilla/f1/issues#issue/16
+* Make youtube videos playable in Facebook
+  https://github.com/mozilla/f1/issues#issue/17
+* Leave Send Link menu option in there.
+  https://github.com/mozilla/f1/issues#issue/18
+* Privacy policy update?
+  * Make the policy and link clear it is F1 privacy policy, put link under install button?
+* Meta tag changes for facebook: Facebook changed their meta tag requirements
+  to include the og: (open graph) prefix.  We'll need to look for this in the
+  add-on if we want to continue getting the correct open graph information from
+  sites that provide it.
+  [facebook developers - share](http://developers.facebook.com/docs/share)
+  https://github.com/mozilla/f1/issues#issue/19
+* Share option on the facebook page that shows the share? It is not showing up,
+  dmandelin's family advice.
+
 
 # Better settings/choice release
 
@@ -68,3 +91,6 @@
   * user test the video
 
 * automated xpi build for AMO that increments version number.
+
+* How to handle the icon on dark themes?
+
