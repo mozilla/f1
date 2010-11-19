@@ -205,7 +205,7 @@ class api():
         c.shorturl = options.get('shorturl')
         # get the title, or the long url or the short url or nothing
         c.title = options.get('title', options.get('link', options.get('shorturl', '')))
-        c.description = options.get('description', '')
+        c.description = options.get('description', '')[:280]
 
         part1 = MIMEText(render('/text_email.mako').encode('utf-8'), 'plain')
         part1.set_charset('utf-8')
