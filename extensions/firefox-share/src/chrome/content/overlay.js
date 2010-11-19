@@ -26,7 +26,7 @@
 /*global document: false, setInterval: false, clearInterval: false,
   Application: false, gBrowser: false, window: false, Components: false,
   Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false,
-  XPCOMUtils: false, ffshareAutoCompleteData: false,
+  XPCOMUtils: false, ffshareAutoCompleteData: false, AddonManager: false,
   BrowserToolboxCustomizeDone: false, InjectorInit: false, injector: false */
 
 var ffshare;
@@ -188,14 +188,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       // maybe can just use onLocationChange, but I don't think so?
       var flags = Components.interfaces.nsIWebProgressListener;
+
+      // This seems like an excessive check but works very well
       if (aStateFlags & flags.STATE_IS_WINDOW &&
                  aStateFlags & flags.STATE_STOP) {
-        // This seems like an excessive check but works very well
-        if (ffshare.firstRun) {
+        if (!ffshare.didOnFirstRun) {
           //Be sure to disable first run after one try. Even if it does
           //not work, do not want to annoy the user with continual popping up
           //of the front page.
-          ffshare.firstRun = false;
+          ffshare.didOnFirstRun = true;
           ffshare.onFirstRun();
         }
       }
@@ -585,13 +586,23 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     shareUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
     frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
     useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
-    firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", true),
+    previousVersion: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".previous_version", ""),
 
     errorPage: 'chrome://ffshare/content/down.html',
 
-    addButton: function () {
-      // Place the button in the toolbar. This should only be called
-      // on first install or upgrade.
+    onInstallUpgrade: function (version) {
+      //Only run if the versions do not match.
+      if (version === ffshare.previousVersion) {
+        return;
+      }
+
+      //Update previousVersion pref. Do this now in case an error below
+      //prevents it -- do not want to get in a situation where for instance
+      //we pop the front page URL for every tab navigation.
+      ffshare.previousVersion = version;
+      Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".previous_version", version);
+
+      // Place the button in the toolbar.
       try {
         //Not needed since we add to the end.
         //var afterId = "urlbar-container";   // ID of element to insert after
@@ -615,23 +626,27 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         }
       }
       catch (e) {}
+
+      //Register first run listener.
+      gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
+      this.addedFirstRunProgressListener = true;
     },
 
     onLoad: function () {
-      // initialization code
-      if (this.firstRun) {
-        this.addButton();
-
-        //Register first run listener.
-        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
-        this.addedFirstRunProgressListener = true;
-      }
-
       //Figure out if this is a first install/upgrade case.
       if (typeof AddonManager !== 'undefined') {
-        AddonManager.getAddonByID(FFSHARE_EXT_ID, function (addon) {  
-          log("My extension's version is [" + addon.version + "]");
+        //Firefox 4
+        AddonManager.getAddonByID(FFSHARE_EXT_ID, function (addon) {
+          ffshare.onInstallUpgrade(addon.version);
         });
+      } else {
+        //Firefox before version 4.
+        try {
+          var em = Components.classes["@mozilla.org/extensions/manager;1"]
+                   .getService(Components.interfaces.nsIExtensionManager),
+              addon = em.getItemForID(FFSHARE_EXT_ID);
+          ffshare.onInstallUpgrade(addon.version);
+        } catch (e) {}
       }
 
       try {
@@ -749,9 +764,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       openAndReuseOneTabPerURL(this.frontpageUrl);
-
-      // curse you first install prefs!
-      Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
     },
 
     isValidURL: function (url) {
