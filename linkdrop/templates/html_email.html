@@ -2,49 +2,18 @@
     "http://www.w3.org/TR/html4/loose.dtd">
 <html lang="en">
 <head>
-    <title>${c.title}</title>
-    <style>
-    .message {
-        margin: 5px;
-        padding: 5px;
-        font-family: cursive;
-        border: 1px solid;
-        background-color: yellow;
-    }
-    .footer {
-        font-family: fantasy;
-        border: 1px solid orange;
-        margin: 5px;
-        padding: 5px;
-        background-color: skyblue;
-    }
-    .logo {
-        background-image: url(http://f1.mozillamessaging.com/favicon.ico);
-        background-repeat: no-repeat;
-        padding: 10px;
-        float: left;
-    }
-    .footer-text {
-        padding-left: 30px;
-    }
-    </style>
+    <title>$TITLE</title>
 </head>
-<body>
-    <div class="message">
-        ${c.message}
-% if c.shorturl and c.longurl:
-        <br /><a class="link" href="${c.shorturl}">${c.longurl}</a>
-% elif c.longurl:
-        <br /><a class="link" href="${c.longurl}">${c.longurl}</a>
-% elif c.shorturl:
-        <br /><a class="link" href="${c.shorturl}">${c.shorturl}</a>
-% endif
+<body style="margin: 1em;max-width:600pt;">
+    <div class="message" style="color:#222;">
+        $MESSAGE: Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. 
     </div>
-    <div class="footer">
-        <div class="logo"></div>
-        <div class="footer-text">
-        This shared link has been brought to you by <a href="http://f1.mozillamessaging.com/">Mozilla F1</a>.
+    <div class="share" style="margin:1em 0;max-width:480pt;">
+        <div class="link" style="">
+        <a style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;" href="http://f1.mozillamessaging.com/">F1 by Mozilla Messaging</a>
         </div>
+        <div class="description" style="font-family:Arial,Helvetica,sans-serif;font-size:x-small;color:#666;">Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra. Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui. Donec non enim in turpis pulvinar facilisis. Ut felis. Praesent dapibus, neque id cursus faucibus, tortor neque egestas augue, eu vulputate magna eros eu erat. Aliquam erat volutpat. Nam dui mi, tincidunt quis, accumsan porttitor, facilisis luctus, metus.</div>
     </div>
+    <div style="font-family:Arial,Helvetica,sans-serif;font-size:xx-small;color:#999;position:absolute;bottom:0;margin:1em 0;">Jean Reilly is awesome and used <a style="color:#666;" href="http://f1.mozillamessaging.com/">Mozilla F1</a> to share this.</div>
 </body>
 </html>
