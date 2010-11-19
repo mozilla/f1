@@ -51,8 +51,6 @@ from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attrib
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
 from linkdrop.lib.oauth.base import get_oauth_config
 
-re_url = re.compile(r'(http://[^\s]*)')
-
 GOOGLE_OAUTH = 'https://www.google.com/accounts/OAuthGetAccessToken'
 
 domain = 'google.com'
@@ -205,14 +203,13 @@ class api():
         # insert the url if it is not already in the message
         c.longurl = options.get('link')
         c.shorturl = options.get('shorturl')
+        # get the title, or the long url or the short url or nothing
+        c.title = options.get('title', options.get('link', options.get('shorturl', '')))
+        c.description = options.get('description', '')
 
         part1 = MIMEText(render('/text_email.mako').encode('utf-8'), 'plain')
         part1.set_charset('utf-8')
-        
-        # if a url is in the text, make it an html link now, this will messup
-        # if the user has done the html themselves
-        c.message = re_url.sub(r'<a href="\1">\1</a>', message)
-        
+
         part2 = MIMEText(render('/html_email.mako').encode('utf-8'), 'html')
         part2.set_charset('utf-8')
         msg.attach(part1)

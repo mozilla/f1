@@ -3,48 +3,21 @@
 <html lang="en">
 <head>
     <title>${c.subject}</title>
-    <style>
-    .message {
-        margin: 5px;
-        padding: 5px;
-        font-family: cursive;
-        border: 1px solid;
-        background-color: yellow;
-    }
-    .footer {
-        font-family: fantasy;
-        border: 1px solid orange;
-        margin: 5px;
-        padding: 5px;
-        background-color: skyblue;
-    }
-    .logo {
-        background-image: url(http://f1.mozillamessaging.com/favicon.ico);
-        background-repeat: no-repeat;
-        padding: 10px;
-        float: left;
-    }
-    .footer-text {
-        padding-left: 30px;
-    }
-    </style>
 </head>
-<body>
-    <div class="message">
+<body style="margin: 1em;max-width:600pt;">
+    <div class="message" style="color:#222;">
         ${context.write(c.message)}
-% if c.shorturl and c.longurl:
-        <br /> <a class="link" href="${c.shorturl}">${c.longurl}</a>
+    </div>
+    <div class="share" style="margin:1em 0;max-width:480pt;">
+        <div class="link" style="">
+% if c.shorturl:
+        <a style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;" href="${c.shorturl}">${c.title}</a></div>
 % elif c.longurl:
-        <br /> <a class="link" href="${c.longurl}">${c.longurl}</a>
-% elif c.shorturl:
-        <br /> <a class="link" href="${c.shorturl}">${c.shorturl}</a>
+        <a style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;" href="${c.longurl}">${c.title}</a>
 % endif
-    </div>
-    <div class="footer">
-        <div class="logo"></div>
-        <div class="footer-text">
-        This shared link has been brought to you by <a href="http://f1.mozillamessaging.com/">Mozilla F1</a>.
         </div>
+        <div class="description" style="font-family:Arial,Helvetica,sans-serif;font-size:x-small;color:#666;">${c.description}</div>
     </div>
+    <div style="font-family:Arial,Helvetica,sans-serif;font-size:xx-small;color:#999;position:absolute;bottom:0;margin:1em 0;">${c.from_name} is awesome and used <a style="color:#666;" href="http://f1.mozillamessaging.com/">Mozilla F1</a> to share this.</div>
 </body>
 </html>
