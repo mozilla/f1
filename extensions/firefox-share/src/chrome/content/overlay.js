@@ -784,8 +784,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         var valid = this.isValidURL(url), buttonNode;
         document.getElementById("menu_ffshare").hidden = (!valid);
         document.getElementById("context-ffshare").hidden = (!valid);
+        document.getElementById("context-ffshare-separator").hidden = (!valid);
         document.getElementById("context-selected-ffshare").hidden = (!valid);
-        document.getElementById("context-selected-ffshare-sepatartor").hidden = (!valid);
+        document.getElementById("context-selected-ffshare-separator").hidden = (!valid);
         buttonNode = document.getElementById(buttonId);
         if (buttonNode) {
           buttonNode.disabled = (!valid);
@@ -806,13 +807,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                             gContextMenu.onImage || gContextMenu.onCanvas ||
                             gContextMenu.onVideo || gContextMenu.onAudio);
 
-        // Always hide the send page... menu item
-        document.getElementById("context-sendpage").hidden = true;
-
         document.getElementById("context-ffshare").hidden = hide;
+        document.getElementById("context-ffshare-separator").hidden = hide;
 
         document.getElementById("context-selected-ffshare").hidden = hideSelected;
-        document.getElementById("context-selected-ffshare-sepatartor").hidden = hideSelected;
+        document.getElementById("context-selected-ffshare-separator").hidden = hideSelected;
       } catch (ignore) { }
     },
 
