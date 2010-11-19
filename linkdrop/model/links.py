@@ -28,7 +28,7 @@ import urllib, json, cgi
 from pylons import config, request, response, session, url
 from paste.deploy.converters import asbool
 
-from sqlalchemy import Column, Integer, String, Boolean, UniqueConstraint, Text, Sequence
+from sqlalchemy import Column, Integer, String, Boolean, UniqueConstraint, Text, Sequence, UnicodeText, DDL
 from sqlalchemy.orm.exc import NoResultFound
 
 from linkdrop.model.meta import Base, Session, make_table_args
@@ -42,7 +42,7 @@ class Link(JsonExpandoMixin, SerializerMixin, Base):
 
     id = Column(Integer, primary_key=True)
     userkey = Column(RDUnicode(128), index=True)
-    long_url = Column(RDUnicode(128), nullable=False)
+    long_url = Column(UnicodeText, nullable=False)
     short_url = Column(RDUnicode(128), nullable=False, index=True, default='')
     audience = Column(RDUnicode(128), nullable=False, default='')
 
@@ -75,3 +75,4 @@ class Link(JsonExpandoMixin, SerializerMixin, Base):
             Session.commit()
             return l
 
+DDL("ALTER TABLE links ADD INDEX(long_url(128))", on='mysql').execute_at("after-create", Base.metadata)

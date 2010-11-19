@@ -25,7 +25,9 @@
 /*jslint indent: 2, es5: true, plusplus: false, onevar: false */
 /*global document: false, setInterval: false, clearInterval: false,
   Application: false, gBrowser: false, window: false, Components: false,
-  Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false */
+  Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false,
+  XPCOMUtils: false, ffshareAutoCompleteData: false,
+  BrowserToolboxCustomizeDone: false, InjectorInit: false, injector: false */
 
 var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
@@ -37,7 +39,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   var slice = Array.prototype.slice,
       ostring = Object.prototype.toString,
-      empty = {}, fn;
+      empty = {}, fn,
+      buttonId = 'ffshare-toolbar-button';
+
+  function getButton() {
+    return document.getElementById(buttonId);
+  }
 
   function mixin(target, source, override) {
     //TODO: consider ES5 getters and setters in here.
@@ -194,20 +201,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
   };
 
-   var canShareProgressListener = {
-     QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
+  var canShareProgressListener = {
+    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
                                            Components.interfaces.nsISupportsWeakReference,
                                            Components.interfaces.nsISupports]),
 
-     onLocationChange: function (aWebProgress, aRequest, aLocation) {
-       ffshare.canShareURL(aLocation.spec);
-     },
+    onLocationChange: function (aWebProgress, aRequest, aLocation) {
+      ffshare.canShareURL(aLocation.spec);
+    },
 
-     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
-     onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
-     onSecurityChange: function (aWebProgress, aRequest, aState) {},
-     onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
-   };
+    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
+    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
+    onSecurityChange: function (aWebProgress, aRequest, aState) {},
+    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
+  };
 
   function NavProgressListener(tabFrame) {
     this.tabFrame = tabFrame;
@@ -318,8 +325,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var tabUrl = gBrowser.getBrowserForTab(this.tab).currentURI.spec,
           iframeNode;
 
-      if (!ffshare.isValidURL(tabUrl))
+      if (!ffshare.isValidURL(tabUrl)) {
         return;
+      }
 
       iframeNode = this.shareFrame || this.createShareFrame(options);
 
@@ -578,13 +586,41 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onLoad: function () {
       // initialization code
       if (this.firstRun) {
+        // Place the button in the toolbar on first load.
+        try {
+          //Not needed since we add to the end.
+          //var afterId = "urlbar-container";   // ID of element to insert after
+          var navBar  = document.getElementById("nav-bar"),
+              curSet  = navBar.currentSet.split(","), set;
+
+          if (curSet.indexOf(buttonId) === -1) {
+            //The next two lines place it between url and search bars.
+            //pos = curSet.indexOf(afterId) + 1 || curSet.length;
+            //var set = curSet.slice(0, pos).concat(buttonId).concat(curSet.slice(pos));
+            //Add it to the end of the toolbar.
+            set = curSet.concat(buttonId).join(",");
+
+            navBar.setAttribute("currentset", set);
+            navBar.currentSet = set;
+            document.persist(navBar.id, "currentset");
+            try {
+              BrowserToolboxCustomizeDone(true);
+            }
+            catch (e) {}
+          }
+        }
+        catch (e) {}
+
+        //Register first run listener.
         gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
         this.addedFirstRunProgressListener = true;
       }
 
       try {
         gBrowser.addProgressListener(canShareProgressListener);
-      } catch (e) { error(e); }
+      } catch (e) {
+        error(e);
+      }
 
       document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
     },
@@ -597,7 +633,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       try {
         gBrowser.removeProgressListener(canShareProgressListener);
-      } catch (e) { error(e); }
+      } catch (e) {
+        error(e);
+      }
 
       document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
     },
@@ -619,7 +657,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
                            .getService(Components.interfaces.nsIWindowMediator);
         var browserEnumerator = wm.getEnumerator("navigator:browser"),
-            rect, browser;
+            rect, browser, buttonNode;
 
         // Check each browser instance for our URL
         var found = false;
@@ -639,16 +677,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
               // Focus *this* browser-window
               browserWin.focus();
 
-              rect = browserWin.document.getElementById("ffshare-toolbar-button").getBoundingClientRect();
-              browser = gBrowser.getBrowserForTab(tabbrowser.selectedTab);
-
-              // try setting the button location as the window may have already loaded
-              try {
-                sendJustInstalledEvent(browser, rect);
-              } catch (ignore) { }
-
-              // Add the load handler in case the window hasn't finished loaded (unlikely)
-              browser.addEventListener("load", makeInstalledLoadHandler(browser, rect), true);
+              buttonNode = browserWin.document.getElementById(buttonId);
+              //Button may not be there if customized and removed from toolbar.
+              if (buttonNode) {
+                rect = buttonNode.getBoundingClientRect();
+                browser = gBrowser.getBrowserForTab(tabbrowser.selectedTab);
+  
+                // try setting the button location as the window may have already loaded
+                try {
+                  sendJustInstalledEvent(browser, rect);
+                } catch (ignore) { }
+  
+                // Add the load handler in case the window hasn't finished loaded (unlikely)
+                browser.addEventListener("load", makeInstalledLoadHandler(browser, rect), true);
+              }
 
               found = true;
               break;
@@ -660,22 +702,26 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         if (!found) {
           var recentWindow = wm.getMostRecentWindow("navigator:browser");
           if (recentWindow) {
-            rect = recentWindow.document.getElementById("ffshare-toolbar-button").getBoundingClientRect();
-            // Use the existing browser (recent) Window
-            var tab = recentWindow.gBrowser.loadOneTab(url, { referrerURI: null,
-                                                             charset: null,
-                                                             postData: null,
-                                                             inBackground: false,
-                                                             allowThirdPartyFixup: null });
-            browser = gBrowser.getBrowserForTab(tab);
-            browser.addEventListener("load",
-                                    function buttonX() {
-                                      browser.removeEventListener("load", buttonX, true);
-                                      browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
-                                      var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
-                                      evt.initEvent("buttonX", true, false);
-                                      browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
-                                    }, true);
+            buttonNode = recentWindow.document.getElementById(buttonId);
+            //Button may not be there if customized and removed from toolbar.
+            if (buttonNode) {
+              rect = buttonNode.getBoundingClientRect();
+              // Use the existing browser (recent) Window
+              var tab = recentWindow.gBrowser.loadOneTab(url, { referrerURI: null,
+                                                               charset: null,
+                                                               postData: null,
+                                                               inBackground: false,
+                                                               allowThirdPartyFixup: null });
+              browser = gBrowser.getBrowserForTab(tab);
+              browser.addEventListener("load",
+                                      function buttonX() {
+                                        browser.removeEventListener("load", buttonX, true);
+                                        browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
+                                        var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
+                                        evt.initEvent("buttonX", true, false);
+                                        browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
+                                      }, true);
+            }
           }
           else {
             // No browser windows are open, so open a new one.
@@ -690,20 +736,25 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
     },
 
-    isValidURL: function(url) {
+    isValidURL: function (url) {
       //Only open the share frame for http/https urls, file urls for testing.
       return (url.indexOf('http') === 0 || url.indexOf('file') === 0);
     },
 
-    canShareURL: function(url) {
+    canShareURL: function (url) {
       try {
-        var valid = this.isValidURL(url);
+        var valid = this.isValidURL(url), buttonNode;
         document.getElementById("menu_ffshare").hidden = (!valid);
         document.getElementById("context-ffshare").hidden = (!valid);
         document.getElementById("context-selected-ffshare").hidden = (!valid);
         document.getElementById("context-selected-ffshare-sepatartor").hidden = (!valid);
-        document.getElementById("ffshare-toolbar-button").disabled = (!valid);
-      } catch(e) { throw e; }
+        buttonNode = document.getElementById(buttonId);
+        if (buttonNode) {
+          buttonNode.disabled = (!valid);
+        }
+      } catch (e) {
+        throw e;
+      }
     },
 
     onContextMenuItemShowing: function (e) {
