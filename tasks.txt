@@ -3,20 +3,18 @@
 * Make sure 0.7.1 extension works with new site, by pointing it to staging. - James
 * Email template design - Andy
   * Run through email clients.
-* Build xpi on staging box - Gozer
-* Remove link and title in the email message - James
-  * "Add a comment (we'll send the link along)" - Andy
-* For staging box, reference staging xpi for the install button. - James 
 * 0.7.2 xpi for testing.
 * Blog post. - Bryan?
   * Bug fix/perf release.
-  * Faster,
+  * Faster
   * email templates
   * movable button
 
 * optional bugs
   * FE perf - James
     * appcache
+  * Build xpi on staging box - Gozer
+  * For staging box, reference staging xpi for the install button. - James 
   * HTML5 autocomplete - James
     * May need to talk to satchel owner for FF4 if does not work out, to
       make autocomplete provider more robust and officially supported.
