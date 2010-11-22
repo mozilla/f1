@@ -1,46 +1,50 @@
 # Perf release (wednesday)
 
-* FE perf - James
-  * appcache
-  * versioned resources
-* HTML5/FF friendly option for the video - Bryan
-* Build xpi on staging box - Gozer
 * Make sure 0.7.1 extension works with new site, by pointing it to staging. - James
-* For staging box, reference staging xpi for the install button. - James
 * Email template design - Andy
+  * Run through email clients.
+* Build xpi on staging box - Gozer
+* Remove link and title in the email message - James
+  * "Add a comment (we'll send the link along)" - Andy
+* For staging box, reference staging xpi for the install button. - James 
+* 0.7.2 xpi for testing.
+* Blog post. - Bryan?
+  * Bug fix/perf release.
+  * Faster,
+  * email templates
+  * movable button
+
 * optional bugs
+  * FE perf - James
+    * appcache
   * HTML5 autocomplete - James
     * May need to talk to satchel owner for FF4 if does not work out, to
       make autocomplete provider more robust and officially supported.
     * >> Contacts Addon messes up HTML5 autocomplete!
+  * HTML5/FF friendly option for the video - Bryan
   * aTab is null in minefied - James
     * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
-
-New feedback:
-
-* http://www.youtube.com/watch?v=U0CGsw6h60k&feature=aso
-  Has a quote in the title that is html encoded in the email message.
-* noscript breaks the UI
-  https://github.com/mozilla/f1/issues#issue/16
-* Make youtube videos playable in Facebook
-  https://github.com/mozilla/f1/issues#issue/17
-* Privacy policy update?
-  * Make the policy and link clear it is F1 privacy policy, put link under install button?
-* Meta tag changes for facebook: Facebook changed their meta tag requirements
-  to include the og: (open graph) prefix.  We'll need to look for this in the
-  add-on if we want to continue getting the correct open graph information from
-  sites that provide it.
-  [facebook developers - share](http://developers.facebook.com/docs/share)
-  https://github.com/mozilla/f1/issues#issue/19
-* Share option on the facebook page that shows the share? It is not showing up,
-  dmandelin's family advice.
-
+  * Privacy policy update? - David
+    * Make the policy and link clear it is F1 privacy policy, put link under install button?
+  * noscript breaks the UI
+    https://github.com/mozilla/f1/issues#issue/16
+  * Make youtube videos playable in Facebook
+    https://github.com/mozilla/f1/issues#issue/17
+  * Meta tag changes for facebook: Facebook changed their meta tag requirements
+    to include the og: (open graph) prefix.  We'll need to look for this in the
+    add-on if we want to continue getting the correct open graph information from
+    sites that provide it.
+    [facebook developers - share](http://developers.facebook.com/docs/share)
+    https://github.com/mozilla/f1/issues#issue/19
+  * Share option on the facebook page that shows the share? It is not showing up,
+    dmandelin's family advice.
 
 # Better settings/choice release
 
 * A way to surface settings, accounts - Andy and Bryan
 * Surface the bookmarking better?
 * f1 keybinding
+* UI to let the user know that we will be adding a link in the twitter/email.
 
 # Work out common share icon
 
@@ -57,19 +61,19 @@ New feedback:
 * Set up page with analytics - Shane
 * Set up dedicated analytics box? - Gozer/Shane
 
-# Server stuff
-
-* async calls for apis
-* own url shortener?
-* better tests with real oauth calls?
-* no mysql?
-
 # Backlog
 
 * iframe embedding for web sites
   * Aggregate analytics per domain.
     * opt out metrics pref.
 * Statistics blog post
+
+* server improvements: async server.
+* server improvements: own url shortener?
+* server improvements: better tests with real oauth calls?
+* server improvements: no mysql?
+
+* Automated tests
 
 * Jen: how would she do it: When configuring Gmail account, it says that F1 is looking for four things from my Google account.
   The fourth is "Gmail". What does that mean? Does it mean "Gmail address (if different from Google account")
