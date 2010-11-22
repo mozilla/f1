@@ -16,7 +16,7 @@
             <a style="color:#00A0FF;font-size:14px;" href="${c.longurl}">${c.title}</a>
 % endif
         </div>
-% if c.description
+% if c.description:
         <div class="description" style="font-size:12px;color:#666;margin:10px 0;font-style:italic;padding:0 0 0 15px;border-left:1px solid #666;">
             ${c.description}
         </div>
