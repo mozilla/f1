@@ -24,8 +24,6 @@ New feedback:
   https://github.com/mozilla/f1/issues#issue/16
 * Make youtube videos playable in Facebook
   https://github.com/mozilla/f1/issues#issue/17
-* Leave Send Link menu option in there.
-  https://github.com/mozilla/f1/issues#issue/18
 * Privacy policy update?
   * Make the policy and link clear it is F1 privacy policy, put link under install button?
 * Meta tag changes for facebook: Facebook changed their meta tag requirements

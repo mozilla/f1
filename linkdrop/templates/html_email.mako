@@ -4,20 +4,26 @@
 <head>
     <title>${c.subject}</title>
 </head>
-<body style="margin: 1em;max-width:600pt;">
-    <div class="message" style="color:#222;">
+<body style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;margin:20px;max-width:460px;line-height:110%;">
+    <div class="message" style="font-size:14px;">
         ${context.write(c.message)}
     </div>
-    <div class="share" style="margin:1em 0;max-width:480pt;">
-        <div class="link" style="">
+    <div class="share" style="margin:20px 0;">
+        <div class="link">
 % if c.shorturl:
-        <a style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;" href="${c.shorturl}">${c.title}</a></div>
+            <a style="color:#00A0FF;font-size:14px;" href="${c.shorturl}">${c.title}</a>
 % elif c.longurl:
-        <a style="font-family:Arial,Helvetica,sans-serif;font-weight:bold;" href="${c.longurl}">${c.title}</a>
+            <a style="color:#00A0FF;font-size:14px;" href="${c.longurl}">${c.title}</a>
 % endif
         </div>
-        <div class="description" style="font-family:Arial,Helvetica,sans-serif;font-size:x-small;color:#666;">${c.description}</div>
+% if c.description:
+        <div class="description" style="font-size:12px;color:#666;margin:10px 0;font-style:italic;padding:0 0 0 15px;border-left:1px solid #666;">
+            ${c.description}
+        </div>
+% endif
     </div>
-    <div style="font-family:Arial,Helvetica,sans-serif;font-size:xx-small;color:#999;position:absolute;bottom:0;margin:1em 0;">${c.from_name} is awesome and used <a style="color:#666;" href="http://f1.mozillamessaging.com/">Mozilla F1</a> to share this.</div>
+    <div class="footer" style="font-size:12px;color:#666;position:absolute;bottom:0;margin:20px 0;">
+        sent via <a style="color:#00A0FF;" href="http://f1.mozillamessaging.com/">Mozilla F1</a>
+    </div>
 </body>
 </html>
