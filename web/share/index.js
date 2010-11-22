@@ -583,7 +583,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       twitterDom = $('#twitter'),
       picture, val,
       dom = $('textarea.message.urlWithSpace'),
-      sessionRestore = store.sessionRestore;
+      sessionRestore = store.sessionRestore,
+      tabSelectionDom;
 
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
@@ -657,7 +658,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     //that is not the current tab.
     tabSelection = determineTab();
     $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
-    $(tabSelection).removeClass('ui-tabs-hide');
+    tabSelectionDom = $(tabSelection);
+    tabSelectionDom.removeClass('ui-tabs-hide');
+
+    //Update the profile pic/account name text for the tab.
+    updateUserTab(null, {panel: tabSelectionDom[0]});
 
     //Set up jQuery UI tabs.
     tabDom = $("#tabs");
@@ -704,10 +709,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (!sessionRestore || sessionRestore.domain !== 'google.com') {
       dom.val(val + (options.canonicalUrl || options.url) + "\n");
     }
-
-    //Update static displays
-    $(".meta .url").text(options.url);
-    $(".meta .surl").text(options.shortUrl || options.url);
 
     //Set up twitter text counter
     if (!twitterCounter) {

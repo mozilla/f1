@@ -5,6 +5,7 @@
   * versioned resources
 * HTML5/FF friendly option for the video - Bryan
 * Build xpi on staging box - Gozer
+* Make sure 0.7.1 extension works with new site, by pointing it to staging. - James
 * For staging box, reference staging xpi for the install button. - James
 * Email template design - Andy
 * optional bugs
@@ -17,6 +18,8 @@
 
 New feedback:
 
+* http://www.youtube.com/watch?v=U0CGsw6h60k&feature=aso
+  Has a quote in the title that is html encoded in the email message.
 * noscript breaks the UI
   https://github.com/mozilla/f1/issues#issue/16
 * Make youtube videos playable in Facebook
