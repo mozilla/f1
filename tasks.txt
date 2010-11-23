@@ -42,7 +42,7 @@
 * A way to surface settings, accounts - Andy and Bryan
 * Surface the bookmarking better?
 * f1 keybinding
-* UI to let the user know that we will be adding a link in the twitter/email.
+* UI to let the user know that we will be adding a link in the twitter/email. // done, added wording to placeholder text
 
 # Work out common share icon
 
