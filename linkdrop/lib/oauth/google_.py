@@ -44,6 +44,7 @@ from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
 from linkdrop.lib.base import render
+from linkdrop.lib.helpers import safeHTML
 
 from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
@@ -193,6 +194,7 @@ class api():
         msg.add_header('From', from_email)
         msg.add_header('To', to_)
 
+        c.safeHTML = safeHTML
         c.options = options
         c.from_name = fullname
         c.subject = subject
