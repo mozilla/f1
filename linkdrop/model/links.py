@@ -75,4 +75,12 @@ class Link(JsonExpandoMixin, SerializerMixin, Base):
             Session.commit()
             return l
 
-DDL("ALTER TABLE links ADD INDEX(long_url(128))", on='mysql').execute_at("after-create", Base.metadata)
+def should_create(ddl, event, target, connection, **kw):
+    if connection.engine.name != 'mysql':
+        return False
+    row = connection.execute("""SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS
+        WHERE table_name = 'links'
+        AND index_name = 'ix_long_url';""").scalar()
+    return not bool(row)
+
+DDL("ALTER TABLE links ADD INDEX ix_long_url (long_url(128))", on=should_create).execute_at("after-create", Base.metadata)
