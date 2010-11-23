@@ -46,7 +46,10 @@
       <span class="status inactive"></span>
     </div>
     <div class="rightActions">
-      <a href="http://feedback.mozillalabs.com/forums/68185-messaging-add-ons" target="_blank">feedback</a> <span class="close"></span>
+      <a href="../service/privacy.html" target="_blank">privacy</a> /
+      <a href="../" target="_blank">about</a> /
+      <a href="http://feedback.mozillalabs.com/forums/68185-messaging-add-ons" target="_blank">feedback</a> 
+      <span class="close"></span>
     </div>
   </ul>
 
@@ -70,7 +73,7 @@
         </div>
       </div>
       <div class="message twitterCounter boxFlex">
-        <textarea class="message" placeholder="What do you think of this page?" name="message"></textarea>
+        <textarea class="message" placeholder="Type your message here, and we'll attach the link" name="message"></textarea>
         <div class="counter"></div>
       </div>
       <button class="share" type="submit">share</button>
@@ -99,7 +102,7 @@
         </div>
       </div>
       <div class="message boxFlex">
-        <textarea class="message" placeholder="What do you think of this page?" name="message"></textarea>
+        <textarea class="message" placeholder="Type your message here, and we'll attach the link" name="message"></textarea>
       </div>
       <button class="share" type="submit">share</button>
     </form>
@@ -122,7 +125,7 @@
       <input name="subject" placeholder="subject" type="text" value=""/>
     </div>
     <div class="message boxFlex">
-      <textarea class="message urlWithSpace" placeholder="Don't forget to at least include the link in the subject! :)" name="message"></textarea>
+      <textarea class="message urlWithSpace" placeholder="Type your message here, and we'll attach the link" name="message"></textarea>
     </div>
     <button class="share" type="submit">share</button>
     </form>
@@ -164,9 +167,12 @@
         </li>
       </ul>
 
-      <div class="explainText">
-        <h1><a href="../service/privacy.html" target="_blank">Privacy</a> / <a href="../" target="_blank">About</a></h1>
-        Configure your Twitter, Facebook, or Google account to share with F1.
+      <div class="config">
+        <ul>
+            <li><input type="checkbox"> Bookmark shared links</li>
+            <li><input type="checkbox"> Include F1 email signature</li>
+            <li><input type="checkbox"> Enable keyboard shortcut</li>
+        </ul>
       </div>
     </div>
   </div>
