@@ -560,13 +560,13 @@ ul.ui-autocomplete li.ui-menu-item a.ui-state-hover {
 }
 
 #settings ul {
-  min-width: 420px;
+  min-width: 660px;
 }
 
 #settings ul li {
   display: inline-block;
   float: left;
-  width: 140px;
+  width: 220px;
   min-height: 71px;
 }
 
@@ -667,6 +667,7 @@ h1 img {
   margin: 0 0 0 10px;
   padding: 0 0 0 10px;
   border-left: 1px dotted #888;
+  width: 220px;
 }
 
 #settings .config ul {
