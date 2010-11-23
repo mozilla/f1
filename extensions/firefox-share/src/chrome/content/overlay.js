@@ -61,6 +61,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   }
 
+  function unescapeXml(text) {
+    return text.replace(/&lt;|&#60;/g, '<')
+               .replace(/&gt;|&#62;/g, '>')
+               .replace(/&amp;|&#38;/g, '&')
+               .replace(/&apos;|&#39;/g, '\'')
+               .replace(/&quot;|&#34;/g, '"');
+  }
+
   function log(msg) {
     Application.console.log('.' + msg); // avoid clearing on empty log
   }
@@ -416,17 +424,22 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getPageTitle: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
-      var titleNode = gBrowser.contentDocument.getElementsByTagName('title')[0];
+      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta'),
+          titleNode = gBrowser.contentDocument.getElementsByTagName('title')[0],
+          title;
       for (var i = 0; i < metaNodes.length; i++) {
         if ("title" === metaNodes[i].getAttribute("name")) {
           var content = metaNodes[i].getAttribute("content");
           if (content) {
-            return content.trim();
+            title = content.trim();
+            //Title could have some XML escapes in it since it could be an
+            //og:title type of tag, so be sure unescape
+            return unescapeXml(title);
           }
         }
       }
       if (titleNode) {
+        //Use node Value because 
         return titleNode.firstChild.nodeValue.trim();
       }
       return '';
@@ -438,7 +451,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         if ("description" === metaNodes[i].getAttribute("name")) {
           var content = metaNodes[i].getAttribute("content");
           if (content) {
-            return content;
+            return unescapeXml(content);
           }
         }
       }
@@ -453,7 +466,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         if ("medium" === metaNodes[i].getAttribute("name")) {
           var content = metaNodes[i].getAttribute("content");
           if (content) {
-            return content;
+            return unescapeXml(content);
           }
         }
       }

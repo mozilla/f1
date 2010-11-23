@@ -581,9 +581,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
       twitterDom = $('#twitter'),
-      picture, val,
-      dom = $('textarea.message.urlWithSpace'),
-      sessionRestore = store.sessionRestore;
+      picture,
+      sessionRestore = store.sessionRestore,
+      tabSelectionDom;
 
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
@@ -657,7 +657,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     //that is not the current tab.
     tabSelection = determineTab();
     $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
-    $(tabSelection).removeClass('ui-tabs-hide');
+    tabSelectionDom = $(tabSelection);
+    tabSelectionDom.removeClass('ui-tabs-hide');
+
+    //Update the profile pic/account name text for the tab.
+    updateUserTab(null, {panel: tabSelectionDom[0]});
 
     //Set up jQuery UI tabs.
     tabDom = $("#tabs");
@@ -683,7 +687,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     if (options.title) {
       facebookDom.find('[name="name"]').val(options.title);
-      gmailDom.find('[name="message"]').val(options.title);
       gmailDom.find('[name="title"]').val(options.title);
     }
 
@@ -692,22 +695,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       gmailDom.find('[name="description"]').val(options.description);
     }
 
-    val = dom.val() + '\n';
-
     //If the message containder doesn't want URLs then respect that.
     //However, skip this if session restore is involved.
     if (sessionRestore) {
       sessionRestore = JSON.parse(sessionRestore);
     }
-    //Update gmail message to contain the link, but only do that if
-    //no session restore.
-    if (!sessionRestore || sessionRestore.domain !== 'google.com') {
-      dom.val(val + (options.canonicalUrl || options.url) + "\n");
-    }
-
-    //Update static displays
-    $(".meta .url").text(options.url);
-    $(".meta .surl").text(options.shortUrl || options.url);
 
     //Set up twitter text counter
     if (!twitterCounter) {
