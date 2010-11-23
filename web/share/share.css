@@ -201,6 +201,8 @@ ul.nav li a.icon.settings {
   background-image: url("i/sprite.png");
   background-position: left 4px;
   background-repeat: no-repeat;
+  padding: 0 10px 0 14px;
+  text-indent: -1000px;
 }
 
 ul.nav .rightActions {
@@ -212,8 +214,14 @@ ul.nav .rightActions {
 }
 
 ul.nav .rightActions a {
+/*
   padding: 0 5px 0 0;
   border-right: 1px dotted #888;
+*/
+}
+
+ul.nav .rightActions a:hover {
+  text-decoration: underline;
 }
 
 ul.nav .rightActions span.close {
@@ -654,12 +662,31 @@ h1 img {
   text-align: center;
 }
 
-#settings .explainText {
-  border-left: 1px dotted #888888;
+#settings .config {
   color: #444444;
   margin: 0 0 0 10px;
   padding: 0 0 0 10px;
-  width: 253px;
+  border-left: 1px dotted #888;
+  width: 220px;
+}
+
+#settings .config ul {
+  width: auto;
+  min-width: 0;
+}
+
+#settings .config ul li {
+  display: block;
+  border: none;
+  width: auto;
+  min-height: 0;
+  height: auto;
+  float: none;
+  padding: 4px 0;
+}
+
+#settings .config ul li input[type="checkbox"] {
+  margin: 0 5px 0 0;
 }
 
 #settings .remove {
