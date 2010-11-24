@@ -34,10 +34,36 @@ body {
     font-size: 14px;
     line-height: 21px;
     color: #0a0a0a;
+    overflow-y: scroll;
 }
 
 button::-moz-focus-inner { 
     border: 0; 
+}
+
+button {
+    height: 24px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    cursor: pointer;
+    padding: 0 10px;
+    
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    
+    background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
+}
+
+button:active {
+    -moz-box-shadow: 0 0 1px #666666 inset;
+    -webkit-box-shadow: 0 0 1px #666666 inset;
+    box-shadow: 0 0 1px #666666 inset;
+    
+    background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
 }
 
 a {
@@ -56,6 +82,7 @@ strong {
 #wrapper {
     width: 720px;
     margin: 0 auto;
+    overflow: hidden;
 }
 
 /* 
@@ -91,6 +118,12 @@ strong {
     margin: 20px 0;
 }
 
+h1 {
+    font-size: 18px;
+    font-weight: normal;
+    color: #00A0FF;
+}
+
 /* 
     header 
 */
@@ -99,9 +132,12 @@ strong {
     margin: 36px 0;
 }
 
-#header.row .c3 {
+#header.row .c3,
+#header.row .c2,
+#header.row .c1 {
     height: 90px;
     line-height: 90px;
+    text-align: right;
 }
 
 #header.row .logo {
@@ -109,8 +145,100 @@ strong {
     background-repeat: no-repeat;
 }
 
+/*
+    tabs
+*/
 
+ul#tabs {
+    display: block;
+    margin: 10px 10px 0 10px;
+}
 
+ul#tabs li {
+    display: inline-block;
+    padding: 7px 20px;
+    border-width: 1px 1px 0 1px;
+    border-color: #ccc;
+    border-style: solid;
+    float: left;
+    margin: 0 5px;
+    background-color: #fff;
+    cursor: pointer;
+    -moz-border-radius: 3px 3px 0 0;
+    -webkit-border-radius: 3px 3px 0 0;
+    border-radius: 3px 3px 0 0;
+}
+
+ul#tabs li.selected {
+    background-color: #fafafa;
+    position: relative;
+    z-index: 2;
+}
+
+/*
+    config
+*/
+
+div#config {
+    border-top: 1px solid #ccc;
+    margin: -1px 10px 0 10px;
+    position: relative;
+    z-index: 1;
+    background-image: -moz-linear-gradient(top, #fafafa 0%, #fff 20px);
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 10px;
+    display: inline-block;
+    background-image: url("i/sprite.png");
+    background-repeat: no-repeat;
+    vertical-align: text-bottom;
+}
+
+.icon.twitter {
+    background-position: center -36px;
+}
+
+.icon.facebook {
+    background-position: center -108px;
+}
+
+.icon.gmail {
+    background-position: center -180px;
+}
+
+div#config .panel {
+    margin: 20px 0;
+}
+
+div#config .username {
+    color: #aaa;
+}
+
+div#config ul {
+    margin: 20px 0;
+    border: 1px solid #ccc;
+    background-color: #fafafa;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+div#config ul li {
+    width: 100%;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ccc;
+}
+
+div#config ul li .accountType {
+    line-height: 24px;
+}
+
+div#config ul li:last-child {
+    border-bottom: none;
+}
 
 /*
     hbox & vbox

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>F1: Sidebar</title>
+    <title>F1: Config</title>
     <link rel="stylesheet" type="text/css" href="style.css">
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
     <script type="text/javascript" src="js/jquery.textOverflow.js"></script>
@@ -10,10 +10,60 @@
 <body>
 
 <div id="wrapper">
+
     <div id="header" class="row">
-      <div class="c3 logo">
-      </div>
+        <div class="c2 logo">
+        </div>
+        <div class="c1">
+            <h1>Configuration</h1>
+        </div>
     </div>
+    
+    <ul id="tabs" class="clearfix">
+        <li class="manage selected">manage</li>
+        <li class="settings">settings</li>
+    </ul>
+    
+    <div id="config">
+    
+        <div id="manage" class="panel">
+            <h1>Manage your accounts</h1>
+            <ul>
+                <li class="hbox">
+                    <div class="accountType boxFlex"><span class="icon twitter"></span> Twitter <span class="username">(_andychung)</span></div>
+                    <button>remove</button>
+                </li>
+                <li class="hbox">
+                    <div class="accountType boxFlex"><span class="icon facebook"></span> Facebook <span class="username">(Andy Chung)</span></div>
+                    <button>remove</button>
+                </li>
+                <li class="hbox">
+                    <div class="accountType boxFlex"><span class="icon gmail"></span> Gmail <span class="username">(animalyouth@gmail.com)</span></div>
+                    <button>remove</button>
+                </li>
+            </ul>
+        </div>
+        
+        <div id="settings" class="panel">
+            <h1>Configure your account settings</h1>
+            <ul>
+                <li class="hbox">
+                    <div class="option boxFlex">Enable keyboard shortcuts</div>
+                    <input type="checkbox">
+                </li>
+                <li class="hbox">
+                    <div class="option boxFlex">Include the F1 email signature</div>
+                    <input type="checkbox">
+                </li>
+                <li class="hbox">
+                    <div class="option boxFlex">Automatically bookmark my shared links</div>
+                    <input type="checkbox">
+                </li>
+            </ul>
+        </div>
+    
+    </div>
+    
 </div>
 
 
