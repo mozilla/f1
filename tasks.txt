@@ -1,7 +1,6 @@
 # Perf release (wednesday)
 
 * Make sure to look at feedback channels, anyone complain yesterday?
-* Make sure 0.7.1 extension works with new site, by pointing it to staging. - James
 * Blog post. - Bryan?
   * Bug fix/perf release.
   * Faster
