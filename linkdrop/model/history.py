@@ -22,7 +22,7 @@
 #
 
 # Account definitions
-from sqlalchemy import Column, Integer, String, Boolean, UniqueConstraint, Text, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, UniqueConstraint, Text, ForeignKey, UnicodeText, DDL
 from sqlalchemy.orm import relationship, backref
 
 from linkdrop.model.meta import Base, Session, make_table_args
@@ -52,7 +52,7 @@ class History(JsonExpandoMixin, SerializerMixin, Base):
     id = Column(Integer, primary_key=True)
     account_id = Column(None, ForeignKey(Account.id), index=True)
     published = Column(UTCDateTime, nullable=False)
-    link = Column(RDUnicode(128))
+    link = Column(UnicodeText)
     domain = Column(RDUnicode(64))
     
     account = relationship('Account')
@@ -64,3 +64,12 @@ class History(JsonExpandoMixin, SerializerMixin, Base):
             hasattr(History.__table__, 'insert_prefix'):
             History.__table__.insert_prefix = 'DELAYED'
 
+def should_create(ddl, event, target, connection, **kw):
+    if connection.engine.name != 'mysql':
+        return False
+    row = connection.execute("""SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS
+        WHERE table_name = 'history'
+        AND index_name = 'ix_link';""").scalar()
+    return not bool(row)
+
+DDL("ALTER TABLE history ADD INDEX ix_link (link(128))", on=should_create).execute_at("after-create", Base.metadata)
