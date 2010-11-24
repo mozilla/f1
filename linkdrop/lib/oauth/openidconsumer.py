@@ -281,7 +281,7 @@ class OpenIDResponder():
         # Update the authrequest
         self._update_authrequest(authrequest)
 
-        return_to = url(controller='account', action="verify",
+        return_to = url(controller='account', action="verify", provider=self.provider,
                            qualified=True, **self.return_to_query)
 
         # Ensure our session is saved for the id to persist
@@ -315,7 +315,7 @@ class OpenIDResponder():
         
         # Setup the consumer and parse the information coming back
         oidconsumer = consumer.Consumer(openid_session, self.openid_store)
-        return_to = url(controller='account', action="verify",
+        return_to = url(controller='account', action="verify", provider=self.provider,
                            qualified=True)
         info = oidconsumer.complete(request.params, return_to)
         

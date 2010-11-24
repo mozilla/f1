@@ -104,15 +104,12 @@ OAuth authorization api.
     # this is not a rest api
     def authorize(self, *args, **kw):
         provider = request.POST['domain']
-        session['oauth_provider'] = provider
-        session.save()
         service = get_provider(provider)
         return service.responder().request_access()
 
     # this is not a rest api
     def verify(self, *args, **kw):
-        provider = session.pop('oauth_provider')
-        session.save()
+        provider = request.params.get('provider')
         service = get_provider(provider)
 
         auth = service.responder()
