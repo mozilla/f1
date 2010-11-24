@@ -38,7 +38,7 @@ import logging
 
 from linkdrop.model.meta import Session
 
-logger=logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 ## {{{ http://code.activestate.com/recipes/52281/ (r1) PSF License
@@ -119,7 +119,7 @@ def json_exception_response(func, *args, **kwargs):
     except HTTPException:
         raise
     except Exception, e:
-        logger.exception("%s(%s, %s) failed", func, args, kwargs)
+        log.exception("%s(%s, %s) failed", func, args, kwargs)
         #pylons = get_pylons(args)
         #pylons.response.status_int = 500
         return {

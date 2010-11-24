@@ -35,7 +35,6 @@ from migrate.versioning.util import load_model
 from migrate.versioning import exceptions, genmodel, schemadiff, schema
 
 import linkdrop.lib.app_globals as app_globals
-import linkdrop.lib.helpers
 from linkdrop.config.routing import make_map
 from linkdrop.model import init_model, meta
 
@@ -66,7 +65,9 @@ def load_environment(global_conf, app_conf):
     config.init_app(global_conf, app_conf, package='linkdrop', paths=paths)
     config['routes.map'] = make_map(config)
     config['pylons.app_globals'] = app_globals.Globals(config)
-    config['pylons.h'] = linkdrop.lib.helpers
+
+    import linkdrop.lib.helpers as h
+    config['pylons.h'] = h
     
     # Setup cache object as early as possible
     import pylons
