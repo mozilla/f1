@@ -422,6 +422,25 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     return selection;
   }
 
+  function updateFirstLastTab() {
+    //Apply first and end classes to whatever tabs are shown.
+    $('.ui-tabs-nav > li')
+      //Reset the tabs
+      .removeClass('first')
+      .removeClass('last')
+      //Only grab non-hidden and non-settings tabs.
+      .filter(function (i) {
+        var tab = $(this),
+            hidden = tab.hasClass('hidden'),
+            settings = tab.hasClass('settings'),
+            debugTab = tab.hasClass('debugTab');
+        return !hidden && !settings && !debugTab;
+      })
+      //Apply the new first and last
+      .first().addClass('first').end()
+      .last().addClass('last');
+  }
+
   function updateAccounts(accounts) {
     var hasLastSelectionMatch = false,
         userAccounts = {}, selection,
@@ -508,22 +527,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       updateUserTab(null, {panel: $(selection)[0]});
     }
 
-    //Apply first and end classes to whatever tabs are shown.
-    $('.ui-tabs-nav > li')
-      //Reset the tabs
-      .removeClass('first')
-      .removeClass('last')
-      //Only grab non-hidden and non-settings tabs.
-      .filter(function (i) {
-        var tab = $(this),
-            hidden = tab.hasClass('hidden'),
-            settings = tab.hasClass('settings'),
-            debugTab = tab.hasClass('debugTab');
-        return !hidden && !settings && !debugTab;
-      })
-      //Apply the new first and last
-      .first().addClass('first').end()
-      .last().addClass('last');
+    updateFirstLastTab();
   }
 
   function onGetAccounts(json) {
@@ -670,6 +674,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     //Make the tabs visible now to the user, now that tabs have been set up.
     tabDom.removeClass('invisible');
     bodyDom.removeClass('loading');
+
+    //Make sure first/last tab styles are set up accordingly.
+    updateFirstLastTab();
 
     //Set up hidden form fields for facebook
     //TODO: try sending data urls via options.thumbnail if no

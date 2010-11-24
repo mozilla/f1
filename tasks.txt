@@ -1,9 +1,7 @@
 # Perf release (wednesday)
 
+* Make sure to look at feedback channels, anyone complain yesterday?
 * Make sure 0.7.1 extension works with new site, by pointing it to staging. - James
-* Email template design - Andy
-  * Run through email clients.
-* 0.7.2 xpi for testing.
 * Blog post. - Bryan?
   * Bug fix/perf release.
   * Faster
@@ -13,6 +11,9 @@
 * optional bugs
   * FE perf - James
     * appcache
+  * If do oauth and cancel, be sure current tab selection is cleared - James
+  * After oauth is done, be sure that the account/get is called before updating
+    the UI - James
   * Build xpi on staging box - Gozer
   * For staging box, reference staging xpi for the install button. - James 
   * HTML5 autocomplete - James
@@ -43,6 +44,8 @@
 * Surface the bookmarking better?
 * f1 keybinding
 * UI to let the user know that we will be adding a link in the twitter/email.
+------
+* Figure out stats gathering for third party calls. - Mark
 
 # Work out common share icon
 
