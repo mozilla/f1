@@ -28,7 +28,7 @@
 
 require.def("oauth",
 function () {
-  var authDone, win, lastDomain, lastDomainTime = 0;
+  var authDone, win, lastTime = 0;
 
   //Handle communication from the auth window, when it completes.
   window.addEventListener("message", function (evt) {
@@ -43,7 +43,6 @@ function () {
 
       //Reset windows
       win = null;
-      lastDomain = null;
 
       if (authDone) {
         authDone(status);
@@ -65,12 +64,11 @@ function () {
     }
 
     //If got another request for the domain and window has not shown up yet
-    //for 5 seconds, or if domain is different, then try window open call.
-    //5 seconds is a bit arbitrary, slower systems may have a longer wait,
+    //for 4 seconds, or if domain is different, then try window open call.
+    //4 seconds is a bit arbitrary, slower systems may have a longer wait,
     //but just trying to reduce the edge cases of seeing multiple windows.
-    if ((!win && domain === lastDomain && currentTime > lastDomainTime + 5000) || domain !== lastDomain) {
-      lastDomain = domain;
-      lastDomainTime = currentTime;
+    if ((currentTime > lastTime + 4000)) {
+      lastTime = currentTime;
       win = window.open(url + "?domain=" + domain,
         "ffshareOAuth",
         "dialog=yes, modal=yes, width=900, height=500, scrollbars=yes");
