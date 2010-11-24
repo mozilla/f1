@@ -209,7 +209,12 @@ div#config {
     background-position: center -180px;
 }
 
-div#config .panel {
+#done {
+    padding: 0 10px;
+}
+
+.panel {
+    width: 100%;
     margin: 20px 0;
 }
 
