@@ -1,5 +1,11 @@
 $(document).ready(function($) {
     
+    // resize wrapper
+    $(window).bind("load resize", function(){
+        var h = $(window).height();
+        $("#wrapper").css({ "min-height" : (h) });
+    });
+    
     // create ellipsis for gecko
     $(function() {
         $(".overflow").textOverflow(null,true);

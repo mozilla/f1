@@ -83,6 +83,7 @@ strong {
     width: 720px;
     margin: 0 auto;
     overflow: hidden;
+    position: relative;
 }
 
 /* 
@@ -209,6 +210,11 @@ div#config {
     background-position: center -180px;
 }
 
+.icon.rss {
+    background-position: center -322px;
+    margin: 0;
+}
+
 #done {
     padding: 0 10px;
 }
@@ -243,6 +249,12 @@ div#config ul li .accountType {
 
 div#config ul li:last-child {
     border-bottom: none;
+}
+
+div#newsFooter {
+    margin: 10px;
+    position: absolute;
+    bottom: 0;
 }
 
 /*

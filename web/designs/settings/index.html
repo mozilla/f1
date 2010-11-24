@@ -30,15 +30,15 @@
             <h1>Manage your accounts</h1>
             <ul>
                 <li class="hbox">
-                    <div class="accountType boxFlex"><span class="icon twitter"></span> Twitter <span class="username">(_andychung)</span></div>
+                    <div class="accountType overflow boxFlex"><span class="icon twitter"></span> Twitter <span class="username">(_andychung)</span></div>
                     <button>remove</button>
                 </li>
                 <li class="hbox">
-                    <div class="accountType boxFlex"><span class="icon facebook"></span> Facebook <span class="username">(Andy Chung)</span></div>
+                    <div class="accountType overflow boxFlex"><span class="icon facebook"></span> Facebook <span class="username">(Andy Chung)</span></div>
                     <button>remove</button>
                 </li>
                 <li class="hbox">
-                    <div class="accountType boxFlex"><span class="icon gmail"></span> Gmail <span class="username">(animalyouth@gmail.com)</span></div>
+                    <div class="accountType overflow boxFlex"><span class="icon gmail"></span> Gmail <span class="username">(animalyouth@gmail.com)</span></div>
                     <button>remove</button>
                 </li>
             </ul>
@@ -48,16 +48,16 @@
             <h1>Configure your account settings</h1>
             <ul>
                 <li class="hbox">
-                    <div class="option boxFlex">Enable keyboard shortcuts</div>
-                    <input type="checkbox">
+                    <label class="option boxFlex" for="shortcut">Enable keyboard shortcuts</label>
+                    <input type="checkbox" id="shortcut">
                 </li>
                 <li class="hbox">
-                    <div class="option boxFlex">Include the F1 email signature</div>
-                    <input type="checkbox">
+                    <label class="option boxFlex" for="signature">Include the F1 email signature</label>
+                    <input type="checkbox" id="signature">
                 </li>
                 <li class="hbox">
-                    <div class="option boxFlex">Automatically bookmark my shared links</div>
-                    <input type="checkbox">
+                    <label class="option boxFlex" for="bookmark" >Automatically bookmark my shared links</label>
+                    <input type="checkbox" id="bookmark">
                 </li>
             </ul>
         </div>
@@ -67,6 +67,10 @@
     <div id="done" class="panel hbox">
         <div class="boxFlex"></div>
         <button>done</button>
+    </div>
+    
+    <div id="newsFooter" class="panel">
+        <span class="icon rss"></span> <a href="#">F1 gets renamed to F2!</a>
     </div>
     
 </div>
