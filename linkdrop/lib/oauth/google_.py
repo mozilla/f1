@@ -30,6 +30,13 @@ can use OpenId+OAuth hybrid protocol to request access to Google Apps using OAut
 import urlparse
 import re
 from openid.extensions import ax, pape
+from openid.consumer import consumer
+from openid import oidutil
+
+from openid.consumer.discover import DiscoveryFailure
+from openid.message import Message, OPENID_NS, OPENID2_NS, OPENID1_NS, \
+     IDENTIFIER_SELECT, no_default, BARE_NS
+
 import oauth2 as oauth
 #from oauth2.clients.smtp import SMTP
 import smtplib
@@ -52,14 +59,47 @@ from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attrib
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
 from linkdrop.lib.oauth.base import get_oauth_config
 
-def _get_google_access_url():
-    id = request.POST.get('openid_identifier')#, 'g.caraveo.com')
-    if id:
-        return 'https://www.google.com/a/%s/OAuthGetAccessToken' % id
-    else:
-        return 'https://www.google.com/accounts/OAuthGetAccessToken'
+GOOGLE_OAUTH = 'https://www.google.com/accounts/OAuthGetAccessToken'
 
 domain = 'google.com'
+
+class GoogleConsumer(consumer.GenericConsumer):
+    # a HACK to allow us to user google domains for federated login.
+    # this doesn't do the proper discovery and validation, but since we
+    # are forcing this to go through well known endpoints it is fine.
+    def _discoverAndVerify(self, claimed_id, to_match_endpoints):
+        oidutil.log('Performing discovery on %s' % (claimed_id,))
+        if not claimed_id.startswith('https://www.google.com/accounts/'):
+            # want to get a service endpoint for the domain, but keep the
+            # original claimed_id so tests during verify pass
+            g_claimed_id = "https://www.google.com/accounts/o8/user-xrds?uri="+claimed_id
+            _, services = self._discover(g_claimed_id)
+            services[0].claimed_id = claimed_id
+        else:
+            _, services = self._discover(claimed_id)
+        if not services:
+            raise DiscoveryFailure('No OpenID information found at %s' %
+                                   (claimed_id,), None)
+        return self._verifyDiscoveredServices(claimed_id, services,
+                                              to_match_endpoints)
+
+    def complete(self, message, endpoint, return_to):
+        """Process the OpenID message, using the specified endpoint
+        and return_to URL as context. This method will handle any
+        OpenID message that is sent to the return_to URL.
+        """
+        mode = message.getArg(OPENID_NS, 'mode', '<No mode set>')
+        claimed_id = message.getArg(OPENID2_NS, 'claimed_id')
+        if not claimed_id.startswith('https://www.google.com/accounts/'):
+            # we want to be sure we have the correct endpoint with the
+            # google domain claimed_id hacked in
+            claimed_id = "https://www.google.com/accounts/o8/user-xrds?uri="+claimed_id
+            _, services = self._discover(claimed_id)
+            endpoint = services[0]
+        modeMethod = getattr(self, '_complete_' + mode,
+                             self._completeInvalid)
+
+        return modeMethod(message, endpoint, return_to)
 
 class responder(OpenIDResponder):
     def __init__(self, consumer=None, oauth_key=None, oauth_secret=None, request_attributes=None, *args,
@@ -73,6 +113,7 @@ class responder(OpenIDResponder):
         OpenIDResponder.__init__(self, domain)
         self.consumer_key = self.config.get('consumer_key')
         self.consumer_secret = self.config.get('consumer_secret')
+        self.consumer_class = GoogleConsumer
 
     def _lookup_identifier(self, identifier):
         """Return the Google OpenID directed endpoint"""
@@ -124,13 +165,12 @@ class responder(OpenIDResponder):
         consumer = oauth.Consumer(self.consumer_key, self.consumer_secret)
         token = oauth.Token(key=request_token, secret='')
         client = oauth.Client(consumer, token)
-        resp, content = client.request(_get_google_access_url(), "POST")
+        resp, content = client.request(GOOGLE_OAUTH, "POST")
         if resp['status'] != '200':
             return None
         return dict(urlparse.parse_qsl(content))
 
     def _get_credentials(self, result_data):
-        
         #{'profile': {'preferredUsername': u'mixedpuppy',
         #     'displayName': u'Shane Caraveo',
         #     'name':
@@ -140,13 +180,29 @@ class responder(OpenIDResponder):
         #        'providerName': 'Google',
         #        'verifiedEmail': u'mixedpuppy@gmail.com',
         #        'identifier': 'https://www.google.com/accounts/o8/id?id=AItOawnEHbJcEY5EtwX7vf81_x2P4KUjha35VyQ'}}
+        
+        # google OpenID for domains result is:
+        #{'profile': {
+        #    'displayName': u'Shane Caraveo',
+        #    'name': {'givenName': u'Shane', 'formatted': u'Shane Caraveo', 'familyName': u'Caraveo'}, 
+        #    'providerName': 'OpenID',
+        #    'identifier': u'http://g.caraveo.com/openid?id=103543354513986529024',
+        #    'emails': [u'mixedpuppy@g.caraveo.com']}}
+        
         profile = result_data['profile']
-        userid = profile['verifiedEmail']
-        username = profile['preferredUsername']
-        profile['emails'] = [{ 'value': userid, 'primary': True }]
+        userid = profile.get('verifiedEmail','')
+        emails = profile.get('emails')
+        profile['emails'] = []
+        if userid:
+            profile['emails'] = [{ 'value': userid, 'primary': False }]
+        if emails:
+            # fix the emails list
+            for e in emails:
+                profile['emails'].append({ 'value': e, 'primary': False })
+        profile['emails'][0]['primary'] = True
         account = {'domain': domain,
-                   'userid': userid,
-                   'username': username }
+                   'userid': profile['emails'][0]['value'],
+                   'username': profile.get('preferredUsername','') }
         profile['accounts'] = [account]
         return result_data
 
@@ -184,7 +240,7 @@ class api():
         result = error = None
 
         profile = self.account.get('profile', {})
-        from_email = from_ = profile.get('verifiedEmail')
+        from_email = from_ = profile['emails'][0]['value']
         fullname = profile.get('displayName', None)
         if fullname:
             from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), from_,)
