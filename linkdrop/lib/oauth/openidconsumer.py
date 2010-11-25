@@ -259,7 +259,7 @@ class OpenIDResponder():
         # Load default parameters that all Auth Responders take
         session['end_point_success'] = request.POST.get('end_point_success', self.config.get('oauth_success'))
         fail_uri = session['end_point_auth_failure'] = request.POST.get('end_point_auth_failure', self.config.get('oauth_failure'))
-        openid_url = request.POST.get('openid_identifier')
+        openid_url = request.POST.get('openid_identifier')#, 'g.caraveo.com')
         
         # Let inherited consumers alter the openid identifier if desired
         openid_url = self._lookup_identifier(openid_url)
@@ -303,6 +303,9 @@ class OpenIDResponder():
             return authrequest.htmlMarkup(realm=request.application_url, return_to=return_to, 
                                           immediate=False)
     
+    def _update_verify(self, consumer):
+        pass
+
     def verify(self):
         """Handle incoming redirect from OpenID Provider"""
         log_debug = self.log_debug
@@ -315,6 +318,7 @@ class OpenIDResponder():
         
         # Setup the consumer and parse the information coming back
         oidconsumer = consumer.Consumer(openid_session, self.openid_store)
+        self._update_verify(oidconsumer)
         return_to = url(controller='account', action="verify", provider=self.provider,
                            qualified=True)
         info = oidconsumer.complete(request.params, return_to)

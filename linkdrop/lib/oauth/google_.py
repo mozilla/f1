@@ -52,7 +52,12 @@ from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attrib
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
 from linkdrop.lib.oauth.base import get_oauth_config
 
-GOOGLE_OAUTH = 'https://www.google.com/accounts/OAuthGetAccessToken'
+def _get_google_access_url():
+    id = request.POST.get('openid_identifier')#, 'g.caraveo.com')
+    if id:
+        return 'https://www.google.com/a/%s/OAuthGetAccessToken' % id
+    else:
+        return 'https://www.google.com/accounts/OAuthGetAccessToken'
 
 domain = 'google.com'
 
@@ -71,6 +76,8 @@ class responder(OpenIDResponder):
 
     def _lookup_identifier(self, identifier):
         """Return the Google OpenID directed endpoint"""
+        if identifier:
+            return "https://www.google.com/accounts/o8/site-xrds?hd=%s" % (identifier)
         return "https://www.google.com/accounts/o8/id"
     
     def _update_authrequest(self, authrequest):
@@ -109,12 +116,15 @@ class responder(OpenIDResponder):
             authrequest.addExtension(ui_request)
         return None
     
+    def _update_verify(self, consumer):
+        pass
+
     def _get_access_token(self, request_token):
         """Retrieve the access token if OAuth hybrid was used"""
         consumer = oauth.Consumer(self.consumer_key, self.consumer_secret)
         token = oauth.Token(key=request_token, secret='')
         client = oauth.Client(consumer, token)
-        resp, content = client.request(GOOGLE_OAUTH, "POST")
+        resp, content = client.request(_get_google_access_url(), "POST")
         if resp['status'] != '200':
             return None
         return dict(urlparse.parse_qsl(content))
