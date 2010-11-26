@@ -131,6 +131,49 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             dom.find('textarea.message').val(data.message);
           }
         }
+      },
+      'googleapps.com': {
+        medium: 'googleapps',
+        name: 'Google Apps',
+        tabName: 'googleappsTab',
+        selectionName: 'googleapps',
+        icon: 'i/gmailIcon.png',
+        serviceUrl: 'https://mail.google.com',
+        revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
+        signOutUrl: 'http://google.com/preferences',
+        accountLink: function (account) {
+          return 'http://google.com/profiles/' + account.username;
+        },
+        validate: function (sendData) {
+          if (!sendData.to || !sendData.to.trim()) {
+            showStatus('statusToError');
+            return false;
+          }
+          return true;
+        },
+        getFormData: function () {
+          var dom = $('#googleapps'),
+              to = dom.find('[name="to"]').val().trim() || '',
+              subject = dom.find('[name="subject"]').val().trim() || '',
+              message = dom.find('textarea.message').val().trim() || '';
+          return {
+            to: to,
+            subject: subject,
+            message: message
+          };
+        },
+        restoreFormData: function (data) {
+          var dom = $('#googleapps');
+          if (data.to) {
+            dom.find('[name="to"]').val(data.to);
+          }
+          if (data.subject) {
+            dom.find('[name="subject"]').val(data.subject);
+          }
+          if (data.message) {
+            dom.find('textarea.message').val(data.message);
+          }
+        }
       }
     },
     hash = location.href.split('#')[1],
@@ -450,7 +493,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //Figure out what accounts we do have
       accounts.forEach(function (account) {
         var name = account.accounts[0].domain;
-        if (name) {
+        if (name && actions[name]) {
           //Make sure to see if there is a match for last selection
           if (!hasLastSelectionMatch) {
             hasLastSelectionMatch = actions[name].selectionName === store.lastSelection;
@@ -499,6 +542,20 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         delete store.gmailContacts;
         updateAutoComplete();
       }
+    }
+
+    if (userAccounts.googleapps) {
+      updateAccountDisplay('googleapps', userAccounts.googleapps);
+      //Make sure we have contacts for auto-complete
+      //storeGmailContacts(userAccounts.googleapps);
+    } else {
+      updateAccountButton('googleapps.com');
+
+      //Make sure there is no cached data hanging around.
+      //if (store.gmailContacts) {
+      //  delete store.gmailContacts;
+      //  updateAutoComplete();
+      //}
     }
 
     //Session restore, do after form setting above.
@@ -592,6 +649,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
     gmailDom = $('#gmail');
+    appsDom = $('#googleapps');
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
@@ -690,16 +748,19 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       twitterDom.find('[name="link"]').val(options.url);
       facebookDom.find('[name="link"]').val(options.url);
       gmailDom.find('[name="link"]').val(options.url);
+      appsDom.find('[name="link"]').val(options.url);
     }
 
     if (options.title) {
       facebookDom.find('[name="name"]').val(options.title);
       gmailDom.find('[name="title"]').val(options.title);
+      appsDom.find('[name="title"]').val(options.title);
     }
 
     if (options.description) {
       facebookDom.find('[name="caption"]').val(options.description);
       gmailDom.find('[name="description"]').val(options.description);
+      appsDom.find('[name="description"]').val(options.description);
     }
 
     //If the message containder doesn't want URLs then respect that.

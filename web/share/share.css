@@ -343,6 +343,12 @@ ul.nav li.ui-tabs-selected a.gmail {
   background-repeat: no-repeat;
 }
 
+ul.nav li.ui-tabs-selected a.googleapps {
+  background-image: url("i/sprite.png");
+  background-position: left -284px;
+  background-repeat: no-repeat;
+}
+
 ul.nav li.ui-tabs-selected a.debug {
   background-image: url("i/bug_b.png");
 }
@@ -558,22 +564,23 @@ ul.ui-autocomplete li.ui-menu-item a.ui-state-hover {
 #settings ul li {
   display: inline-block;
   float: left;
-  width: 220px;
+  width: 140px;
   min-height: 71px;
+}
+
+#settings ul li {
+  padding: 0 10px 0;
+  border-width: 0 1px;
+  border-left-style: dotted;
+  border-color: #888;
 }
 
 #settings ul li:nth-child(1) {
   padding: 0 10px 0 0;
+  border: none;
 }
 
-#settings ul li:nth-child(2) {
-  padding: 0 10px 0;
-  border-width: 0 1px;
-  border-style: dotted;
-  border-color: #888;
-}
-
-#settings ul li:nth-child(3) {
+#settings ul li:nth-child(4) {
   padding: 0 0 0 10px;
 }
 

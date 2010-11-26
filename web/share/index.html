@@ -39,6 +39,7 @@
     <li class="twitterTab leftTab hidden"><a class="icon twitter" href="#twitter">Twitter</a></li>
     <li class="facebookTab leftTab hidden"><a class="icon facebook" href="#facebook">Facebook</a></li>
     <li class="gmailTab leftTab hidden"><a class="icon gmail" href="#gmail">Gmail</a></li>
+    <li class="googleappsTab leftTab hidden"><a class="icon gmail" href="#googleapps">Google Apps</a></li>
     <li class="debugTab"><a class="icon debug" href="#debug">debug</a></li>
     <div class="user-info">
       <span class="avatar"><img class="avatar" src=""></span>
@@ -128,6 +129,29 @@
     </form>
   </div>
 
+  <div id="googleapps" class="ui-tabs-hide">
+    <form name="googleappsSend" class="hbox messageForm" action="#">
+    <div class="user inactive col">
+      <input type="hidden" name="domain" value="googleapps.com" />
+      <input type="hidden" name="userid" value="" />
+      <input type="hidden" name="username" value="" />
+      <input type="hidden" name="link" value="" />
+      <input type="hidden" name="title" value="" />
+      <input type="hidden" name="description" value="" />
+      <span class="avatar"><img class="avatar" src="i/face2.png"></span>
+      <span class="username">Domain User</span>
+    </div>
+    <div class="addressing">
+      <input name="to" placeholder="to" type="text" value="" class="ffshareAutoComplete"/>
+      <input name="subject" placeholder="subject" type="text" value=""/>
+    </div>
+    <div class="message boxFlex">
+      <textarea class="message urlWithSpace" placeholder="Type your message here, and we'll attach the link" name="message"></textarea>
+    </div>
+    <button class="share" type="submit">share</button>
+    </form>
+  </div>
+
   <div id="debug" class="ui-tabs-hide">
     <div class="hbox messageForm">
       <div style="width:450px;">
@@ -161,6 +185,10 @@
         <li class="gmailSettings">
           <h1><span class="accountIcon gmailIcon"></span> Gmail</h1>
           <span data-domain="google.com"></span>
+        </li>
+        <li class="googleappsSettings">
+          <h1><span class="accountIcon gmailIcon"></span> Google Apps</h1>
+          <span data-domain="googleapps.com"></span>
         </li>
       </ul>
 

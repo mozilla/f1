@@ -110,9 +110,11 @@ class responder(OpenIDResponder):
         authentication.
         
         """
+        
         OpenIDResponder.__init__(self, domain)
         self.consumer_key = self.config.get('consumer_key')
         self.consumer_secret = self.config.get('consumer_secret')
+        self.provider = request.POST.get('domain', domain) # support for google apps domains
         self.consumer_class = GoogleConsumer
 
     def _lookup_identifier(self, identifier):
@@ -190,6 +192,10 @@ class responder(OpenIDResponder):
         #    'emails': [u'mixedpuppy@g.caraveo.com']}}
         
         profile = result_data['profile']
+        provider = domain
+        import sys; print >> sys.stderr, "credential provider is ", profile.get('providerName')
+        if profile.get('providerName').lower() == 'openid':
+            provider = 'googleapps.com'
         userid = profile.get('verifiedEmail','')
         emails = profile.get('emails')
         profile['emails'] = []
@@ -200,7 +206,7 @@ class responder(OpenIDResponder):
             for e in emails:
                 profile['emails'].append({ 'value': e, 'primary': False })
         profile['emails'][0]['primary'] = True
-        account = {'domain': domain,
+        account = {'domain': provider,
                    'userid': profile['emails'][0]['value'],
                    'username': profile.get('preferredUsername','') }
         profile['accounts'] = [account]
