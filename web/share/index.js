@@ -262,6 +262,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   //Make it globally visible for debug purposes
   window.showStatusShared = showStatusShared;
 
+  function handleCaptcha(detail, error) {
+    $('#captchaImage').attr('src',detail['imageurl']);
+    if (error)
+        $('#captchaMsg').text(error['message']);
+    $('#captchaSound').attr('src',detail['audiourl']);
+    showStatus('statusCaptcha', false);
+  }
+  window.handleCaptcha = handleCaptcha;
+
   function sendMessage() {
     showStatus('statusSharing');
 
@@ -281,6 +290,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           // oauth+smtp will return a 535 on authentication failure
           if (code ===  401 || code === 535) {
             showStatus('statusAuth');
+          } else if (json.error.code == 'Client.HumanVerificationRequired') {
+            handleCaptcha(json.error.detail);
+          } else if (json.error.code == 'Client.WrongInput') {
+            handleCaptcha(json.error.detail, json.error);
           } else {
             showStatus('statusError', json.error.message);
           }
@@ -691,6 +704,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           showStatus('statusOAuthFailed');
         }
       });
+    });
+
+    $('#captchaButton').click(function(evt) {
+        cancelStatus();
+        clickBlockDom.removeClass('hidden');
+        sendData.HumanVerification = $('#captcha').attr('value');
+        sendData.HumanVerificationImage = $('#captchaImage').attr('src');
+        sendMessage();
     });
 
     //Use cached account info to speed up startup, but then

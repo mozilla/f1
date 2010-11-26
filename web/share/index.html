@@ -248,6 +248,20 @@
   <button class="statusButton statusErrorButton">ok</button>
 </div>
 
+<div id="statusCaptcha" class="status hidden intermediate captcha">
+  <div class="captcha-wrap">
+  <div class="captcha-content">
+    <img id="captchaImage" class="captchaImage" /> 
+    <input id="captcha" name="captcha" placeholder="captcha" type="text"/>
+    <button id="captchaButton" class="statusButton">ok</button>
+  </div>
+  <div id="captchaMsg" class="captcha-msg">
+    Somebody wants to know that you're really human.
+    <div>Enter Captcha text to send message.</div>
+  </div>
+  </div>
+</div>
+
 <div id="statusToError" class="status hidden error">
   The 'to' field is required to send email.
   <button class="statusButton statusErrorButton">ok</button>

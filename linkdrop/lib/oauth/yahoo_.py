@@ -113,11 +113,14 @@ class api():
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         self.sigmethod = oauth.SignatureMethod_HMAC_SHA1()
          
-    def rawcall(self, url, method, args):
+    def rawcall(self, url, method, args, options={}):
         headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         }
+        if options.get('HumanVerification'):
+            headers['X-HumanVerification-ImageUrl'] = options.get('HumanVerificationImage')
+            headers['X-HumanVerification-Answer'] = options.get('HumanVerification')
         # simple jsonrpc call
         postdata = json.dumps({"method": method, 'params': args, 'id':'jsonrpc'})
         postdata = postdata.encode("utf-8")
@@ -174,6 +177,6 @@ class api():
                  "savecopy":1
                 }]
 
-        return self.rawcall(self.endpoints['mail'], 'SendMessage', params)
+        return self.rawcall(self.endpoints['mail'], 'SendMessage', params, options)
 
 
