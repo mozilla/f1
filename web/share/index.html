@@ -39,6 +39,7 @@
     <li class="twitterTab leftTab hidden"><a class="icon twitter" href="#twitter">Twitter</a></li>
     <li class="facebookTab leftTab hidden"><a class="icon facebook" href="#facebook">Facebook</a></li>
     <li class="gmailTab leftTab hidden"><a class="icon gmail" href="#gmail">Gmail</a></li>
+    <li class="yahooTab leftTab hidden"><a class="icon yahoo" href="#yahoo">Yahoo!</a></li>
     <li class="debugTab"><a class="icon debug" href="#debug">debug</a></li>
     <div class="user-info">
       <span class="avatar"><img class="avatar" src=""></span>
@@ -128,6 +129,29 @@
     </form>
   </div>
 
+  <div id="yahoo" class="ui-tabs-hide">
+    <form name="yahooSend" class="hbox messageForm" action="#">
+    <div class="user inactive col">
+      <input type="hidden" name="domain" value="yahoo.com" />
+      <input type="hidden" name="userid" value="" />
+      <input type="hidden" name="username" value="" />
+      <input type="hidden" name="link" value="" />
+      <input type="hidden" name="title" value="" />
+      <input type="hidden" name="description" value="" />
+      <span class="avatar"><img class="avatar" src="i/face2.png"></span>
+      <span class="username">Yahoo! User</span>
+    </div>
+    <div class="addressing">
+      <input name="to" placeholder="to" type="text" value="" class="ffshareAutoComplete"/>
+      <input name="subject" placeholder="subject" type="text" value=""/>
+    </div>
+    <div class="message boxFlex">
+      <textarea class="message urlWithSpace" placeholder="Type your message here, and we'll attach the link" name="message"></textarea>
+    </div>
+    <button class="share" type="submit">share</button>
+    </form>
+  </div>
+
   <div id="debug" class="ui-tabs-hide">
     <div class="hbox messageForm">
       <div style="width:450px;">
@@ -162,11 +186,15 @@
           <h1><span class="accountIcon gmailIcon"></span> Gmail</h1>
           <span data-domain="google.com"></span>
         </li>
+        <li class="yahooSettings">
+          <h1><span class="accountIcon yahooIcon"></span> Yahoo!</h1>
+          <span data-domain="yahoo.com"></span>
+        </li>
       </ul>
 
       <div class="explainText">
         <h1><a href="../service/privacy.html" target="_blank">Privacy</a> / <a href="../" target="_blank">About</a></h1>
-        Configure your Twitter, Facebook, or Google account to share links with your contacts.
+        Configure your Twitter, Facebook, Yahoo! or Google account to share links with your contacts.
       </div>
     </div>
   </div>

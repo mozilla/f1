@@ -131,6 +131,49 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             dom.find('textarea.message').val(data.message);
           }
         }
+      },
+      'yahoo.com': {
+        medium: 'yahoo',
+        name: 'Yahoo!',
+        tabName: 'yahooTab',
+        selectionName: 'yahoo',
+        icon: 'i/yahooIcon.png',
+        serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
+        revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
+        signOutUrl: 'https://login.yahoo.com/config/login?logout=1',
+        accountLink: function (account) {
+          return 'http://profiles.yahoo.com/' + account.username;
+        },
+        validate: function (sendData) {
+          if (!sendData.to || !sendData.to.trim()) {
+            showStatus('statusToError');
+            return false;
+          }
+          return true;
+        },
+        getFormData: function () {
+          var dom = $('#yahoo'),
+              to = dom.find('[name="to"]').val().trim() || '',
+              subject = dom.find('[name="subject"]').val().trim() || '',
+              message = dom.find('textarea.message').val().trim() || '';
+          return {
+            to: to,
+            subject: subject,
+            message: message
+          };
+        },
+        restoreFormData: function (data) {
+          var dom = $('#yahoo');
+          if (data.to) {
+            dom.find('[name="to"]').val(data.to);
+          }
+          if (data.subject) {
+            dom.find('[name="subject"]').val(data.subject);
+          }
+          if (data.message) {
+            dom.find('textarea.message').val(data.message);
+          }
+        }
       }
     },
     hash = location.href.split('#')[1],
@@ -504,6 +547,20 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     }
 
+    if (userAccounts.yahoo) {
+      updateAccountDisplay('yahoo', userAccounts.yahoo);
+      //Make sure we have contacts for auto-complete
+      //storeYahooContacts(userAccounts.yahoo);
+    } else {
+      updateAccountButton('yahoo.com');
+
+      //Make sure there is no cached data hanging around.
+      //if (store.yahooContacts) {
+      //  delete store.yahooContacts;
+      //  updateAutoComplete();
+      //}
+    }
+
     //Session restore, do after form setting above.
     if (sessionRestore) {
       sessionRestore = JSON.parse(sessionRestore);
@@ -595,6 +652,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
     gmailDom = $('#gmail');
+    yahooDom = $('#yahoo');
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
@@ -693,16 +751,19 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       twitterDom.find('[name="link"]').val(options.url);
       facebookDom.find('[name="link"]').val(options.url);
       gmailDom.find('[name="link"]').val(options.url);
+      yahooDom.find('[name="link"]').val(options.url);
     }
 
     if (options.title) {
       facebookDom.find('[name="name"]').val(options.title);
       gmailDom.find('[name="title"]').val(options.title);
+      yahooDom.find('[name="title"]').val(options.title);
     }
 
     if (options.description) {
       facebookDom.find('[name="caption"]').val(options.description);
       gmailDom.find('[name="description"]').val(options.description);
+      yahooDom.find('[name="description"]').val(options.description);
     }
 
     //If the message containder doesn't want URLs then respect that.
