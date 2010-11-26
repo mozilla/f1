@@ -455,9 +455,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       selection = '#' + store.lastSelection;
     } else {
       if (accountCache && accountCache.length) {
-        selectionName = actions[accountCache[0].accounts[0].domain].selectionName;
-        if (selectionName) {
-          selection = '#' + selectionName;
+        var name = accountCache[0].accounts[0].domain;
+        if (actions[name]) {
+            selectionName = actions[accountCache[0].accounts[0].domain].selectionName;
+            if (selectionName) {
+              selection = '#' + selectionName;
+            }
         }
       }
     }
