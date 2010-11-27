@@ -651,8 +651,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
-    gmailDom = $('#gmail');
-    appsDom = $('#googleapps');
+    var gmailDom = $('#gmail');
+    var appsDom = $('#googleapps');
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
