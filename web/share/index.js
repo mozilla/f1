@@ -181,7 +181,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     options = {},
     tabDom, bodyDom, clickBlockDom, twitterCounter,
     updateTab = true, accountCache, tabSelection,
-    gmailDom, autoCompleteWidget, store = localStorage;
+    gmailDom, yahooDom, autoCompleteWidget, store = localStorage;
 
   //Capability detect for localStorage. At least on add-on does weird things
   //with it, so even a concern in Gecko-only code.
@@ -658,7 +658,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
       twitterDom = $('#twitter'),
-      picture,
+      picture, yahooDom,
       sessionRestore = store.sessionRestore,
       tabSelectionDom;
 
