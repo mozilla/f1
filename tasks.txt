@@ -1,8 +1,6 @@
 # Perf release (wednesday)
 
 * Make sure 0.7.1 extension works with new site, by pointing it to staging. - James
-* Email template design - Andy
-  * Run through email clients.
 * 0.7.2 xpi for testing.
 * Blog post. - Bryan?
   * Bug fix/perf release.
