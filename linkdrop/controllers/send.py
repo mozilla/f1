@@ -60,6 +60,53 @@ The 'send' namespace is used to send updates to our supported services.
 
     @api_response
     @json_exception_response
+    @api_entry(
+        doc="""
+send
+----
+
+Share a link through F1.
+""",
+        queryargs=[
+            # name, type, required, default, allowed, doc
+            api_arg('domain', 'string', True, None, None, """
+Domain of service to share to (google.com for gmail, facebook.com, twitter.com)
+"""),
+            api_arg('message', 'string', True, None, None, """
+Message entered by user
+"""),
+            api_arg('username', 'string', False, None, None, """
+Optional username, required if more than one account is configured for a domain.
+"""),
+            api_arg('userid', 'string', False, None, None, """
+Optional userid, required if more than one account is configured for a domain.
+"""),
+            api_arg('link', 'string', False, None, None, """
+URL to share
+"""),
+            api_arg('shorturl', 'string', False, None, None, """
+Shortened version of URL to share
+"""),
+            api_arg('shorten', 'boolean', False, None, None, """
+Force a shortening of the URL provided
+"""),
+            api_arg('to', 'string', False, None, None, """
+Individual or group to share with, not supported by all services.
+"""),
+            api_arg('subject', 'string', False, None, None, """
+Subject line for emails, not supported by all services.
+"""),
+            api_arg('picture', 'string', False, None, None, """
+URL to publicly available thumbnail, not supported by all services.
+"""),
+            api_arg('description', 'string', False, None, None, """
+Site provided description of the shared item, not supported by all services.
+"""),
+            api_arg('name', 'string', False, None, None, """
+"""),
+        ],
+        response={'type': 'list', 'doc': 'raw data list'}
+    )
     def send(self):
         result = {}
         error = None

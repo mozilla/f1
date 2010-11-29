@@ -63,11 +63,11 @@ comma seperated values that can be [domain,perday]
             whereclause.append(Account.created < UTCDateTime.from_string(end))
         if 'perday' in opts:
             if 'domain' in opts:
-                s = select([func.date(Account.created), Account.domain, func.count(Account.id)])
+                s = select([func.date_format(History.published, "%Y-%m-%d"), Account.domain, func.count(Account.id)])
                 groupby.append(func.to_days(Account.created))
                 groupby.append(Account.domain)
             else:
-                s = select([func.date(Account.created), func.count(Account.id)])
+                s = select([func.date_format(History.published, "%Y-%m-%d"), func.count(Account.id)])
                 groupby.append(func.to_days(Account.created))
         else:
             s = select([func.count(Account.domain), Account.domain])

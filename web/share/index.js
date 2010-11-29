@@ -412,9 +412,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       selection = '#' + store.lastSelection;
     } else {
       if (accountCache && accountCache.length) {
-        selectionName = actions[accountCache[0].accounts[0].domain].selectionName;
-        if (selectionName) {
-          selection = '#' + selectionName;
+        var name = accountCache[0].accounts[0].domain;
+        if (actions[name]) {
+            selectionName = actions[accountCache[0].accounts[0].domain].selectionName;
+            if (selectionName) {
+              selection = '#' + selectionName;
+            }
         }
       }
     }
@@ -450,7 +453,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //Figure out what accounts we do have
       accounts.forEach(function (account) {
         var name = account.accounts[0].domain;
-        if (name) {
+        if (name && actions[name]) {
           //Make sure to see if there is a match for last selection
           if (!hasLastSelectionMatch) {
             hasLastSelectionMatch = actions[name].selectionName === store.lastSelection;
