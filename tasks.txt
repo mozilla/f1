@@ -1,9 +1,17 @@
 # Better settings/choice release
 
 * A way to surface settings, accounts - Andy and Bryan
-* Surface the bookmarking better?
-* f1 keybinding
-* UI to let the user know that we will be adding a link in the twitter/email.
+  * Surface the bookmarking better?
+  * f1 keybinding
+* UI to let the user know that we will be adding a link in the twitter/email. - Andy
+* Add Yahoo, Google Apps for domain - Shane
+* Look at LinkedIn API - Shane
+* Flesh out APIs, target Dec 2nd.
+  * Figure out basic iframe API: oexchange with https, sizings and a callback when done?
+  * server-to-server API - Shane
+    * How does F1 know about new sites?
+* New settings page: how to surface new accounts to people upgrading vs first time users? - Bryan/Andy/James
+* Make sure web UI gets expired from cache on new release since old one cannot handle accounts it did not know about.
 
 ## optional settings release work
 
