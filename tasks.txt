@@ -3,6 +3,8 @@
 * A way to surface settings, accounts - Andy and Bryan
   * Surface the bookmarking better?
   * f1 keybinding
+* Yahoo icon - Andy
+* Google Apps icon (should it be different than gmail?) - Bryan and Andy
 * share UI: push a style or change in UI for x days indicating new share services - Andy
   * turn it off after x number of days since last opened share UI
 * Settings page indicates which ones are new, and that UI matches the new indicator in share UI. - Andy
@@ -11,14 +13,15 @@
   * Do a dropdown/overlay of settings over the browser page. - James
 * Change to common share icon.
 * UI to let the user know that we will be adding a link in the twitter/email. - Andy
-* Add Yahoo, Google Apps for domain - Shane
+* New settings page: how to surface new accounts to people upgrading vs first time users? - Bryan/Andy/James
+* Make sure web UI gets expired from cache on new release since old one cannot handle accounts it did not know about.
+
+# API work
 * Look at LinkedIn API - Shane
 * Flesh out APIs, target Dec 2nd.
   * Figure out basic iframe API: oexchange with https, sizings and a callback when done?
   * server-to-server API - Shane
     * How does F1 know about new sites?
-* New settings page: how to surface new accounts to people upgrading vs first time users? - Bryan/Andy/James
-* Make sure web UI gets expired from cache on new release since old one cannot handle accounts it did not know about.
 
 ## optional settings release work
 
