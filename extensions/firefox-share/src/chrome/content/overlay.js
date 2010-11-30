@@ -790,7 +790,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     isValidURI: function (aURI) {
       //Only open the share frame for http/https urls, file urls for testing.
-      return (aURI.schemeIs('http') || aURI.schemeIs('https') || aURI.schemeIs('file'));
+      return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') || aURI.schemeIs('file')));
     },
 
     canShareURI: function (aURI) {
