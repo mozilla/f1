@@ -116,7 +116,8 @@ OAuth authorization api.
         try:
             user = auth.verify()
             account = user['profile']['accounts'][0]
-    
+            if not user.get('oauth_token') and not user.get('oauth_token_secret'):
+                raise Exception('Unable to get OAUTH access')
             acct = self._get_or_create_account(provider, account['userid'], account['username'])
             acct.profile = user['profile']
             acct.oauth_token = user.get('oauth_token', None)
