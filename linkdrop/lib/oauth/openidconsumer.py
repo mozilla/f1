@@ -195,6 +195,7 @@ class OpenIDResponder():
 
     def __init__(self, provider):
         self.provider = provider
+        self.consumer_class = None
         self.log_debug = logging.DEBUG >= log.getEffectiveLevel()
 
         self.config = get_oauth_config(provider)
@@ -268,7 +269,7 @@ class OpenIDResponder():
             return redirect(fail_uri)
         
         openid_session = {}
-        oidconsumer = consumer.Consumer(openid_session, self.openid_store)
+        oidconsumer = consumer.Consumer(openid_session, self.openid_store, self.consumer_class)
                 
         try:
             authrequest = oidconsumer.begin(openid_url)
@@ -314,7 +315,7 @@ class OpenIDResponder():
             raise AccessException("openid session missing")
         
         # Setup the consumer and parse the information coming back
-        oidconsumer = consumer.Consumer(openid_session, self.openid_store)
+        oidconsumer = consumer.Consumer(openid_session, self.openid_store, self.consumer_class)
         return_to = url(controller='account', action="verify", provider=self.provider,
                            qualified=True)
         info = oidconsumer.complete(request.params, return_to)

@@ -132,6 +132,49 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           }
         }
       },
+      'googleapps.com': {
+        medium: 'googleapps',
+        name: 'Google Apps',
+        tabName: 'googleappsTab',
+        selectionName: 'googleapps',
+        icon: 'i/gmailIcon.png',
+        serviceUrl: 'https://mail.google.com',
+        revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
+        signOutUrl: 'http://google.com/preferences',
+        accountLink: function (account) {
+          return 'http://google.com/profiles/' + account.username;
+        },
+        validate: function (sendData) {
+          if (!sendData.to || !sendData.to.trim()) {
+            showStatus('statusToError');
+            return false;
+          }
+          return true;
+        },
+        getFormData: function () {
+          var dom = $('#googleapps'),
+              to = dom.find('[name="to"]').val().trim() || '',
+              subject = dom.find('[name="subject"]').val().trim() || '',
+              message = dom.find('textarea.message').val().trim() || '';
+          return {
+            to: to,
+            subject: subject,
+            message: message
+          };
+        },
+        restoreFormData: function (data) {
+          var dom = $('#googleapps');
+          if (data.to) {
+            dom.find('[name="to"]').val(data.to);
+          }
+          if (data.subject) {
+            dom.find('[name="subject"]').val(data.subject);
+          }
+          if (data.message) {
+            dom.find('textarea.message').val(data.message);
+          }
+        }
+      },
       'yahoo.com': {
         medium: 'yahoo',
         name: 'Yahoo!',
@@ -560,6 +603,20 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     }
 
+    if (userAccounts.googleapps) {
+      updateAccountDisplay('googleapps', userAccounts.googleapps);
+      //Make sure we have contacts for auto-complete
+      //storeGmailContacts(userAccounts.googleapps);
+    } else {
+      updateAccountButton('googleapps.com');
+
+      //Make sure there is no cached data hanging around.
+      //if (store.gmailContacts) {
+      //  delete store.gmailContacts;
+      //  updateAutoComplete();
+      //}
+    }
+
     if (userAccounts.yahoo) {
       updateAccountDisplay('yahoo', userAccounts.yahoo);
       //Make sure we have contacts for auto-complete
@@ -666,6 +723,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     clickBlockDom = $('#clickBlock');
     gmailDom = $('#gmail');
     yahooDom = $('#yahoo');
+    var appsDom = $('#googleapps');
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
@@ -773,18 +831,21 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       facebookDom.find('[name="link"]').val(options.url);
       gmailDom.find('[name="link"]').val(options.url);
       yahooDom.find('[name="link"]').val(options.url);
+      appsDom.find('[name="link"]').val(options.url);
     }
 
     if (options.title) {
       facebookDom.find('[name="name"]').val(options.title);
       gmailDom.find('[name="title"]').val(options.title);
       yahooDom.find('[name="title"]').val(options.title);
+      appsDom.find('[name="title"]').val(options.title);
     }
 
     if (options.description) {
       facebookDom.find('[name="caption"]').val(options.description);
       gmailDom.find('[name="description"]').val(options.description);
       yahooDom.find('[name="description"]').val(options.description);
+      appsDom.find('[name="description"]').val(options.description);
     }
 
     //If the message containder doesn't want URLs then respect that.

@@ -222,7 +222,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                                            Components.interfaces.nsISupports]),
 
     onLocationChange: function (aWebProgress, aRequest, aLocation) {
-      ffshare.canShareURL(aLocation.spec);
+      ffshare.canShareURI(aLocation);
     },
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
@@ -337,10 +337,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     show: function (options) {
-      var tabUrl = gBrowser.getBrowserForTab(this.tab).currentURI.spec,
+      var tabURI = gBrowser.getBrowserForTab(this.tab).currentURI,
+          tabUrl = tabURI.spec,
           iframeNode;
 
-      if (!ffshare.isValidURL(tabUrl)) {
+      if (!ffshare.isValidURI(tabURI)) {
         return;
       }
 
@@ -787,14 +788,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       openAndReuseOneTabPerURL(this.frontpageUrl);
     },
 
-    isValidURL: function (url) {
+    isValidURI: function (aURI) {
       //Only open the share frame for http/https urls, file urls for testing.
-      return (url.indexOf('http') === 0 || url.indexOf('file') === 0);
+      return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') || aURI.schemeIs('file')));
     },
 
-    canShareURL: function (url) {
+    canShareURI: function (aURI) {
       try {
-        var valid = this.isValidURL(url), buttonNode;
+        var valid = this.isValidURI(aURI), buttonNode;
         document.getElementById("menu_ffshare").hidden = (!valid);
         document.getElementById("context-ffshare").hidden = (!valid);
         document.getElementById("context-ffshare-separator").hidden = (!valid);

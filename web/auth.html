@@ -71,7 +71,17 @@
         var args = url.queryToObject(search);
         if (args['domain']) {
           $("#domain").attr("value", args['domain']);
-          document.authForm.submit();
+	  if (args['domain'] == 'googleapps.com') {
+	    $('#oauth').removeClass('hidden');
+	    $('#message').addClass('hidden');
+	    $('#submitbtn').click(function (evt) {
+	      $('#oauth').addClass('hidden');
+	      $('#message').removeClass('hidden');
+	      document.authForm.submit();
+	    });
+	  } else {
+	    document.authForm.submit();
+	  }
         }
       }
     });
@@ -79,19 +89,21 @@
 </head>
 <body class="settings">
 
-  <div class="authorize hidden">
+  <div id="oauth" class="authorize hidden">
     <form name="authForm" action="/api/account/authorize" method="POST">
 	 <input type="hidden" name="domain" id="domain" value="">
+	  Enter your Google Apps domain
+	 <input name="openid_identifier" id="openid_identifier" value="">
 	 <input type="hidden" name="end_point_success" value="/auth.html#oauth_success">
 	 <input type="hidden" name="end_point_auth_failure" value="/auth.html#oauth_failure">
-     <button type="submit">send</button>
+     <button id='submitbtn' type="submit">send</button>
     </form>
 
     </div>
     <div style="clear: both"/>
   </div>
 
-  <div class="connecting"><img src="share/i/loader.gif"> connecting...</div>
+  <div id='message' class="connecting"><img src="share/i/loader.gif"> connecting...</div>
 </body>
 </html>
 

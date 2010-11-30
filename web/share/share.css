@@ -343,9 +343,15 @@ ul.nav li.ui-tabs-selected a.gmail {
   background-repeat: no-repeat;
 }
 
-ul.nav li.ui-tabs-selected a.yahoo {
+ul.nav li.ui-tabs-selected a.googleapps {
   background-image: url("i/sprite.png");
   background-position: left -284px;
+  background-repeat: no-repeat;
+}
+
+ul.nav li.ui-tabs-selected a.yahoo {
+  background-image: url("i/sprite.png");
+  background-position: left -356px;
   background-repeat: no-repeat;
 }
 
