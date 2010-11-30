@@ -3,6 +3,13 @@
 * A way to surface settings, accounts - Andy and Bryan
   * Surface the bookmarking better?
   * f1 keybinding
+* share UI: push a style or change in UI for x days indicating new share services - Andy
+  * turn it off after x number of days since last opened share UI
+* Settings page indicates which ones are new, and that UI matches the new indicator in share UI. - Andy
+* Move down to icons for tabs with tooltips so we can fit all 6. - Andy
+* Settings now become a page. - Andy
+  * Do a dropdown/overlay of settings over the browser page. - James
+* Change to common share icon.
 * UI to let the user know that we will be adding a link in the twitter/email. - Andy
 * Add Yahoo, Google Apps for domain - Shane
 * Look at LinkedIn API - Shane
