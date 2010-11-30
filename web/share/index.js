@@ -174,6 +174,49 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             dom.find('textarea.message').val(data.message);
           }
         }
+      },
+      'yahoo.com': {
+        medium: 'yahoo',
+        name: 'Yahoo!',
+        tabName: 'yahooTab',
+        selectionName: 'yahoo',
+        icon: 'i/yahooIcon.png',
+        serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
+        revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
+        signOutUrl: 'https://login.yahoo.com/config/login?logout=1',
+        accountLink: function (account) {
+          return 'http://profiles.yahoo.com/' + account.username;
+        },
+        validate: function (sendData) {
+          if (!sendData.to || !sendData.to.trim()) {
+            showStatus('statusToError');
+            return false;
+          }
+          return true;
+        },
+        getFormData: function () {
+          var dom = $('#yahoo'),
+              to = dom.find('[name="to"]').val().trim() || '',
+              subject = dom.find('[name="subject"]').val().trim() || '',
+              message = dom.find('textarea.message').val().trim() || '';
+          return {
+            to: to,
+            subject: subject,
+            message: message
+          };
+        },
+        restoreFormData: function (data) {
+          var dom = $('#yahoo');
+          if (data.to) {
+            dom.find('[name="to"]').val(data.to);
+          }
+          if (data.subject) {
+            dom.find('[name="subject"]').val(data.subject);
+          }
+          if (data.message) {
+            dom.find('textarea.message').val(data.message);
+          }
+        }
       }
     },
     hash = location.href.split('#')[1],
@@ -181,7 +224,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     options = {},
     tabDom, bodyDom, clickBlockDom, twitterCounter,
     updateTab = true, accountCache, tabSelection,
-    gmailDom, autoCompleteWidget, store = localStorage;
+    gmailDom, yahooDom, autoCompleteWidget, store = localStorage;
 
   //Capability detect for localStorage. At least on add-on does weird things
   //with it, so even a concern in Gecko-only code.
@@ -262,6 +305,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   //Make it globally visible for debug purposes
   window.showStatusShared = showStatusShared;
 
+  function handleCaptcha(detail, error) {
+    $('#captchaImage').attr('src',detail['imageurl']);
+    if (error)
+        $('#captchaMsg').text(error['message']);
+    $('#captchaSound').attr('src',detail['audiourl']);
+    showStatus('statusCaptcha', false);
+  }
+  window.handleCaptcha = handleCaptcha;
+
   function sendMessage() {
     showStatus('statusSharing');
 
@@ -281,6 +333,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           // oauth+smtp will return a 535 on authentication failure
           if (code ===  401 || code === 535) {
             showStatus('statusAuth');
+          } else if (json.error.code == 'Client.HumanVerificationRequired') {
+            handleCaptcha(json.error.detail);
+          } else if (json.error.code == 'Client.WrongInput') {
+            handleCaptcha(json.error.detail, json.error);
           } else {
             showStatus('statusError', json.error.message);
           }
@@ -561,6 +617,20 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //}
     }
 
+    if (userAccounts.yahoo) {
+      updateAccountDisplay('yahoo', userAccounts.yahoo);
+      //Make sure we have contacts for auto-complete
+      //storeYahooContacts(userAccounts.yahoo);
+    } else {
+      updateAccountButton('yahoo.com');
+
+      //Make sure there is no cached data hanging around.
+      //if (store.yahooContacts) {
+      //  delete store.yahooContacts;
+      //  updateAutoComplete();
+      //}
+    }
+
     //Session restore, do after form setting above.
     if (sessionRestore) {
       sessionRestore = JSON.parse(sessionRestore);
@@ -645,13 +715,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
       twitterDom = $('#twitter'),
-      picture,
+      picture, yahooDom,
       sessionRestore = store.sessionRestore,
       tabSelectionDom;
 
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
-    var gmailDom = $('#gmail');
+    gmailDom = $('#gmail');
+    yahooDom = $('#yahoo');
     var appsDom = $('#googleapps');
 
     //Set the type of system as a class on the UI to show/hide things in
@@ -691,6 +762,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           showStatus('statusOAuthFailed');
         }
       });
+    });
+
+    $('#captchaButton').click(function(evt) {
+        cancelStatus();
+        clickBlockDom.removeClass('hidden');
+        sendData.HumanVerification = $('#captcha').attr('value');
+        sendData.HumanVerificationImage = $('#captchaImage').attr('src');
+        sendMessage();
     });
 
     //Use cached account info to speed up startup, but then
@@ -751,18 +830,21 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       twitterDom.find('[name="link"]').val(options.url);
       facebookDom.find('[name="link"]').val(options.url);
       gmailDom.find('[name="link"]').val(options.url);
+      yahooDom.find('[name="link"]').val(options.url);
       appsDom.find('[name="link"]').val(options.url);
     }
 
     if (options.title) {
       facebookDom.find('[name="name"]').val(options.title);
       gmailDom.find('[name="title"]').val(options.title);
+      yahooDom.find('[name="title"]').val(options.title);
       appsDom.find('[name="title"]').val(options.title);
     }
 
     if (options.description) {
       facebookDom.find('[name="caption"]').val(options.description);
       gmailDom.find('[name="description"]').val(options.description);
+      yahooDom.find('[name="description"]').val(options.description);
       appsDom.find('[name="description"]').val(options.description);
     }
 
