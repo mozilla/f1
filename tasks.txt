@@ -1,8 +1,8 @@
 # Better settings/choice release
 
 * A way to surface settings, accounts - Andy and Bryan
-  * Surface the bookmarking better?
-  * f1 keybinding
+  * Existing accounts, available accounts, and new accounts
+  * Settings for bookmarks and F1 keybinding
 * Yahoo icon - Andy
 * Google Apps icon (should it be different than gmail?) - Bryan and Andy
 * share UI: push a style or change in UI for x days indicating new share services - Andy
