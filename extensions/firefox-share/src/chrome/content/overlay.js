@@ -319,6 +319,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           canonicalUrl: this.getCanonicalURL(),
           shortUrl: this.getShortURL(),
           previews: this.previews(),
+          siteName: this.getSiteName(),
           system: ffshare.system
         });
 
@@ -469,6 +470,19 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       metas = gBrowser.contentDocument.querySelectorAll("meta[name='description']");
       for (i = 0; i < metas.length; i++) {
         if ("description" === metas[i].getAttribute("name")) {
+          var content = metas[i].getAttribute("content");
+          if (content) {
+            return unescapeXml(content);
+          }
+        }
+      }
+      return "";
+    },
+
+    getSiteName: function () {
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:site_name']");
+      for (var i = 0; i < metas.length; i++) {
+        if ("og:site_name" === metas[i].getAttribute("property")) {
           var content = metas[i].getAttribute("content");
           if (content) {
             return unescapeXml(content);
