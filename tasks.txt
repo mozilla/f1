@@ -50,12 +50,6 @@
   https://github.com/mozilla/f1/issues#issue/16
 * Make youtube videos playable in Facebook
   https://github.com/mozilla/f1/issues#issue/17
-* Meta tag changes for facebook: Facebook changed their meta tag requirements
-  to include the og: (open graph) prefix.  We'll need to look for this in the
-  add-on if we want to continue getting the correct open graph information from
-  sites that provide it.
-  [facebook developers - share](http://developers.facebook.com/docs/share)
-  https://github.com/mozilla/f1/issues#issue/19
 * Share option on the facebook page that shows the share? It is not showing up,
   dmandelin's family advice.
 
