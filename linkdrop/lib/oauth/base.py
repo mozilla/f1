@@ -30,6 +30,7 @@ def get_oauth_config(provider):
 
 class OAuth1():
     def __init__(self, provider):
+        self.provider = provider
         self.config = get_oauth_config(provider)
         self.request_token_url = self.config.get('request')
         self.access_token_url = self.config.get('access')
@@ -51,6 +52,7 @@ class OAuth1():
         client = oauth.Client(self.consumer)
         params = {'oauth_callback': url(controller='account',
                                         action="verify",
+                                        provider=self.provider,
                                         qualified=True)}
         if self.scope:
             params[ 'scope' ] = self.scope
@@ -112,7 +114,7 @@ class OAuth2():
         session['end_point_auth_failure'] = request.POST.get('end_point_auth_failure', self.config.get('oauth_failure'))
         session.save()
 
-        return_to = url(controller='account', action="verify",
+        return_to = url(controller='account', action="verify", provider=self.provider,
                            qualified=True)
 
         loc = url(self.authorization_url, client_id=self.app_id, scope=self.scope,
@@ -129,7 +131,7 @@ class OAuth2():
             log.info("%s: %s", self.provider, err)
             raise AccessException(err)
         
-        return_to = url(controller='account', action="verify",
+        return_to = url(controller='account', action="verify", provider=self.provider,
                            qualified=True)
 
         access_url = url(self.access_token_url, client_id=self.app_id,

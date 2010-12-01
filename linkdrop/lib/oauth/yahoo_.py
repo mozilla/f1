@@ -29,9 +29,14 @@ import httplib2
 import json
 import copy
 
+from email.header import Header
+
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
+
+from linkdrop.lib.base import render
+from linkdrop.lib.helpers import safeHTML
 
 from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
@@ -113,11 +118,14 @@ class api():
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         self.sigmethod = oauth.SignatureMethod_HMAC_SHA1()
          
-    def rawcall(self, url, method, args):
+    def rawcall(self, url, method, args, options={}):
         headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         }
+        if options.get('HumanVerification'):
+            headers['X-HumanVerification-ImageUrl'] = options.get('HumanVerificationImage')
+            headers['X-HumanVerification-Answer'] = options.get('HumanVerification')
         # simple jsonrpc call
         postdata = json.dumps({"method": method, 'params': args, 'id':'jsonrpc'})
         postdata = postdata.encode("utf-8")
@@ -156,9 +164,32 @@ class api():
 
     def sendmessage(self, message, options={}):
         result = error = None
-        from_ = self.account.get('profile',{}).get('verifiedEmail')
+
+        profile = self.account.get('profile', {})
+        from_email = from_ = profile.get('verifiedEmail')
+        fullname = profile.get('displayName', None)
+        if fullname:
+            from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), from_,)
+
         to_ = options['to']
         subject = options.get('subject')
+
+        c.safeHTML = safeHTML
+        c.options = options
+        c.from_name = fullname
+        c.subject = subject
+        c.from_header = from_
+        c.to_header = to_
+        c.message = message
+
+        # insert the url if it is not already in the message
+        c.longurl = options.get('link')
+        c.shorturl = options.get('shorturl')
+        # get the title, or the long url or the short url or nothing
+        c.title = options.get('title', options.get('link', options.get('shorturl', '')))
+        c.description = options.get('description', '')[:280]
+
+        message = render('/text_email.mako').encode('utf-8')
 
         params = [{
                 "message":
@@ -174,6 +205,6 @@ class api():
                  "savecopy":1
                 }]
 
-        return self.rawcall(self.endpoints['mail'], 'SendMessage', params)
+        return self.rawcall(self.endpoints['mail'], 'SendMessage', params, options)
 
 

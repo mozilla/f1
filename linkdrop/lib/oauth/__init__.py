@@ -35,6 +35,7 @@ _providers = {
     twitter_.domain:  twitter_,
     facebook_.domain: facebook_,
     google_.domain: google_,
+    "googleapps.com": google_,
     yahoo_.domain: yahoo_
 }
 

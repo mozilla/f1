@@ -104,22 +104,20 @@ OAuth authorization api.
     # this is not a rest api
     def authorize(self, *args, **kw):
         provider = request.POST['domain']
-        session['oauth_provider'] = provider
-        session.save()
         service = get_provider(provider)
         return service.responder().request_access()
 
     # this is not a rest api
     def verify(self, *args, **kw):
-        provider = session.pop('oauth_provider')
-        session.save()
+        provider = request.params.get('provider')
         service = get_provider(provider)
 
         auth = service.responder()
         try:
             user = auth.verify()
             account = user['profile']['accounts'][0]
-    
+            if not user.get('oauth_token') and not user.get('oauth_token_secret'):
+                raise Exception('Unable to get OAUTH access')
             acct = self._get_or_create_account(provider, account['userid'], account['username'])
             acct.profile = user['profile']
             acct.oauth_token = user.get('oauth_token', None)
