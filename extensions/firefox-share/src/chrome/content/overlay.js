@@ -427,17 +427,27 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     getPageTitle: function () {
       var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta'),
           titleNode = gBrowser.contentDocument.getElementsByTagName('title')[0],
-          title;
+          title = null;
       for (var i = 0; i < metaNodes.length; i++) {
+        if ("og:title" === metaNodes[i].getAttribute("property")) {
+          var content = metaNodes[i].getAttribute("content");
+          if (content) {
+            //Title could have some XML escapes in it since it could be an
+            //og:title type of tag, so be sure unescape
+            return unescapeXml(content.trim());
+          }
+        }
+        // Look for the title property and save it but we bias toward the OG:
         if ("title" === metaNodes[i].getAttribute("name")) {
           var content = metaNodes[i].getAttribute("content");
           if (content) {
             title = content.trim();
-            //Title could have some XML escapes in it since it could be an
-            //og:title type of tag, so be sure unescape
-            return unescapeXml(title);
           }
         }
+      }
+      if (title) {
+        //Title could have some XML escapes in it so be sure unescape
+        return unescapeXml(title);
       }
       if (titleNode) {
         //Use node Value because 
@@ -447,14 +457,25 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getPageDescription: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
+      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta'),
+          description = null;
       for (var i = 0; i < metaNodes.length; i++) {
-        if ("description" === metaNodes[i].getAttribute("name")) {
+        if ("og:description" === metaNodes[i].getAttribute("property")) {
           var content = metaNodes[i].getAttribute("content");
           if (content) {
             return unescapeXml(content);
           }
         }
+        //Look for description and save it but we bias toward the OG:
+        if ("description" === metaNodes[i].getAttribute("name")) {
+          var content = metaNodes[i].getAttribute("content");
+          if (content) {
+            description = content;
+          }
+        }
+      }
+      if (description) {
+        return unescapeXml(description);
       }
       return "";
     },
@@ -555,8 +576,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // Look for rel="image_src" and use those if they're available
       // see e.g. http://about.digg.com/thumbnails
 
-      var links = gBrowser.contentDocument.getElementsByTagName("link"),
+      var metas = gBrowser.contentDocument.getElementsByTagName('meta'),
+          links = gBrowser.contentDocument.getElementsByTagName("link"),
           previews = [], i;
+
+      for (i = 0; i < metas.length; i++) {
+        if (metas[i].getAttribute("property") === "og:image") {
+          previews.push(metas[i].getAttribute("content"));
+        }
+      }
 
       for (i = 0; i < links.length; i++) {
         if (links[i].getAttribute("rel") === "image_src") {
