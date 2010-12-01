@@ -12,6 +12,9 @@
 <prefpane id="ffshare-prefpane" label="&ffshare.preferences.prefpane.label;" style="background-color:#fff;">
   <preferences>
     <preference id="pref_bookmarking" name="extensions.ffshare@mozilla.org.bookmarking" instantApply="true" type="bool"/>
+    <preference id="pref_use_accel_key"
+                name="extensions.ffshare@mozilla.org.use-accel-key"
+                instantApply="true" type="bool"/>
   </preferences>
   <hbox flex="1">
     <vbox>
@@ -27,6 +30,11 @@
       <hbox flex="1" align="center">
           <checkbox preference="pref_bookmarking" id="bookmarking"
                     label="&ffshare.preferences.bookmarking.label;"/>
+          <spacer flex="1"/>
+      </hbox>
+      <hbox flex="1" align="center">
+          <checkbox preference="pref_use_accel_key" id="accel_key"
+                    label="&ffshare.preferences.use_accel_key.label;"/>
           <spacer flex="1"/>
       </hbox>
     </vbox>

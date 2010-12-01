@@ -602,8 +602,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
     previousVersion: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".previous_version", ""),
     firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", ""),
+    useAccelKey: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".use-accel-key", true),
 
     errorPage: 'chrome://ffshare/content/down.html',
+
+    keycodeId: "key_ffshare",
+    keycode : "VK_F1",
+    oldKeycodeId: "key_old_ffshare",
+    commandId: "cmd_openSharePage",
 
     onInstallUpgrade: function (version) {
       //Only run if the versions do not match.
@@ -678,6 +684,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
+
+      this.initKeyCode();
+
+      this.prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                             .getService(Components.interfaces.nsIPrefService)
+                             .getBranch("extensions." + FFSHARE_EXT_ID + ".")
+                             .QueryInterface(Components.interfaces.nsIPrefBranch2);
+
+      this.prefs.addObserver("", this, false);
+
     },
 
     onUnload: function () {
@@ -693,6 +709,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
+
+      this.prefs.removeObserver("", this);
+
     },
 
     onFirstRun: function () {
@@ -788,6 +807,70 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       openAndReuseOneTabPerURL(this.frontpageUrl);
     },
 
+    // This function is to be run once at onLoad
+    // Checks for the existence of key code already and saves or gives it an ID for later
+    // We could get away without this check but we're being nice to existing key commands
+    initKeyCode: function() {
+      var keys = document.getElementsByTagName("key");
+      for (var i = 0; i < keys.length; i++) {
+        // has the keycode we want to take and isn't already ours
+        if (this.keycode == keys[i].getAttribute("keycode") &&
+            this.keycodeId != keys[i].id) {
+
+          if (keys[i].id)
+            this.oldKeycodeId = keys[i].id;
+          else
+            keys[i].id = this.oldKeycodeId;
+
+          break;
+        }
+      }
+      this.setAccelKey(this.useAccelKey);
+    },
+
+  observe: function(subject, topic, data) {
+    if (topic != "nsPref:changed") {
+       return;
+    }
+
+    switch(data) {
+      case "use-accel-key":
+        try {
+          var pref = subject.QueryInterface(Components.interfaces.nsIPrefBranch);
+          ffshare.setAccelKey(pref.getBoolPref("use-accel-key"));
+        } catch(e) { error(e); }
+        break;
+    }
+
+   },
+
+    setAccelKey: function(keyOn) {
+      var oldKey = document.getElementById(this.oldKeycodeId),
+          f1Key = document.getElementById(this.keycodeId),
+          keyset = document.getElementById("mainKeyset");
+
+      if (keyOn) {
+        try {
+          if (oldKey) {
+            oldKey.setAttribute("keycode", "")
+          }
+          f1Key.setAttribute("keycode", this.keycode);
+        } catch (e) { error(e); }
+      } else {
+        try {
+          f1Key.setAttribute("keycode", "");
+          if (oldKey) {
+            oldKey.setAttribute("keycode", this.keycode)
+          }
+        } catch (e) { error(e); }
+      }
+
+      // now we invalidate the keyset cache so our changes take effect
+      var p = keyset.parentNode;
+      p.appendChild(p.removeChild(keyset));
+
+    },
+
     isValidURI: function (aURI) {
       //Only open the share frame for http/https urls, file urls for testing.
       return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') || aURI.schemeIs('file')));
@@ -827,6 +910,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         document.getElementById("context-selected-ffshare").hidden = hideSelected;
         document.getElementById("context-selected-ffshare-separator").hidden = hideSelected;
       } catch (ignore) { }
+    },
+
+    onOpenShareCommand: function (e) {
+      this.toggle();
     },
 
     onMenuItemCommand: function (e) {

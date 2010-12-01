@@ -33,6 +33,14 @@
     <stringbundle id="ffshare-strings" src="chrome://ffshare/locale/overlay.properties"/>
   </stringbundleset>
 
+  <commandset id="mainCommandSet">
+    <command id="cmd_openSharePage" oncommand="ffshare.onOpenShareCommand();"/>
+  </commandset>
+
+  <keyset id="mainKeyset">
+    <key id="key_ffshare" keycode="" command="cmd_openSharePage"/>
+  </keyset>
+
   <popupset id="mainPopupSet">
     <!--
       General Right click / context menu share option
