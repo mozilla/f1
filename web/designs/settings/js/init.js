@@ -6,6 +6,12 @@ $(document).ready(function($) {
         $("#wrapper").css({ "min-height" : (h) });
     });
     
+    // flash new stuff yellow
+    $(function() {
+        $("ul.add").animate( { backgroundColor: '#ffff99' }, 200)
+            .delay(1000).animate( { backgroundColor: '#fafafa' }, 3000);
+    });
+    
     // create ellipsis for gecko
     $(function() {
         $(".overflow").textOverflow(null,true);

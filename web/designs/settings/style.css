@@ -66,6 +66,32 @@ button:active {
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
 }
 
+button span.remove,
+button span.add {
+    color: #fff;
+    font-weight: bold;
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    background-image: url("i/sprite.png");
+    background-repeat: no-repeat;
+    vertical-align: text-bottom;
+    margin: 0 0 0 5px;
+}
+
+button.config {
+    width: 100px;
+    text-align: center;
+}
+
+button span.remove {
+    background-position: center -305px;
+}
+
+button span.add {
+    background-position: center -339px;
+}
+
 a {
     color: #00a0ff;
     text-decoration: none;
@@ -203,15 +229,23 @@ div#config {
 }
 
 .icon.facebook {
-    background-position: center -108px;
+    background-position: center -69px;
 }
 
 .icon.gmail {
-    background-position: center -180px;
+    background-position: center -101px;
+}
+
+.icon.yahoo {
+    background-position: center -132px;
+}
+
+.icon.googleApp {
+    background-position: center -165px;
 }
 
 .icon.rss {
-    background-position: center -322px;
+    background-position: center -271px;
     margin: 0;
 }
 
@@ -228,8 +262,13 @@ div#config .username {
     color: #aaa;
 }
 
+div#config .new {
+    color: #ff5959;
+    font-style: italic;
+}
+
 div#config ul {
-    margin: 20px 0;
+    margin: 10px 0 20px;
     border: 1px solid #ccc;
     background-color: #fafafa;
     -moz-border-radius: 5px;

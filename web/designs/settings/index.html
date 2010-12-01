@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="style.css">
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
     <script type="text/javascript" src="js/jquery.textOverflow.js"></script>
+    <script type="text/javascript" src="js/jquery.colorFade.js"></script>
     <script type="text/javascript" src="js/init.js"></script>
 </head>
 <body>
@@ -27,21 +28,34 @@
     <div id="config">
     
         <div id="manage" class="panel">
-            <h1>Manage your accounts</h1>
+            <h1>My accounts</h1>
             <ul>
                 <li class="hbox">
                     <div class="accountType overflow boxFlex"><span class="icon twitter"></span> Twitter <span class="username">(_andychung)</span></div>
-                    <button>remove</button>
+                    <button class="config">remove <span class="remove"></span></button>
                 </li>
                 <li class="hbox">
                     <div class="accountType overflow boxFlex"><span class="icon facebook"></span> Facebook <span class="username">(Andy Chung)</span></div>
-                    <button>remove</button>
+                    <button class="config">remove <span class="remove"></span></button>
                 </li>
                 <li class="hbox">
                     <div class="accountType overflow boxFlex"><span class="icon gmail"></span> Gmail <span class="username">(animalyouth@gmail.com)</span></div>
-                    <button>remove</button>
+                    <button class="config">remove <span class="remove"></span></button>
                 </li>
             </ul>
+            
+            <h1>Add more accounts</h1>
+            <ul class="add">
+                <li class="hbox">
+                    <div class="accountType overflow boxFlex"><span class="icon yahoo"></span> Yahoo Mail <span class="new">new!</span></div>
+                    <button class="config">add <span class="add"></span></button>
+                </li>
+                <li class="hbox">
+                    <div class="accountType overflow boxFlex"><span class="icon googleApp"></span> Google Apps <span class="new">new!</span></div>
+                    <button class="config">add <span class="add"></span></button>
+                </li>
+            </ul>
+            
         </div>
         
         <div id="settings" class="panel">

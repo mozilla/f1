@@ -164,8 +164,6 @@ ul.nav li.first.last {
 }
 
 ul.nav li a.icon {
-  margin: 0 0 0 8px;
-  padding: 0 10px 0 20px;
   font-weight: bold;
   color: #333;
   text-shadow: 1px 1px 0 rgba(255,255,255,0.25);
@@ -173,36 +171,69 @@ ul.nav li a.icon {
   background-repeat: no-repeat;
   background-position: left center;
   display: block;
+  background-image: url("i/sprite.png");
+  background-repeat: no-repeat;
+  padding: 0 17px 0 17px;
+  text-indent: -1000px;
+  position: relative;
+}
+
+ul.nav li a.icon:hover:before {
+    content: "\25B2";
+    position: absolute;
+    left: 12px;
+    top: 14px;
+    color: rgba(0,0,0,0.75);
+    display: block;
+    text-indent: 0;
+    text-shadow: none;
+    z-index: 100000;
+}
+
+ul.nav li a.icon:hover:after {
+    content: attr(name);
+    position: absolute;
+    left: 0;
+    top: 30px;
+    color: #fafafa;
+    padding: 0 10px;
+    display: block;
+    text-indent: 0;
+    background-color: rgba(0,0,0,0.75);
+    text-shadow: none;
+    text-align: center;
+    white-space: nowrap;
+    overflow: visible;
+    z-index: 100000;
+}
+
+ul.nav li a.icon.settings {
+  background-position: center 4px;
 }
 
 ul.nav li a.icon.twitter {
-  background-image: url("i/sprite.png");
-  background-position: left -32px;
-  background-repeat: no-repeat;
+  background-position: center -31px;
 }
 
 ul.nav li a.icon.facebook {
-  background-image: url("i/sprite.png");
-  background-position: left -104px;
-  background-repeat: no-repeat;
+  background-position: center -65px;
 }
 
 ul.nav li a.icon.gmail {
-  background-image: url("i/sprite.png");
-  background-position: left -176px;
-  background-repeat: no-repeat;
+  background-position: center -98px;
+}
+
+ul.nav li a.icon.yahoo {
+  background-position: center -128px;
+}
+
+ul.nav li a.icon.googleApps {
+  background-position: center -161px;
 }
 
 ul.nav li a.icon.debug {
   background-image: url("i/bug_b.png");
-}
-
-ul.nav li a.icon.settings {
-  background-image: url("i/sprite.png");
-  background-position: left 4px;
-  background-repeat: no-repeat;
-  padding: 0 10px 0 14px;
-  text-indent: -1000px;
+  background-position: center;
 }
 
 ul.nav .rightActions {
@@ -231,13 +262,13 @@ ul.nav .rightActions span.close {
   margin-left: 3px;
   cursor: pointer;
   background-image: url("i/sprite.png");
-  background-position: left -288px;
+  background-position: left -237px;
   background-repeat: no-repeat;
 }
 
 ul.nav .rightActions span.close:hover {
   background-image: url("i/sprite.png");
-  background-position: left -252px;
+  background-position: left -201px;
   background-repeat: no-repeat;
 }
 
@@ -333,6 +364,7 @@ ul.nav li.ui-tabs-selected {
   border-color: #666;
 }
 
+/*
 ul.nav li.ui-tabs-selected a.twitter {
   background-image: url("i/sprite.png");
   background-position: left -68px;
@@ -350,6 +382,7 @@ ul.nav li.ui-tabs-selected a.gmail {
   background-position: left -212px;
   background-repeat: no-repeat;
 }
+*/
 
 ul.nav li.ui-tabs-selected a.debug {
   background-image: url("i/bug_b.png");
@@ -604,19 +637,31 @@ ul.ui-autocomplete li.ui-menu-item a.ui-state-hover {
 
 #settings ul li h1 .twitterIcon {
   background-image: url("i/sprite.png");
-  background-position: left -37px;
+  background-position: left -36px;
   background-repeat: no-repeat;
 }
 
 #settings ul li h1 .facebookIcon {
   background-image: url("i/sprite.png");
-  background-position: left -109px;
+  background-position: left -70px;
   background-repeat: no-repeat;
 }
 
 #settings ul li h1 .gmailIcon {
   background-image: url("i/sprite.png");
-  background-position: left -181px;
+  background-position: left -103px;
+  background-repeat: no-repeat;
+}
+
+#settings ul li h1 .yahooIcon {
+  background-image: url("i/sprite.png");
+  background-position: left -132px;
+  background-repeat: no-repeat;
+}
+
+#settings ul li h1 .googleAppsIcon {
+  background-image: url("i/sprite.png");
+  background-position: left -165px;
   background-repeat: no-repeat;
 }
 
