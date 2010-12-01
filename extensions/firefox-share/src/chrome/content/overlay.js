@@ -609,7 +609,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     keycodeId: "key_ffshare",
     keycode : "VK_F1",
     oldKeycodeId: "key_old_ffshare",
-    commandId: "cmd_openSharePage",
 
     onInstallUpgrade: function (version) {
       //Only run if the versions do not match.
@@ -877,17 +876,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     canShareURI: function (aURI) {
+      var command = document.getElementById("cmd_openSharePage");
       try {
-        var valid = this.isValidURI(aURI), buttonNode;
-        document.getElementById("menu_ffshare").hidden = (!valid);
-        document.getElementById("context-ffshare").hidden = (!valid);
-        document.getElementById("context-ffshare-separator").hidden = (!valid);
-        document.getElementById("context-selected-ffshare").hidden = (!valid);
-        document.getElementById("context-selected-ffshare-separator").hidden = (!valid);
-        buttonNode = document.getElementById(buttonId);
-        if (buttonNode) {
-          buttonNode.disabled = (!valid);
-        }
+        if (this.isValidURI(aURI))
+          command.removeAttribute("disabled");
+        else
+          command.setAttribute("disabled", "true");
       } catch (e) {
         throw e;
       }
@@ -916,14 +910,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.toggle();
     },
 
-    onMenuItemCommand: function (e) {
-      this.toggle();
-    },
-
-    onToolbarButtonCommand: function (e) {
-      this.toggle();
-    },
-    
     toggle: function (options) {
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;

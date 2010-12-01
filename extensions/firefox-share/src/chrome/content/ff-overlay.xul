@@ -56,7 +56,7 @@
                 insertafter="context-sendpage"
                 label="&ffshareContext.label;"
                 accesskey="&ffshareContext.accesskey;"
-                oncommand="ffshare.onMenuItemCommand(event)"/>
+                command="cmd_openSharePage"/>
       <menuseparator id="context-ffshare-separator"
                      insertafter="context-sendpage"/>
       <!--
@@ -75,7 +75,7 @@
                 insertafter="context-sep-selectall"
                 label="&ffshareContext.label;"
                 accesskey="&ffshareContext.accesskey;"
-                oncommand="ffshare.onMenuItemCommand(event)"/>
+                command="cmd_openSharePage"/>
     </popup>
   </popupset>
 
@@ -94,8 +94,8 @@
               insertafter="menu_sendLink"
               label="&ffshareMenu.label;"
               accesskey="&ffshareMenu.accesskey;"
-              oncommand="ffshare.onMenuItemCommand(event)"/>
-    <menuseparator id="context-selected-ffshare-separator"
+              command="cmd_openSharePage"/>
+    <menuseparator id="menu_ffshare_separator"
                    insertafter="menu_sendLink"/>
   </menupopup>
 
@@ -110,24 +110,15 @@
            style="margin-left: 3px;visibility: collapse;"/>
   </hbox>
 
-  <!-- toolbar id="nav-bar">
-    <toolbarbutton id="ffshare-toolbar-button"
-                   insertbefore="urlbar-search-splitter"
-                   class="toolbarbutton-1 chromeclass-toolbar-additional"
-                   label="&ffshareToolbarButton.label;"
-                   tooltiptext="&ffshareToolbarButton.tooltip;"
-                   oncommand="ffshare.onToolbarButtonCommand(event)"/>
-  </toolbar -->
-
   <toolbarpalette id="BrowserToolbarPalette">
     <toolbarbutton id="ffshare-toolbar-button"/>
   </toolbarpalette>
 
   <toolbarbutton id="ffshare-toolbar-button"
-                   class="toolbarbutton-1 chromeclass-toolbar-additional"
-                   label="&ffshareToolbarButton.label;"
-                   tooltiptext="&ffshareToolbarButton.tooltip;"
-                   oncommand="ffshare.onToolbarButtonCommand(event)"/>
+                 class="toolbarbutton-1 chromeclass-toolbar-additional"
+                 label="&ffshareToolbarButton.label;"
+                 tooltiptext="&ffshareToolbarButton.tooltip;"
+                 command="cmd_openSharePage"/>
 
   <tabbrowser id="content"/>
 
