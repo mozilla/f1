@@ -425,32 +425,51 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getPageTitle: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta'),
-          titleNode = gBrowser.contentDocument.getElementsByTagName('title')[0],
-          title;
-      for (var i = 0; i < metaNodes.length; i++) {
-        if ("title" === metaNodes[i].getAttribute("name")) {
-          var content = metaNodes[i].getAttribute("content");
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:title']"),
+          i, title;
+      for (i = 0; i < metas.length; i++) {
+        if ("og:title" === metas[i].getAttribute("property")) {
+          var content = metas[i].getAttribute("content");
           if (content) {
-            title = content.trim();
             //Title could have some XML escapes in it since it could be an
             //og:title type of tag, so be sure unescape
-            return unescapeXml(title);
+            return unescapeXml(content.trim());
           }
         }
       }
-      if (titleNode) {
-        //Use node Value because 
-        return titleNode.firstChild.nodeValue.trim();
+      metas = gBrowser.contentDocument.querySelectorAll("meta[name='title']");
+      for (i = 0; i < metas.length; i++) {
+        if ("title" === metas[i].getAttribute("name")) {
+          var content = metas[i].getAttribute("content");
+          if (content) {
+            //Title could have some XML escapes in it so be sure unescape
+            return unescapeXml(content.trim());
+          }
+        }
       }
-      return '';
+      title = gBrowser.contentDocument.getElementsByTagName("title")[0];
+      if (title) {
+        //Use node Value because we have nothing else
+        return title.firstChild.nodeValue.trim();
+      }
+      return "";
     },
 
     getPageDescription: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
-      for (var i = 0; i < metaNodes.length; i++) {
-        if ("description" === metaNodes[i].getAttribute("name")) {
-          var content = metaNodes[i].getAttribute("content");
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:description']"),
+          i;
+      for (i = 0; i < metas.length; i++) {
+        if ("og:description" === metas[i].getAttribute("property")) {
+          var content = metas[i].getAttribute("content");
+          if (content) {
+            return unescapeXml(content);
+          }
+        }
+      }
+      metas = gBrowser.contentDocument.querySelectorAll("meta[name='description']");
+      for (i = 0; i < metas.length; i++) {
+        if ("description" === metas[i].getAttribute("name")) {
+          var content = metas[i].getAttribute("content");
           if (content) {
             return unescapeXml(content);
           }
@@ -462,10 +481,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // According to Facebook - (only the first 3 are interesting)
     // Valid values for medium_type are audio, image, video, news, blog, and mult.
     getPageMedium: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
-      for (var i = 0; i < metaNodes.length; i++) {
-        if ("medium" === metaNodes[i].getAttribute("name")) {
-          var content = metaNodes[i].getAttribute("content");
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']");
+      for (var i = 0; i < metas.length; i++) {
+        if ("medium" === metas[i].getAttribute("name")) {
+          var content = metas[i].getAttribute("content");
           if (content) {
             return unescapeXml(content);
           }
@@ -475,18 +494,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getShortURL: function () {
-      var links = gBrowser.contentDocument.getElementsByTagName("link"),
-        rel = null,
-        rev = null,
-        i;
+      var shorturl = gBrowser.contentDocument.getElementById("shorturl"),
+          links = gBrowser.contentDocument.querySelectorAll("link[rel='shortlink']");
 
       // flickr does id="shorturl"
-      var shorturl = gBrowser.contentDocument.getElementById("shorturl");
       if (shorturl) {
         return shorturl.getAttribute("href");
       }
 
-      for (i = 0; i < links.length; i++) {
+      for (var i = 0; i < links.length; i++) {
         // is there a rel=shortlink href?
         if (links[i].getAttribute("rel") === "shortlink") {
           return gBrowser.currentURI.resolve(links[i].getAttribute("href"));
@@ -496,11 +512,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getCanonicalURL: function () {
-      var links = gBrowser.contentDocument.getElementsByTagName("link"),
-        rel = null,
-        i;
+      var links = gBrowser.contentDocument.querySelectorAll("link[rel='canonical']");
 
-      for (i = 0; i < links.length; i++) {
+      for (var i = 0; i < links.length; i++) {
         if (links[i].getAttribute("rel") === "canonical") {
           return gBrowser.currentURI.resolve(links[i].getAttribute("href"));
         }
@@ -552,11 +566,18 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     previews: function () {
-      // Look for rel="image_src" and use those if they're available
-      // see e.g. http://about.digg.com/thumbnails
-
-      var links = gBrowser.contentDocument.getElementsByTagName("link"),
+      // Look for FB og:image and then rel="image_src" to use if available
+      // for og:image see: http://developers.facebook.com/docs/share
+      // for image_src see: http://about.digg.com/thumbnails
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:image']"),
+          links = gBrowser.contentDocument.querySelectorAll("link[rel='image_src']"),
           previews = [], i;
+
+      for (i = 0; i < metas.length; i++) {
+        if (metas[i].getAttribute("property") === "og:image") {
+          previews.push(metas[i].getAttribute("content"));
+        }
+      }
 
       for (i = 0; i < links.length; i++) {
         if (links[i].getAttribute("rel") === "image_src") {
@@ -602,8 +623,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
     previousVersion: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".previous_version", ""),
     firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", ""),
+    useAccelKey: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".use-accel-key", true),
 
     errorPage: 'chrome://ffshare/content/down.html',
+
+    keycodeId: "key_ffshare",
+    keycode : "VK_F1",
+    oldKeycodeId: "key_old_ffshare",
 
     onInstallUpgrade: function (version) {
       //Only run if the versions do not match.
@@ -678,6 +704,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
+
+      this.initKeyCode();
+
+      this.prefs = Components.classes["@mozilla.org/preferences-service;1"]
+                             .getService(Components.interfaces.nsIPrefService)
+                             .getBranch("extensions." + FFSHARE_EXT_ID + ".")
+                             .QueryInterface(Components.interfaces.nsIPrefBranch2);
+
+      this.prefs.addObserver("", this, false);
+
     },
 
     onUnload: function () {
@@ -693,6 +729,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
+
+      this.prefs.removeObserver("", this);
+
     },
 
     onFirstRun: function () {
@@ -788,23 +827,82 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       openAndReuseOneTabPerURL(this.frontpageUrl);
     },
 
+    // This function is to be run once at onLoad
+    // Checks for the existence of key code already and saves or gives it an ID for later
+    // We could get away without this check but we're being nice to existing key commands
+    initKeyCode: function() {
+      var keys = document.getElementsByTagName("key");
+      for (var i = 0; i < keys.length; i++) {
+        // has the keycode we want to take and isn't already ours
+        if (this.keycode == keys[i].getAttribute("keycode") &&
+            this.keycodeId != keys[i].id) {
+
+          if (keys[i].id)
+            this.oldKeycodeId = keys[i].id;
+          else
+            keys[i].id = this.oldKeycodeId;
+
+          break;
+        }
+      }
+      this.setAccelKey(this.useAccelKey);
+    },
+
+  observe: function(subject, topic, data) {
+    if (topic != "nsPref:changed") {
+       return;
+    }
+
+    switch(data) {
+      case "use-accel-key":
+        try {
+          var pref = subject.QueryInterface(Components.interfaces.nsIPrefBranch);
+          ffshare.setAccelKey(pref.getBoolPref("use-accel-key"));
+        } catch(e) { error(e); }
+        break;
+    }
+
+   },
+
+    setAccelKey: function(keyOn) {
+      var oldKey = document.getElementById(this.oldKeycodeId),
+          f1Key = document.getElementById(this.keycodeId),
+          keyset = document.getElementById("mainKeyset");
+
+      if (keyOn) {
+        try {
+          if (oldKey) {
+            oldKey.setAttribute("keycode", "")
+          }
+          f1Key.setAttribute("keycode", this.keycode);
+        } catch (e) { error(e); }
+      } else {
+        try {
+          f1Key.setAttribute("keycode", "");
+          if (oldKey) {
+            oldKey.setAttribute("keycode", this.keycode)
+          }
+        } catch (e) { error(e); }
+      }
+
+      // now we invalidate the keyset cache so our changes take effect
+      var p = keyset.parentNode;
+      p.appendChild(p.removeChild(keyset));
+
+    },
+
     isValidURI: function (aURI) {
       //Only open the share frame for http/https urls, file urls for testing.
       return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') || aURI.schemeIs('file')));
     },
 
     canShareURI: function (aURI) {
+      var command = document.getElementById("cmd_openSharePage");
       try {
-        var valid = this.isValidURI(aURI), buttonNode;
-        document.getElementById("menu_ffshare").hidden = (!valid);
-        document.getElementById("context-ffshare").hidden = (!valid);
-        document.getElementById("context-ffshare-separator").hidden = (!valid);
-        document.getElementById("context-selected-ffshare").hidden = (!valid);
-        document.getElementById("context-selected-ffshare-separator").hidden = (!valid);
-        buttonNode = document.getElementById(buttonId);
-        if (buttonNode) {
-          buttonNode.disabled = (!valid);
-        }
+        if (this.isValidURI(aURI))
+          command.removeAttribute("disabled");
+        else
+          command.setAttribute("disabled", "true");
       } catch (e) {
         throw e;
       }
@@ -829,14 +927,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       } catch (ignore) { }
     },
 
-    onMenuItemCommand: function (e) {
+    onOpenShareCommand: function (e) {
       this.toggle();
     },
 
-    onToolbarButtonCommand: function (e) {
-      this.toggle();
-    },
-    
     toggle: function (options) {
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
