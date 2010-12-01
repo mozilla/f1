@@ -293,10 +293,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   function showStatusShared() {
     var sendDomain = (sendData && sendData.domain) || 'twitter.com',
+        siteName = options.siteName,
         url = options.url || "",
         doubleSlashIndex = url.indexOf("//") + 2;
     $('#statusShared').empty().append(jig('#sharedTemplate', {
-      domain: url.slice(doubleSlashIndex, url.indexOf("/", doubleSlashIndex)),
+      domain: siteName || url.slice(doubleSlashIndex, url.indexOf("/", doubleSlashIndex)),
       service: actions[sendDomain].name,
       href: actions[sendDomain].serviceUrl
     })).find('.shareTitle').textOverflow(null, true);

@@ -319,6 +319,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           canonicalUrl: this.getCanonicalURL(),
           shortUrl: this.getShortURL(),
           previews: this.previews(),
+          siteName: this.getSiteName(),
           system: ffshare.system
         });
 
@@ -428,24 +429,18 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:title']"),
           i, title;
       for (i = 0; i < metas.length; i++) {
-        if ("og:title" === metas[i].getAttribute("property")) {
-          var content = metas[i].getAttribute("content");
-          if (content) {
-            //Title could have some XML escapes in it since it could be an
-            //og:title type of tag, so be sure unescape
-            return unescapeXml(content.trim());
-          }
-        }
+        var content = metas[i].getAttribute("content");
+        if (content)
+          //Title could have some XML escapes in it since it could be an
+          //og:title type of tag, so be sure unescape
+          return unescapeXml(content.trim());
       }
       metas = gBrowser.contentDocument.querySelectorAll("meta[name='title']");
       for (i = 0; i < metas.length; i++) {
-        if ("title" === metas[i].getAttribute("name")) {
-          var content = metas[i].getAttribute("content");
-          if (content) {
-            //Title could have some XML escapes in it so be sure unescape
-            return unescapeXml(content.trim());
-          }
-        }
+        var content = metas[i].getAttribute("content");
+        if (content)
+          //Title could have some XML escapes in it so be sure unescape
+          return unescapeXml(content.trim());
       }
       title = gBrowser.contentDocument.getElementsByTagName("title")[0];
       if (title) {
@@ -459,21 +454,25 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:description']"),
           i;
       for (i = 0; i < metas.length; i++) {
-        if ("og:description" === metas[i].getAttribute("property")) {
-          var content = metas[i].getAttribute("content");
-          if (content) {
-            return unescapeXml(content);
-          }
-        }
+        var content = metas[i].getAttribute("content");
+        if (content)
+          return unescapeXml(content);
       }
       metas = gBrowser.contentDocument.querySelectorAll("meta[name='description']");
       for (i = 0; i < metas.length; i++) {
-        if ("description" === metas[i].getAttribute("name")) {
-          var content = metas[i].getAttribute("content");
-          if (content) {
-            return unescapeXml(content);
-          }
-        }
+        var content = metas[i].getAttribute("content");
+        if (content)
+          return unescapeXml(content);
+      }
+      return "";
+    },
+
+    getSiteName: function () {
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:site_name']");
+      for (var i = 0; i < metas.length; i++) {
+        var content = metas[i].getAttribute("content");
+        if (content)
+          return unescapeXml(content);
       }
       return "";
     },
@@ -483,12 +482,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     getPageMedium: function () {
       var metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']");
       for (var i = 0; i < metas.length; i++) {
-        if ("medium" === metas[i].getAttribute("name")) {
-          var content = metas[i].getAttribute("content");
-          if (content) {
-            return unescapeXml(content);
-          }
-        }
+        var content = metas[i].getAttribute("content");
+        if (content)
+          return unescapeXml(content);
       }
       return "";
     },
@@ -503,21 +499,29 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       for (var i = 0; i < links.length; i++) {
-        // is there a rel=shortlink href?
-        if (links[i].getAttribute("rel") === "shortlink") {
-          return gBrowser.currentURI.resolve(links[i].getAttribute("href"));
-        }
+        var content = links[i].getAttribute("href");
+        if (content)
+          return gBrowser.currentURI.resolve(content);
       }
       return "";
     },
 
     getCanonicalURL: function () {
-      var links = gBrowser.contentDocument.querySelectorAll("link[rel='canonical']");
+      var links = gBrowser.contentDocument.querySelectorAll("meta[property='og:url']").
+          i;
 
-      for (var i = 0; i < links.length; i++) {
-        if (links[i].getAttribute("rel") === "canonical") {
-          return gBrowser.currentURI.resolve(links[i].getAttribute("href"));
-        }
+      for (i = 0; i < links.length; i++) {
+        var content = links[i].getAttribute("content");
+        if (content)
+          return gBrowser.currentURI.resolve(content);
+      }
+
+      links = gBrowser.contentDocument.querySelectorAll("link[rel='canonical']");
+
+      for (i = 0; i < links.length; i++) {
+        var content = links[i].getAttribute("href");
+        if (content)
+          return gBrowser.currentURI.resolve(content);
       }
 
       // Finally try some hacks for certain sites
@@ -574,15 +578,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           previews = [], i;
 
       for (i = 0; i < metas.length; i++) {
-        if (metas[i].getAttribute("property") === "og:image") {
-          previews.push(metas[i].getAttribute("content"));
-        }
+        var content = metas[i].getAttribute("content");
+        if (content)
+          previews.push(content);
       }
 
       for (i = 0; i < links.length; i++) {
-        if (links[i].getAttribute("rel") === "image_src") {
-          previews.push(links[i].getAttribute("href"));
-        }
+        var content = links[i].getAttribute("href");
+        if (content)
+          previews.push(content);
       }
       return previews;
     },
