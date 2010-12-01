@@ -3,10 +3,7 @@
 <head>
     <title>F1: Config</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-    <script type="text/javascript" src="js/jquery.textOverflow.js"></script>
-    <script type="text/javascript" src="js/jquery.colorFade.js"></script>
-    <script type="text/javascript" src="js/init.js"></script>
+    <script data-main="index.js" src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
 </head>
 <body>
 
@@ -26,7 +23,7 @@
     </ul>
     
     <div id="config">
-    
+
         <div id="manage" class="panel">
             <h1>My accounts</h1>
             <ul>
@@ -44,7 +41,7 @@
                 </li>
             </ul>
             
-            <h1>Add more accounts</h1>
+            <h1>Add accounts</h1>
             <ul class="add">
                 <li class="hbox">
                     <div class="accountType overflow boxFlex"><span class="icon yahoo"></span> Yahoo Mail <span class="new">new!</span></div>
@@ -89,6 +86,19 @@
     
 </div>
 
+<script id="addTemplate" type="text/template">
+  <li class="hbox">
+      <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name} {isNew [}<span class="new">new!</span>{]}</div>
+      <button class="config">add <span class="add"></span></button>
+  </li>
+</script>
+
+<script id="accountTemplate" type="text/template">
+  <li class="hbox">
+      <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name} <span class="username">({accountName})</span></div>
+      <button class="config">remove <span class="remove"></span></button>
+  </li>
+</script>
 
 </body>
 </html>

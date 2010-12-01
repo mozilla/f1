@@ -26,7 +26,7 @@
   document: false, setTimeout: false, localStorage: false */
 "use strict";
 
-require.def("send",
+require.def("index",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
          "placeholder", "TextCounter", "AutoComplete", "dispatch",
          "jquery-ui-1.8.6.custom.min", "jquery.textOverflow"],
@@ -454,7 +454,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       id = ui.panel.id,
       userInfoDom = $(".user-info");
 
-    if (id !== 'debug' && id !== 'settings') {
+    if (id !== 'debug') {
       imageUrl = $(ui.panel).find("div.user img.avatar").attr("src");
       userName = $(ui.panel).find("div.user .username").text();
       inactive = $(ui.panel).find("div.user").hasClass("inactive");
@@ -491,21 +491,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       serviceDom.find('input[name="userid"]').val(svcAccount.userid);
       serviceDom.find('input[name="username"]').val(svcAccount.username);
       serviceDom.find('div.user').removeClass('inactive');
-
-      //Replace the Add button in settings tab to show the user instead
-      $('#settings span[data-domain="' + svcAccount.domain + '"]').empty().append(jig('#accountTemplate', account));
     });
   }
 
-  function updateAccountButton(domain) {
-    $('#settings span[data-domain="' + domain + '"]').empty().append(jig('#addAccountTemplate', domain));
-
-    //Also be sure the account tab is hidden.
-    $('.' + actions[domain].tabName).addClass('hidden');
-  }
-
   function determineTab() {
-    var selection = '#settings', selectionName;
+    var selection, selectionName;
 
     if (store.lastSelection) {
       selection = '#' + store.lastSelection;
@@ -530,13 +520,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //Reset the tabs
       .removeClass('first')
       .removeClass('last')
-      //Only grab non-hidden and non-settings tabs.
+      //Only grab non-hidden tabs.
       .filter(function (i) {
         var tab = $(this),
             hidden = tab.hasClass('hidden'),
-            settings = tab.hasClass('settings'),
             debugTab = tab.hasClass('debugTab');
-        return !hidden && !settings && !debugTab;
+        return !hidden && !debugTab;
       })
       //Apply the new first and last
       .first().addClass('first').end()
@@ -579,14 +568,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     if (userAccounts.twitter) {
       updateAccountDisplay('twitter', userAccounts.twitter);
-    } else {
-      updateAccountButton('twitter.com');
     }
 
     if (userAccounts.facebook) {
       updateAccountDisplay('facebook', userAccounts.facebook);
-    } else {
-      updateAccountButton('facebook.com');
     }
 
     if (userAccounts.gmail) {
@@ -594,8 +579,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //Make sure we have contacts for auto-complete
       storeGmailContacts(userAccounts.gmail);
     } else {
-      updateAccountButton('google.com');
-
       //Make sure there is no cached data hanging around.
       if (store.gmailContacts) {
         delete store.gmailContacts;
@@ -607,28 +590,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       updateAccountDisplay('googleapps', userAccounts.googleapps);
       //Make sure we have contacts for auto-complete
       //storeGmailContacts(userAccounts.googleapps);
-    } else {
-      updateAccountButton('googleapps.com');
-
-      //Make sure there is no cached data hanging around.
-      //if (store.gmailContacts) {
-      //  delete store.gmailContacts;
-      //  updateAutoComplete();
-      //}
     }
 
     if (userAccounts.yahoo) {
       updateAccountDisplay('yahoo', userAccounts.yahoo);
       //Make sure we have contacts for auto-complete
       //storeYahooContacts(userAccounts.yahoo);
-    } else {
-      updateAccountButton('yahoo.com');
-
-      //Make sure there is no cached data hanging around.
-      //if (store.yahooContacts) {
-      //  delete store.yahooContacts;
-      //  updateAutoComplete();
-      //}
     }
 
     //Session restore, do after form setting above.
@@ -686,7 +653,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   function accountsUpdated() {
-    //The accounts were updated in the settings page.
     //Update the account display to reflect the choices appropriately.
 
     //Turn off tab updating
@@ -796,27 +762,32 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     });
 
+    tabSelection = determineTab();
+
     //Set up HTML so initial jquery UI tabs will not flash away from the selected
     //tab as we show it. Done for performance and to remove a flash of tab content
     //that is not the current tab.
-    tabSelection = determineTab();
-    $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
-    tabSelectionDom = $(tabSelection);
-    tabSelectionDom.removeClass('ui-tabs-hide');
-
-    //Update the profile pic/account name text for the tab.
-    updateUserTab(null, {panel: tabSelectionDom[0]});
-
-    //Set up jQuery UI tabs.
-    tabDom = $("#tabs");
-    tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
-    tabDom.bind("tabsselect", updateUserTab);
-    //Make the tabs visible now to the user, now that tabs have been set up.
-    tabDom.removeClass('invisible');
-    bodyDom.removeClass('loading');
-
-    //Make sure first/last tab styles are set up accordingly.
-    updateFirstLastTab();
+    if (tabSelection) {
+      $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
+      tabSelectionDom = $(tabSelection);
+      tabSelectionDom.removeClass('ui-tabs-hide');
+  
+      //Update the profile pic/account name text for the tab.
+      updateUserTab(null, {panel: tabSelectionDom[0]});
+  
+      //Set up jQuery UI tabs.
+      tabDom = $("#tabs");
+      tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
+      tabDom.bind("tabsselect", updateUserTab);
+      //Make the tabs visible now to the user, now that tabs have been set up.
+      tabDom.removeClass('invisible');
+      bodyDom.removeClass('loading');
+  
+      //Make sure first/last tab styles are set up accordingly.
+      updateFirstLastTab();
+    } else {
+      showStatus('statusSettings');
+    }
 
     //Set up hidden form fields for facebook
     //TODO: try sending data urls via options.thumbnail if no
@@ -888,61 +859,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     $('.description').textOverflow(null, true);
     $('.url').textOverflow(null, true);
     $('.surl').textOverflow(null, true);
-
-    //Handle button click for services in the settings.
-    $('#settings').delegate('.auth', 'click', function (evt) {
-      var node = evt.target,
-        domain = node.getAttribute('data-domain');
-
-      //Make sure to bring the user back to this service if
-      //the auth is successful.
-      store.lastSelection = actions[domain].selectionName;
-      //Mark that this account was just added, so that on reload,
-      //the auto-cleanup of lastSelection does not occur right away.
-      store.accountAdded = true;
-
-      oauth(domain, function (success) {
-        if (success) {
-          location.reload();
-        } else {
-          showStatus('statusOAuthFailed');
-        }
-      });
-    });
-
-    //In settings, hook up remove buttons to remove an account
-    bodyDom.delegate('.accountRemove', 'click', function (evt) {
-      var buttonNode = evt.target,
-          domain = buttonNode.getAttribute('data-domain'),
-          userName = buttonNode.getAttribute('data-username'),
-          userId = buttonNode.getAttribute('data-userid');
-
-      rdapi('account/signout', {
-        data: {
-          domain: domain,
-          userid: userId,
-          username: userName
-        },
-        success: function () {
-          accountsUpdated();
-        },
-        error: function (xhr, textStatus, err) {
-          showError({
-            message: err
-          });
-        }
-      });
-
-      //Remove any cached data
-      if (domain === 'google.com' && store.gmailContacts) {
-        delete store.gmailContacts;
-      }
-      if (actions[domain].selectionName === store.lastSelection) {
-        delete store.lastSelection;
-      }
-
-      evt.preventDefault();
-    });
 
     $("form.messageForm")
       .submit(function (evt) {
