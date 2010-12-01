@@ -260,7 +260,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   function showError(error) {
     //TODO: make this nicer.
-    alert('error.msg');
+    alert(error.msg);
   }
 
   showStatus = function (statusId, shouldCloseOrMessage) {
@@ -652,6 +652,19 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     });
   }
 
+  //Listen for when the settings tab changes the accounts
+  dispatch.sub('accountsChanged', function () {
+    getAccounts(function (json) {
+      //Save data in localStorage, then reload, because the tabs
+      //were not created without an active account.
+      if (json.error) {
+        json = [];
+      }
+      store.accountCache = JSON.stringify(json);
+      location.reload();
+    });
+  });
+
   function accountsUpdated() {
     //Update the account display to reflect the choices appropriately.
 
@@ -901,7 +914,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       .each(function (i, node) {
         placeholder(node);
       });
-    
   });
 
 });

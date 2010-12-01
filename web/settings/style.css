@@ -37,6 +37,10 @@ body {
     overflow-y: scroll;
 }
 
+.hidden {
+    display: none;
+}
+
 button::-moz-focus-inner { 
     border: 0; 
 }
@@ -240,7 +244,7 @@ div#config {
     background-position: center -132px;
 }
 
-.icon.googleApp {
+.icon.googleApps {
     background-position: center -165px;
 }
 

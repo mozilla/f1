@@ -16,45 +16,32 @@
             <h1>F1 Configuration</h1>
         </div>
     </div>
-    
+
+    <!-- Start status messages -->
+    <div id="statusError" class="status hidden error">
+      We're really sorry, F1 done goofed up. <span class="message"></span>
+      <button class="statusButton statusErrorButton">ok</button>
+    </div>
+    <!-- End status messages -->
+
     <ul id="tabs" class="clearfix">
         <li class="manage selected">manage</li>
         <li class="settings">settings</li>
     </ul>
-    
+
     <div id="config">
 
         <div id="manage" class="panel">
-            <h1>My accounts</h1>
-            <ul>
-                <li class="hbox">
-                    <div class="accountType overflow boxFlex"><span class="icon twitter"></span> Twitter <span class="username">(_andychung)</span></div>
-                    <button class="config">remove <span class="remove"></span></button>
-                </li>
-                <li class="hbox">
-                    <div class="accountType overflow boxFlex"><span class="icon facebook"></span> Facebook <span class="username">(Andy Chung)</span></div>
-                    <button class="config">remove <span class="remove"></span></button>
-                </li>
-                <li class="hbox">
-                    <div class="accountType overflow boxFlex"><span class="icon gmail"></span> Gmail <span class="username">(animalyouth@gmail.com)</span></div>
-                    <button class="config">remove <span class="remove"></span></button>
-                </li>
+            <h1 id="existingHeader" class="hidden">My accounts</h1>
+            <ul id="existing" class="hidden">
             </ul>
-            
-            <h1>Add accounts</h1>
-            <ul class="add">
-                <li class="hbox">
-                    <div class="accountType overflow boxFlex"><span class="icon yahoo"></span> Yahoo Mail <span class="new">new!</span></div>
-                    <button class="config">add <span class="add"></span></button>
-                </li>
-                <li class="hbox">
-                    <div class="accountType overflow boxFlex"><span class="icon googleApp"></span> Google Apps <span class="new">new!</span></div>
-                    <button class="config">add <span class="add"></span></button>
-                </li>
+
+            <h1 id="availableHeader" class="hidden">Add accounts</h1>
+            <ul id="available" class="add hidden">
             </ul>
-            
+
         </div>
-        
+
         <div id="settings" class="panel">
             <h1>Configure your account settings</h1>
             <ul>
@@ -72,12 +59,12 @@
                 </li>
             </ul>
         </div>
-    
+
     </div>
     
     <div id="done" class="panel hbox">
         <div class="boxFlex"></div>
-        <button>done</button>
+        <button class="close">done</button>
     </div>
     
     <div id="newsFooter" class="panel">
@@ -86,17 +73,20 @@
     
 </div>
 
+<!-- Templates -->
+
 <script id="addTemplate" type="text/template">
-  <li class="hbox">
+  <li class="hbox {isNew [}newItem{]}">
       <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name} {isNew [}<span class="new">new!</span>{]}</div>
-      <button class="config">add <span class="add"></span></button>
+      <button class="config auth" data-domain="{domain}">add <span class="add"></span></button>
   </li>
 </script>
 
 <script id="accountTemplate" type="text/template">
+  {.acct accounts[0]}
   <li class="hbox">
-      <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name} <span class="username">({accountName})</span></div>
-      <button class="config">remove <span class="remove"></span></button>
+      <div class="accountType overflow boxFlex"><span class="icon {domainType(_)}"></span> {domainName(_)} <span class="username">({displayName})</span></div>
+      <button class="config remove" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}">remove <span class="remove"></span></button>
   </li>
 </script>
 
