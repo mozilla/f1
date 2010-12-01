@@ -425,57 +425,55 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getPageTitle: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta'),
-          titleNode = gBrowser.contentDocument.getElementsByTagName('title')[0],
-          title = null;
-      for (var i = 0; i < metaNodes.length; i++) {
-        if ("og:title" === metaNodes[i].getAttribute("property")) {
-          var content = metaNodes[i].getAttribute("content");
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:title']"),
+          i, title;
+      for (i = 0; i < metas.length; i++) {
+        if ("og:title" === metas[i].getAttribute("property")) {
+          var content = metas[i].getAttribute("content");
           if (content) {
             //Title could have some XML escapes in it since it could be an
             //og:title type of tag, so be sure unescape
             return unescapeXml(content.trim());
           }
         }
-        // Look for the title property and save it but we bias toward the OG:
-        if ("title" === metaNodes[i].getAttribute("name")) {
-          var content = metaNodes[i].getAttribute("content");
+      }
+      metas = gBrowser.contentDocument.querySelectorAll("meta[name='title']");
+      for (i = 0; i < metas.length; i++) {
+        if ("title" === metas[i].getAttribute("name")) {
+          var content = metas[i].getAttribute("content");
           if (content) {
-            title = content.trim();
+            //Title could have some XML escapes in it so be sure unescape
+            return unescapeXml(content.trim());
           }
         }
       }
+      title = gBrowser.contentDocument.getElementsByTagName("title")[0];
       if (title) {
-        //Title could have some XML escapes in it so be sure unescape
-        return unescapeXml(title);
+        //Use node Value because we have nothing else
+        return title.firstChild.nodeValue.trim();
       }
-      if (titleNode) {
-        //Use node Value because 
-        return titleNode.firstChild.nodeValue.trim();
-      }
-      return '';
+      return "";
     },
 
     getPageDescription: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta'),
-          description = null;
-      for (var i = 0; i < metaNodes.length; i++) {
-        if ("og:description" === metaNodes[i].getAttribute("property")) {
-          var content = metaNodes[i].getAttribute("content");
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:description']"),
+          i;
+      for (i = 0; i < metas.length; i++) {
+        if ("og:description" === metas[i].getAttribute("property")) {
+          var content = metas[i].getAttribute("content");
           if (content) {
             return unescapeXml(content);
           }
         }
-        //Look for description and save it but we bias toward the OG:
-        if ("description" === metaNodes[i].getAttribute("name")) {
-          var content = metaNodes[i].getAttribute("content");
+      }
+      metas = gBrowser.contentDocument.querySelectorAll("meta[name='description']");
+      for (i = 0; i < metas.length; i++) {
+        if ("description" === metas[i].getAttribute("name")) {
+          var content = metas[i].getAttribute("content");
           if (content) {
-            description = content;
+            return unescapeXml(content);
           }
         }
-      }
-      if (description) {
-        return unescapeXml(description);
       }
       return "";
     },
@@ -483,10 +481,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // According to Facebook - (only the first 3 are interesting)
     // Valid values for medium_type are audio, image, video, news, blog, and mult.
     getPageMedium: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
-      for (var i = 0; i < metaNodes.length; i++) {
-        if ("medium" === metaNodes[i].getAttribute("name")) {
-          var content = metaNodes[i].getAttribute("content");
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']");
+      for (var i = 0; i < metas.length; i++) {
+        if ("medium" === metas[i].getAttribute("name")) {
+          var content = metas[i].getAttribute("content");
           if (content) {
             return unescapeXml(content);
           }
@@ -496,18 +494,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getShortURL: function () {
-      var links = gBrowser.contentDocument.getElementsByTagName("link"),
-        rel = null,
-        rev = null,
-        i;
+      var shorturl = gBrowser.contentDocument.getElementById("shorturl"),
+          links = gBrowser.contentDocument.querySelectorAll("link[rel='shortlink']");
 
       // flickr does id="shorturl"
-      var shorturl = gBrowser.contentDocument.getElementById("shorturl");
       if (shorturl) {
         return shorturl.getAttribute("href");
       }
 
-      for (i = 0; i < links.length; i++) {
+      for (var i = 0; i < links.length; i++) {
         // is there a rel=shortlink href?
         if (links[i].getAttribute("rel") === "shortlink") {
           return gBrowser.currentURI.resolve(links[i].getAttribute("href"));
@@ -517,11 +512,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getCanonicalURL: function () {
-      var links = gBrowser.contentDocument.getElementsByTagName("link"),
-        rel = null,
-        i;
+      var links = gBrowser.contentDocument.querySelectorAll("link[rel='canonical']");
 
-      for (i = 0; i < links.length; i++) {
+      for (var i = 0; i < links.length; i++) {
         if (links[i].getAttribute("rel") === "canonical") {
           return gBrowser.currentURI.resolve(links[i].getAttribute("href"));
         }
@@ -573,11 +566,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     previews: function () {
-      // Look for rel="image_src" and use those if they're available
-      // see e.g. http://about.digg.com/thumbnails
-
-      var metas = gBrowser.contentDocument.getElementsByTagName('meta'),
-          links = gBrowser.contentDocument.getElementsByTagName("link"),
+      // Look for FB og:image and then rel="image_src" to use if available
+      // for og:image see: http://developers.facebook.com/docs/share
+      // for image_src see: http://about.digg.com/thumbnails
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:image']"),
+          links = gBrowser.contentDocument.querySelectorAll("link[rel='image_src']"),
           previews = [], i;
 
       for (i = 0; i < metas.length; i++) {
