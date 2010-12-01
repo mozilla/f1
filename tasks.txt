@@ -5,6 +5,8 @@
   * Settings for bookmarks and F1 keybinding
 * Yahoo icon - Andy
 * Google Apps icon (should it be different than gmail?) - Bryan and Andy
+* Google Apps Account Connect dialog: http://i.imgur.com/V7wr2.png - Andy
+  * We need to get the apps domain for the person
 * share UI: push a style or change in UI for x days indicating new share services - Andy
   * turn it off after x number of days since last opened share UI
 * Settings page indicates which ones are new, and that UI matches the new indicator in share UI. - Andy
