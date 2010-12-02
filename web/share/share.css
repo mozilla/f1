@@ -179,32 +179,32 @@ ul.nav li a.icon {
 }
 
 ul.nav li a.icon:hover:before {
-    content: "\25B2";
-    position: absolute;
-    left: 12px;
-    top: 14px;
-    color: rgba(0,0,0,0.75);
-    display: block;
-    text-indent: 0;
-    text-shadow: none;
-    z-index: 100000;
+  content: "\25B2";
+  position: absolute;
+  left: 12px;
+  top: 14px;
+  color: rgba(0,0,0,0.75);
+  display: block;
+  text-indent: 0;
+  text-shadow: none;
+  z-index: 100000;
 }
 
 ul.nav li a.icon:hover:after {
-    content: attr(name);
-    position: absolute;
-    left: 0;
-    top: 30px;
-    color: #fafafa;
-    padding: 0 10px;
-    display: block;
-    text-indent: 0;
-    background-color: rgba(0,0,0,0.75);
-    text-shadow: none;
-    text-align: center;
-    white-space: nowrap;
-    overflow: visible;
-    z-index: 100000;
+  content: attr(name);
+  position: absolute;
+  left: 0;
+  top: 30px;
+  color: #fafafa;
+  padding: 0 10px;
+  display: block;
+  text-indent: 0;
+  background-color: rgba(0,0,0,0.75);
+  text-shadow: none;
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+  z-index: 100000;
 }
 
 ul.nav li a.icon.settings {
@@ -245,14 +245,17 @@ ul.nav .rightActions {
 }
 
 ul.nav .rightActions a {
-/*
-  padding: 0 5px 0 0;
+  padding: 0 5px;
   border-right: 1px dotted #888;
-*/
 }
 
 ul.nav .rightActions a:hover {
   text-decoration: underline;
+}
+
+ul.nav .rightActions a.new {
+  color: #ff5959;
+  font-weight: bold;
 }
 
 ul.nav .rightActions span.close {
@@ -364,26 +367,6 @@ ul.nav li.ui-tabs-selected {
   border-color: #666;
 }
 
-/*
-ul.nav li.ui-tabs-selected a.twitter {
-  background-image: url("i/sprite.png");
-  background-position: left -68px;
-  background-repeat: no-repeat;
-}
-
-ul.nav li.ui-tabs-selected a.facebook {
-  background-image: url("i/sprite.png");
-  background-position: left -140px;
-  background-repeat: no-repeat;
-}
-
-ul.nav li.ui-tabs-selected a.gmail {
-  background-image: url("i/sprite.png");
-  background-position: left -212px;
-  background-repeat: no-repeat;
-}
-*/
-
 ul.nav li.ui-tabs-selected a.googleapps {
   background-image: url("i/sprite.png");
   background-position: left -284px;
@@ -467,7 +450,6 @@ div.meta {
   color: #444;
   white-space: normal;
   font-size: 9px;
-  /* max-height: 22px;  */ 
   overflow: hidden;
 }
 
@@ -497,7 +479,7 @@ button.share:focus {
 
 /* Disable user resizing of text area since it covers the twitter count. */
 textarea {
-    resize: none;
+  resize: none;
 }
 
 textarea, input[type="text"] {
