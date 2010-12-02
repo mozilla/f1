@@ -22,13 +22,15 @@
  * */
 
 /*jslint indent: 2 */
-/*global require: false, window: false, location: true */
+/*global require: false, window: false, location: true, localStorage: false,
+  opener: false, setTimeout: false */
 "use strict";
 
 require.def("index",
-        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "dispatch",
-         "jquery.colorFade", "jquery.textOverflow"],
-function (require,   $,        fn,         rdapi,   oauth,   jig,         dispatch) {
+        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
+         "dispatch", "blade/url", "jquery.colorFade", "jquery.textOverflow"],
+function (require,   $,        fn,         rdapi,   oauth,   jig,
+          dispatch,   url) {
 
   var domains = {
     'twitter.com': {
@@ -75,6 +77,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         dispat
   domainList = [
     'twitter.com', 'facebook.com', 'google.com', 'googleapps.com', 'yahoo.com'
   ],
+  options = url.queryToObject(location.href.split('#')[1] || ''),
   store = localStorage;
 
   //Capability detect for localStorage. At least on add-on does weird things
@@ -165,6 +168,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         dispat
   });
 
   $(function () {
+    var manageDom = $("#manage"),
+        settingsDom = $("#settings");
 
     // resize wrapper
     $(window).bind("load resize", function () {
@@ -242,24 +247,22 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         dispat
     });
     
     // tabs
-    $("#settings").hide();
-    
     $("ul#tabs li").click(function () {
       $(this).addClass("selected");
       $(this).siblings().removeClass("selected");
     });
 
     $("ul#tabs li.manage").click(function () {
-      if ($("#manage").is(":hidden")) {
-        $("#manage").fadeIn(200);
-        $("#manage").siblings().fadeOut(0);
+      if (manageDom.is(":hidden")) {
+        manageDom.fadeIn(200);
+        manageDom.siblings().fadeOut(0);
       }
     });
-    
+
     $("ul#tabs li.settings").click(function () {
-      if ($("#settings").is(":hidden")) {
-        $("#settings").fadeIn(200);
-        $("#settings").siblings().fadeOut(0);
+      if (settingsDom.is(":hidden")) {
+        settingsDom.fadeIn(200);
+        settingsDom.siblings().fadeOut(0);
       }
     });
   });  

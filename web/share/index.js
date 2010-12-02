@@ -258,11 +258,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   //For debug tab purpose, make it global.
   window.closeShare = close;
 
-  function showError(error) {
-    //TODO: make this nicer.
-    alert(error.msg);
-  }
-
   showStatus = function (statusId, shouldCloseOrMessage) {
     $('div.status').addClass('hidden');
     clickBlockDom.removeClass('hidden');
@@ -307,10 +302,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   window.showStatusShared = showStatusShared;
 
   function handleCaptcha(detail, error) {
-    $('#captchaImage').attr('src',detail['imageurl']);
-    if (error)
-        $('#captchaMsg').text(error['message']);
-    $('#captchaSound').attr('src',detail['audiourl']);
+    $('#captchaImage').attr('src', detail.imageurl);
+    if (error) {
+      $('#captchaMsg').text(error.message);
+    }
+    $('#captchaSound').attr('src', detail.audiourl);
     showStatus('statusCaptcha', false);
   }
   window.handleCaptcha = handleCaptcha;
@@ -334,9 +330,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           // oauth+smtp will return a 535 on authentication failure
           if (code ===  401 || code === 535) {
             showStatus('statusAuth');
-          } else if (json.error.code == 'Client.HumanVerificationRequired') {
+          } else if (json.error.code === 'Client.HumanVerificationRequired') {
             handleCaptcha(json.error.detail);
-          } else if (json.error.code == 'Client.WrongInput') {
+          } else if (json.error.code === 'Client.WrongInput') {
             handleCaptcha(json.error.detail, json.error);
           } else {
             showStatus('statusError', json.error.message);
@@ -496,18 +492,18 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   function determineTab() {
-    var selection, selectionName;
+    var selection, selectionName, name;
 
     if (store.lastSelection) {
       selection = '#' + store.lastSelection;
     } else {
       if (accountCache && accountCache.length) {
-        var name = accountCache[0].accounts[0].domain;
+        name = accountCache[0].accounts[0].domain;
         if (actions[name]) {
-            selectionName = actions[accountCache[0].accounts[0].domain].selectionName;
-            if (selectionName) {
-              selection = '#' + selectionName;
-            }
+          selectionName = actions[accountCache[0].accounts[0].domain].selectionName;
+          if (selectionName) {
+            selection = '#' + selectionName;
+          }
         }
       }
     }
@@ -666,18 +662,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     });
   });
 
-  function accountsUpdated() {
-    //Update the account display to reflect the choices appropriately.
-
-    //Turn off tab updating
-    updateTab = false;
-
-    //Hide the tab buttons, the getAccounts will show the ones available.
-    $('.leftTab').addClass('hidden');
-
-    getAccounts();
-  }
-
   if (hash) {
     urlArgs = url.queryToObject(hash);
     if (urlArgs.options) {
@@ -695,7 +679,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
       twitterDom = $('#twitter'),
-      picture, yahooDom,
+      appsDom = $('#googleapps'),
+      picture,
       sessionRestore = store.sessionRestore,
       tabSelectionDom;
 
@@ -703,13 +688,18 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     clickBlockDom = $('#clickBlock');
     gmailDom = $('#gmail');
     yahooDom = $('#yahoo');
-    var appsDom = $('#googleapps');
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
     if (options.system) {
       $(document.documentElement).addClass(options.system);
     }
+
+    //Update settings link to have the version of the extension.
+    $('.settingsLink').each(function (i, node) {
+      node.setAttribute('href', node.getAttribute('href') +
+                        '#version=' + (options.version || ''));
+    });
 
     //Debug info on the data that was received.
     if (options.system === 'dev') {
@@ -744,12 +734,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       });
     });
 
-    $('#captchaButton').click(function(evt) {
-        cancelStatus();
-        clickBlockDom.removeClass('hidden');
-        sendData.HumanVerification = $('#captcha').attr('value');
-        sendData.HumanVerificationImage = $('#captchaImage').attr('src');
-        sendMessage();
+    $('#captchaButton').click(function (evt) {
+      cancelStatus();
+      clickBlockDom.removeClass('hidden');
+      sendData.HumanVerification = $('#captcha').attr('value');
+      sendData.HumanVerificationImage = $('#captchaImage').attr('src');
+      sendMessage();
     });
 
     //Use cached account info to speed up startup, but then

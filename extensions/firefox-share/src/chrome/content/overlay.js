@@ -312,6 +312,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         iframeNode.style.minHeight = 0;
 
         mixin(options, {
+          version: ffshare.version,
           title: this.getPageTitle(),
           description: this.getPageDescription(),
           medium: this.getPageMedium(),
@@ -621,6 +622,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   ffshare = {
 
+    version: '',
     system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
     shareUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
     frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
@@ -636,6 +638,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     oldKeycodeId: "key_old_ffshare",
 
     onInstallUpgrade: function (version) {
+      ffshare.version = version;
+
       //Only run if the versions do not match.
       if (version === ffshare.previousVersion) {
         return;

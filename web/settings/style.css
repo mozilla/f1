@@ -37,7 +37,8 @@ body {
   overflow-y: scroll;
 }
 
-.hidden {
+.hidden,
+#tabs li.hidden {
   display: none;
 }
 
@@ -210,7 +211,7 @@ ul#tabs li.selected {
     config
 */
 
-div#config {
+#config {
   border-top: 1px solid #ccc;
   margin: -1px 10px 0 10px;
   position: relative;
@@ -262,16 +263,16 @@ div#config {
   margin: 20px 0;
 }
 
-div#config .username {
+#config .username {
   color: #aaa;
 }
 
-div#config .new {
+#config .new {
   color: #ff5959;
   font-style: italic;
 }
 
-div#config ul {
+#config ul {
   margin: 10px 0 20px;
   border: 1px solid #ccc;
   background-color: #fafafa;
@@ -280,21 +281,21 @@ div#config ul {
   border-radius: 5px;
 }
 
-div#config ul li {
+#config ul li {
   width: 100%;
   padding: 10px 20px;
   border-bottom: 1px solid #ccc;
 }
 
-div#config ul li .accountType {
+#config ul li .accountType {
   line-height: 24px;
 }
 
-div#config ul li:last-child {
+#config ul li:last-child {
   border-bottom: none;
 }
 
-div#newsFooter {
+#newsFooter {
   padding: 0 10px;
   margin: 10px 0;
   position: absolute;
@@ -302,7 +303,7 @@ div#newsFooter {
   width: 720px;
 }
 
-div#newsFooter .about {
+#newsFooter .about {
   margin: 0 0 0 10px;
 }
 
