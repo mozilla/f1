@@ -1,10 +1,7 @@
 # Better settings/choice release
 
 * Implement settings for bookmarks and F1 keybinding - Bryan / James
-* Google Apps Account Connect dialog: http://i.imgur.com/V7wr2.png - Andy
-  * We need to get the apps domain for the person
-* share UI: push a style or change in UI for x days indicating new share services - Andy
-  * turn it off after x number of days since last opened share UI
+* turn off indication of "NEW STUFF" after x number of days since last opened share UI - James
 * New settings page: how to surface new accounts to people upgrading vs first time users? - Bryan/Andy/James
 * Make sure web UI gets expired from cache on new release since old one cannot handle accounts it did not know about.
 
