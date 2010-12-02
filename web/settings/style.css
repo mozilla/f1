@@ -83,6 +83,13 @@ button span.add {
   margin: 0 0 0 5px;
 }
 
+button.done {
+    height: 32px;
+    font-size: 14px;
+    padding: 0 20px;
+    margin-bottom: 40px;
+}
+
 button.config {
   width: 100px;
   text-align: center;
@@ -292,6 +299,9 @@ div#config ul li .accountType {
 
 div#config ul li:last-child {
   border-bottom: none;
+  -moz-border-radius: 0 0 5px 5px;
+  -webkit-border-radius: 0 0 5px 5px;
+  border-radius: 0 0 5px 5px;
 }
 
 div#newsFooter {
