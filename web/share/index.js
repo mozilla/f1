@@ -811,12 +811,16 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       facebookDom.find('[name="picture"]').val(picture);
     }
 
-    if (options.url) {
-      twitterDom.find('[name="link"]').val(options.url);
-      facebookDom.find('[name="link"]').val(options.url);
-      gmailDom.find('[name="link"]').val(options.url);
-      yahooDom.find('[name="link"]').val(options.url);
-      appsDom.find('[name="link"]').val(options.url);
+    //We default to using the canonical URL instead of the URL shown in the address
+    //bar as this should be the better URL to share.
+    //TODO: We might want to do some minimal checking of this URL in a future
+    //UI so we warn people of a major difference and allow them to choose the URL
+    if (options.canonicalUrl || options.url) {
+      twitterDom.find('[name="link"]').val(options.canonicalUrl || options.url);
+      facebookDom.find('[name="link"]').val(options.canonicalUrl || options.url);
+      gmailDom.find('[name="link"]').val(options.canonicalUrl || options.url);
+      yahooDom.find('[name="link"]').val(options.canonicalUrl || options.url);
+      appsDom.find('[name="link"]').val(options.canonicalUrl || options.url);
     }
 
     if (options.title) {
