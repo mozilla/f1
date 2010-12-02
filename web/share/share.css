@@ -367,18 +367,6 @@ ul.nav li.ui-tabs-selected {
   border-color: #666;
 }
 
-ul.nav li.ui-tabs-selected a.googleapps {
-  background-image: url("i/sprite.png");
-  background-position: left -284px;
-  background-repeat: no-repeat;
-}
-
-ul.nav li.ui-tabs-selected a.yahoo {
-  background-image: url("i/sprite.png");
-  background-position: left -356px;
-  background-repeat: no-repeat;
-}
-
 ul.nav li.ui-tabs-selected a.debug {
   background-image: url("i/bug_b.png");
 }
