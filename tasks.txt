@@ -1,10 +1,7 @@
 # Better settings/choice release
 
 * Implement settings for bookmarks and F1 keybinding - Bryan / James
-* Google Apps Account Connect dialog: http://i.imgur.com/V7wr2.png - Andy
-  * We need to get the apps domain for the person
-* share UI: push a style or change in UI for x days indicating new share services - Andy
-  * turn it off after x number of days since last opened share UI
+* turn off indication of "NEW STUFF" after x number of days since last opened share UI - James
 * New settings page: how to surface new accounts to people upgrading vs first time users? - Bryan/Andy/James
 * Make sure web UI gets expired from cache on new release since old one cannot handle accounts it did not know about.
 
@@ -17,6 +14,8 @@
 
 ## optional settings release work
 
+* Send, get 401, should try to reauth: onclick handler to #authOkButton, but there is not one in index.html - James
+* Make sure that if auth is lost, the UI for share is refreshed correctly with localStorage - James
 * Figure out stats gathering for third party calls. - Mark
 * The "logged out" message is a bit scary, and it is not clear, if you get it
   while after typing a share message, that the message is in localStorage, and
@@ -33,6 +32,8 @@
   * May need to talk to satchel owner for FF4 if does not work out, to
     make autocomplete provider more robust and officially supported.
   * >> Contacts Addon messes up HTML5 autocomplete!
+    * ignore the contacts issue for now, once we have a mechanism for doing this
+      using html5, I'll make contacts do the same thing.
 * HTML5/FF friendly option for the video - Bryan
 * aTab is null in minefied - James
   * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6

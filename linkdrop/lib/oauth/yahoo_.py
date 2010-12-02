@@ -151,7 +151,7 @@ class api():
                 })
             return response['result'], error
         elif 'error' in response:
-            error = copy.copy(error)
+            error = copy.copy(response['error'])
             error.update({ 'provider': domain, 'status': int(resp['status']) })
         else:
             error = {'provider': domain,
