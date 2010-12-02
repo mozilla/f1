@@ -32,6 +32,8 @@
   * May need to talk to satchel owner for FF4 if does not work out, to
     make autocomplete provider more robust and officially supported.
   * >> Contacts Addon messes up HTML5 autocomplete!
+    * ignore the contacts issue for now, once we have a mechanism for doing this
+      using html5, I'll make contacts do the same thing.
 * HTML5/FF friendly option for the video - Bryan
 * aTab is null in minefied - James
   * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
