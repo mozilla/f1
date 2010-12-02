@@ -735,6 +735,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
 
       this.prefs.removeObserver("", this);
+      this.prefs = null;
 
     },
 
