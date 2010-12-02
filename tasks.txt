@@ -1,20 +1,10 @@
 # Better settings/choice release
 
-* A way to surface settings, accounts - Andy and Bryan
-  * Existing accounts, available accounts, and new accounts
-  * Settings for bookmarks and F1 keybinding
-* Yahoo icon - Andy
-* Google Apps icon (should it be different than gmail?) - Bryan and Andy
+* Implement settings for bookmarks and F1 keybinding - Bryan / James
 * Google Apps Account Connect dialog: http://i.imgur.com/V7wr2.png - Andy
   * We need to get the apps domain for the person
 * share UI: push a style or change in UI for x days indicating new share services - Andy
   * turn it off after x number of days since last opened share UI
-* Settings page indicates which ones are new, and that UI matches the new indicator in share UI. - Andy
-* Move down to icons for tabs with tooltips so we can fit all 6. - Andy
-* Settings now become a page. - Andy
-  * Do a dropdown/overlay of settings over the browser page. - James
-* Change to common share icon.
-* UI to let the user know that we will be adding a link in the twitter/email. - Andy
 * New settings page: how to surface new accounts to people upgrading vs first time users? - Bryan/Andy/James
 * Make sure web UI gets expired from cache on new release since old one cannot handle accounts it did not know about.
 
