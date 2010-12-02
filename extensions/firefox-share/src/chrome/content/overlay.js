@@ -507,7 +507,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getCanonicalURL: function () {
-      var links = gBrowser.contentDocument.querySelectorAll("meta[property='og:url']").
+      var links = gBrowser.contentDocument.querySelectorAll("meta[property='og:url']"),
           i;
 
       for (i = 0; i < links.length; i++) {
