@@ -143,6 +143,8 @@ header span.close:active {
 
 #pageInfo .thumbnail img {
     border: none;
+    max-width: 90px;
+    max-height: 60px;
 }
 
 #pageInfo .pageTitle {
