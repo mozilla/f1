@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>F1: Popup</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+
+    <script type="text/javascript" src="js/jquery.textOverflow.js"></script>
+
+    <script type="text/javascript">
+    $(document).ready(function() {
+        $("#accounts").accordion();
+    });
+    </script>
+
+</head>
+<body>
+
+<div id="wrapper">
+
+    <header class="hbox">
+        <h1 class="boxFlex">Mozilla F1</h1>
+        <nav>
+            <ul>
+                <li class="settings"><a class="configureToggle" href="#">configure</a></li>
+                <li><span class="close"></span></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="sharebox hbox">
+
+    <div id="pageInfo">
+        <div class="hbox">
+            <div class="thumbnail"><img src="i/thumb.jpg"></div>
+            <div class="boxFlex1 overflow pageTitle">F1 by Mozilla Labs</div>
+        </div>
+        <div class="pageDescription">F1 is a browser extension that allows you to share links in a fast and fun way. Share links from within the browser, from any webpage, using the same services you already know and love.</div>
+    </div>
+
+    <div id="accounts">
+
+        <div class="hbox twitter">
+            <span class="arrow"></span>
+            <span class="icon twitter"></span> 
+            <h3 class="boxFlex overflow">Twitter</h3>
+            <span class="username">_andychung</span>
+        </div>
+
+        <div class="twitter">
+            <div class="padding">
+                <label>type your message:</label>
+                <textarea class="compose"></textarea>
+                <div class="accountActions hbox">
+                    <span class="count boxFlex">140</span>
+                    <button>share</button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="hbox facebook">
+            <span class="arrow"></span>
+            <span class="icon facebook"></span> 
+            <h3 class="boxFlex overflow">Facebook</h3>
+            <span class="username">Andy Chung</span>
+        </div>
+        <div class="facebook">
+            <div class="padding">
+                <div class="facebookActions hbox">
+                    <div class="to">
+                        <label>send to:</label>
+                        <div class="dropdownContainer">
+                            <select class="facebookDropdown">
+                                <option selected value="1">my wall</option>
+                                <option value="2">group wall</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="group boxFlex">
+                        <label>type in the name of group:</label>
+                        <input type="text">
+                    </div>
+                    <div class="list">
+                        <label>list</label>
+                        <button></button>
+                    </div>
+                </div>
+                <label>type your message:</label>
+                <textarea class="compose"></textarea>
+                <div class="accountActions hbox">
+                    <span class="count boxFlex">420</span>
+                    <button>share</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="hbox google">
+            <span class="arrow"></span>
+            <span class="icon google"></span>  
+            <h3 class="boxFlex overflow">Google Mail</h3>
+            <span class="username">animalyouth@gmail.com</span>
+        </div>
+        <div class="google">
+            <div class="padding">
+                <div class="to">
+                    <label>to: <em>(enter emails separated by comma)</em></label>
+                    <input type="text">
+                </div>
+                <div class="subject">
+                    <label>subject:</label>
+                    <input type="text">
+                </div>
+                <label>type your message:</label>
+                <textarea class="compose"></textarea>
+                <div class="accountActions hbox">
+                    <span class="count boxFlex"></span>
+                    <button>share</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    </div>
+
+    <div style="position:absolute;bottom:0;">
+        <section id="news" class="hbox">
+            <div>
+                <span class="icon rss"></span>
+            </div>
+            <div class="boxFlex">
+                <h3>Latest from the F1 team</h3>
+                <div class="story">"F1 goes live!"</div>
+            </div>
+        </section>
+    </div>
+
+
+</div>
+
+</body>
+</html>
