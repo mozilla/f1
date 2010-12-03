@@ -72,7 +72,6 @@ header {
     width: 100%;
     padding: 8px 5px 10px 10px;
     background-color: #d4dde5;
-    border-right: 1px solid #a6afb6;
 }
 
 header h1 {
@@ -118,7 +117,6 @@ header span.close:active {
 
 #pageInfo, #accounts {
     width: 320px;
-    border-right: 1px solid #a6afb6;
 }
 
 /*
@@ -128,7 +126,7 @@ header span.close:active {
     padding: 10px;
     background-image: -moz-linear-gradient(top, #d4dde5 0%, #c6d1da 100%);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #d4dde5), color-stop(100%, #c6d1da));
-    border-bottom: 1px solid #a6afb6;
+    border-right: 1px solid #a6afb6;
 }
 
 #pageInfo .top {
@@ -174,16 +172,15 @@ header span.close:active {
     margin-top: -1px;
     background-image: -moz-linear-gradient(top, #d4dde5 0%, #c6d1da 100%);
     background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #d4dde5), color-stop(100%, #c6d1da));
+    outline: none;
+    padding: 10px;
+    cursor: pointer;
+    width: 100%;
+    -moz-user-select: none;
 }
 
 .ui-accordion-content {
     background-color: #e9eef2;
-}
-
-.ui-accordion-header {
-    padding: 10px;
-    cursor: pointer;
-    width: 100%;
 }
 
 span.arrow,

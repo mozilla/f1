@@ -12,6 +12,12 @@
     <script type="text/javascript">
     $(document).ready(function() {
         $("#accounts").accordion();
+        $(".twitter .compose").keydown(function() {
+            $(".twitter .count").text(140 - $(this).val().length);
+        }).keydown();
+        $(".facebook .compose").keydown(function() {
+            $(".facebook .count").text(420 - $(this).val().length);
+        }).keydown();
     });
     </script>
 
