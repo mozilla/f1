@@ -112,8 +112,8 @@ class responder(OpenIDResponder):
         """
         
         OpenIDResponder.__init__(self, domain)
-        self.consumer_key = self.config.get('consumer_key')
-        self.consumer_secret = self.config.get('consumer_secret')
+        self.consumer_key = str(self.config.get('consumer_key'))
+        self.consumer_secret = str(self.config.get('consumer_secret'))
         self.provider = request.POST.get('domain', domain) # support for google apps domains
         self.consumer_class = GoogleConsumer
 
@@ -237,9 +237,9 @@ class api():
         self.port = 587
         self.config = get_oauth_config(domain)
         self.account = account
-        self.oauth_token = oauth.Token(key=account.get('oauth_token'), secret=account.get('oauth_token_secret'))
-        self.consumer_key = self.config.get('consumer_key')
-        self.consumer_secret = self.config.get('consumer_secret')
+        self.oauth_token = oauth.Token(key=str(account.get('oauth_token')), secret=str(account.get('oauth_token_secret')))
+        self.consumer_key = str(self.config.get('consumer_key'))
+        self.consumer_secret = str(self.config.get('consumer_secret'))
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
 
     def sendmessage(self, message, options={}):
