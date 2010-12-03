@@ -51,7 +51,7 @@ from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
 from linkdrop.lib.base import render
-from linkdrop.lib.helpers import safeHTML
+from linkdrop.lib.helpers import safeHTML, literal
 
 from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
@@ -112,8 +112,8 @@ class responder(OpenIDResponder):
         """
         
         OpenIDResponder.__init__(self, domain)
-        self.consumer_key = self.config.get('consumer_key')
-        self.consumer_secret = self.config.get('consumer_secret')
+        self.consumer_key = str(self.config.get('consumer_key'))
+        self.consumer_secret = str(self.config.get('consumer_secret'))
         self.provider = request.POST.get('domain', domain) # support for google apps domains
         self.consumer_class = GoogleConsumer
 
@@ -237,9 +237,9 @@ class api():
         self.port = 587
         self.config = get_oauth_config(domain)
         self.account = account
-        self.oauth_token = oauth.Token(key=account.get('oauth_token'), secret=account.get('oauth_token_secret'))
-        self.consumer_key = self.config.get('consumer_key')
-        self.consumer_secret = self.config.get('consumer_secret')
+        self.oauth_token = oauth.Token(key=str(account.get('oauth_token')), secret=str(account.get('oauth_token_secret')))
+        self.consumer_key = str(self.config.get('consumer_key'))
+        self.consumer_secret = str(self.config.get('consumer_secret'))
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
 
     def sendmessage(self, message, options={}):
@@ -259,7 +259,9 @@ class api():
             server.set_debuglevel(True)
         
         subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
-        
+        title = options.get('title', options.get('link', options.get('shorturl', '')))
+        description = options.get('description', '')[:280]
+
         msg = MIMEMultipart('alternative')
         msg.set_charset('utf-8')
         msg.add_header('Subject', Header(subject, 'utf-8').encode())
@@ -268,24 +270,37 @@ class api():
 
         c.safeHTML = safeHTML
         c.options = options
-        c.from_name = fullname
-        c.subject = subject
-        c.from_header = from_
-        c.to_header = to_
-        c.message = message
 
         # insert the url if it is not already in the message
         c.longurl = options.get('link')
         c.shorturl = options.get('shorturl')
+
+
+        # reset to unwrapped for html email, they will be escaped
+        c.from_name = fullname
+        c.subject = subject
+        c.from_header = from_
+        c.to_header = to_
+        c.title = title
+        c.description = description
+        c.message = message
+
+        part2 = MIMEText(render('/html_email.mako').encode('utf-8'), 'html')
+        part2.set_charset('utf-8')
+
         # get the title, or the long url or the short url or nothing
-        c.title = options.get('title', options.get('link', options.get('shorturl', '')))
-        c.description = options.get('description', '')[:280]
+        # wrap these in literal for text email
+        c.from_name = literal(fullname)
+        c.subject = literal(subject)
+        c.from_header = literal(from_)
+        c.to_header = literal(to_)
+        c.title = literal(title)
+        c.description = literal(description)
+        c.message = literal(message)
 
         part1 = MIMEText(render('/text_email.mako').encode('utf-8'), 'plain')
         part1.set_charset('utf-8')
 
-        part2 = MIMEText(render('/html_email.mako').encode('utf-8'), 'html')
-        part2.set_charset('utf-8')
         msg.attach(part1)
         msg.attach(part2)
 

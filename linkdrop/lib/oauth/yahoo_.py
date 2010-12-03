@@ -29,14 +29,12 @@ import httplib2
 import json
 import copy
 
-from email.header import Header
-
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
 
 from linkdrop.lib.base import render
-from linkdrop.lib.helpers import safeHTML
+from linkdrop.lib.helpers import safeHTML, literal
 
 from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
@@ -151,7 +149,7 @@ class api():
                 })
             return response['result'], error
         elif 'error' in response:
-            error = copy.copy(error)
+            error = copy.copy(response['error'])
             error.update({ 'provider': domain, 'status': int(resp['status']) })
         else:
             error = {'provider': domain,
@@ -168,39 +166,52 @@ class api():
         profile = self.account.get('profile', {})
         from_email = from_ = profile.get('verifiedEmail')
         fullname = profile.get('displayName', None)
-        if fullname:
-            from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), from_,)
 
         to_ = options['to']
-        subject = options.get('subject')
+        subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
+        title = options.get('title', options.get('link', options.get('shorturl', '')))
+        description = options.get('description', '')[:280]
 
         c.safeHTML = safeHTML
         c.options = options
-        c.from_name = fullname
-        c.subject = subject
-        c.from_header = from_
-        c.to_header = to_
-        c.message = message
 
         # insert the url if it is not already in the message
         c.longurl = options.get('link')
         c.shorturl = options.get('shorturl')
-        # get the title, or the long url or the short url or nothing
-        c.title = options.get('title', options.get('link', options.get('shorturl', '')))
-        c.description = options.get('description', '')[:280]
 
-        message = render('/text_email.mako').encode('utf-8')
+
+        # reset to unwrapped for html email, they will be escaped
+        c.from_name = fullname
+        c.subject = subject
+        c.from_header = from_
+        c.to_header = to_
+        c.title = title
+        c.description = description
+        c.message = message
+
+        html_message = render('/html_email.mako').encode('utf-8')
+
+        # get the title, or the long url or the short url or nothing
+        # wrap these in literal for text email
+        c.from_name = literal(fullname)
+        c.subject = literal(subject)
+        c.from_header = literal(from_)
+        c.to_header = literal(to_)
+        c.title = literal(title)
+        c.description = literal(description)
+        c.message = literal(message)
+
+        text_message = render('/text_email.mako').encode('utf-8')
 
         params = [{
                 "message":
                     {"subject":subject,
                      "from":{"email":from_},
                      "to":[{"email":to_}],
-                     "body":{"data": message,
-                             "type":"text",
-                             "subtype":"plain",
-                             "charset":"us-ascii"
-                             }
+                     "simplebody":{
+                        "text": text_message,
+                        "html": html_message
+                     }
                     },
                  "savecopy":1
                 }]

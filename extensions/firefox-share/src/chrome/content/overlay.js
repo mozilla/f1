@@ -428,20 +428,22 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     getPageTitle: function () {
       var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:title']"),
-          i, title;
+          i, title, content;
       for (i = 0; i < metas.length; i++) {
-        var content = metas[i].getAttribute("content");
-        if (content)
+        content = metas[i].getAttribute("content");
+        if (content) {
           //Title could have some XML escapes in it since it could be an
           //og:title type of tag, so be sure unescape
           return unescapeXml(content.trim());
+        }
       }
       metas = gBrowser.contentDocument.querySelectorAll("meta[name='title']");
       for (i = 0; i < metas.length; i++) {
-        var content = metas[i].getAttribute("content");
-        if (content)
+        content = metas[i].getAttribute("content");
+        if (content) {
           //Title could have some XML escapes in it so be sure unescape
           return unescapeXml(content.trim());
+        }
       }
       title = gBrowser.contentDocument.getElementsByTagName("title")[0];
       if (title) {
@@ -453,17 +455,19 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     getPageDescription: function () {
       var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:description']"),
-          i;
+          i, content;
       for (i = 0; i < metas.length; i++) {
-        var content = metas[i].getAttribute("content");
-        if (content)
+        content = metas[i].getAttribute("content");
+        if (content) {
           return unescapeXml(content);
+        }
       }
       metas = gBrowser.contentDocument.querySelectorAll("meta[name='description']");
       for (i = 0; i < metas.length; i++) {
-        var content = metas[i].getAttribute("content");
-        if (content)
+        content = metas[i].getAttribute("content");
+        if (content) {
           return unescapeXml(content);
+        }
       }
       return "";
     },
@@ -472,8 +476,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:site_name']");
       for (var i = 0; i < metas.length; i++) {
         var content = metas[i].getAttribute("content");
-        if (content)
+        if (content) {
           return unescapeXml(content);
+        }
       }
       return "";
     },
@@ -484,8 +489,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']");
       for (var i = 0; i < metas.length; i++) {
         var content = metas[i].getAttribute("content");
-        if (content)
+        if (content) {
           return unescapeXml(content);
+        }
       }
       return "";
     },
@@ -501,28 +507,31 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       for (var i = 0; i < links.length; i++) {
         var content = links[i].getAttribute("href");
-        if (content)
+        if (content) {
           return gBrowser.currentURI.resolve(content);
+        }
       }
       return "";
     },
 
     getCanonicalURL: function () {
       var links = gBrowser.contentDocument.querySelectorAll("meta[property='og:url']"),
-          i;
+          i, content;
 
       for (i = 0; i < links.length; i++) {
-        var content = links[i].getAttribute("content");
-        if (content)
+        content = links[i].getAttribute("content");
+        if (content) {
           return gBrowser.currentURI.resolve(content);
+        }
       }
 
       links = gBrowser.contentDocument.querySelectorAll("link[rel='canonical']");
 
       for (i = 0; i < links.length; i++) {
-        var content = links[i].getAttribute("href");
-        if (content)
+        content = links[i].getAttribute("href");
+        if (content) {
           return gBrowser.currentURI.resolve(content);
+        }
       }
 
       // Finally try some hacks for certain sites
@@ -576,18 +585,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // for image_src see: http://about.digg.com/thumbnails
       var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:image']"),
           links = gBrowser.contentDocument.querySelectorAll("link[rel='image_src']"),
-          previews = [], i;
+          previews = [], i, content;
 
       for (i = 0; i < metas.length; i++) {
-        var content = metas[i].getAttribute("content");
-        if (content)
+        content = metas[i].getAttribute("content");
+        if (content) {
           previews.push(content);
+        }
       }
 
       for (i = 0; i < links.length; i++) {
-        var content = links[i].getAttribute("href");
-        if (content)
+        content = links[i].getAttribute("href");
+        if (content) {
           previews.push(content);
+        }
       }
       return previews;
     },
@@ -839,17 +850,19 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // This function is to be run once at onLoad
     // Checks for the existence of key code already and saves or gives it an ID for later
     // We could get away without this check but we're being nice to existing key commands
-    initKeyCode: function() {
+    initKeyCode: function () {
       var keys = document.getElementsByTagName("key");
       for (var i = 0; i < keys.length; i++) {
         // has the keycode we want to take and isn't already ours
-        if (this.keycode == keys[i].getAttribute("keycode") &&
-            this.keycodeId != keys[i].id) {
+        if (this.keycode === keys[i].getAttribute("keycode") &&
+            this.keycodeId !== keys[i].id) {
 
-          if (keys[i].id)
+          if (keys[i].id) {
             this.oldKeycodeId = keys[i].id;
-          else
+          }
+          else {
             keys[i].id = this.oldKeycodeId;
+          }
 
           break;
         }
@@ -857,23 +870,23 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.setAccelKey(this.useAccelKey);
     },
 
-  observe: function(subject, topic, data) {
-    if (topic != "nsPref:changed") {
-       return;
-    }
+    observe: function (subject, topic, data) {
+      if (topic !== "nsPref:changed") {
+        return;
+      }
 
-    switch(data) {
-      case "use-accel-key":
+      if ("use-accel-key" === data) {
         try {
           var pref = subject.QueryInterface(Components.interfaces.nsIPrefBranch);
           ffshare.setAccelKey(pref.getBoolPref("use-accel-key"));
-        } catch(e) { error(e); }
-        break;
-    }
+        } catch (e) {
+          error(e);
+        }
+      }
 
-   },
+    },
 
-    setAccelKey: function(keyOn) {
+    setAccelKey: function (keyOn) {
       var oldKey = document.getElementById(this.oldKeycodeId),
           f1Key = document.getElementById(this.keycodeId),
           keyset = document.getElementById("mainKeyset");
@@ -881,17 +894,21 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (keyOn) {
         try {
           if (oldKey) {
-            oldKey.setAttribute("keycode", "")
+            oldKey.setAttribute("keycode", "");
           }
           f1Key.setAttribute("keycode", this.keycode);
-        } catch (e) { error(e); }
+        } catch (e) {
+          error(e);
+        }
       } else {
         try {
           f1Key.setAttribute("keycode", "");
           if (oldKey) {
-            oldKey.setAttribute("keycode", this.keycode)
+            oldKey.setAttribute("keycode", this.keycode);
           }
-        } catch (e) { error(e); }
+        } catch (e) {
+          error(e);
+        }
       }
 
       // now we invalidate the keyset cache so our changes take effect
@@ -908,10 +925,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     canShareURI: function (aURI) {
       var command = document.getElementById("cmd_openSharePage");
       try {
-        if (this.isValidURI(aURI))
+        if (this.isValidURI(aURI)) {
           command.removeAttribute("disabled");
-        else
+        } else {
           command.setAttribute("disabled", "true");
+        }
       } catch (e) {
         throw e;
       }

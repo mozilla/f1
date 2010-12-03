@@ -16,6 +16,7 @@
 
 * Send, get 401, should try to reauth: onclick handler to #authOkButton, but there is not one in index.html - James
 * Make sure that if auth is lost, the UI for share is refreshed correctly with localStorage - James
+* Confirm that extension that messes with localStorage still has workable UI with new settings page. - James
 * Figure out stats gathering for third party calls. - Mark
 * The "logged out" message is a bit scary, and it is not clear, if you get it
   while after typing a share message, that the message is in localStorage, and
@@ -32,6 +33,8 @@
   * May need to talk to satchel owner for FF4 if does not work out, to
     make autocomplete provider more robust and officially supported.
   * >> Contacts Addon messes up HTML5 autocomplete!
+    * ignore the contacts issue for now, once we have a mechanism for doing this
+      using html5, I'll make contacts do the same thing.
 * HTML5/FF friendly option for the video - Bryan
 * aTab is null in minefied - James
   * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
