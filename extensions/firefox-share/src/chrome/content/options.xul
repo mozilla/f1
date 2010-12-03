@@ -13,7 +13,7 @@
   <preferences>
     <preference id="pref_bookmarking" name="extensions.ffshare@mozilla.org.bookmarking" instantApply="true" type="bool"/>
     <preference id="pref_use_accel_key"
-                name="extensions.ffshare@mozilla.org.use-accel-key"
+                name="extensions.ffshare@mozilla.org.use_accel_key"
                 instantApply="true" type="bool"/>
   </preferences>
   <hbox flex="1">

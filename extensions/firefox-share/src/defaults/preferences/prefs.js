@@ -1,6 +1,6 @@
 pref("extensions.ffshare@mozilla.org.system", "prod");
 pref("extensions.ffshare@mozilla.org.bookmarking", true);
-pref("extensions.ffshare@mozilla.org.use-accel-key", true);
+pref("extensions.ffshare@mozilla.org.use_accel_key", true);
 
 pref("extensions.ffshare@mozilla.org.previous_version", "");
 pref("extensions.ffshare@mozilla.org.first-install", true);

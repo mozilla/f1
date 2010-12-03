@@ -220,7 +220,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     },
     hash = location.href.split('#')[1],
-    urlArgs, sendData,
+    urlArgs, sendData, prop,
     options = {},
     tabDom, bodyDom, clickBlockDom, twitterCounter,
     updateTab = true, tabSelection, accountCache,
@@ -632,8 +632,24 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (!options.title) {
       options.title = options.url;
     }
-    if (!options.system) {
-      options.system = 'prod';
+    if (!options.prefs.system) {
+      options.prefs.system = 'prod';
+    }
+  }
+
+  //Save the extension version in the localStorage, for use in
+  //other pages like settings.
+  if (options.version) {
+    store.extensionVersion = options.version;
+  }
+
+  //Save the preferences in localStorage, for use in
+  //other ppages like setting.
+  if (options.prefs) {
+    for (prop in options.prefs) {
+      if (options.prefs.hasOwnProperty(prop)) {
+        localStorage['prefs.' + prop] = options.prefs[prop];
+      }
     }
   }
 
@@ -653,18 +669,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
-    if (options.system) {
-      $(document.documentElement).addClass(options.system);
+    if (options.prefs.system) {
+      $(document.documentElement).addClass(options.prefs.system);
     }
 
-    //Update settings link to have the version of the extension.
-    $('.settingsLink').each(function (i, node) {
-      node.setAttribute('href', node.getAttribute('href') +
-                        '#version=' + (options.version || ''));
-    });
-
     //Debug info on the data that was received.
-    if (options.system === 'dev') {
+    if (options.prefs.system === 'dev') {
       $('#debugOutput').val(JSON.stringify(options));
       $('#debugCurrentLocation').val(location.href);
     }

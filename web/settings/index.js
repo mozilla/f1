@@ -23,15 +23,15 @@
 
 /*jslint indent: 2 */
 /*global require: false, window: false, location: true, localStorage: false,
-  opener: false, setTimeout: false */
+  opener: false, setTimeout: false, setInterval: false */
 "use strict";
 
 require.def("index",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
-         "dispatch", "blade/url", "storage", "accounts",
+         "dispatch", "storage", "accounts", "dotCompare",
          "jquery.colorFade", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,
-          dispatch,   url,         storage,   accounts) {
+          dispatch,   storage,   accounts,   dotCompare) {
 
   var domains = {
     'twitter.com': {
@@ -78,8 +78,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   domainList = [
     'twitter.com', 'facebook.com', 'google.com', 'googleapps.com', 'yahoo.com'
   ],
-  options = url.queryToObject(location.href.split('#')[1] || ''),
-  store = storage();
+  store = storage(),
+  isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1;
 
   jig.addFn({
     domainType: function (account) {
@@ -109,8 +109,17 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     }
   }
 
-  accounts.onChange();
+  //Do not keep around the tab if the opener for it has disappeared.
+  function confirmOpener() {
+    if (!opener || opener.closed) {
+      window.close();
+    }
+  }
+  confirmOpener();
+  setInterval(confirmOpener, 400);
 
+  //Set up knowledge of accounts and changes.
+  accounts.onChange();
   accounts(function (json) {
       var html = '';
   
@@ -130,7 +139,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         $('#existing')
           .append(html)
           .removeClass('hidden');
-  
       }
   
       html = '';
@@ -158,7 +166,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
 
   $(function () {
     var manageDom = $("#manage"),
-        settingsDom = $("#settings");
+        settingsDom = $("#settings"),
+        pref;
 
     // resize wrapper
     $(window).bind("load resize", function () {
@@ -218,14 +227,40 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         }
 
         evt.preventDefault();
+      }).
+      delegate('#settings [type="checkbox"]', 'click', function (evt) {
+        //Listen for changes in prefs and update localStorage, inform opener
+        //of changes.
+        var node = evt.target,
+            prefId = node.id,
+            value = node.checked;
+
+        store['prefs.' + prefId] = value;
+        dispatch.pub('prefChanged', {
+          name: prefId,
+          value: value
+        }, opener);
       });
+
+    //Set up state of the prefs.
+    pref = store['prefs.use_accel_key'];
+    pref = pref ? JSON.parse(pref) : false;
+    $('#use_accel_key')[0].checked = pref || false;
+    pref = store['prefs.bookmarking'];
+    pref = pref ? JSON.parse(pref) : false;
+    $('#bookmarking')[0].checked = pref || false;
 
     // create ellipsis for gecko
     $(function () {
       $(".overflow").textOverflow(null, true);
     });
-    
+
     // tabs
+    // Only show settings if extension can actually handle setting of them.
+    if (isGreaterThan072) {
+      $('li.settings').removeClass('hidden');
+    }
+
     $("ul#tabs li").click(function () {
       $(this).addClass("selected");
       $(this).siblings().removeClass("selected");
@@ -244,5 +279,5 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         settingsDom.siblings().fadeOut(0);
       }
     });
-  });  
+  });
 });
