@@ -1,7 +1,5 @@
 # Better settings/choice release
 
-* turn off indication of "NEW STUFF" after x number of days since last opened share UI - James
-* New settings page: how to surface new accounts to people upgrading vs first time users? - Bryan/Andy/James
 * Make sure web UI gets expired from cache on new release since old one cannot handle accounts it did not know about.
 
 # API work
@@ -13,7 +11,6 @@
 
 ## optional settings release work
 
-* Autocomplete in minefield is showing the full blue text - James
 * Send, get 401, should try to reauth: onclick handler to #authOkButton, but there is not one in index.html - James
 * Make sure that if auth is lost, the UI for share is refreshed correctly with localStorage - James
 * Confirm that extension that messes with localStorage still has workable UI with new settings page. - James

@@ -28,12 +28,28 @@
 
 require.def("index",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
-         "dispatch", "storage", "accounts", "dotCompare",
+         "dispatch", "storage", "accounts", "dotCompare", "blade/url",
          "jquery.colorFade", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,
-          dispatch,   storage,   accounts,   dotCompare) {
+          dispatch,   storage,   accounts,   dotCompare,   url) {
 
-  var domains = {
+  var domainList = [
+    'twitter.com', 'facebook.com', 'google.com', 'googleapps.com', 'yahoo.com'
+  ],
+  store = storage(),
+  isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
+  options = url.queryToObject(location.href.split('#')[1] || '') || {},
+  showNew = options.show === 'new',
+  domains;
+
+  //If new items should be shown, refresh the location bar,
+  //so further reloads of the page do not trigger showNew
+  if (showNew) {
+    delete options.show;
+    location.replace(location.href.split('#')[0] + '#' + url.objectToQuery(options));
+  }
+
+  domains = {
     'twitter.com': {
       type: 'twitter',
       name: 'Twitter',
@@ -59,7 +75,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       }
     },
     'googleapps.com': {
-      isNew: true,
+      isNew: showNew,
       type: 'googleApps',
       name: 'Google Apps',
       serviceUrl: 'https://mail.google.com',
@@ -67,19 +83,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       signOutUrl: 'http://google.com/preferences'
     },
     'yahoo.com': {
-      isNew: true,
+      isNew: showNew,
       type: 'yahoo',
       name: 'Yahoo!',
       serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
       revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
       signOutUrl: 'https://login.yahoo.com/config/login?logout=1'
     }
-  },
-  domainList = [
-    'twitter.com', 'facebook.com', 'google.com', 'googleapps.com', 'yahoo.com'
-  ],
-  store = storage(),
-  isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1;
+  };
+
 
   jig.addFn({
     domainType: function (account) {
@@ -153,12 +165,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           .append(html)
           .removeClass('hidden');
       }
-  
+
       //Flash the new items.
-      $(function () {
-        $("li.newItem").animate({ backgroundColor: '#ffff99' }, 200)
-          .delay(1000).animate({ backgroundColor: '#fafafa' }, 3000);
-      });
+      if (showNew) {
+        $(function () {
+          $("li.newItem").animate({ backgroundColor: '#ffff99' }, 200)
+            .delay(1000).animate({ backgroundColor: '#fafafa' }, 3000);
+        });
+      }
     },
     //error handler for accounts
     onError

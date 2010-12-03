@@ -222,8 +222,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     hash = location.href.split('#')[1],
     urlArgs, sendData, prop,
     options = {},
-    tabDom, bodyDom, clickBlockDom, twitterCounter,
-    updateTab = true, tabSelection, accountCache,
+    tabDom, bodyDom, clickBlockDom, twitterCounter, timer,
+    updateTab = true, tabSelection, accountCache, showNew,
     gmailDom, yahooDom, autoCompleteWidget, store = localStorage;
 
   //Capability detect for localStorage. At least on add-on does weird things
@@ -629,12 +629,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (urlArgs.options) {
       options = JSON.parse(urlArgs.options);
     }
-    if (!options.title) {
-      options.title = options.url;
-    }
-    if (!options.prefs.system) {
-      options.prefs.system = 'prod';
-    }
+  }
+  options.prefs = options.prefs || {};
+  if (!options.title) {
+    options.title = options.url;
+  }
+  if (!options.prefs.system) {
+    options.prefs.system = 'prod';
   }
 
   //Save the extension version in the localStorage, for use in
@@ -650,6 +651,21 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       if (options.prefs.hasOwnProperty(prop)) {
         localStorage['prefs.' + prop] = options.prefs[prop];
       }
+    }
+  }
+
+  //For the "new items" link, only show it for x number of days after showing it.
+  //NOTE: when updating for newer releases, delete the old value from the
+  //storage.
+  timer = store.newTimerV1;
+  if (!timer) {
+    store.newTimerV1 = (new Date()).getTime();
+    showNew = true;
+  } else {
+    timer = JSON.parse(timer);
+    //If time since first seen is greater than three days, hide the new link.
+    if ((new Date()).getTime() - timer < (3 * 24 * 60 * 60 * 1000)) {
+      showNew = true;
     }
   }
 
@@ -677,6 +693,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (options.prefs.system === 'dev') {
       $('#debugOutput').val(JSON.stringify(options));
       $('#debugCurrentLocation').val(location.href);
+    }
+
+    //Show the new link if appropriate.
+    if (showNew) {
+      $('#newLink').removeClass('hidden');
     }
 
     //Hook up button for share history
