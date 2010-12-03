@@ -1,7 +1,5 @@
 # Better settings/choice release
 
-* Remove options.xul? - James
-* Implement settings for bookmarks and F1 keybinding - Bryan / James
 * turn off indication of "NEW STUFF" after x number of days since last opened share UI - James
 * New settings page: how to surface new accounts to people upgrading vs first time users? - Bryan/Andy/James
 * Make sure web UI gets expired from cache on new release since old one cannot handle accounts it did not know about.
