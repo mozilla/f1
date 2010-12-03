@@ -28,10 +28,10 @@
 
 require.def("index",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
-         "placeholder", "TextCounter", "AutoComplete", "dispatch",
+         "placeholder", "TextCounter", "AutoComplete", "dispatch", "accounts",
          "jquery-ui-1.8.6.custom.min", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
-          placeholder,   TextCounter,   AutoComplete,   dispatch) {
+          placeholder,   TextCounter,   AutoComplete,   dispatch,   accounts) {
 
   var showStatus,
     actions = {
@@ -223,7 +223,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     urlArgs, sendData,
     options = {},
     tabDom, bodyDom, clickBlockDom, twitterCounter,
-    updateTab = true, accountCache, tabSelection,
+    updateTab = true, tabSelection, accountCache,
     gmailDom, yahooDom, autoCompleteWidget, store = localStorage;
 
   //Capability detect for localStorage. At least on add-on does weird things
@@ -624,44 +624,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     updateFirstLastTab();
   }
 
-  function onGetAccounts(json) {
-    if (json.error) {
-      json = [];
-    }
-
-    //Store the JSON for the next page load.
-    accountCache = json;
-    store.accountCache = JSON.stringify(json);
-
-    updateAccounts(json);
-  }
-
-  function getAccounts(onSuccess) {
-    rdapi('account/get', {
-      success: onSuccess || onGetAccounts,
-      error: function (xhr, textStatus, err) {
-        if (xhr.status === 503) {
-          showStatus('statusServerBusyClose');
-        } else {
-          showStatus('statusServerError', err);
-        }
-      }
-    });
-  }
-
-  //Listen for when the settings tab changes the accounts
-  dispatch.sub('accountsChanged', function () {
-    getAccounts(function (json) {
-      //Save data in localStorage, then reload, because the tabs
-      //were not created without an active account.
-      if (json.error) {
-        json = [];
-      }
-      store.accountCache = JSON.stringify(json);
-      location.reload();
-    });
-  });
-
   if (hash) {
     urlArgs = url.queryToObject(hash);
     if (urlArgs.options) {
@@ -742,56 +704,55 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       sendMessage();
     });
 
-    //Use cached account info to speed up startup, but then
-    //call API service to be sure data is up to date.
-    accountCache = (store.accountCache && JSON.parse(store.accountCache)) || [];
+    //Set up default handler for account changes triggered from other
+    //windows, or updates to expired cache.
+    accounts.onChange();
+
+    //Fetch the accounts.
+    accounts(function (json) {
+        accountCache = json;
+  
+        //No need to update tab since that will be done inline below.
+        updateTab = false;
+        updateAccounts(accountCache);
+        updateTab = true;
     
-    //No need to update tab since that will be done inline below.
-    updateTab = false;
-    onGetAccounts(accountCache);
-    updateTab = true;
+        tabSelection = determineTab();
+    
+        //Set up HTML so initial jquery UI tabs will not flash away from the selected
+        //tab as we show it. Done for performance and to remove a flash of tab content
+        //that is not the current tab.
+        if (tabSelection) {
+          $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
+          tabSelectionDom = $(tabSelection);
+          tabSelectionDom.removeClass('ui-tabs-hide');
 
-    getAccounts(function (json) {
+          //Update the profile pic/account name text for the tab.
+          updateUserTab(null, {panel: tabSelectionDom[0]});
 
-      //If json differs from accountCache, then save and reload
-      var same = json.length === accountCache.length;
-      if (same) {
-        same = !json.some(function (account, i) {
-          return account.identifier !== accountCache[i].identifier;
-        });
+          //Set up jQuery UI tabs.
+          tabDom = $("#tabs");
+          tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
+          tabDom.bind("tabsselect", updateUserTab);
+          //Make the tabs visible now to the user, now that tabs have been set up.
+          tabDom.removeClass('invisible');
+          bodyDom.removeClass('loading');
+
+          //Make sure first/last tab styles are set up accordingly.
+          updateFirstLastTab();
+        } else {
+          showStatus('statusSettings');
+        }
+      },
+      //Error handler for account fetch
+      function (xhr, textStatus, err) {
+        if (xhr.status === 503) {
+          showStatus('statusServerBusyClose');
+        } else {
+          showStatus('statusServerError', err);
+        }
       }
-
-      if (!same) {
-        onGetAccounts(json);
-      }
-    });
-
-    tabSelection = determineTab();
-
-    //Set up HTML so initial jquery UI tabs will not flash away from the selected
-    //tab as we show it. Done for performance and to remove a flash of tab content
-    //that is not the current tab.
-    if (tabSelection) {
-      $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
-      tabSelectionDom = $(tabSelection);
-      tabSelectionDom.removeClass('ui-tabs-hide');
-  
-      //Update the profile pic/account name text for the tab.
-      updateUserTab(null, {panel: tabSelectionDom[0]});
-  
-      //Set up jQuery UI tabs.
-      tabDom = $("#tabs");
-      tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
-      tabDom.bind("tabsselect", updateUserTab);
-      //Make the tabs visible now to the user, now that tabs have been set up.
-      tabDom.removeClass('invisible');
-      bodyDom.removeClass('loading');
-  
-      //Make sure first/last tab styles are set up accordingly.
-      updateFirstLastTab();
-    } else {
-      showStatus('statusSettings');
-    }
+    );
 
     //Set up hidden form fields for facebook
     //TODO: try sending data urls via options.thumbnail if no

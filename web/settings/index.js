@@ -28,9 +28,10 @@
 
 require.def("index",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
-         "dispatch", "blade/url", "jquery.colorFade", "jquery.textOverflow"],
+         "dispatch", "blade/url", "storage", "accounts",
+         "jquery.colorFade", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,
-          dispatch,   url) {
+          dispatch,   url,         storage,   accounts) {
 
   var domains = {
     'twitter.com': {
@@ -78,19 +79,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     'twitter.com', 'facebook.com', 'google.com', 'googleapps.com', 'yahoo.com'
   ],
   options = url.queryToObject(location.href.split('#')[1] || ''),
-  store = localStorage;
-
-  //Capability detect for localStorage. At least on add-on does weird things
-  //with it, so even a concern in Gecko-only code.
-  try {
-    store.tempVar = 'temp';
-    if (store.tempVar === 'temp') {
-    }
-    delete store.tempVar;
-  } catch (e) {
-    //Just use a simple in-memory object. Not as nice, but code will still work.
-    store = {};
-  }
+  store = storage();
 
   jig.addFn({
     domainType: function (account) {
@@ -112,14 +101,19 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     }
   }
 
-  rdapi('account/get', {
-    success: function (json) {
-      if (json.error) {
-        json = [];
-      }
+  function onError(xhr, textStatus, err) {
+    if (xhr.status === 503) {
+      showStatus('statusServerBusyClose');
+    } else {
+      showStatus('statusServerError', err);
+    }
+  }
 
+  accounts.onChange();
+
+  accounts(function (json) {
       var html = '';
-
+  
       //Weed out existing accounts for domains from available domainList,
       //and generate account UI
       json.forEach(function (item) {
@@ -129,16 +123,16 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         }
         html += jig('#accountTemplate', item);
       });
-
+  
       //Generate UI for each list.
       if (html) {
         $('#existingHeader').removeClass('hidden');
         $('#existing')
           .append(html)
           .removeClass('hidden');
-
+  
       }
-
+  
       html = '';
       domainList.forEach(function (domain) {
         var data = domains[domain];
@@ -151,21 +145,16 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           .append(html)
           .removeClass('hidden');
       }
-
+  
       //Flash the new items.
       $(function () {
         $("li.newItem").animate({ backgroundColor: '#ffff99' }, 200)
           .delay(1000).animate({ backgroundColor: '#fafafa' }, 3000);
       });
     },
-    error: function (xhr, textStatus, err) {
-      if (xhr.status === 503) {
-        showStatus('statusServerBusyClose');
-      } else {
-        showStatus('statusServerError', err);
-      }
-    }
-  });
+    //error handler for accounts
+    onError
+  );
 
   $(function () {
     var manageDom = $("#manage"),
@@ -193,12 +182,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
 
         oauth(domain, function (success) {
           if (success) {
-            dispatch.pub('accountsChanged', null, opener);
-            //Paranoid that the postMessage will be canceled if reload
-            //is called too quickly, so using a setTimeout.
-            setTimeout(function () {
-              location.reload();
-            }, 200);
+            accounts.fetch(null, onError);
           } else {
             showStatus('statusOAuthFailed');
           }
@@ -218,12 +202,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             username: userName
           },
           success: function () {
-            dispatch.pub('accountsChanged', null, opener);
-            //Paranoid that the postMessage will be canceled if reload
-            //is called too quickly, so using a setTimeout.
-            setTimeout(function () {
-              location.reload();
-            }, 200);
+            accounts.fetch(null, onError);
           },
           error: function (xhr, textStatus, err) {
             showStatus('statusError', err);
