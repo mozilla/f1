@@ -701,10 +701,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     }
 
     //Hook up button for share history
-    $('#shareHistoryButton').click(function (evt) {
-      window.open('history.html');
-      close();
-    });
     bodyDom
       .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
         cancelStatus();
@@ -720,7 +716,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     $('#authOkButton').click(function (evt) {
       oauth(sendData.domain, function (success) {
         if (success) {
-          sendMessage();
+          accounts.clear();
+          accounts();
         } else {
           showStatus('statusOAuthFailed');
         }

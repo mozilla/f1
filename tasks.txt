@@ -11,14 +11,8 @@
 
 ## optional settings release work
 
-* Send, get 401, should try to reauth: onclick handler to #authOkButton, but there is not one in index.html - James
-* Make sure that if auth is lost, the UI for share is refreshed correctly with localStorage - James
 * Confirm that extension that messes with localStorage still has workable UI with new settings page. - James
 * Figure out stats gathering for third party calls. - Mark
-* The "logged out" message is a bit scary, and it is not clear, if you get it
-  while after typing a share message, that the message is in localStorage, and
-  if you log in with the same account type and name, then your message will
-  still be available.
 * FE perf - James
   * appcache
 * If do oauth and cancel, be sure current tab selection is cleared - James

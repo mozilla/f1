@@ -95,7 +95,9 @@ function (storage,   dispatch,   rdapi) {
 
     //Call ok callback with current knowledge. If there is a change in the
     //account info, then the fetch will trigger changed event later.
-    ok(accountCache);
+    if (ok) {
+      ok(accountCache);
+    }
 
     if (fetch) {
       accounts.fetch(null, error);
@@ -139,6 +141,14 @@ function (storage,   dispatch,   rdapi) {
       },
       error: error || function () {}
     });
+  };
+
+  /**
+   * Clears the account data. Use this when it is known that the server
+   * info is no longer valid/expired.
+   */
+  accounts.clear = function () {
+    delete store.accountCache;
   };
 
   /**
