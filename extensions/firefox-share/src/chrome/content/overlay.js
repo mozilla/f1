@@ -40,7 +40,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   // This add-on manager is only available in Firefox 4+
   try {
     Components.utils.import("resource://gre/modules/AddonManager.jsm");
-  } catch (e) {   
+  } catch (e) {
   }
 
   var slice = Array.prototype.slice,
@@ -104,7 +104,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @returns {Function}
      */
     bind: function (obj, f) {
-      //Do not bother if 
+      //Do not bother if
       if (!f) {
         return obj;
       }
@@ -123,7 +123,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   function StateProgressListener(tabFrame) {
     this.tabFrame = tabFrame;
   }
-  
+
   StateProgressListener.prototype = {
     // detect communication from the iframe via location setting
     QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
@@ -165,11 +165,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
               } catch (e) {
                 skip = true;
               }
-  
+
               if (!skip) {
                 topic = message.topic;
                 data = message.data;
-    
+
                 if (topic && this.tabFrame[topic]) {
                   this.tabFrame[topic](data);
                 }
@@ -234,7 +234,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   function NavProgressListener(tabFrame) {
     this.tabFrame = tabFrame;
   }
-  
+
   NavProgressListener.prototype = {
     // detect navigational events for the tab, so we can close
 
@@ -270,7 +270,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.navProgressListener = new NavProgressListener(this);
       gBrowser.getBrowserForTab(this.tab).webProgress.addProgressListener(this.navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
     },
-    
+
     unregisterListener: function (listener) {
       var shareFrameProgress = this.shareFrame.webProgress;
       shareFrameProgress.removeProgressListener(this.stateProgressListener);
@@ -310,7 +310,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         iframeNode.setAttribute('autocompletepopup', 'PopupAutoCompleteRichResult');
         //Use the Firefox global context menu so we get spellcheck and such
         iframeNode.setAttribute("contextmenu", "contentAreaContextMenu");
- 
+
         iframeNode.className = 'ffshare-frame';
         iframeNode.style.width = '100%';
         iframeNode.style.height = '114px';
@@ -417,7 +417,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (this.useCssTransition) {
         this.onHeightEnd = onEnd;
       }
-      
+
       this.shareFrame.style.height = height + 'px';
 
       if (!this.useCssTransition && onEnd) {
@@ -456,7 +456,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         }
       }
       title = gBrowser.contentDocument.getElementsByTagName("title")[0];
-      if (title) {
+      if (title && title.firstChild) {
         //Use node Value because we have nothing else
         return title.firstChild.nodeValue.trim();
       }
@@ -810,12 +810,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
               if (buttonNode) {
                 rect = buttonNode.getBoundingClientRect();
                 browser = gBrowser.getBrowserForTab(tabbrowser.selectedTab);
-  
+
                 // try setting the button location as the window may have already loaded
                 try {
                   sendJustInstalledEvent(browser, rect);
                 } catch (ignore) { }
-  
+
                 // Add the load handler in case the window hasn't finished loaded (unlikely)
                 browser.addEventListener("load", makeInstalledLoadHandler(browser, rect), true);
               }
@@ -984,7 +984,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         tabFrame.hide();
       } else {
         tabFrame.show(options);
-      }      
+      }
     }
   };
 
