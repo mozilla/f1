@@ -1,5 +1,10 @@
 # Better settings/choice release
 
+* Improve the "Please <a>configure accounts</a> to share" page - Andy
+* Update the F1 front page to capture the new UI - Andy
+* New video for the front page - Andy
+* Change text for Manage/Settings - Andy
+* Hide F1 gets renamed to F2 - Andy
 * Make sure web UI gets expired from cache on new release since old one cannot handle accounts it did not know about.
 
 # API work
@@ -11,6 +16,7 @@
 
 ## optional settings release work
 
+* F1 RSS News in Settings Page - James
 * Confirm that extension that messes with localStorage still has workable UI with new settings page. - James
 * Figure out stats gathering for third party calls. - Mark
 * FE perf - James
