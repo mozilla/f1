@@ -852,6 +852,16 @@ div.status.intermediate.error .statusButton {
   border-color: #AB4D00;
 }
 
+div.status.noConfig {
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.75);
+    line-height: 18px;
+}
+
+div.status.noConfig img {
+    display: block;
+    margin: 20px auto 5px;
+}
+
 .statusButton {
   font-size: 11px;
   vertical-align: baseline;

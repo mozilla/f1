@@ -317,6 +317,9 @@ ul#tabs li.selected {
   margin: 0 0 0 10px;
 }
 
+#newsFooter .headline {
+    visibility: hidden; /* hide headline until we get a real news feed */
+}
 
 
 /*
