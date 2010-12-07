@@ -30,6 +30,9 @@
   <!-- script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script-->
 </head>
 <body class="loading">
+<noscript>
+    Please enable JavaScript to use F1.
+</noscript>
 
 <div id="tabs" class="invisible">
 
@@ -48,7 +51,7 @@
     <div class="rightActions">
       <a id="newLink" href="../settings/#show=new" class="settingsLink new hidden" target="_blank">new stuff!</a>
       <a href="../settings/" class="settingsLink" target="_blank">settings</a>
-      <a href="http://feedback.mozillalabs.com/forums/68185-messaging-add-ons" target="_blank">feedback</a> 
+      <a href="http://feedback.mozillalabs.com/forums/68185-messaging-add-ons" target="_blank">feedback</a>
       <span class="close"></span>
     </div>
   </ul>
@@ -202,7 +205,7 @@
 <script id="accountTemplate" type="text/template">
   {.userAccount accounts[0]}
   <div class="account">
-    <!-- <img src="{profilePic(photos)}"> --> 
+    <!-- <img src="{profilePic(photos)}"> -->
     <span class="check">&#x2714;</span> <span title="{userAccount.domain} properly configured!" class="name">{displayName}</span>
     <span class="remove"><a class="accountRemove" href="#" data-domain="{userAccount.domain}" data-username="{userAccount.username}" data-userid="{userAccount.userid}">remove</a></span>
   </div>
@@ -252,7 +255,7 @@
 <div id="statusCaptcha" class="status hidden intermediate captcha">
   <div class="captcha-wrap">
   <div class="captcha-content">
-    <img id="captchaImage" class="captchaImage" /> 
+    <img id="captchaImage" class="captchaImage" />
     <input id="captcha" name="captcha" placeholder="captcha" type="text"/>
     <button id="captchaButton" class="statusButton">ok</button>
   </div>

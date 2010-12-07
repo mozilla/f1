@@ -107,7 +107,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   function showStatus(statusId, message) {
     $('div.status').addClass('hidden');
     $('#' + statusId).removeClass('hidden');
-  
+
     if (message) {
       $('#' + statusId + ' .message').text(message);
     }
@@ -134,7 +134,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   accounts.onChange();
   accounts(function (json) {
       var html = '';
-  
+
       //Weed out existing accounts for domains from available domainList,
       //and generate account UI
       json.forEach(function (item) {
@@ -144,7 +144,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         }
         html += jig('#accountTemplate', item);
       });
-  
+
       //Generate UI for each list.
       if (html) {
         $('#existingHeader').removeClass('hidden');
@@ -152,7 +152,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           .append(html)
           .removeClass('hidden');
       }
-  
+
       html = '';
       domainList.forEach(function (domain) {
         var data = domains[domain];
@@ -181,7 +181,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   $(function () {
     var manageDom = $("#manage"),
         settingsDom = $("#settings"),
-        pref;
+        pref, node;
 
     // resize wrapper
     $(window).bind("load resize", function () {
@@ -217,7 +217,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             domain = buttonNode.getAttribute('data-domain'),
             userName = buttonNode.getAttribute('data-username'),
             userId = buttonNode.getAttribute('data-userid');
-  
+
         rdapi('account/signout', {
           data: {
             domain: domain,
@@ -293,5 +293,33 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         settingsDom.siblings().fadeOut(0);
       }
     });
+
+    //Callback handler for JSONP feed response from Google.
+    window.onFeedLoad = function (x, data) {
+      var title, link, i, entries;
+      if (data && data.feed && data.feed.entries) {
+        for (i = 0; (entry = data.feed.entries[i]); i++) {
+          if (entry.categories && entry.categories.indexOf('Sharing') !== -1) {
+            link = entry.link;
+            title = entry.title;
+            break;
+          }
+        }
+      }
+
+      if (link) {
+        $('#newsFooter .headline').removeClass('invisible');
+        $('#rssLink').attr('href', link).text(title);
+      }
+    };
+
+    //Fetch the feed. This is low priority, so done at the bottom.
+    node = document.createElement("script");
+    node.charset = "utf-8";
+    node.async = true;
+    node.src = 'http://www.google.com/uds/Gfeeds?v=1.0&callback=onFeedLoad&context=' +
+              '&output=json&' +
+              'q=http%3A%2F%2Fmozillalabs.com%2Fmessaging%2Ffeed%2F';
+    $('head')[0].appendChild(node);
   });
 });

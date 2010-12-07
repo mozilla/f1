@@ -38,6 +38,13 @@
   list-style-type: none;
 }
 
+noscript {
+    display: block;
+    text-align: center;
+    padding: 20px;
+    font-size: larger;
+}
+
 body {
   font-size: 11px;
   font-family: "Lucida Grande", Verdana, sans-serif;
@@ -463,7 +470,7 @@ button.share {
 
 button.share:focus {
   -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
-} 
+}
 
 /* Disable user resizing of text area since it covers the twitter count. */
 textarea {
@@ -471,7 +478,7 @@ textarea {
 }
 
 textarea, input[type="text"] {
-  border-width: 1px; 
+  border-width: 1px;
   border-style: solid;
   border-color: #888;
   font-family: "Lucida Grande", Verdana, sans-serif;
@@ -486,8 +493,8 @@ textarea, input[type="text"] {
 
 textarea:focus, input[type="text"]:focus {
   -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25) inset,  0 1px 0 #fff;
-}  
-  
+}
+
 
 textarea.message {
   -moz-border-radius: 2px 0 0 2px;
@@ -880,103 +887,103 @@ div.status.noConfig img {
 
 /* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
 /* hbox and vbox classes */
- 
+
 .hbox {
 	display: -webkit-box;
 	-webkit-box-orient: horizontal;
 	-webkit-box-align: stretch;
- 
+
 	display: -moz-box;
 	-moz-box-orient: horizontal;
 	-moz-box-align: stretch;
- 
+
 	display: box;
 	box-orient: horizontal;
 	box-align: stretch;
 }
- 
+
 .hbox > * {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 	display: block;
 }
- 
+
 .vbox {
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
 	-webkit-box-align: stretch;
- 
+
 	display: -moz-box;
 	-moz-box-orient: vertical;
 	-moz-box-align: stretch;
- 
+
 	display: box;
 	box-orient: vertical;
 	box-align: stretch;
 }
- 
+
 .vbox > * {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 	display: block;
 }
- 
+
 .spacer {
 	-webkit-box-flex: 1;
 	-moz-box-flex: 1;
 	box-flex: 1;
 }
- 
+
 .reverse {
 	-webkit-box-direction: reverse;
 	-moz-box-direction: reverse;
 	box-direction: reverse;
 }
- 
+
 .boxFlex0 {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 }
- 
+
 .boxFlex1, .boxFlex {
 	-webkit-box-flex: 1;
 	-moz-box-flex: 1;
 	box-flex: 1;
 }
- 
+
 .boxFlex2 {
 	-webkit-box-flex: 2;
 	-moz-box-flex: 2;
 	box-flex: 2;
 }
- 
+
 .boxGroup1 {
 	-webkit-box-flex-group: 1;
 	-moz-box-flex-group: 1;
 	box-flex-group: 1;
 }
- 
+
 .boxGroup2 {
 	-webkit-box-flex-group: 2;
 	-moz-box-flex-group: 2;
 	box-flex-group: 2;
 }
- 
+
 .start {
 	-webkit-box-pack: start;
 	-moz-box-pack: start;
 	box-pack: start;
 }
- 
+
 .end {
 	-webkit-box-pack: end;
 	-moz-box-pack: end;
 	box-pack: end;
 }
- 
+
 .center {
 	-webkit-box-pack: center;
 	-moz-box-pack: center;
@@ -994,11 +1001,11 @@ div.status.noConfig img {
 	line-height: 0;
 	height: 0;
 }
- 
+
 html[xmlns] .clearfix {
 	display: block;
 }
- 
+
 * html .clearfix {
 	height: 1%;
 }

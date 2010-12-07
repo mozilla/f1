@@ -20,7 +20,7 @@
  *
  * Contributor(s):
  * */
- 
+
 * {
   margin: 0;
   padding: 0;
@@ -42,8 +42,12 @@ body {
   display: none;
 }
 
-button::-moz-focus-inner { 
-  border: 0; 
+.invisible {
+  visibility: hidden;
+}
+
+button::-moz-focus-inner {
+  border: 0;
 }
 
 button {
@@ -53,11 +57,11 @@ button {
   border-color: #aaa;
   cursor: pointer;
   padding: 0 10px;
-  
+
   -moz-border-radius: 2px;
   -webkit-border-radius: 2px;
   border-radius: 2px;
-  
+
   background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
 }
@@ -66,7 +70,7 @@ button:active {
   -moz-box-shadow: 0 0 1px #666666 inset;
   -webkit-box-shadow: 0 0 1px #666666 inset;
   box-shadow: 0 0 1px #666666 inset;
-  
+
   background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
 }
@@ -124,8 +128,8 @@ strong {
   position: relative;
 }
 
-/* 
-    grid 
+/*
+    grid
 */
 
 .c1, .c2, .c3 {
@@ -163,8 +167,8 @@ h1 {
   color: #00A0FF;
 }
 
-/* 
-    header 
+/*
+    header
 */
 
 #header.row {
@@ -317,121 +321,116 @@ ul#tabs li.selected {
   margin: 0 0 0 10px;
 }
 
-#newsFooter .headline {
-    visibility: hidden; /* hide headline until we get a real news feed */
-}
-
-
 /*
     hbox & vbox
 */
- 
+
 .hbox {
 	display: -webkit-box;
 	-webkit-box-orient: horizontal;
 	-webkit-box-align: stretch;
- 
+
 	display: -moz-box;
 	-moz-box-orient: horizontal;
 	-moz-box-align: stretch;
- 
+
 	display: box;
 	box-orient: horizontal;
 	box-align: stretch;
-	
+
 	width: 100%;
 }
- 
+
 .hbox > * {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 	display: block;
 }
- 
+
 .vbox {
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
 	-webkit-box-align: stretch;
- 
+
 	display: -moz-box;
 	-moz-box-orient: vertical;
 	-moz-box-align: stretch;
- 
+
 	display: box;
 	box-orient: vertical;
 	box-align: stretch;
 }
- 
+
 .vbox > * {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 	display: block;
 }
- 
+
 .spacer {
 	-webkit-box-flex: 1;
 	-moz-box-flex: 1;
 	box-flex: 1;
 }
- 
+
 .reverse {
 	-webkit-box-direction: reverse;
 	-moz-box-direction: reverse;
 	box-direction: reverse;
 }
- 
+
 .boxFlex0 {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 }
- 
+
 .boxFlex1, .boxFlex {
 	-webkit-box-flex: 1;
 	-moz-box-flex: 1;
 	box-flex: 1;
 }
- 
+
 .boxFlex2 {
 	-webkit-box-flex: 2;
 	-moz-box-flex: 2;
 	box-flex: 2;
 }
- 
+
 .boxGroup1 {
 	-webkit-box-flex-group: 1;
 	-moz-box-flex-group: 1;
 	box-flex-group: 1;
 }
- 
+
 .boxGroup2 {
 	-webkit-box-flex-group: 2;
 	-moz-box-flex-group: 2;
 	box-flex-group: 2;
 }
- 
+
 .start {
 	-webkit-box-pack: start;
 	-moz-box-pack: start;
 	box-pack: start;
 }
- 
+
 .end {
 	-webkit-box-pack: end;
 	-moz-box-pack: end;
 	box-pack: end;
 }
- 
+
 .center {
 	-webkit-box-pack: center;
 	-moz-box-pack: center;
 	box-pack: center;
 }
 
-/* 
-    clearfix 
+/*
+    clearfix
 */
 
 .clearfix:after {
@@ -442,16 +441,16 @@ ul#tabs li.selected {
 	line-height: 0;
 	height: 0;
 }
- 
+
 html[xmlns] .clearfix {
 	display: block;
 }
- 
+
 * html .clearfix {
 	height: 1%;
 }
 
-/* 
+/*
     webkit specific styles
 */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
