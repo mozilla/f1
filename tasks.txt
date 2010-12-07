@@ -32,8 +32,6 @@
   * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
 * Privacy policy update? - David
   * Make the policy and link clear it is F1 privacy policy, put link under install button?
-* noscript breaks the UI
-  https://github.com/mozilla/f1/issues#issue/16
 * Make youtube videos playable in Facebook
   https://github.com/mozilla/f1/issues#issue/17
 * Share option on the facebook page that shows the share? It is not showing up,
