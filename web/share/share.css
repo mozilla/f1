@@ -759,65 +759,81 @@ div.status {
   text-align: center;
 }
 
-div.captcha {
-  position: absolute;
-  width: 100%;
-  height: 113px;
-  line-height: normal;
-  top: 0;
-  left: 0;
-  color: #0a0a0a;
-  font-size: 14px;
-  padding-top: 15px;
-  padding-left: 5px;
-  text-align: center;
-}
-
 #statusCaptcha {
   line-height: normal;
 }
 
 div.captcha-wrap {
-  margin-left: auto;
-  margin-right: auto;
-  width: 500px;
+  /*  we need this to take up the full height of the status bar */
+  height: 113px;
 }
 
-div.captcha-content {
-  max-width: 300px;
-  text-align: left;
-  float: left;
-}
-
-div.captcha-msg {
-  max-width: 200px;
-  float: right;
-  text-align: left;
-}
-
-div.captcha-content > img {
+div.captcha-wrap img {
   width: 200px;
   height: 55px;
+  margin: 0 10px;
 }
-div.captcha-content > input {
-  margin-top: 5px;
-  width: 200px;
-  height: 20px;
-  font-size: 11pt;
+
+div.captcha-wrap .text,
+div.captcha-wrap .subtext {
+  font-size: smaller;
+  color: #444;
+  text-align: left;
 }
-div.captcha-content > button {
-  margin: 5px;
+
+div.captcha-wrap .subtext {
+  color: #666;
+}
+
+div.captcha-wrap .controls {
+  width: 100%;
+}
+
+div.captcha-wrap button {
+  height: 30px;
+  border-width: 1px 1px 1px 0;
+  border-style: solid;
+  border-color: #888;
+  cursor: pointer;
+  padding: 0 10px;
+  margin: 0;
+  -moz-border-radius: 0 2px 2px 0;
+  -webkit-border-radius: 0 2px 2px 0;
+  border-radius: 0 2px 2px 0;
+  background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
+}
+
+div.captcha-wrap button:active {
+  -moz-box-shadow: 0 0 1px #666666 inset;
+  -webkit-box-shadow: 0 0 1px #666666 inset;
+  box-shadow: 0 0 1px #666666 inset;
+  background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
+}
+
+div.captcha-wrap input {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #888;
+  font-family: "Lucida Grande", Verdana, sans-serif;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 3px;
+  margin: 0;
+  -moz-border-radius: 2px 0 0 2px;
+  -moz-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
 }
 
 #captchaSuround {
   max-height: 80px;
 }
 #captchaImage {
-  border: 1px solid black;
+  border: 1px solid #888;
 }
 
 #captchaSound {
-  border: 1px solid black;
+  border: 1px solid #888;
   width: 10px;
   height: 10px;
 }

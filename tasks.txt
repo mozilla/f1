@@ -2,7 +2,6 @@
 
 * Update the F1 front page to capture the new UI - Andy
 * New video for the front page - Andy
-* Improve the Yahoo! Captcha page - Andy
 
 # API work
 * Look at LinkedIn API - Shane

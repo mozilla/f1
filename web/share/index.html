@@ -250,16 +250,20 @@
 </div>
 
 <div id="statusCaptcha" class="status hidden intermediate captcha">
-  <div class="captcha-wrap">
-  <div class="captcha-content">
-    <img id="captchaImage" class="captchaImage" />
-    <input id="captcha" name="captcha" placeholder="captcha" type="text"/>
-    <button id="captchaButton" class="statusButton">ok</button>
-  </div>
-  <div id="captchaMsg" class="captcha-msg">
-    Somebody wants to know that you're really human.
-    <div>Enter Captcha text to send message.</div>
-  </div>
+  <div class="captcha-wrap vbox boxFlex center">
+    <div>
+    <form name="captchaForm" onsubmit="document.getElementById('captchaButton').click();return false;" class="hbox boxFlex">
+      <div><img id="captchaImage" class="captchaImage"/></div>
+      <div>
+        <div class="text">Please enter the text you see:</div>
+        <div class="controls hbox boxFlex">
+          <input class="boxFlex" id="captcha" name="captcha" placeholder="captcha" type="text"/>
+          <button id="captchaButton" class="statusButton">submit</button>
+        </div>
+        <div class="subtext">(sorry, sometimes email providers require this)</div>
+      </div>
+    </form>
+    </div>
   </div>
 </div>
 
