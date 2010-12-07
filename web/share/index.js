@@ -306,6 +306,18 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
   window.handleCaptcha = handleCaptcha;
 
+  function reAuth() {
+    //First, save form state so their message can be recovered after
+    //binding accounts.
+    var data = {
+      "link": sendData.link,
+      "domain": sendData.domain,
+      "formData": actions[sendData.domain].getFormData()
+    };
+    store.sessionRestore = JSON.stringify(data);
+    showStatus('statusAuth');
+  }
+
   function sendMessage() {
     showStatus('statusSharing');
 
@@ -324,7 +336,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           // XXX need to find out what error codes everyone uses
           // oauth+smtp will return a 535 on authentication failure
           if (code ===  401 || code === 535) {
-            showStatus('statusAuth');
+            reAuth();
           } else if (json.error.code === 'Client.HumanVerificationRequired') {
             handleCaptcha(json.error.detail);
           } else if (json.error.code === 'Client.WrongInput') {
@@ -351,16 +363,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           //it is hard to see how that might happen -- either all the cookies
           //are gone or they are all there.
           //var headerError = xhr.getResponseHeader('X-Error');
-
-          //First, save form state so their message can be recovered after
-          //binding accounts.
-          var data = {
-            "link": sendData.link,
-            "domain": sendData.domain,
-            "formData": actions[sendData.domain].getFormData()
-          };
-          store.sessionRestore = JSON.stringify(data);
-          showStatus('statusCookiePukeError');
+          reAuth();
         } else if (xhr.status === 503) {
           showStatus('statusServerBusy');
         } else {
