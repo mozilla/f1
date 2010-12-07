@@ -12,7 +12,6 @@
 
 ## optional settings release work
 
-* Confirm that extension that messes with localStorage still has workable UI with new settings page. - James
 * Figure out stats gathering for third party calls. - Mark
 * FE perf - James
   * appcache

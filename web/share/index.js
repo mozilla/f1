@@ -29,9 +29,11 @@
 require.def("index",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
          "placeholder", "TextCounter", "AutoComplete", "dispatch", "accounts",
+         "storage",
          "jquery-ui-1.8.6.custom.min", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
-          placeholder,   TextCounter,   AutoComplete,   dispatch,   accounts) {
+          placeholder,   TextCounter,   AutoComplete,   dispatch,   accounts,
+          storage) {
 
   var showStatus,
     actions = {
@@ -219,19 +221,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     options = {},
     tabDom, bodyDom, clickBlockDom, twitterCounter, timer,
     updateTab = true, tabSelection, accountCache, showNew,
-    gmailDom, yahooDom, autoCompleteWidget, store = localStorage;
-
-  //Capability detect for localStorage. At least on add-on does weird things
-  //with it, so even a concern in Gecko-only code.
-  try {
-    store.tempVar = 'temp';
-    if (store.tempVar === 'temp') {
-    }
-    delete store.tempVar;
-  } catch (e) {
-    //Just use a simple in-memory object. Not as nice, but code will still work.
-    store = {};
-  }
+    gmailDom, yahooDom, autoCompleteWidget, store = storage();
 
   jig.addFn({
     profilePic: function (photos) {
@@ -647,7 +637,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   if (options.prefs) {
     for (prop in options.prefs) {
       if (options.prefs.hasOwnProperty(prop)) {
-        localStorage['prefs.' + prop] = options.prefs[prop];
+        store['prefs.' + prop] = options.prefs[prop];
       }
     }
   }
@@ -733,6 +723,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     //Set up default handler for account changes triggered from other
     //windows, or updates to expired cache.
     accounts.onChange();
+
+    //Only bother with localStorage enabled storage.
+    if (storage.type === 'memory') {
+      showStatus('statusEnableLocalStorage');
+      return;
+    }
 
     //Fetch the accounts.
     accounts(function (json) {
