@@ -309,6 +309,20 @@ ul#tabs li.selected {
   border-radius: 0 0 5px 5px;
 }
 
+#settings .key {
+  font-family: Helvetica,Arial,sans-serif;
+  margin-right: 3px;
+  padding: 5px;
+  -moz-border-radius: 4px;
+  -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(0, 0, 0, 0.3);
+  background: -moz-linear-gradient(#f8f8f8, #dddee0) repeat scroll 0 0 #ecedef;
+  color: #434343;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 0 1px 1px white;
+   -moz-user-select: none;
+}
+
 #newsFooter {
   padding: 0 10px;
   margin: 10px 0;
