@@ -197,14 +197,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       //Handle button click for services in the settings.
       .delegate('.auth', 'click', function (evt) {
         var node = evt.target,
-          domain = node.getAttribute('data-domain');
-
-        //Make sure to bring the user back to this service if
-        //the auth is successful.
-        store.lastSelection = domains[domain].selectionName;
+          domain = node.getAttribute('data-domain'),
+          selectionName = domains[domain].type;
 
         oauth(domain, function (success) {
           if (success) {
+            //Make sure to bring the user back to this service if
+            //the auth is successful.
+            store.lastSelection = selectionName;
+
             accounts.fetch(null, onError);
           } else {
             showStatus('statusOAuthFailed');

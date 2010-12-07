@@ -16,9 +16,6 @@
 * Figure out stats gathering for third party calls. - Mark
 * FE perf - James
   * appcache
-* If do oauth and cancel, be sure current tab selection is cleared - James
-* After oauth is done, be sure that the account/get is called before updating
-  the UI - James
 * Build xpi on staging box - Gozer
 * For staging box, reference staging xpi for the install button. - James
 * HTML5 autocomplete - James

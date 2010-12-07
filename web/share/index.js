@@ -36,7 +36,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   var showStatus,
     actions = {
       'twitter.com': {
-        medium: 'twitter',
         name: 'Twitter',
         tabName: 'twitterTab',
         selectionName: 'twitter',
@@ -63,7 +62,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         }
       },
       'facebook.com': {
-        medium: 'facebook',
         name: 'Facebook',
         tabName: 'facebookTab',
         selectionName: 'facebook',
@@ -90,7 +88,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         }
       },
       'google.com': {
-        medium: 'google',
         name: 'Gmail',
         tabName: 'gmailTab',
         selectionName: 'gmail',
@@ -133,10 +130,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         }
       },
       'googleapps.com': {
-        medium: 'googleapps',
         name: 'Google Apps',
-        tabName: 'googleappsTab',
-        selectionName: 'googleapps',
+        tabName: 'googleAppsTab',
+        selectionName: 'googleApps',
         icon: 'i/gmailIcon.png',
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
@@ -152,7 +148,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           return true;
         },
         getFormData: function () {
-          var dom = $('#googleapps'),
+          var dom = $('#googleApps'),
               to = dom.find('[name="to"]').val().trim() || '',
               subject = dom.find('[name="subject"]').val().trim() || '',
               message = dom.find('textarea.message').val().trim() || '';
@@ -163,7 +159,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           };
         },
         restoreFormData: function (data) {
-          var dom = $('#googleapps');
+          var dom = $('#googleApps');
           if (data.to) {
             dom.find('[name="to"]').val(data.to);
           }
@@ -176,7 +172,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         }
       },
       'yahoo.com': {
-        medium: 'yahoo',
         name: 'Yahoo!',
         tabName: 'yahooTab',
         selectionName: 'yahoo',
@@ -474,7 +469,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         svcAccount = account.accounts[0],
         photo = account.photos && account.photos[0] && account.photos[0].value,
         serviceDom = $('#' + service);
-      
+
       //Add the tab as an option
       $('.' + service + 'Tab').removeClass('hidden');
 
@@ -583,10 +578,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     }
 
-    if (userAccounts.googleapps) {
-      updateAccountDisplay('googleapps', userAccounts.googleapps);
+    if (userAccounts.googleApps) {
+      updateAccountDisplay('googleApps', userAccounts.googleApps);
       //Make sure we have contacts for auto-complete
-      //storeGmailContacts(userAccounts.googleapps);
+      //storeGmailContacts(userAccounts.googleApps);
     }
 
     if (userAccounts.yahoo) {
@@ -673,7 +668,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
       twitterDom = $('#twitter'),
-      appsDom = $('#googleapps'),
+      appsDom = $('#googleApps'),
       picture,
       sessionRestore = store.sessionRestore,
       tabSelectionDom;
@@ -739,14 +734,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     //Fetch the accounts.
     accounts(function (json) {
         accountCache = json;
-  
+
         //No need to update tab since that will be done inline below.
         updateTab = false;
         updateAccounts(accountCache);
         updateTab = true;
-    
+
         tabSelection = determineTab();
-    
+
         //Set up HTML so initial jquery UI tabs will not flash away from the selected
         //tab as we show it. Done for performance and to remove a flash of tab content
         //that is not the current tab.
