@@ -274,6 +274,11 @@ ul#tabs li.selected {
   margin: 20px 0;
 }
 
+#config .about {
+  color: #444;
+  text-align: center;
+}
+
 #config .username {
   color: #aaa;
 }
@@ -331,8 +336,9 @@ ul#tabs li.selected {
   width: 720px;
 }
 
-#newsFooter .about {
+#newsFooter .privacy {
   margin: 0 0 0 10px;
+  color: #444;
 }
 
 /*
