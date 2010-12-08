@@ -28,6 +28,7 @@ import oauth2 as oauth
 import httplib2
 import json
 import copy
+from rfc822 import AddressList
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -167,10 +168,15 @@ class api():
         from_email = from_ = profile.get('verifiedEmail')
         fullname = profile.get('displayName', None)
 
-        to_ = options['to']
+        to_addrs = AddressList(options['to'])
         subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
         title = options.get('title', options.get('link', options.get('shorturl', '')))
         description = options.get('description', '')[:280]
+        
+        to_ = []
+        for a in to_addrs.addresslist:
+            # expect normal email address formats, parse them
+            to_.append({'name': a[0], 'email': a[1]})
 
         c.safeHTML = safeHTML
         c.options = options
@@ -206,8 +212,8 @@ class api():
         params = [{
                 "message":
                     {"subject":subject,
-                     "from":{"email":from_},
-                     "to":[{"email":to_}],
+                     "from":{"name": fullname, "email":from_},
+                     "to":to_,
                      "simplebody":{
                         "text": text_message,
                         "html": html_message
