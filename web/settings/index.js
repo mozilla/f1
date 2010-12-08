@@ -85,7 +85,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     'yahoo.com': {
       isNew: showNew,
       type: 'yahoo',
-      name: 'Yahoo!',
+      name: 'Yahoo! Mail',
       serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
       revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
       signOutUrl: 'https://login.yahoo.com/config/login?logout=1'
