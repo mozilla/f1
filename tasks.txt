@@ -13,6 +13,8 @@
 ## optional settings release work
 
 * Figure out stats gathering for third party calls. - Mark
+* autocomplete for twitter names
+* typing d name in twitter does a direct message, we should do the same?
 * FE perf - James
   * appcache
 * Build xpi on staging box - Gozer
