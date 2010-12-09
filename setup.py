@@ -30,7 +30,7 @@ except ImportError:
 
 setup(
     name='linkdrop',
-    version='0.1.2',
+    version='0.1.3',
     description='',
     author='',
     author_email='',
