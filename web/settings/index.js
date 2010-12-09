@@ -21,9 +21,9 @@
  * Contributor(s):
  * */
 
-/*jslint indent: 2 */
+/*jslint indent: 2, plusplus: false */
 /*global require: false, window: false, location: true, localStorage: false,
-  opener: false, setTimeout: false, setInterval: false */
+  opener: false, setTimeout: false, setInterval: false, document: false */
 "use strict";
 
 require.def("index",
@@ -133,46 +133,48 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   //Set up knowledge of accounts and changes.
   accounts.onChange();
   accounts(function (json) {
-      var html = '';
+      $(function () {
+        var html = '';
 
-      //Weed out existing accounts for domains from available domainList,
-      //and generate account UI
-      json.forEach(function (item) {
-        var index = domainList.indexOf(item.accounts[0].domain);
-        if (index !== -1) {
-          domainList.splice(index, 1);
-        }
-        html += jig('#accountTemplate', item);
-      });
-
-      //Generate UI for each list.
-      if (html) {
-        $('#existingHeader').removeClass('hidden');
-        $('#existing')
-          .append(html)
-          .removeClass('hidden');
-      }
-
-      html = '';
-      domainList.forEach(function (domain) {
-        var data = domains[domain];
-        data.domain = domain;
-        html += jig('#addTemplate', domains[domain]);
-      });
-      if (html) {
-        $('#availableHeader').removeClass('hidden');
-        $('#available')
-          .append(html)
-          .removeClass('hidden');
-      }
-
-      //Flash the new items.
-      if (showNew) {
-        $(function () {
-          $("li.newItem").animate({ backgroundColor: '#ffff99' }, 200)
-            .delay(1000).animate({ backgroundColor: '#fafafa' }, 3000);
+        //Weed out existing accounts for domains from available domainList,
+        //and generate account UI
+        json.forEach(function (item) {
+          var index = domainList.indexOf(item.accounts[0].domain);
+          if (index !== -1) {
+            domainList.splice(index, 1);
+          }
+          html += jig('#accountTemplate', item);
         });
-      }
+
+        //Generate UI for each list.
+        if (html) {
+          $('#existingHeader').removeClass('hidden');
+          $('#existing')
+            .append(html)
+            .removeClass('hidden');
+        }
+
+        html = '';
+        domainList.forEach(function (domain) {
+          var data = domains[domain];
+          data.domain = domain;
+          html += jig('#addTemplate', domains[domain]);
+        });
+        if (html) {
+          $('#availableHeader').removeClass('hidden');
+          $('#available')
+            .append(html)
+            .removeClass('hidden');
+        }
+
+        //Flash the new items.
+        if (showNew) {
+          $(function () {
+            $("li.newItem").animate({ backgroundColor: '#ffff99' }, 200)
+              .delay(1000).animate({ backgroundColor: '#fafafa' }, 3000);
+          });
+        }
+      });
     },
     //error handler for accounts
     onError
@@ -297,7 +299,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
 
     //Callback handler for JSONP feed response from Google.
     window.onFeedLoad = function (x, data) {
-      var title, link, i, entries;
+      var title, link, i, entry;
       if (data && data.feed && data.feed.entries) {
         for (i = 0; (entry = data.feed.entries[i]); i++) {
           if (entry.categories && entry.categories.indexOf('Sharing') !== -1) {
