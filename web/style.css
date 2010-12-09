@@ -101,6 +101,7 @@ strong {
 
 #installed img {
   vertical-align: text-bottom;
+  margin: -1px 4px 0 0;
 }
 
 #installClose {
@@ -174,7 +175,8 @@ a#installClose:hover {
 }
 
 #header.row button.download img {
-  vertical-align: bottom;
+  vertical-align: middle;
+  margin: -1px 4px 0 0;
 }
 
 #header.row button.download span.meta {

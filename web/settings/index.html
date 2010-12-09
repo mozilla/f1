@@ -45,11 +45,12 @@
         <h1>Configure your sharing settings</h1>
         <ul>
           <li class="hbox">
-            <label class="option boxFlex" for="shortcut"><span class="key">F1</span> keyboard shortcut enabled</label>
+            <span class="key">F1</span>
+            <label class="option boxFlex" for="use_accel_key">keyboard shortcut enabled</label>
             <input type="checkbox" id="use_accel_key">
           </li>
           <li class="hbox">
-            <label class="option boxFlex" for="bookmark">Bookmark the links I share</label>
+            <label class="option boxFlex" for="bookmarking">Bookmark the links I share</label>
             <input type="checkbox" id="bookmarking">
           </li>
         </ul>
@@ -62,12 +63,15 @@
     <button class="close done">done</button>
   </div>
 
+  <div class="panel about" style="text-align: center; color: rgb(68, 68, 68);">
+    <a target="_blank" href="../">Mozilla F1</a> helps you share links with the people that matter
+  </div>
+
   <div id="newsFooter" class="panel">
     <div class="hbox">
       <div class="boxFlex headline invisible"><span class="icon rss"></span> <a id="rssLink" href="#" target="_blank"></a></div>
-      <div class="about">
-        <a href="../service/privacy.html" target="_blank">privacy</a>
-        <a href="../" target="_blank">about</a>
+      <div class="privacy">
+        We care about your <a href="../service/privacy.html" target="_blank">privacy</a>, seriously.
       </div>
     </div>
   </div>

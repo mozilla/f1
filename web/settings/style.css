@@ -274,6 +274,11 @@ ul#tabs li.selected {
   margin: 20px 0;
 }
 
+#config .about {
+  color: #444;
+  text-align: center;
+}
+
 #config .username {
   color: #aaa;
 }
@@ -310,9 +315,8 @@ ul#tabs li.selected {
 }
 
 #settings .key {
-  font-family: Helvetica,Arial,sans-serif;
-  margin-right: 3px;
-  padding: 5px;
+  margin-right: 10px;
+  padding: 0 3px 0 5px;
   -moz-border-radius: 4px;
   -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(0, 0, 0, 0.3);
   background: -moz-linear-gradient(#f8f8f8, #dddee0) repeat scroll 0 0 #ecedef;
@@ -331,8 +335,9 @@ ul#tabs li.selected {
   width: 720px;
 }
 
-#newsFooter .about {
+#newsFooter .privacy {
   margin: 0 0 0 10px;
+  color: #444;
 }
 
 /*
