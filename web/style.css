@@ -308,26 +308,6 @@ a#installClose:hover {
   padding: 10px 0 0 0;
 }
 
-#allow_helper,
 #installFrame {
     display: none;
-}
-
-#allow_helper {
-  position: fixed;
-  z-index: 100;
-  top: 5px;
-  right: 20px; /* aproximate size and spacing */
-  font-size: 12px;
-}
-
-#allow_helper .message {
-  color: #000;
-  background-color: yellow;
-  padding: 7px 14px;
-  -moz-border-radius: 5px;
-}
-
-#allow_helper img {
-  vertical-align: text-bottom;
 }
