@@ -42,13 +42,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   showNew = options.show === 'new',
   domains;
 
-  //If new items should be shown, refresh the location bar,
-  //so further reloads of the page do not trigger showNew
-  if (showNew) {
-    delete options.show;
-    location.replace(location.href.split('#')[0] + '#' + url.objectToQuery(options));
-  }
-
   domains = {
     'twitter.com': {
       type: 'twitter',
@@ -181,6 +174,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   );
 
   $(function () {
+
+    //If new items should be shown, refresh the location bar,
+    //so further reloads of the page do not trigger showNew
+    if (showNew) {
+      delete options.show;
+      location.replace(location.href.split('#')[0] + '#' + url.objectToQuery(options));
+    }
+
     var manageDom = $("#manage"),
         settingsDom = $("#settings"),
         pref, node;
