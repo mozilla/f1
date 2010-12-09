@@ -1,8 +1,5 @@
 # Better settings/choice release
 
-* Update the F1 front page to capture the new UI - Andy
-* New video for the front page - Andy
-
 # API work
 * Look at LinkedIn API - Shane
 * Flesh out APIs, target Dec 2nd.
