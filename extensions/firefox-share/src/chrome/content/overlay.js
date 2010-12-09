@@ -708,7 +708,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
 
         //Register first run listener.
-        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
+        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
         this.addedFirstRunProgressListener = true;
       }
     },
