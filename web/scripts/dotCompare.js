@@ -30,7 +30,7 @@ require.def("dotCompare", function () {
   /**
    * A function that compares two "x.x.x" version numbers, and returns:
    * @param {String} a value of "x.x.x".
-   * @param {String} a value of "x.x.x".
+   * @param {String} b value of "x.x.x".
    * @returns Number that depends on the equality:
    * -1 if a is less than b
    * 0 if they are the same
