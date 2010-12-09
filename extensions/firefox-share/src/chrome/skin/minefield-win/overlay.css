@@ -69,3 +69,8 @@
   margin: 5px 0;
 }
 
+/* Styles to style the autocomplete results */
+.autocomplete-richlistitem[type="ffshare"] .ac-site-icon,
+.autocomplete-richlistitem[type="ffshare"] .ac-url-box {
+    display: none !important;
+}

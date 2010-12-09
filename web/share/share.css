@@ -38,6 +38,13 @@
   list-style-type: none;
 }
 
+noscript {
+    display: block;
+    text-align: center;
+    padding: 20px;
+    font-size: larger;
+}
+
 body {
   font-size: 11px;
   font-family: "Lucida Grande", Verdana, sans-serif;
@@ -164,8 +171,6 @@ ul.nav li.first.last {
 }
 
 ul.nav li a.icon {
-  margin: 0 0 0 8px;
-  padding: 0 10px 0 20px;
   font-weight: bold;
   color: #333;
   text-shadow: 1px 1px 0 rgba(255,255,255,0.25);
@@ -173,34 +178,69 @@ ul.nav li a.icon {
   background-repeat: no-repeat;
   background-position: left center;
   display: block;
+  background-image: url("i/sprite.png");
+  background-repeat: no-repeat;
+  padding: 0 17px 0 17px;
+  text-indent: -1000px;
+  position: relative;
+}
+
+ul.nav li a.icon:hover:before {
+  content: "\25B2";
+  position: absolute;
+  left: 12px;
+  top: 14px;
+  color: rgba(0,0,0,0.75);
+  display: block;
+  text-indent: 0;
+  text-shadow: none;
+  z-index: 100000;
+}
+
+ul.nav li a.icon:hover:after {
+  content: attr(name);
+  position: absolute;
+  left: 0;
+  top: 30px;
+  color: #fafafa;
+  padding: 0 10px;
+  display: block;
+  text-indent: 0;
+  background-color: rgba(0,0,0,0.75);
+  text-shadow: none;
+  text-align: center;
+  white-space: nowrap;
+  overflow: visible;
+  z-index: 100000;
+}
+
+ul.nav li a.icon.settings {
+  background-position: center 4px;
 }
 
 ul.nav li a.icon.twitter {
-  background-image: url("i/sprite.png");
-  background-position: left -32px;
-  background-repeat: no-repeat;
+  background-position: center -31px;
 }
 
 ul.nav li a.icon.facebook {
-  background-image: url("i/sprite.png");
-  background-position: left -104px;
-  background-repeat: no-repeat;
+  background-position: center -65px;
 }
 
 ul.nav li a.icon.gmail {
-  background-image: url("i/sprite.png");
-  background-position: left -176px;
-  background-repeat: no-repeat;
+  background-position: center -98px;
+}
+
+ul.nav li a.icon.yahoo {
+  background-position: center -128px;
+}
+
+ul.nav li a.icon.googleApps {
+  background-position: center -161px;
 }
 
 ul.nav li a.icon.debug {
   background-image: url("i/bug_b.png");
-}
-
-ul.nav li a.icon.settings {
-  background-image: url("i/sprite.png");
-  background-position: left 4px;
-  background-repeat: no-repeat;
+  background-position: center;
 }
 
 ul.nav .rightActions {
@@ -212,8 +252,17 @@ ul.nav .rightActions {
 }
 
 ul.nav .rightActions a {
-  padding: 0 5px 0 0;
+  padding: 0 5px;
   border-right: 1px dotted #888;
+}
+
+ul.nav .rightActions a:hover {
+  text-decoration: underline;
+}
+
+ul.nav .rightActions a.new {
+  color: #ff5959;
+  font-weight: bold;
 }
 
 ul.nav .rightActions span.close {
@@ -223,13 +272,13 @@ ul.nav .rightActions span.close {
   margin-left: 3px;
   cursor: pointer;
   background-image: url("i/sprite.png");
-  background-position: left -288px;
+  background-position: left -237px;
   background-repeat: no-repeat;
 }
 
 ul.nav .rightActions span.close:hover {
   background-image: url("i/sprite.png");
-  background-position: left -252px;
+  background-position: left -201px;
   background-repeat: no-repeat;
 }
 
@@ -325,24 +374,6 @@ ul.nav li.ui-tabs-selected {
   border-color: #666;
 }
 
-ul.nav li.ui-tabs-selected a.twitter {
-  background-image: url("i/sprite.png");
-  background-position: left -68px;
-  background-repeat: no-repeat;
-}
-
-ul.nav li.ui-tabs-selected a.facebook {
-  background-image: url("i/sprite.png");
-  background-position: left -140px;
-  background-repeat: no-repeat;
-}
-
-ul.nav li.ui-tabs-selected a.gmail {
-  background-image: url("i/sprite.png");
-  background-position: left -212px;
-  background-repeat: no-repeat;
-}
-
 ul.nav li.ui-tabs-selected a.debug {
   background-image: url("i/bug_b.png");
 }
@@ -414,7 +445,6 @@ div.meta {
   color: #444;
   white-space: normal;
   font-size: 9px;
-  /* max-height: 22px;  */ 
   overflow: hidden;
 }
 
@@ -440,15 +470,15 @@ button.share {
 
 button.share:focus {
   -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
-} 
+}
 
 /* Disable user resizing of text area since it covers the twitter count. */
 textarea {
-    resize: none;
+  resize: none;
 }
 
 textarea, input[type="text"] {
-  border-width: 1px; 
+  border-width: 1px;
   border-style: solid;
   border-color: #888;
   font-family: "Lucida Grande", Verdana, sans-serif;
@@ -463,8 +493,8 @@ textarea, input[type="text"] {
 
 textarea:focus, input[type="text"]:focus {
   -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25) inset,  0 1px 0 #fff;
-}  
-  
+}
+
 
 textarea.message {
   -moz-border-radius: 2px 0 0 2px;
@@ -558,22 +588,23 @@ ul.ui-autocomplete li.ui-menu-item a.ui-state-hover {
 #settings ul li {
   display: inline-block;
   float: left;
-  width: 220px;
+  width: 140px;
   min-height: 71px;
+}
+
+#settings ul li {
+  padding: 0 10px 0;
+  border-width: 0 1px;
+  border-left-style: dotted;
+  border-color: #888;
 }
 
 #settings ul li:nth-child(1) {
   padding: 0 10px 0 0;
+  border: none;
 }
 
-#settings ul li:nth-child(2) {
-  padding: 0 10px 0;
-  border-width: 0 1px;
-  border-style: dotted;
-  border-color: #888;
-}
-
-#settings ul li:nth-child(3) {
+#settings ul li:nth-child(4) {
   padding: 0 0 0 10px;
 }
 
@@ -596,19 +627,31 @@ ul.ui-autocomplete li.ui-menu-item a.ui-state-hover {
 
 #settings ul li h1 .twitterIcon {
   background-image: url("i/sprite.png");
-  background-position: left -37px;
+  background-position: left -36px;
   background-repeat: no-repeat;
 }
 
 #settings ul li h1 .facebookIcon {
   background-image: url("i/sprite.png");
-  background-position: left -109px;
+  background-position: left -70px;
   background-repeat: no-repeat;
 }
 
 #settings ul li h1 .gmailIcon {
   background-image: url("i/sprite.png");
-  background-position: left -181px;
+  background-position: left -103px;
+  background-repeat: no-repeat;
+}
+
+#settings ul li h1 .yahooIcon {
+  background-image: url("i/sprite.png");
+  background-position: left -132px;
+  background-repeat: no-repeat;
+}
+
+#settings ul li h1 .googleAppsIcon {
+  background-image: url("i/sprite.png");
+  background-position: left -165px;
   background-repeat: no-repeat;
 }
 
@@ -654,12 +697,31 @@ h1 img {
   text-align: center;
 }
 
-#settings .explainText {
-  border-left: 1px dotted #888888;
+#settings .config {
   color: #444444;
   margin: 0 0 0 10px;
   padding: 0 0 0 10px;
-  width: 253px;
+  border-left: 1px dotted #888;
+  width: 220px;
+}
+
+#settings .config ul {
+  width: auto;
+  min-width: 0;
+}
+
+#settings .config ul li {
+  display: block;
+  border: none;
+  width: auto;
+  min-height: 0;
+  height: auto;
+  float: none;
+  padding: 4px 0;
+}
+
+#settings .config ul li input[type="checkbox"] {
+  margin: 0 5px 0 0;
 }
 
 #settings .remove {
@@ -695,6 +757,85 @@ div.status {
   color: #0a0a0a;
   font-size: 14px;
   text-align: center;
+}
+
+#statusCaptcha {
+  line-height: normal;
+}
+
+div.captcha-wrap {
+  /*  we need this to take up the full height of the status bar */
+  height: 113px;
+}
+
+div.captcha-wrap img {
+  width: 200px;
+  height: 55px;
+  margin: 0 10px;
+}
+
+div.captcha-wrap .text,
+div.captcha-wrap .subtext {
+  font-size: smaller;
+  color: #444;
+  text-align: left;
+}
+
+div.captcha-wrap .subtext {
+  color: #666;
+}
+
+div.captcha-wrap .controls {
+  width: 100%;
+}
+
+div.captcha-wrap button {
+  height: 30px;
+  border-width: 1px 1px 1px 0;
+  border-style: solid;
+  border-color: #888;
+  cursor: pointer;
+  padding: 0 10px;
+  margin: 0;
+  -moz-border-radius: 0 2px 2px 0;
+  -webkit-border-radius: 0 2px 2px 0;
+  border-radius: 0 2px 2px 0;
+  background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
+}
+
+div.captcha-wrap button:active {
+  -moz-box-shadow: 0 0 1px #666666 inset;
+  -webkit-box-shadow: 0 0 1px #666666 inset;
+  box-shadow: 0 0 1px #666666 inset;
+  background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
+}
+
+div.captcha-wrap input {
+  border-width: 1px;
+  border-style: solid;
+  border-color: #888;
+  font-family: "Lucida Grande", Verdana, sans-serif;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 3px;
+  margin: 0;
+  -moz-border-radius: 2px 0 0 2px;
+  -moz-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
+}
+
+#captchaSuround {
+  max-height: 80px;
+}
+#captchaImage {
+  border: 1px solid #888;
+}
+
+#captchaSound {
+  border: 1px solid #888;
+  width: 10px;
+  height: 10px;
 }
 
 div.status img {
@@ -734,6 +875,16 @@ div.status.intermediate.error .statusButton {
   border-color: #AB4D00;
 }
 
+div.status.noConfig {
+    text-shadow: 1px 1px 0 rgba(255,255,255,0.75);
+    line-height: 18px;
+}
+
+div.status.noConfig img {
+    display: block;
+    margin: 20px auto 5px;
+}
+
 .statusButton {
   font-size: 11px;
   vertical-align: baseline;
@@ -752,103 +903,103 @@ div.status.intermediate.error .statusButton {
 
 /* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
 /* hbox and vbox classes */
- 
+
 .hbox {
 	display: -webkit-box;
 	-webkit-box-orient: horizontal;
 	-webkit-box-align: stretch;
- 
+
 	display: -moz-box;
 	-moz-box-orient: horizontal;
 	-moz-box-align: stretch;
- 
+
 	display: box;
 	box-orient: horizontal;
 	box-align: stretch;
 }
- 
+
 .hbox > * {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 	display: block;
 }
- 
+
 .vbox {
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
 	-webkit-box-align: stretch;
- 
+
 	display: -moz-box;
 	-moz-box-orient: vertical;
 	-moz-box-align: stretch;
- 
+
 	display: box;
 	box-orient: vertical;
 	box-align: stretch;
 }
- 
+
 .vbox > * {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 	display: block;
 }
- 
+
 .spacer {
 	-webkit-box-flex: 1;
 	-moz-box-flex: 1;
 	box-flex: 1;
 }
- 
+
 .reverse {
 	-webkit-box-direction: reverse;
 	-moz-box-direction: reverse;
 	box-direction: reverse;
 }
- 
+
 .boxFlex0 {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 }
- 
+
 .boxFlex1, .boxFlex {
 	-webkit-box-flex: 1;
 	-moz-box-flex: 1;
 	box-flex: 1;
 }
- 
+
 .boxFlex2 {
 	-webkit-box-flex: 2;
 	-moz-box-flex: 2;
 	box-flex: 2;
 }
- 
+
 .boxGroup1 {
 	-webkit-box-flex-group: 1;
 	-moz-box-flex-group: 1;
 	box-flex-group: 1;
 }
- 
+
 .boxGroup2 {
 	-webkit-box-flex-group: 2;
 	-moz-box-flex-group: 2;
 	box-flex-group: 2;
 }
- 
+
 .start {
 	-webkit-box-pack: start;
 	-moz-box-pack: start;
 	box-pack: start;
 }
- 
+
 .end {
 	-webkit-box-pack: end;
 	-moz-box-pack: end;
 	box-pack: end;
 }
- 
+
 .center {
 	-webkit-box-pack: center;
 	-moz-box-pack: center;
@@ -866,11 +1017,11 @@ div.status.intermediate.error .statusButton {
 	line-height: 0;
 	height: 0;
 }
- 
+
 html[xmlns] .clearfix {
 	display: block;
 }
- 
+
 * html .clearfix {
 	height: 1%;
 }

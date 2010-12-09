@@ -116,14 +116,19 @@ OAuth authorization api.
         try:
             user = auth.verify()
             account = user['profile']['accounts'][0]
-    
+            if not user.get('oauth_token') and not user.get('oauth_token_secret'):
+                raise Exception('Unable to get OAUTH access')
             acct = self._get_or_create_account(provider, account['userid'], account['username'])
             acct.profile = user['profile']
             acct.oauth_token = user.get('oauth_token', None)
             if 'oauth_token_secret' in user:
                 acct.oauth_token_secret = user['oauth_token_secret']
             acct.updated = UTCDateTime.now()
-            Session.commit()
+            try:
+                Session.commit()
+            except UnicodeEncodeError, e:
+                log.exception("***** UnicodeEncodeError! %r: %r: %r %r" % (acct.domain, acct.userid, acct.username,acct.json_attributes,))
+                raise e
             # XXX argh, this is also done in get_or_create above, but we have to
             # ensure we have the updated data
             session[acct.key] = acct.to_dict()

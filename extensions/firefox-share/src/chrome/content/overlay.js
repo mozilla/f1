@@ -40,7 +40,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   // This add-on manager is only available in Firefox 4+
   try {
     Components.utils.import("resource://gre/modules/AddonManager.jsm");
-  } catch (e) {   
+  } catch (e) {
   }
 
   var slice = Array.prototype.slice,
@@ -104,7 +104,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @returns {Function}
      */
     bind: function (obj, f) {
-      //Do not bother if 
+      //Do not bother if
       if (!f) {
         return obj;
       }
@@ -123,7 +123,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   function StateProgressListener(tabFrame) {
     this.tabFrame = tabFrame;
   }
-  
+
   StateProgressListener.prototype = {
     // detect communication from the iframe via location setting
     QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
@@ -153,7 +153,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         } else {
           this.tabFrame.shareFrame.contentWindow.wrappedJSObject.addEventListener("message", fn.bind(this, function (evt) {
             //Make sure we only act on messages from the page we expect.
-            if (ffshare.shareUrl.indexOf(evt.origin) === 0) {
+            if (ffshare.prefs.share_url.indexOf(evt.origin) === 0) {
               //Mesages have the following properties:
               //name: the string name of the messsage
               //data: the JSON structure of data for the message.
@@ -165,11 +165,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
               } catch (e) {
                 skip = true;
               }
-  
+
               if (!skip) {
                 topic = message.topic;
                 data = message.data;
-    
+
                 if (topic && this.tabFrame[topic]) {
                   this.tabFrame[topic](data);
                 }
@@ -222,7 +222,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                                            Components.interfaces.nsISupports]),
 
     onLocationChange: function (aWebProgress, aRequest, aLocation) {
-      ffshare.canShareURL(aLocation.spec);
+      ffshare.canShareURI(aLocation);
     },
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
@@ -234,7 +234,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   function NavProgressListener(tabFrame) {
     this.tabFrame = tabFrame;
   }
-  
+
   NavProgressListener.prototype = {
     // detect navigational events for the tab, so we can close
 
@@ -270,7 +270,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.navProgressListener = new NavProgressListener(this);
       gBrowser.getBrowserForTab(this.tab).webProgress.addProgressListener(this.navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
     },
-    
+
     unregisterListener: function (listener) {
       var shareFrameProgress = this.shareFrame.webProgress;
       shareFrameProgress.removeProgressListener(this.stateProgressListener);
@@ -278,6 +278,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(this.navProgressListener);
       this.navProgressListener = null;
+    },
+
+    //Fired when a pref changes from content space. the pref object has
+    //a name and value.
+    prefChanged: function (pref) {
+      Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + "." + pref.name, pref.value);
     },
 
     hide: function () {
@@ -304,7 +310,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         iframeNode.setAttribute('autocompletepopup', 'PopupAutoCompleteRichResult');
         //Use the Firefox global context menu so we get spellcheck and such
         iframeNode.setAttribute("contextmenu", "contentAreaContextMenu");
- 
+
         iframeNode.className = 'ffshare-frame';
         iframeNode.style.width = '100%';
         iframeNode.style.height = '114px';
@@ -312,6 +318,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         iframeNode.style.minHeight = 0;
 
         mixin(options, {
+          version: ffshare.version,
           title: this.getPageTitle(),
           description: this.getPageDescription(),
           medium: this.getPageMedium(),
@@ -319,14 +326,19 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           canonicalUrl: this.getCanonicalURL(),
           shortUrl: this.getShortURL(),
           previews: this.previews(),
-          system: ffshare.system
+          siteName: this.getSiteName(),
+          prefs: {
+            system: ffshare.prefs.system,
+            bookmarking: ffshare.prefs.bookmarking,
+            use_accel_key: ffshare.prefs.use_accel_key
+          }
         });
 
         if (!options.previews.length && !options.thumbnail) {
           // then we need to make our own thumbnail
           options.thumbnail = this.getThumbnailData();
         }
-        url = ffshare.shareUrl +
+        url = ffshare.prefs.share_url +
                   '#options=' + encodeURIComponent(JSON.stringify(options));
 
         iframeNode.setAttribute("type", "content");
@@ -337,16 +349,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     show: function (options) {
-      var tabUrl = gBrowser.getBrowserForTab(this.tab).currentURI.spec,
+      var tabURI = gBrowser.getBrowserForTab(this.tab).currentURI,
+          tabUrl = tabURI.spec,
           iframeNode;
 
-      if (!ffshare.isValidURL(tabUrl)) {
+      if (!ffshare.isValidURI(tabURI)) {
         return;
       }
 
       iframeNode = this.shareFrame || this.createShareFrame(options);
 
-      if (ffshare.frontpageUrl === tabUrl) {
+      if (ffshare.prefs.frontpage_url === tabUrl) {
         var browser = gBrowser.getBrowserForTab(this.tab);
         // If we're looking at the front page we should clear the first run helper
         var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
@@ -379,7 +392,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     success: function (data) {
       this.hide();
 
-      if (ffshare.useBookmarking) {
+      if (ffshare.prefs.bookmarking) {
         var tags = ['shared', 'f1'];
         if (data.domain === 'twitter.com') {
           tags.push("twitter");
@@ -404,7 +417,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (this.useCssTransition) {
         this.onHeightEnd = onEnd;
       }
-      
+
       this.shareFrame.style.height = height + 'px';
 
       if (!this.useCssTransition && onEnd) {
@@ -424,35 +437,57 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getPageTitle: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta'),
-          titleNode = gBrowser.contentDocument.getElementsByTagName('title')[0],
-          title;
-      for (var i = 0; i < metaNodes.length; i++) {
-        if ("title" === metaNodes[i].getAttribute("name")) {
-          var content = metaNodes[i].getAttribute("content");
-          if (content) {
-            title = content.trim();
-            //Title could have some XML escapes in it since it could be an
-            //og:title type of tag, so be sure unescape
-            return unescapeXml(title);
-          }
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:title']"),
+          i, title, content;
+      for (i = 0; i < metas.length; i++) {
+        content = metas[i].getAttribute("content");
+        if (content) {
+          //Title could have some XML escapes in it since it could be an
+          //og:title type of tag, so be sure unescape
+          return unescapeXml(content.trim());
         }
       }
-      if (titleNode) {
-        //Use node Value because 
-        return titleNode.firstChild.nodeValue.trim();
+      metas = gBrowser.contentDocument.querySelectorAll("meta[name='title']");
+      for (i = 0; i < metas.length; i++) {
+        content = metas[i].getAttribute("content");
+        if (content) {
+          //Title could have some XML escapes in it so be sure unescape
+          return unescapeXml(content.trim());
+        }
       }
-      return '';
+      title = gBrowser.contentDocument.getElementsByTagName("title")[0];
+      if (title && title.firstChild) {
+        //Use node Value because we have nothing else
+        return title.firstChild.nodeValue.trim();
+      }
+      return "";
     },
 
     getPageDescription: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
-      for (var i = 0; i < metaNodes.length; i++) {
-        if ("description" === metaNodes[i].getAttribute("name")) {
-          var content = metaNodes[i].getAttribute("content");
-          if (content) {
-            return unescapeXml(content);
-          }
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:description']"),
+          i, content;
+      for (i = 0; i < metas.length; i++) {
+        content = metas[i].getAttribute("content");
+        if (content) {
+          return unescapeXml(content);
+        }
+      }
+      metas = gBrowser.contentDocument.querySelectorAll("meta[name='description']");
+      for (i = 0; i < metas.length; i++) {
+        content = metas[i].getAttribute("content");
+        if (content) {
+          return unescapeXml(content);
+        }
+      }
+      return "";
+    },
+
+    getSiteName: function () {
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:site_name']");
+      for (var i = 0; i < metas.length; i++) {
+        var content = metas[i].getAttribute("content");
+        if (content) {
+          return unescapeXml(content);
         }
       }
       return "";
@@ -461,47 +496,51 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // According to Facebook - (only the first 3 are interesting)
     // Valid values for medium_type are audio, image, video, news, blog, and mult.
     getPageMedium: function () {
-      var metaNodes = gBrowser.contentDocument.getElementsByTagName('meta');
-      for (var i = 0; i < metaNodes.length; i++) {
-        if ("medium" === metaNodes[i].getAttribute("name")) {
-          var content = metaNodes[i].getAttribute("content");
-          if (content) {
-            return unescapeXml(content);
-          }
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']");
+      for (var i = 0; i < metas.length; i++) {
+        var content = metas[i].getAttribute("content");
+        if (content) {
+          return unescapeXml(content);
         }
       }
       return "";
     },
 
     getShortURL: function () {
-      var links = gBrowser.contentDocument.getElementsByTagName("link"),
-        rel = null,
-        rev = null,
-        i;
+      var shorturl = gBrowser.contentDocument.getElementById("shorturl"),
+          links = gBrowser.contentDocument.querySelectorAll("link[rel='shortlink']");
 
       // flickr does id="shorturl"
-      var shorturl = gBrowser.contentDocument.getElementById("shorturl");
       if (shorturl) {
         return shorturl.getAttribute("href");
       }
 
-      for (i = 0; i < links.length; i++) {
-        // is there a rel=shortlink href?
-        if (links[i].getAttribute("rel") === "shortlink") {
-          return gBrowser.currentURI.resolve(links[i].getAttribute("href"));
+      for (var i = 0; i < links.length; i++) {
+        var content = links[i].getAttribute("href");
+        if (content) {
+          return gBrowser.currentURI.resolve(content);
         }
       }
       return "";
     },
 
     getCanonicalURL: function () {
-      var links = gBrowser.contentDocument.getElementsByTagName("link"),
-        rel = null,
-        i;
+      var links = gBrowser.contentDocument.querySelectorAll("meta[property='og:url']"),
+          i, content;
 
       for (i = 0; i < links.length; i++) {
-        if (links[i].getAttribute("rel") === "canonical") {
-          return gBrowser.currentURI.resolve(links[i].getAttribute("href"));
+        content = links[i].getAttribute("content");
+        if (content) {
+          return gBrowser.currentURI.resolve(content);
+        }
+      }
+
+      links = gBrowser.contentDocument.querySelectorAll("link[rel='canonical']");
+
+      for (i = 0; i < links.length; i++) {
+        content = links[i].getAttribute("href");
+        if (content) {
+          return gBrowser.currentURI.resolve(content);
         }
       }
 
@@ -551,15 +590,24 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     previews: function () {
-      // Look for rel="image_src" and use those if they're available
-      // see e.g. http://about.digg.com/thumbnails
+      // Look for FB og:image and then rel="image_src" to use if available
+      // for og:image see: http://developers.facebook.com/docs/share
+      // for image_src see: http://about.digg.com/thumbnails
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:image']"),
+          links = gBrowser.contentDocument.querySelectorAll("link[rel='image_src']"),
+          previews = [], i, content;
 
-      var links = gBrowser.contentDocument.getElementsByTagName("link"),
-          previews = [], i;
+      for (i = 0; i < metas.length; i++) {
+        content = metas[i].getAttribute("content");
+        if (content) {
+          previews.push(content);
+        }
+      }
 
       for (i = 0; i < links.length; i++) {
-        if (links[i].getAttribute("rel") === "image_src") {
-          previews.push(links[i].getAttribute("href"));
+        content = links[i].getAttribute("href");
+        if (content) {
+          previews.push(content);
         }
       }
       return previews;
@@ -595,25 +643,37 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   ffshare = {
 
-    system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
-    shareUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
-    frontpageUrl: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
-    useBookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
-    previousVersion: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".previous_version", ""),
-    firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", ""),
+    version: '',
+    prefs: {
+      system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
+      share_url: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
+      frontpage_url: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
+      bookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
+      previous_version: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".previous_version", ""),
+      //Cannot rename firstRun to first_install since it would mess up already deployed clients,
+      //would pop a new F1 window on an upgrade vs. fresh install.
+      firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", ""),
+      use_accel_key: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".use_accel_key", true)
+    },
 
     errorPage: 'chrome://ffshare/content/down.html',
 
+    keycodeId: "key_ffshare",
+    keycode : "VK_F1",
+    oldKeycodeId: "key_old_ffshare",
+
     onInstallUpgrade: function (version) {
+      ffshare.version = version;
+
       //Only run if the versions do not match.
-      if (version === ffshare.previousVersion) {
+      if (version === ffshare.prefs.previous_version) {
         return;
       }
 
-      //Update previousVersion pref. Do this now in case an error below
+      //Update prefs.previous_version pref. Do this now in case an error below
       //prevents it -- do not want to get in a situation where for instance
       //we pop the front page URL for every tab navigation.
-      ffshare.previousVersion = version;
+      ffshare.prefs.previous_version = version;
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".previous_version", version);
 
       // Place the button in the toolbar.
@@ -641,14 +701,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
       catch (e) {}
 
-      if (ffshare.firstRun) {
+      if (ffshare.prefs.firstRun) {
         //Make sure to set the pref first to avoid bad things if later code
         //throws and we cannot set the pref.
-        ffshare.firstRun = false;
+        ffshare.prefs.firstRun = false;
         Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
 
         //Register first run listener.
-        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.STATE_DOCUMENT);
+        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
         this.addedFirstRunProgressListener = true;
       }
     },
@@ -677,6 +737,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
+
+      this.initKeyCode();
+
+      this.prefService = Components.classes["@mozilla.org/preferences-service;1"]
+                             .getService(Components.interfaces.nsIPrefService)
+                             .getBranch("extensions." + FFSHARE_EXT_ID + ".")
+                             .QueryInterface(Components.interfaces.nsIPrefBranch2);
+
+      this.prefService.addObserver("", this, false);
+
     },
 
     onUnload: function () {
@@ -692,6 +762,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
+
+      this.prefService.removeObserver("", this);
+      this.prefService = null;
+
     },
 
     onFirstRun: function () {
@@ -702,7 +776,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var iframeNode = document.createElement("browser");
       iframeNode.setAttribute("type", "content");
       iframeNode.setAttribute("style", "width: 100px; height: 100px; background: pink;");
-      iframeNode.setAttribute("src", this.shareUrl);
+      iframeNode.setAttribute("src", ffshare.prefs.share_url);
       iframeNode.setAttribute("style", "visibility: collapse;");
       notificationBox.insertBefore(iframeNode, notificationBox.firstChild);
 
@@ -736,12 +810,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
               if (buttonNode) {
                 rect = buttonNode.getBoundingClientRect();
                 browser = gBrowser.getBrowserForTab(tabbrowser.selectedTab);
-  
+
                 // try setting the button location as the window may have already loaded
                 try {
                   sendJustInstalledEvent(browser, rect);
                 } catch (ignore) { }
-  
+
                 // Add the load handler in case the window hasn't finished loaded (unlikely)
                 browser.addEventListener("load", makeInstalledLoadHandler(browser, rect), true);
               }
@@ -784,25 +858,91 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         }
       }
 
-      openAndReuseOneTabPerURL(this.frontpageUrl);
+      openAndReuseOneTabPerURL(this.prefs.frontpage_url);
     },
 
-    isValidURL: function (url) {
+    // This function is to be run once at onLoad
+    // Checks for the existence of key code already and saves or gives it an ID for later
+    // We could get away without this check but we're being nice to existing key commands
+    initKeyCode: function () {
+      var keys = document.getElementsByTagName("key");
+      for (var i = 0; i < keys.length; i++) {
+        // has the keycode we want to take and isn't already ours
+        if (this.keycode === keys[i].getAttribute("keycode") &&
+            this.keycodeId !== keys[i].id) {
+
+          if (keys[i].id) {
+            this.oldKeycodeId = keys[i].id;
+          }
+          else {
+            keys[i].id = this.oldKeycodeId;
+          }
+
+          break;
+        }
+      }
+      this.setAccelKey(this.prefs.use_accel_key);
+    },
+
+    observe: function (subject, topic, data) {
+      if (topic !== "nsPref:changed") {
+        return;
+      }
+
+      if ("use_accel_key" === data) {
+        try {
+          var pref = subject.QueryInterface(Components.interfaces.nsIPrefBranch);
+          ffshare.setAccelKey(pref.getBoolPref("use_accel_key"));
+        } catch (e) {
+          error(e);
+        }
+      }
+
+    },
+
+    setAccelKey: function (keyOn) {
+      var oldKey = document.getElementById(this.oldKeycodeId),
+          f1Key = document.getElementById(this.keycodeId),
+          keyset = document.getElementById("mainKeyset");
+
+      if (keyOn) {
+        try {
+          if (oldKey) {
+            oldKey.setAttribute("keycode", "");
+          }
+          f1Key.setAttribute("keycode", this.keycode);
+        } catch (e) {
+          error(e);
+        }
+      } else {
+        try {
+          f1Key.setAttribute("keycode", "");
+          if (oldKey) {
+            oldKey.setAttribute("keycode", this.keycode);
+          }
+        } catch (e) {
+          error(e);
+        }
+      }
+
+      // now we invalidate the keyset cache so our changes take effect
+      var p = keyset.parentNode;
+      p.appendChild(p.removeChild(keyset));
+
+    },
+
+    isValidURI: function (aURI) {
       //Only open the share frame for http/https urls, file urls for testing.
-      return (url.indexOf('http') === 0 || url.indexOf('file') === 0);
+      return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') || aURI.schemeIs('file')));
     },
 
-    canShareURL: function (url) {
+    canShareURI: function (aURI) {
+      var command = document.getElementById("cmd_openSharePage");
       try {
-        var valid = this.isValidURL(url), buttonNode;
-        document.getElementById("menu_ffshare").hidden = (!valid);
-        document.getElementById("context-ffshare").hidden = (!valid);
-        document.getElementById("context-ffshare-separator").hidden = (!valid);
-        document.getElementById("context-selected-ffshare").hidden = (!valid);
-        document.getElementById("context-selected-ffshare-separator").hidden = (!valid);
-        buttonNode = document.getElementById(buttonId);
-        if (buttonNode) {
-          buttonNode.disabled = (!valid);
+        if (this.isValidURI(aURI)) {
+          command.removeAttribute("disabled");
+        } else {
+          command.setAttribute("disabled", "true");
         }
       } catch (e) {
         throw e;
@@ -828,14 +968,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       } catch (ignore) { }
     },
 
-    onMenuItemCommand: function (e) {
+    onOpenShareCommand: function (e) {
       this.toggle();
     },
 
-    onToolbarButtonCommand: function (e) {
-      this.toggle();
-    },
-    
     toggle: function (options) {
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
@@ -848,27 +984,27 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         tabFrame.hide();
       } else {
         tabFrame.show(options);
-      }      
+      }
     }
   };
 
-  if (!ffshare.shareUrl) {
-    if (ffshare.system === 'dev') {
-      ffshare.shareUrl = 'http://linkdrop.caraveo.com:5000/share/';
-    } else if (ffshare.system === 'staging') {
-      ffshare.shareUrl = 'https://f1-staging.mozillamessaging.com/share/';
+  if (!ffshare.prefs.share_url) {
+    if (ffshare.prefs.system === 'dev') {
+      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/share/';
+    } else if (ffshare.prefs.system === 'staging') {
+      ffshare.prefs.share_url = 'https://f1-staging.mozillamessaging.com/share/';
     } else {
-      ffshare.shareUrl = 'https://f1.mozillamessaging.com/share/';
+      ffshare.prefs.share_url = 'https://f1.mozillamessaging.com/share/';
     }
   }
 
-  if (!ffshare.frontpageUrl) {
-    if (ffshare.system === 'dev') {
-      ffshare.frontpageUrl = 'http://linkdrop.caraveo.com:5000/';
-    } else if (ffshare.system === 'staging') {
-      ffshare.frontpageUrl = 'http://f1-staging.mozillamessaging.com/';
+  if (!ffshare.prefs.frontpage_url) {
+    if (ffshare.prefs.system === 'dev') {
+      ffshare.prefs.frontpage_url = 'http://linkdrop.caraveo.com:5000/';
+    } else if (ffshare.prefs.system === 'staging') {
+      ffshare.prefs.frontpage_url = 'http://f1-staging.mozillamessaging.com/';
     } else {
-      ffshare.frontpageUrl = 'http://f1.mozillamessaging.com/';
+      ffshare.prefs.frontpage_url = 'http://f1.mozillamessaging.com/';
     }
   }
 

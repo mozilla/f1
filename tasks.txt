@@ -1,50 +1,39 @@
-# Perf release (wednesday)
-
-* Make sure to look at feedback channels, anyone complain yesterday?
-* Blog post. - Bryan?
-  * Bug fix/perf release.
-  * Faster
-  * email templates
-  * movable button
-
-* optional bugs
-  * FE perf - James
-    * appcache
-  * If do oauth and cancel, be sure current tab selection is cleared - James
-  * After oauth is done, be sure that the account/get is called before updating
-    the UI - James
-  * Build xpi on staging box - Gozer
-  * For staging box, reference staging xpi for the install button. - James 
-  * HTML5 autocomplete - James
-    * May need to talk to satchel owner for FF4 if does not work out, to
-      make autocomplete provider more robust and officially supported.
-    * >> Contacts Addon messes up HTML5 autocomplete!
-  * HTML5/FF friendly option for the video - Bryan
-  * aTab is null in minefied - James
-    * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
-  * Privacy policy update? - David
-    * Make the policy and link clear it is F1 privacy policy, put link under install button?
-  * noscript breaks the UI
-    https://github.com/mozilla/f1/issues#issue/16
-  * Make youtube videos playable in Facebook
-    https://github.com/mozilla/f1/issues#issue/17
-  * Meta tag changes for facebook: Facebook changed their meta tag requirements
-    to include the og: (open graph) prefix.  We'll need to look for this in the
-    add-on if we want to continue getting the correct open graph information from
-    sites that provide it.
-    [facebook developers - share](http://developers.facebook.com/docs/share)
-    https://github.com/mozilla/f1/issues#issue/19
-  * Share option on the facebook page that shows the share? It is not showing up,
-    dmandelin's family advice.
-
 # Better settings/choice release
 
-* A way to surface settings, accounts - Andy and Bryan
-* Surface the bookmarking better?
-* f1 keybinding
-* UI to let the user know that we will be adding a link in the twitter/email.
-------
+# API work
+* Look at LinkedIn API - Shane
+* Flesh out APIs, target Dec 2nd.
+  * Figure out basic iframe API: oexchange with https, sizings and a callback when done?
+  * server-to-server API - Shane
+    * How does F1 know about new sites?
+
+## optional settings release work
+
 * Figure out stats gathering for third party calls. - Mark
+* autocomplete for twitter names
+* typing d name in twitter does a direct message, we should do the same?
+* FE perf - James
+  * appcache
+* Build xpi on staging box - Gozer
+* For staging box, reference staging xpi for the install button. - James
+* HTML5 autocomplete - James
+  * May need to talk to satchel owner for FF4 if does not work out, to
+    make autocomplete provider more robust and officially supported.
+  * >> Contacts Addon messes up HTML5 autocomplete!
+    * ignore the contacts issue for now, once we have a mechanism for doing this
+      using html5, I'll make contacts do the same thing.
+* HTML5/FF friendly option for the video - Bryan
+* aTab is null in minefied - James
+  * notificationBox.insertBefore(iframeNode, notificationBox.firstChild); seems to cause it, at least in FF4 beta 6
+* Privacy policy update? - David
+  * Make the policy and link clear it is F1 privacy policy, put link under install button?
+* Make youtube videos playable in Facebook
+  https://github.com/mozilla/f1/issues#issue/17
+* Share option on the facebook page that shows the share? It is not showing up,
+  dmandelin's family advice.
+
+
+
 
 # Work out common share icon
 
@@ -96,4 +85,3 @@
 * automated xpi build for AMO that increments version number.
 
 * How to handle the icon on dark themes?
-

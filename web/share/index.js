@@ -26,17 +26,18 @@
   document: false, setTimeout: false, localStorage: false */
 "use strict";
 
-require.def("send",
+require.def("index",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
-         "placeholder", "TextCounter", "AutoComplete", "dispatch",
+         "placeholder", "TextCounter", "AutoComplete", "dispatch", "accounts",
+         "storage",
          "jquery-ui-1.8.6.custom.min", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
-          placeholder,   TextCounter,   AutoComplete,   dispatch) {
+          placeholder,   TextCounter,   AutoComplete,   dispatch,   accounts,
+          storage) {
 
   var showStatus,
     actions = {
       'twitter.com': {
-        medium: 'twitter',
         name: 'Twitter',
         tabName: 'twitterTab',
         selectionName: 'twitter',
@@ -63,7 +64,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         }
       },
       'facebook.com': {
-        medium: 'facebook',
         name: 'Facebook',
         tabName: 'facebookTab',
         selectionName: 'facebook',
@@ -90,7 +90,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         }
       },
       'google.com': {
-        medium: 'google',
         name: 'Gmail',
         tabName: 'gmailTab',
         selectionName: 'gmail',
@@ -131,26 +130,98 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             dom.find('textarea.message').val(data.message);
           }
         }
+      },
+      'googleapps.com': {
+        name: 'Google Apps',
+        tabName: 'googleAppsTab',
+        selectionName: 'googleApps',
+        icon: 'i/gmailIcon.png',
+        serviceUrl: 'https://mail.google.com',
+        revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
+        signOutUrl: 'http://google.com/preferences',
+        accountLink: function (account) {
+          return 'http://google.com/profiles/' + account.username;
+        },
+        validate: function (sendData) {
+          if (!sendData.to || !sendData.to.trim()) {
+            showStatus('statusToError');
+            return false;
+          }
+          return true;
+        },
+        getFormData: function () {
+          var dom = $('#googleApps'),
+              to = dom.find('[name="to"]').val().trim() || '',
+              subject = dom.find('[name="subject"]').val().trim() || '',
+              message = dom.find('textarea.message').val().trim() || '';
+          return {
+            to: to,
+            subject: subject,
+            message: message
+          };
+        },
+        restoreFormData: function (data) {
+          var dom = $('#googleApps');
+          if (data.to) {
+            dom.find('[name="to"]').val(data.to);
+          }
+          if (data.subject) {
+            dom.find('[name="subject"]').val(data.subject);
+          }
+          if (data.message) {
+            dom.find('textarea.message').val(data.message);
+          }
+        }
+      },
+      'yahoo.com': {
+        name: 'Yahoo!',
+        tabName: 'yahooTab',
+        selectionName: 'yahoo',
+        icon: 'i/yahooIcon.png',
+        serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
+        revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
+        signOutUrl: 'https://login.yahoo.com/config/login?logout=1',
+        accountLink: function (account) {
+          return 'http://profiles.yahoo.com/' + account.username;
+        },
+        validate: function (sendData) {
+          if (!sendData.to || !sendData.to.trim()) {
+            showStatus('statusToError');
+            return false;
+          }
+          return true;
+        },
+        getFormData: function () {
+          var dom = $('#yahoo'),
+              to = dom.find('[name="to"]').val().trim() || '',
+              subject = dom.find('[name="subject"]').val().trim() || '',
+              message = dom.find('textarea.message').val().trim() || '';
+          return {
+            to: to,
+            subject: subject,
+            message: message
+          };
+        },
+        restoreFormData: function (data) {
+          var dom = $('#yahoo');
+          if (data.to) {
+            dom.find('[name="to"]').val(data.to);
+          }
+          if (data.subject) {
+            dom.find('[name="subject"]').val(data.subject);
+          }
+          if (data.message) {
+            dom.find('textarea.message').val(data.message);
+          }
+        }
       }
     },
     hash = location.href.split('#')[1],
-    urlArgs, sendData,
+    urlArgs, sendData, prop,
     options = {},
-    tabDom, bodyDom, clickBlockDom, twitterCounter,
-    updateTab = true, accountCache, tabSelection,
-    gmailDom, autoCompleteWidget, store = localStorage;
-
-  //Capability detect for localStorage. At least on add-on does weird things
-  //with it, so even a concern in Gecko-only code.
-  try {
-    store.tempVar = 'temp';
-    if (store.tempVar === 'temp') {
-    }
-    delete store.tempVar;
-  } catch (e) {
-    //Just use a simple in-memory object. Not as nice, but code will still work.
-    store = {};
-  }
+    tabDom, bodyDom, clickBlockDom, twitterCounter, timer,
+    updateTab = true, tabSelection, accountCache, showNew,
+    gmailDom, yahooDom, autoCompleteWidget, store = storage();
 
   jig.addFn({
     profilePic: function (photos) {
@@ -171,11 +242,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
   //For debug tab purpose, make it global.
   window.closeShare = close;
-
-  function showError(error) {
-    //TODO: make this nicer.
-    alert('error.msg');
-  }
 
   showStatus = function (statusId, shouldCloseOrMessage) {
     $('div.status').addClass('hidden');
@@ -207,10 +273,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   function showStatusShared() {
     var sendDomain = (sendData && sendData.domain) || 'twitter.com',
+        siteName = options.siteName,
         url = options.url || "",
         doubleSlashIndex = url.indexOf("//") + 2;
     $('#statusShared').empty().append(jig('#sharedTemplate', {
-      domain: url.slice(doubleSlashIndex, url.indexOf("/", doubleSlashIndex)),
+      domain: siteName || url.slice(doubleSlashIndex, url.indexOf("/", doubleSlashIndex)),
       service: actions[sendDomain].name,
       href: actions[sendDomain].serviceUrl
     })).find('.shareTitle').textOverflow(null, true);
@@ -218,6 +285,28 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
   //Make it globally visible for debug purposes
   window.showStatusShared = showStatusShared;
+
+  function handleCaptcha(detail, error) {
+    $('#captchaImage').attr('src', detail.imageurl);
+    if (error) {
+      $('#captchaMsg').text(error.message);
+    }
+    $('#captchaSound').attr('src', detail.audiourl);
+    showStatus('statusCaptcha', false);
+  }
+  window.handleCaptcha = handleCaptcha;
+
+  function reAuth() {
+    //First, save form state so their message can be recovered after
+    //binding accounts.
+    var data = {
+      "link": sendData.link,
+      "domain": sendData.domain,
+      "formData": actions[sendData.domain].getFormData()
+    };
+    store.sessionRestore = JSON.stringify(data);
+    showStatus('statusAuth');
+  }
 
   function sendMessage() {
     showStatus('statusSharing');
@@ -237,7 +326,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           // XXX need to find out what error codes everyone uses
           // oauth+smtp will return a 535 on authentication failure
           if (code ===  401 || code === 535) {
-            showStatus('statusAuth');
+            reAuth();
+          } else if (json.error.code === 'Client.HumanVerificationRequired') {
+            handleCaptcha(json.error.detail);
+          } else if (json.error.code === 'Client.WrongInput') {
+            handleCaptcha(json.error.detail, json.error);
           } else {
             showStatus('statusError', json.error.message);
           }
@@ -260,16 +353,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           //it is hard to see how that might happen -- either all the cookies
           //are gone or they are all there.
           //var headerError = xhr.getResponseHeader('X-Error');
-
-          //First, save form state so their message can be recovered after
-          //binding accounts.
-          var data = {
-            "link": sendData.link,
-            "domain": sendData.domain,
-            "formData": actions[sendData.domain].getFormData()
-          };
-          store.sessionRestore = JSON.stringify(data);
-          showStatus('statusCookiePukeError');
+          reAuth();
         } else if (xhr.status === 503) {
           showStatus('statusServerBusy');
         } else {
@@ -355,7 +439,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       id = ui.panel.id,
       userInfoDom = $(".user-info");
 
-    if (id !== 'debug' && id !== 'settings') {
+    if (id !== 'debug') {
       imageUrl = $(ui.panel).find("div.user img.avatar").attr("src");
       userName = $(ui.panel).find("div.user .username").text();
       inactive = $(ui.panel).find("div.user").hasClass("inactive");
@@ -378,7 +462,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         svcAccount = account.accounts[0],
         photo = account.photos && account.photos[0] && account.photos[0].value,
         serviceDom = $('#' + service);
-      
+
       //Add the tab as an option
       $('.' + service + 'Tab').removeClass('hidden');
 
@@ -392,29 +476,22 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       serviceDom.find('input[name="userid"]').val(svcAccount.userid);
       serviceDom.find('input[name="username"]').val(svcAccount.username);
       serviceDom.find('div.user').removeClass('inactive');
-
-      //Replace the Add button in settings tab to show the user instead
-      $('#settings span[data-domain="' + svcAccount.domain + '"]').empty().append(jig('#accountTemplate', account));
     });
   }
 
-  function updateAccountButton(domain) {
-    $('#settings span[data-domain="' + domain + '"]').empty().append(jig('#addAccountTemplate', domain));
-
-    //Also be sure the account tab is hidden.
-    $('.' + actions[domain].tabName).addClass('hidden');
-  }
-
   function determineTab() {
-    var selection = '#settings', selectionName;
+    var selection, selectionName, name;
 
     if (store.lastSelection) {
       selection = '#' + store.lastSelection;
     } else {
       if (accountCache && accountCache.length) {
-        selectionName = actions[accountCache[0].accounts[0].domain].selectionName;
-        if (selectionName) {
-          selection = '#' + selectionName;
+        name = accountCache[0].accounts[0].domain;
+        if (actions[name]) {
+          selectionName = actions[accountCache[0].accounts[0].domain].selectionName;
+          if (selectionName) {
+            selection = '#' + selectionName;
+          }
         }
       }
     }
@@ -428,13 +505,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //Reset the tabs
       .removeClass('first')
       .removeClass('last')
-      //Only grab non-hidden and non-settings tabs.
+      //Only grab non-hidden tabs.
       .filter(function (i) {
         var tab = $(this),
             hidden = tab.hasClass('hidden'),
-            settings = tab.hasClass('settings'),
             debugTab = tab.hasClass('debugTab');
-        return !hidden && !settings && !debugTab;
+        return !hidden && !debugTab;
       })
       //Apply the new first and last
       .first().addClass('first').end()
@@ -450,7 +526,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //Figure out what accounts we do have
       accounts.forEach(function (account) {
         var name = account.accounts[0].domain;
-        if (name) {
+        if (name && actions[name]) {
           //Make sure to see if there is a match for last selection
           if (!hasLastSelectionMatch) {
             hasLastSelectionMatch = actions[name].selectionName === store.lastSelection;
@@ -477,14 +553,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     if (userAccounts.twitter) {
       updateAccountDisplay('twitter', userAccounts.twitter);
-    } else {
-      updateAccountButton('twitter.com');
     }
 
     if (userAccounts.facebook) {
       updateAccountDisplay('facebook', userAccounts.facebook);
-    } else {
-      updateAccountButton('facebook.com');
     }
 
     if (userAccounts.gmail) {
@@ -492,13 +564,23 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //Make sure we have contacts for auto-complete
       storeGmailContacts(userAccounts.gmail);
     } else {
-      updateAccountButton('google.com');
-
       //Make sure there is no cached data hanging around.
       if (store.gmailContacts) {
         delete store.gmailContacts;
         updateAutoComplete();
       }
+    }
+
+    if (userAccounts.googleApps) {
+      updateAccountDisplay('googleApps', userAccounts.googleApps);
+      //Make sure we have contacts for auto-complete
+      //storeGmailContacts(userAccounts.googleApps);
+    }
+
+    if (userAccounts.yahoo) {
+      updateAccountDisplay('yahoo', userAccounts.yahoo);
+      //Make sure we have contacts for auto-complete
+      //storeYahooContacts(userAccounts.yahoo);
     }
 
     //Session restore, do after form setting above.
@@ -530,54 +612,48 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     updateFirstLastTab();
   }
 
-  function onGetAccounts(json) {
-    if (json.error) {
-      json = [];
-    }
-
-    //Store the JSON for the next page load.
-    accountCache = json;
-    store.accountCache = JSON.stringify(json);
-
-    updateAccounts(json);
-  }
-
-  function getAccounts(onSuccess) {
-    rdapi('account/get', {
-      success: onSuccess || onGetAccounts,
-      error: function (xhr, textStatus, err) {
-        if (xhr.status === 503) {
-          showStatus('statusServerBusyClose');
-        } else {
-          showStatus('statusServerError', err);
-        }
-      }
-    });
-  }
-
-  function accountsUpdated() {
-    //The accounts were updated in the settings page.
-    //Update the account display to reflect the choices appropriately.
-
-    //Turn off tab updating
-    updateTab = false;
-
-    //Hide the tab buttons, the getAccounts will show the ones available.
-    $('.leftTab').addClass('hidden');
-
-    getAccounts();
-  }
-
   if (hash) {
     urlArgs = url.queryToObject(hash);
     if (urlArgs.options) {
       options = JSON.parse(urlArgs.options);
     }
-    if (!options.title) {
-      options.title = options.url;
+  }
+  options.prefs = options.prefs || {};
+  if (!options.title) {
+    options.title = options.url;
+  }
+  if (!options.prefs.system) {
+    options.prefs.system = 'prod';
+  }
+
+  //Save the extension version in the localStorage, for use in
+  //other pages like settings.
+  if (options.version) {
+    store.extensionVersion = options.version;
+  }
+
+  //Save the preferences in localStorage, for use in
+  //other ppages like setting.
+  if (options.prefs) {
+    for (prop in options.prefs) {
+      if (options.prefs.hasOwnProperty(prop)) {
+        store['prefs.' + prop] = options.prefs[prop];
+      }
     }
-    if (!options.system) {
-      options.system = 'prod';
+  }
+
+  //For the "new items" link, only show it for x number of days after showing it.
+  //NOTE: when updating for newer releases, delete the old value from the
+  //storage.
+  timer = store.newTimerV1;
+  if (!timer) {
+    store.newTimerV1 = (new Date()).getTime();
+    showNew = true;
+  } else {
+    timer = JSON.parse(timer);
+    //If time since first seen is greater than three days, hide the new link.
+    if ((new Date()).getTime() - timer < (3 * 24 * 60 * 60 * 1000)) {
+      showNew = true;
     }
   }
 
@@ -585,6 +661,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
       twitterDom = $('#twitter'),
+      appsDom = $('#googleApps'),
       picture,
       sessionRestore = store.sessionRestore,
       tabSelectionDom;
@@ -592,24 +669,26 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
     gmailDom = $('#gmail');
+    yahooDom = $('#yahoo');
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
-    if (options.system) {
-      $(document.documentElement).addClass(options.system);
+    if (options.prefs.system) {
+      $(document.documentElement).addClass(options.prefs.system);
     }
 
     //Debug info on the data that was received.
-    if (options.system === 'dev') {
+    if (options.prefs.system === 'dev') {
       $('#debugOutput').val(JSON.stringify(options));
       $('#debugCurrentLocation').val(location.href);
     }
 
+    //Show the new link if appropriate.
+    if (showNew) {
+      $('#newLink').removeClass('hidden');
+    }
+
     //Hook up button for share history
-    $('#shareHistoryButton').click(function (evt) {
-      window.open('history.html');
-      close();
-    });
     bodyDom
       .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
         cancelStatus();
@@ -625,58 +704,77 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     $('#authOkButton').click(function (evt) {
       oauth(sendData.domain, function (success) {
         if (success) {
-          sendMessage();
+          accounts.clear();
+          accounts();
         } else {
           showStatus('statusOAuthFailed');
         }
       });
     });
 
-    //Use cached account info to speed up startup, but then
-    //call API service to be sure data is up to date.
-    accountCache = (store.accountCache && JSON.parse(store.accountCache)) || [];
-    
-    //No need to update tab since that will be done inline below.
-    updateTab = false;
-    onGetAccounts(accountCache);
-    updateTab = true;
-
-    getAccounts(function (json) {
-
-      //If json differs from accountCache, then save and reload
-      var same = json.length === accountCache.length;
-      if (same) {
-        same = !json.some(function (account, i) {
-          return account.identifier !== accountCache[i].identifier;
-        });
-      }
-
-      if (!same) {
-        onGetAccounts(json);
-      }
+    $('#captchaButton').click(function (evt) {
+      cancelStatus();
+      clickBlockDom.removeClass('hidden');
+      sendData.HumanVerification = $('#captcha').attr('value');
+      sendData.HumanVerificationImage = $('#captchaImage').attr('src');
+      sendMessage();
     });
 
-    //Set up HTML so initial jquery UI tabs will not flash away from the selected
-    //tab as we show it. Done for performance and to remove a flash of tab content
-    //that is not the current tab.
-    tabSelection = determineTab();
-    $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
-    tabSelectionDom = $(tabSelection);
-    tabSelectionDom.removeClass('ui-tabs-hide');
+    //Set up default handler for account changes triggered from other
+    //windows, or updates to expired cache.
+    accounts.onChange();
 
-    //Update the profile pic/account name text for the tab.
-    updateUserTab(null, {panel: tabSelectionDom[0]});
+    //Only bother with localStorage enabled storage.
+    if (storage.type === 'memory') {
+      showStatus('statusEnableLocalStorage');
+      return;
+    }
 
-    //Set up jQuery UI tabs.
-    tabDom = $("#tabs");
-    tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
-    tabDom.bind("tabsselect", updateUserTab);
-    //Make the tabs visible now to the user, now that tabs have been set up.
-    tabDom.removeClass('invisible');
-    bodyDom.removeClass('loading');
+    //Fetch the accounts.
+    accounts(function (json) {
+        accountCache = json;
 
-    //Make sure first/last tab styles are set up accordingly.
-    updateFirstLastTab();
+        //No need to update tab since that will be done inline below.
+        updateTab = false;
+        updateAccounts(accountCache);
+        updateTab = true;
+
+        tabSelection = determineTab();
+
+        //Set up HTML so initial jquery UI tabs will not flash away from the selected
+        //tab as we show it. Done for performance and to remove a flash of tab content
+        //that is not the current tab.
+        if (tabSelection) {
+          $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
+          tabSelectionDom = $(tabSelection);
+          tabSelectionDom.removeClass('ui-tabs-hide');
+
+          //Update the profile pic/account name text for the tab.
+          updateUserTab(null, {panel: tabSelectionDom[0]});
+
+          //Set up jQuery UI tabs.
+          tabDom = $("#tabs");
+          tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
+          tabDom.bind("tabsselect", updateUserTab);
+          //Make the tabs visible now to the user, now that tabs have been set up.
+          tabDom.removeClass('invisible');
+          bodyDom.removeClass('loading');
+
+          //Make sure first/last tab styles are set up accordingly.
+          updateFirstLastTab();
+        } else {
+          showStatus('statusSettings');
+        }
+      },
+      //Error handler for account fetch
+      function (xhr, textStatus, err) {
+        if (xhr.status === 503) {
+          showStatus('statusServerBusyClose');
+        } else {
+          showStatus('statusServerError', err);
+        }
+      }
+    );
 
     //Set up hidden form fields for facebook
     //TODO: try sending data urls via options.thumbnail if no
@@ -686,20 +784,30 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       facebookDom.find('[name="picture"]').val(picture);
     }
 
-    if (options.url) {
-      twitterDom.find('[name="link"]').val(options.url);
-      facebookDom.find('[name="link"]').val(options.url);
-      gmailDom.find('[name="link"]').val(options.url);
+    //We default to using the canonical URL instead of the URL shown in the address
+    //bar as this should be the better URL to share.
+    //TODO: We might want to do some minimal checking of this URL in a future
+    //UI so we warn people of a major difference and allow them to choose the URL
+    if (options.canonicalUrl || options.url) {
+      twitterDom.find('[name="link"]').val(options.canonicalUrl || options.url);
+      facebookDom.find('[name="link"]').val(options.canonicalUrl || options.url);
+      gmailDom.find('[name="link"]').val(options.canonicalUrl || options.url);
+      yahooDom.find('[name="link"]').val(options.canonicalUrl || options.url);
+      appsDom.find('[name="link"]').val(options.canonicalUrl || options.url);
     }
 
     if (options.title) {
       facebookDom.find('[name="name"]').val(options.title);
       gmailDom.find('[name="title"]').val(options.title);
+      yahooDom.find('[name="title"]').val(options.title);
+      appsDom.find('[name="title"]').val(options.title);
     }
 
     if (options.description) {
       facebookDom.find('[name="caption"]').val(options.description);
       gmailDom.find('[name="description"]').val(options.description);
+      yahooDom.find('[name="description"]').val(options.description);
+      appsDom.find('[name="description"]').val(options.description);
     }
 
     //If the message containder doesn't want URLs then respect that.
@@ -743,61 +851,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     $('.url').textOverflow(null, true);
     $('.surl').textOverflow(null, true);
 
-    //Handle button click for services in the settings.
-    $('#settings').delegate('.auth', 'click', function (evt) {
-      var node = evt.target,
-        domain = node.getAttribute('data-domain');
-
-      //Make sure to bring the user back to this service if
-      //the auth is successful.
-      store.lastSelection = actions[domain].selectionName;
-      //Mark that this account was just added, so that on reload,
-      //the auto-cleanup of lastSelection does not occur right away.
-      store.accountAdded = true;
-
-      oauth(domain, function (success) {
-        if (success) {
-          location.reload();
-        } else {
-          showStatus('statusOAuthFailed');
-        }
-      });
-    });
-
-    //In settings, hook up remove buttons to remove an account
-    bodyDom.delegate('.accountRemove', 'click', function (evt) {
-      var buttonNode = evt.target,
-          domain = buttonNode.getAttribute('data-domain'),
-          userName = buttonNode.getAttribute('data-username'),
-          userId = buttonNode.getAttribute('data-userid');
-
-      rdapi('account/signout', {
-        data: {
-          domain: domain,
-          userid: userId,
-          username: userName
-        },
-        success: function () {
-          accountsUpdated();
-        },
-        error: function (xhr, textStatus, err) {
-          showError({
-            message: err
-          });
-        }
-      });
-
-      //Remove any cached data
-      if (domain === 'google.com' && store.gmailContacts) {
-        delete store.gmailContacts;
-      }
-      if (actions[domain].selectionName === store.lastSelection) {
-        delete store.lastSelection;
-      }
-
-      evt.preventDefault();
-    });
-
     $("form.messageForm")
       .submit(function (evt) {
 
@@ -839,7 +892,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       .each(function (i, node) {
         placeholder(node);
       });
-    
   });
 
 });

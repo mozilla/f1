@@ -11,11 +11,11 @@ static_dir=$(TOPSRCDIR)/web-static
 webbuild_dir=$(TOPSRCDIR)/tools/webbuild
 requirejs_dir=$(webbuild_dir)/requirejs
 
-version := 0.7.2
+version := 0.7.3
 
 ifeq ($(release_build),)
   xpi_type := dev
-  update_url := 
+  update_url :=
 else
   xpi_type := rel
   update_url :=
@@ -31,19 +31,19 @@ ifneq ($(findstring MINGW,$(shell uname -s)),)
   export NO_SYMLINK = 1
 endif
 
-all: xpi 
+all: xpi
 
 xpi: $(xpi_dir)/$(xpi_name)
 
 $(xpi_dir):
 	mkdir -p $(xpi_dir)
-	
+
 stage_files = $(stage_dir)/defaults $(stage_dir)/chrome $(stage_dir)/install.rdf $(stage_dir)/chrome.manifest $(stage_dir)/components $(stage_dir)/modules
 
 $(stage_dir):
 	mkdir -p $(stage_dir)
 	$(MAKE) $(stage_files)
-	
+
 $(stage_dir)/chrome.manifest: $(srcdir)/chrome.manifest
 	$(SLINK) $(srcdir)/chrome.manifest $(stage_dir)/chrome.manifest
 
@@ -62,7 +62,7 @@ $(stage_dir)/modules: $(srcdir)/modules
 $(stage_dir)/defaults: $(srcdir)/defaults
 	$(SLINK) $(srcdir)/defaults $(stage_dir)/defaults
 
-$(xpi_dir)/$(xpi_name): $(xpi_dir) $(stage_dir) $(dep_files) 
+$(xpi_dir)/$(xpi_name): $(xpi_dir) $(stage_dir) $(dep_files)
 	rm -f $(xpi_dir)/$(xpi_name)
 	cd $(stage_dir) && zip -9r $(xpi_name) $(xpi_files)
 	mv $(stage_dir)/$(xpi_name) $(xpi_dir)/$(xpi_name)
@@ -73,6 +73,7 @@ $(static_dir):
 	rsync -av $(web_dir)/ $(static_dir)/
 	cd $(webbuild_dir) && $(requirejs_dir)/build/build.sh share.build.js
 	cd $(webbuild_dir) && $(requirejs_dir)/build/build.sh frontpage.build.js
+	cd $(webbuild_dir) && $(requirejs_dir)/build/build.sh settings.build.js
 
 clean:
 	rm -rf $(objdir)

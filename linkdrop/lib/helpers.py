@@ -32,6 +32,7 @@ from decorator import decorator
 import pprint
 from xml.sax.saxutils import escape
 import json
+from webhelpers.html import literal
 
 import logging
 

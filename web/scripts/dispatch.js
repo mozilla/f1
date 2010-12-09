@@ -38,10 +38,13 @@ function ($,    object,     fn) {
   var origin = location.protocol + "//" + location.host;
 
   return {
-    sub: function (topic, callback) {
+    sub: function (topic, callback, win, targetOrigin) {
+      win = win || window;
+      targetOrigin = targetOrigin || origin;
+
       var func = function (evt) {
         //Make sure message is from this page.
-        if (evt.origin === origin) {
+        if (evt.origin === targetOrigin) {
           //Assume pub/sub has JSON data with properties named
           //'topic' and 'data'.
           var message = JSON.parse(evt.data),
@@ -52,20 +55,20 @@ function ($,    object,     fn) {
         }
       };
 
-      //Should find window.addEventListener in the browser.
-      window.addEventListener('message', func, false);
+      win.addEventListener('message', func, false);
 
       //return the created function to allow unsubscribing
       return func;
     },
 
-    unsub: function (func) {
-      //Should find window.removeEventListener in the browser.
-      window.removeEventListener('message', func, false);
+    unsub: function (func, win) {
+      win = win || window;
+      win.removeEventListener('message', func, false);
     },
 
-    pub: function (topic, data) {
-      window.postMessage(JSON.stringify({
+    pub: function (topic, data, win) {
+      win = win || window;
+      win.postMessage(JSON.stringify({
         topic: topic,
         data: data
       }), origin);

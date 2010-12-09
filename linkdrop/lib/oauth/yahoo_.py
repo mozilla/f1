@@ -28,10 +28,14 @@ import oauth2 as oauth
 import httplib2
 import json
 import copy
+from rfc822 import AddressList
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
+
+from linkdrop.lib.base import render
+from linkdrop.lib.helpers import safeHTML, literal
 
 from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
@@ -113,11 +117,14 @@ class api():
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         self.sigmethod = oauth.SignatureMethod_HMAC_SHA1()
          
-    def rawcall(self, url, method, args):
+    def rawcall(self, url, method, args, options={}):
         headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
         }
+        if options.get('HumanVerification'):
+            headers['X-HumanVerification-ImageUrl'] = options.get('HumanVerificationImage')
+            headers['X-HumanVerification-Answer'] = options.get('HumanVerification')
         # simple jsonrpc call
         postdata = json.dumps({"method": method, 'params': args, 'id':'jsonrpc'})
         postdata = postdata.encode("utf-8")
@@ -143,7 +150,7 @@ class api():
                 })
             return response['result'], error
         elif 'error' in response:
-            error = copy.copy(error)
+            error = copy.copy(response['error'])
             error.update({ 'provider': domain, 'status': int(resp['status']) })
         else:
             error = {'provider': domain,
@@ -156,24 +163,65 @@ class api():
 
     def sendmessage(self, message, options={}):
         result = error = None
-        from_ = self.account.get('profile',{}).get('verifiedEmail')
-        to_ = options['to']
-        subject = options.get('subject')
+
+        profile = self.account.get('profile', {})
+        from_email = from_ = profile.get('verifiedEmail')
+        fullname = profile.get('displayName', None)
+
+        to_addrs = AddressList(options['to'])
+        subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
+        title = options.get('title', options.get('link', options.get('shorturl', '')))
+        description = options.get('description', '')[:280]
+        
+        to_ = []
+        for a in to_addrs.addresslist:
+            # expect normal email address formats, parse them
+            to_.append({'name': a[0], 'email': a[1]})
+
+        c.safeHTML = safeHTML
+        c.options = options
+
+        # insert the url if it is not already in the message
+        c.longurl = options.get('link')
+        c.shorturl = options.get('shorturl')
+
+
+        # reset to unwrapped for html email, they will be escaped
+        c.from_name = fullname
+        c.subject = subject
+        c.from_header = from_
+        c.to_header = to_
+        c.title = title
+        c.description = description
+        c.message = message
+
+        html_message = render('/html_email.mako').encode('utf-8')
+
+        # get the title, or the long url or the short url or nothing
+        # wrap these in literal for text email
+        c.from_name = literal(fullname)
+        c.subject = literal(subject)
+        c.from_header = literal(from_)
+        c.to_header = literal(to_)
+        c.title = literal(title)
+        c.description = literal(description)
+        c.message = literal(message)
+
+        text_message = render('/text_email.mako').encode('utf-8')
 
         params = [{
                 "message":
                     {"subject":subject,
-                     "from":{"email":from_},
-                     "to":[{"email":to_}],
-                     "body":{"data": message,
-                             "type":"text",
-                             "subtype":"plain",
-                             "charset":"us-ascii"
-                             }
+                     "from":{"name": fullname, "email":from_},
+                     "to":to_,
+                     "simplebody":{
+                        "text": text_message,
+                        "html": html_message
+                     }
                     },
                  "savecopy":1
                 }]
 
-        return self.rawcall(self.endpoints['mail'], 'SendMessage', params)
+        return self.rawcall(self.endpoints['mail'], 'SendMessage', params, options)
 
 

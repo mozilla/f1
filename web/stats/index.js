@@ -111,16 +111,25 @@ function (require,   $,        rdapi,   jig) {
                 $('#notifications').append(jig('#error', json.error));
             } else {
                 $('#notifications').append(jig('#error', json.result));
-
+// test data
+//json = [["2010-11-10", 242], ["2010-11-11", 6321], ["2010-11-12", 6059],
+//    ["2010-11-13", 3585], ["2010-11-14", 2391], ["2010-11-15", 3222],
+//    ["2010-11-16", 3403], ["2010-11-17", 2950], ["2010-11-18", 2788],
+//    ["2010-11-19", 2369], ["2010-11-20", 1458], ["2010-11-21", 1415],
+//    ["2010-11-22", 2039], ["2010-11-23", 1945], ["2010-11-24", 1966],
+//    ["2010-11-25", 1880], ["2010-11-26", 1784], ["2010-11-27", 1121],
+//    ["2010-11-28", 1221], ["2010-11-29", 1782], ["2010-11-30", 1875],
+//    ["2010-12-01", 1798], ["2010-12-02", 1601]];
                 var max = pv.max(json.map(function (d) d[1]));
                 var days = json.map(function (d) d[0]);
                 
                 /* Sizing and scales. */
-                var w = 400,
-                    h = 350,
+                var w = 800,
+                    h = 400,
+                    left = 40,
                     btm = 100,
                     bsp = 2,
-                    bw = (w/json.length-1) - bsp;
+                    bw = (w/json.length-2) - bsp;
                 
                 /* The root panel. */
                 var vis = new pv.Panel()
@@ -131,20 +140,20 @@ function (require,   $,        rdapi,   jig) {
                 /* The bars. */
                 vis.add(pv.Bar)
                     .data(json)
-                    .bottom(btm).width(bw)
+                    .bottom(btm-10).width(bw)
                     .height(function(d) (d[1] / max) * h)
-                    .left(function() this.index * (bw+bsp) + 20);
+                    .left(function() this.index * (bw+bsp) + left);
                 
                 /* y-axis and ticks. */
                 var hmarks = 10;
                 var interval = max/hmarks;
-                var hspace = (h-btm)/interval/(hmarks-1);
+                var hspace = ((h-btm)/interval)/(hmarks-1);
                 vis.add(pv.Rule)
                     .data(pv.range(0, max, interval))
-                    .bottom(function(d) d * hspace + btm)
+                    .bottom(function(d) d * hspace + btm -10)
                     .strokeStyle("lightgrey")
-                    .left(20)
-                    .width(w-20)
+                    .left(left)
+                    .width(w-left)
                 .anchor("left").add(pv.Label)
                     .visible(function(d) d > 0)
                     .text(function (d) d.toFixed());
@@ -152,7 +161,7 @@ function (require,   $,        rdapi,   jig) {
                 /* X-axis and ticks. */
                 vis.add(pv.Rule)
                     .data(days)
-                    .left(function() this.index * (bw+bsp) + 20 + bw/2)
+                    .left(function() this.index * (bw+bsp) + left + bw/2)
                     .bottom(80)
                     .height(5)
                   .anchor("bottom").add(pv.Label)

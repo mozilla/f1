@@ -62,10 +62,6 @@ require.def(['require', 'jquery', 'hashDispatch'],
         }
 
         $('body')
-            .delegate('#installClose', 'click', function (evt) {
-                //Allow closing the installed area thing.
-                $('#installed').fadeOut(500);
-            })
             .delegate('#firefox', 'click', function (evt) {
                 location = 'http://getfirefox.com';
             });
