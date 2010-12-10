@@ -34,20 +34,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           dispatch,   storage,   accounts,   dotCompare,   url) {
 
   var domainList = [
-    'twitter.com', 'facebook.com', 'google.com', 'googleapps.com', 'yahoo.com'
+    'twitter.com', 'facebook.com', 'google.com' //, 'googleapps.com', 'yahoo.com'
   ],
   store = storage(),
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
   options = url.queryToObject(location.href.split('#')[1] || '') || {},
   showNew = options.show === 'new',
   domains;
-
-  //If new items should be shown, refresh the location bar,
-  //so further reloads of the page do not trigger showNew
-  if (showNew) {
-    delete options.show;
-    location.replace(location.href.split('#')[0] + '#' + url.objectToQuery(options));
-  }
 
   domains = {
     'twitter.com': {
@@ -181,6 +174,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   );
 
   $(function () {
+
+    //If new items should be shown, refresh the location bar,
+    //so further reloads of the page do not trigger showNew
+    if (showNew) {
+      delete options.show;
+      location.replace(location.href.split('#')[0] + '#' + url.objectToQuery(options));
+    }
+
     var manageDom = $("#manage"),
         settingsDom = $("#settings"),
         pref, node;
