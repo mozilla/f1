@@ -34,7 +34,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           dispatch,   storage,   accounts,   dotCompare,   url) {
 
   var domainList = [
-    'twitter.com', 'facebook.com', 'google.com', 'googleapps.com', 'yahoo.com'
+    'twitter.com', 'facebook.com', 'google.com' //, 'googleapps.com', 'yahoo.com'
   ],
   store = storage(),
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
