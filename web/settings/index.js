@@ -42,6 +42,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   showNew = options.show === 'new',
   domains;
 
+  //Workaround to allow debugging google apps and yahoo in production.
+  if (options.accounts === 'all') {
+    domainList.push('googleapps.com');
+    domainList.push('yahoo.com');
+  }
+
   domains = {
     'twitter.com': {
       type: 'twitter',
