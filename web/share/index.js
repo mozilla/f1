@@ -134,7 +134,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       'googleapps.com': {
         name: 'Google Apps',
         tabName: 'googleAppsTab',
-        selectionName: 'googleApps',
+        selectionName: 'googleapps',
         icon: 'i/gmailIcon.png',
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
@@ -150,7 +150,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           return true;
         },
         getFormData: function () {
-          var dom = $('#googleApps'),
+          var dom = $('#googleapps'),
               to = dom.find('[name="to"]').val().trim() || '',
               subject = dom.find('[name="subject"]').val().trim() || '',
               message = dom.find('textarea.message').val().trim() || '';
@@ -161,7 +161,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           };
         },
         restoreFormData: function (data) {
-          var dom = $('#googleApps');
+          var dom = $('#googleapps');
           if (data.to) {
             dom.find('[name="to"]').val(data.to);
           }
@@ -571,8 +571,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     }
 
-    if (userAccounts.googleApps) {
-      updateAccountDisplay('googleApps', userAccounts.googleApps);
+    if (userAccounts.googleapps) {
+      updateAccountDisplay('googleapps', userAccounts.googleapps);
       //Make sure we have contacts for auto-complete
       //storeGmailContacts(userAccounts.googleApps);
     }
@@ -663,7 +663,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var thumbImgDom = $('img.thumb'),
       facebookDom = $('#facebook'),
       twitterDom = $('#twitter'),
-      appsDom = $('#googleApps'),
+      appsDom = $('#googleapps'),
       picture,
       sessionRestore = store.sessionRestore,
       tabSelectionDom;
