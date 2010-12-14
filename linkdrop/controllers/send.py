@@ -174,7 +174,7 @@ Site provided description of the shared item, not supported by all services.
 
         if error:
             assert not result
-            log.info("send failure: %r", error)
+            log.error("send failure: %r %r %r", username, userid, error)
         else:
             # create a new record in the history table.
             assert result
