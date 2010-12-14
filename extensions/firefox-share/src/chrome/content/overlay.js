@@ -545,12 +545,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       // Finally try some hacks for certain sites
-      return this.getURLHacks();
+      return this.getCanonicalURLHacks();
     },
 
     // This will likely be a collection of hacks for certain sites we want to
     // work but currently don't provide the right kind of meta data
-    getURLHacks: function () {
+    getCanonicalURLHacks: function () {
       // Google Maps Hack :( obviously this regex isn't robust
       if (/^maps\.google\.[a-zA-Z]{2,5}/.test(gBrowser.currentURI.host)) {
         return gBrowser.contentDocument.getElementById("link").getAttribute("href");
