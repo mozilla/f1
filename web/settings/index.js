@@ -34,19 +34,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           dispatch,   storage,   accounts,   dotCompare,   url) {
 
   var domainList = [
-    'twitter.com', 'facebook.com', 'google.com' //, 'googleapps.com', 'yahoo.com'
+    'twitter.com', 'facebook.com', 'google.com' , 'googleapps.com', 'yahoo.com'
   ],
   store = storage(),
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
   options = url.queryToObject(location.href.split('#')[1] || '') || {},
   showNew = options.show === 'new',
   domains;
-
-  //Workaround to allow debugging google apps and yahoo in production.
-  if (options.accounts === 'all') {
-    domainList.push('googleapps.com');
-    domainList.push('yahoo.com');
-  }
 
   domains = {
     'twitter.com': {

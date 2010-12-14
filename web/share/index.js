@@ -645,8 +645,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   //For the "new items" link, only show it for x number of days after showing it.
   //NOTE: when updating for newer releases, delete the old value from the
   //storage.
-/*
-  timer = store.newTimerV1;
+  timer = store.newTimerV2;
   if (!timer) {
     store.newTimerV1 = (new Date()).getTime();
     showNew = true;
@@ -657,7 +656,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       showNew = true;
     }
   }
-*/
 
   $(function () {
     var thumbImgDom = $('img.thumb'),
