@@ -260,7 +260,6 @@ class api():
 
           return self.rawcall(url, body, "POST")
 
-
      def getcontacts(self, start=0, page=25, group=None):
           # for twitter we get only those people who we follow and who follow us
           # since this data is used for direct messaging
