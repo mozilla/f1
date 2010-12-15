@@ -322,6 +322,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           title: this.getPageTitle(),
           description: this.getPageDescription(),
           medium: this.getPageMedium(),
+          source: this.getSourceURL(),
           url: gBrowser.currentURI.spec,
           canonicalUrl: this.getCanonicalURL(),
           shortUrl: this.getShortURL(),
@@ -509,6 +510,90 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         if (content) {
           return unescapeXml(content);
         }
+      }
+      return "";
+    },
+
+    getSourceURL: function () {
+      var medium = this.getPageMedium(),
+          source;
+
+      //Try the right systems if the medium type matches
+      if ("video" === medium) {
+        return this.getVideoSourceURL();
+      }
+
+      //Now just try them anyway because people often have the wrong type... like vimeo!
+      source = this.getVideoSourceURL();
+      if (source) {
+        return source;
+      }
+      return "";
+    },
+
+    getVideoSourceURL: function () {
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:video']");
+      for (var i = 0; i < metas.length; i++) {
+        var content = metas[i].getAttribute("content");
+        if (content) {
+          return unescapeXml(content);
+        }
+      }
+      return this.getVideoSourceURLHacks();
+    },
+
+    getVideoSourceURLHacks: function () {
+      var canonical = this.getCanonicalURL(),
+          host = gBrowser.currentURI.host,
+          params, embeds;
+
+      //YouTube hack to get the right source without too many parameters
+      if (host.indexOf("youtube.com") >= 0 &&
+          canonical.match(/v=([A-Za-z0-9._%-]*)[&\w;=\+_\-]*/)) {
+        var id = canonical.match(/v=([A-Za-z0-9._%-]*)[&\w;=\+_\-]*/)[1];
+        return "http://www.youtube.com/v/" + id;
+      }
+
+      //Vimeo hack to find the <object data="src"><param name="flashvars"/></object> pieces we need
+      embeds = gBrowser.contentDocument.querySelectorAll("object[type='application/x-shockwave-flash'][data]");
+      params = gBrowser.contentDocument.querySelectorAll("param[name='flashvars']");
+      for (var i = 0; i < embeds.length; i++) {
+        var src = embeds[i].getAttribute("data");
+        var flashvars = params[0].getAttribute("value");
+        if (flashvars) {
+          if (src.indexOf("?") < 0) {
+            src += "?" + unescape(flashvars);
+          } else {
+            src += "&amp;" + unescape(flashvars);
+          }
+        }
+        return gBrowser.currentURI.resolve(unescapeXml(src));
+      }
+
+      //A generic hack that looks for the <param name="movie"> which is often available
+      // for backwards compat and IE
+      params = gBrowser.contentDocument.querySelectorAll("param[name='movie']");
+      for (var i = 0; i < params.length; i++) {
+        var value = params[i].getAttribute("value");
+        if (value) {
+          return gBrowser.currentURI.resolve(unescapeXml(value));
+        }
+      }
+
+      //This one is fairly bad because the flashvars can exceed a reasonable
+      // url length limit and since it is only sent to flash it is often large
+      embeds = gBrowser.contentDocument.querySelectorAll("embed[src]");
+      for (var i = 0; i < embeds.length; i++) {
+        var src = embeds[i].getAttribute("src");
+        var flashvars = embeds[i].getAttribute("flashvars");
+        if (flashvars) {
+          if (src.indexOf("?") < 0) {
+            src += "?" + unescape(flashvars);
+          } else {
+            src += "&amp;" + unescape(flashvars);
+          }
+        }
+        return gBrowser.currentURI.resolve(unescapeXml(src));
       }
       return "";
     },

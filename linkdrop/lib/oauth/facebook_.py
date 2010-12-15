@@ -236,7 +236,7 @@ class api():
                "message": message
           }
 
-          for arg in ['link', 'name', 'description', 'picture']:
+          for arg in ['link', 'name', 'description', 'picture', 'source']:
                if arg in options:
                     body[arg] = options[arg]
 
