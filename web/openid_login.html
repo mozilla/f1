@@ -16,13 +16,15 @@
       Twitter and other accounts.
     </p>
 
-    <form action="/api/signin" method="post">    
+    <form action="/api/account/authorize" method="post">    
       <p>
           <label for="openid">Your OpenID identity URL:</label>
 
           <br />
-          <input type="text" id="openid" name="openid" value="https://www.google.com/accounts/o8/id" size="50"/>
-          <input type="hidden" name="return_to" value="/">
+          <input type="text" id="openid" name="openid_identifier" value="https://www.google.com/accounts/o8/id" size="50"/>
+          <input type="hidden" name="domain" value="openid">
+          <input type="hidden" name="end_point_success" value="/openid_login.html#success">
+          <input type="hidden" name="end_point_auth_failure" value="/openid_login.html#failure">
           <input type="hidden" name="ax_required" value="http://axschema.org/contact/email,http://axschema.org/namePerson/first,http://axschema.org/namePerson/last,http://axschema.org/pref/language,http://axschema.org/contact/country/home">
           <input type="hidden" name="sreg_required" value="email,fullname,country,language,nickname">
           <input type="hidden" name="pape_max_auth_age" value="0">
