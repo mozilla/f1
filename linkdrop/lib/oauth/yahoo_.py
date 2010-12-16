@@ -90,19 +90,6 @@ class responder(OpenIDResponder):
             return None
         return dict(urlparse.parse_qsl(content))
 
-
-    def _get_credentials(self, result_data):
-        profile = result_data['profile']
-        userid = profile['verifiedEmail']
-        username = profile['preferredUsername']
-        profile['emails'] = [{ 'value': userid, 'primary': True }]
-        account = {'domain': domain,
-                   'userid': userid,
-                   'username': username }
-        profile['accounts'] = [account]
-        return result_data
-
-
 class api():
     endpoints = {
         "mail":"http://mail.yahooapis.com/ws/mail/v1.1/jsonrpc"
