@@ -59,7 +59,9 @@ body {
 body.loading {
   background-color: #ddd;
   -moz-box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+  -webkit-box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
   background-image: -moz-linear-gradient(center top , #EEEEEE 0%, #DDDDDD 100%);
+  background-image: -webkit-gradient(linear, center top , #EEEEEE 0%, #DDDDDD 100%);
 }
 
 body.status {
@@ -96,28 +98,35 @@ body #tabs.invisible {
   border-bottom: 1px solid #777;
   background-color: #ddd;
   background-image: -moz-linear-gradient(center top , #EEEEEE 0%, #DDDDDD 100%);
+  background-image: -webkit-gradient(linear, center top , #EEEEEE 0%, #DDDDDD 100%);
 }
 
-button::-moz-focus-inner {
+button::-moz-focus-inner,
+button::-webkit-focus-inner {
   border: 0;
 }
 
 button {
   padding: 2px 15px;
   background-image: -moz-linear-gradient(center top , #FAFAFA 0%, #DDDDDD 100%);
+  background-image: -webkit-gradient(linear, center top , center bottom, from(#FAFAFA), to(#DDDDDD));
   border-width: 1px;
   border-style: solid;
   border-color: #888;
   -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
   margin-left: 5px;
   cursor: pointer;
   -moz-box-shadow: 0 1px 0 #fff;
+  -webkit-box-shadow: 0 1px 0 #fff;
 }
 
 button:active {
   background-image: -moz-linear-gradient(center top , #EEEEEE 0%, #CCCCCC 100%);
+  background-image: -webkit-gradient(linear, center top , #EEEEEE 0%, #CCCCCC 100%);
   -moz-box-shadow:0 0 1px #666666 inset, 0 1px 0 #FFFFFF;
-}
+  -webkit-box-shadow:0 0 1px #666666 inset, 0 1px 0 #FFFFFF;
+}}
 
 /* === TABS === */
 
@@ -137,15 +146,18 @@ ul.nav li {
   font-size: 11px;
   line-height: 24px;
   background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+  background-image: -webkit-gradient(linear, center top , #fafafa 0%, #ddd 100%);
   border-width: 1px;
   border-style: solid;
   border-color: #888;
   -moz-box-shadow: 0 1px 0 #fff;
+  -webkit-box-shadow: 0 1px 0 #fff;
   position: relative;
 }
 
 ul.nav li.ui-state-focus {
   -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
+  -webkit-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
   z-index: 1000;
   position: relative;
 }
@@ -153,17 +165,22 @@ ul.nav li.ui-state-focus {
 ul.nav li:nth-child(n+2) {
   border-left: none;
   -moz-border-radius: 0;
+  -webkit-border-radius: 0;
 }
 
 ul.nav li.first {
   -moz-border-radius-topleft: 2px;
   -moz-border-radius-bottomleft: 2px;
+  -webkit-border-radius-topleft: 2px;
+  -webkit-border-radius-bottomleft: 2px;
   border-left: 1px solid #888888;
 }
 
 ul.nav li.last {
   -moz-border-radius-topright: 2px;
   -moz-border-radius-bottomright: 2px;
+  -webkit-border-radius-topright: 2px;
+  -webkit-border-radius-bottomright: 2px;
 }
 
 ul.nav li.first.last {
@@ -322,14 +339,17 @@ ul.nav .user-info {
 ul.nav .user-info .status {
   display: none;
   -moz-border-radius: 100px;
+  -webkit-border-radius: 100px;
   width: 8px;
   height: 8px;
   vertical-align: middle;
   background-image: -moz-radial-gradient(center, circle cover, #44aaff 0% , #2288ff 50%, #0066dd 90%, #444 100%);
+  background-image: -webkit-radial-gradient(center, circle cover, #44aaff 0% , #2288ff 50%, #0066dd 90%, #444 100%);
 }
 
 ul.nav .user-info .status.inactive {
   background-image: -moz-radial-gradient(center, circle cover, #ddd 0%, #999 50%, #777 90%, #444 100%);
+  background-image: -webkit-radial-gradient(center, circle cover, #ddd 0%, #999 50%, #777 90%, #444 100%);
 }
 
 ul.nav .user-info .username {
@@ -340,6 +360,7 @@ ul.nav .user-info .username {
 
 ul.nav .user-info img.avatar {
   -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
   border: 1px solid #FFFFFF;
   height: 23px;
   margin-right: 5px;
@@ -352,6 +373,7 @@ ul.nav li.settings,
 ul.nav li.settings.ui-tabs-selected  {
   text-align: center;
   -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
 }
 
 ul.nav li.settings {
@@ -370,7 +392,9 @@ ul.nav .navSpacer {
 
 ul.nav li.ui-tabs-selected {
   -moz-box-shadow:0 0 5px #444 inset, 0 1px 0 #FFFFFF;
+  -webkit-box-shadow:0 0 5px #444 inset, 0 1px 0 #FFFFFF;
   background-image:-moz-linear-gradient(center top , #bbb 0%, #aaa 100%);
+  background-image:-webkit-gradient(linear, center top , #bbb 0%, #aaa 100%);
   border-color: #666;
 }
 
@@ -396,8 +420,11 @@ ul.nav li.ui-tabs-selected a.debug {
 
 .thumb {
   -moz-border-radius: 2px 2px 2px 2px;
+  -webkit-border-radius: 2px 2px 2px 2px;
   -moz-box-shadow: 0 1px 0 #fff;
+  -webkit-box-shadow: 0 1px 0 #fff;
   background-image: -moz-linear-gradient(center top , #EEEEEE 0%, #DDDDDD 100%);
+  background-image: -webkit-gradient(linear, center top , #EEEEEE 0%, #DDDDDD 100%);
   border: 1px solid #BBBBBB;
   height: 71px;
   margin: 0 5px 0 0;
@@ -415,6 +442,7 @@ ul.nav li.ui-tabs-selected a.debug {
 
 .thumb .image .thumb {
   -moz-border-radius: 0px;
+  -webkit-border-radius: 0px;
   background-image: none;
   border: none;
   height: auto;
@@ -464,12 +492,14 @@ div.meta {
 
 button.share {
   -moz-border-radius: 0 2px 2px 0;
+  -webkit-border-radius: 0 2px 2px 0;
   border-left: medium none;
   margin-left: 0;
 }
 
 button.share:focus {
   -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
+  -webkit-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
 }
 
 /* Disable user resizing of text area since it covers the twitter count. */
@@ -488,16 +518,20 @@ textarea, input[type="text"] {
   margin: 0;
   width: 100%;
   -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
   -moz-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
+  -webkit-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
 }
 
 textarea:focus, input[type="text"]:focus {
   -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25) inset,  0 1px 0 #fff;
+  -webkit-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25) inset,  0 1px 0 #fff;
 }
 
 
 textarea.message {
   -moz-border-radius: 2px 0 0 2px;
+  -webkit-border-radius: 2px 0 0 2px;
   font-size: 14px;
   min-height: 71px;
 }
@@ -539,6 +573,7 @@ ul.ui-autocomplete {
   border: 1px solid #aaa;
   border-top: none;
   -moz-box-shadow: 0 2px 2px rgba(0,0,0,0.5);
+  -webkit-box-shadow: 0 2px 2px rgba(0,0,0,0.5);
 }
 
 ul.ui-autocomplete li.ui-menu-item a {
@@ -553,6 +588,7 @@ ul.ui-autocomplete li.ui-menu-item a {
 ul.ui-autocomplete li.ui-menu-item a.ui-state-hover {
   background-color: #00A0FF;
   background-image: -moz-linear-gradient(top, #00a0ff 0%, #0D93E0 100%);
+  background-image: -webkit-gradient(linear, top, #00a0ff 0%, #0D93E0 100%);
   color: white;
   font-weight: bold;
 }
@@ -691,6 +727,7 @@ h1 img {
   background-color: #54B851;
   color: #fff;
   -moz-border-radius: 12px;
+  -webkit-border-radius: 12px;
   display: inline-block;
   font-size: 12px;
   font-weight: normal;
@@ -745,6 +782,7 @@ h1 img {
     width: 100%;
     height: 100%;
     background-image:-moz-linear-gradient(center top , #EEEEEE 0%, #DDDDDD 100%);
+    background-image:-webkit-gradient(linear, center top , #EEEEEE 0%, #DDDDDD 100%);
 }
 
 div.status {
@@ -822,7 +860,9 @@ div.captcha-wrap input {
   padding: 3px;
   margin: 0;
   -moz-border-radius: 2px 0 0 2px;
+  -webkit-border-radius: 2px 0 0 2px;
   -moz-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
+  -webkit-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
 }
 
 #captchaSuround {
@@ -890,11 +930,13 @@ div.status.noConfig img {
   vertical-align: baseline;
   font-weight: normal;
   -moz-box-shadow: none;
+  -webkit-box-shadow: none;
   border-color: maroon;
 }
 
 .statusButton:active {
   -moz-box-shadow: 0 0 1px #666666 inset, 0 1px 0 rgba(255,255,255,0.25);
+  -webkit-box-shadow: 0 0 1px #666666 inset, 0 1px 0 rgba(255,255,255,0.25);
 }
 
 #statusErrorMessage {

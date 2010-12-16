@@ -61,11 +61,28 @@ var moz;
     }
   }
 
-  actions = {
-    shareClose: function (data) {
+  function close() {
       window.removeEventListener('message', onMessage, false);
       iframeNode.parentNode.removeChild(iframeNode);
       iframeNode = null;
+  }
+
+  actions = {
+    shareClose: function (data) {
+      var s = iframeNode.style;
+
+      if ('MozTransition' in s || 'WebkitTransition' in s || 'OTransition' in s) {
+        //Webkit does not support transition end(?), so use a timeout
+        setTimeout(close, 500);
+        //iframeNode.addEventListener('transitionend', function (evt) {
+        //  close();
+        //}, false);
+        iframeNode.style.MozTransitionTimingFunction = 'ease-in';
+        iframeNode.style.WebkitTransitionTimingFunction = 'ease-in';
+        iframeNode.style.top = '-114px';
+      } else {
+        close();
+      }
     },
     shareDone: function (data) {
       actions.shareClose(data);
@@ -76,7 +93,7 @@ var moz;
   //Hmm, some weird things in Firefox 3.6.
   //Wanted to use navigator.mozilla.labs.shareEmbed() or something like that
   //but it does not work across page refreshes.
-  if (typeof this.moz === 'undefined' || !moz.labs) {
+  if (typeof moz === 'undefined' || !moz.labs) {
     if (typeof moz === 'undefined') {
       moz = {};
     }
@@ -93,21 +110,26 @@ var moz;
       iframeNode = document.createElement('iframe');
       mixin(iframeNode.style, {
         position: 'fixed',
-        top: 0,
+        top: '-114px',
         left: 0,
         width: '100%',
         height: '114px',
         border: 0,
         zIndex: 1000,
-        MozTransitionProperty: 'height',
-        MozTransitionDuration: '1s',
-        WebkitTransitionProperty: 'height',
-        WebkitTransitionDuration: '1s'
+        MozTransitionProperty: 'top',
+        MozTransitionDuration: '.5s',
+        MozTransitionTimingFunction: 'ease-out',
+        WebkitTransitionProperty: 'top',
+        WebkitTransitionDuration: '.5s'
       }, true);
 
       iframeNode.src = shareUrl + '#options=' + encodeURIComponent(JSON.stringify(options));
       (document.getElementsByTagName('body')[0] || document.documentElement).appendChild(iframeNode);
       window.addEventListener('message', onMessage, false);
+
+      setTimeout(function () {
+        iframeNode.style.top = 0;
+      }, 50);
     };
   }
 
