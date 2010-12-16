@@ -18,6 +18,7 @@
         $(".facebook .compose").keydown(function() {
             $(".facebook .count").text(420 - $(this).val().length);
         }).keydown();
+        $(".overflow").textOverflow();
     });
     </script>
 
@@ -44,6 +45,8 @@
             <div class="boxFlex1 overflow pageTitle">F1 by Mozilla Labs</div>
         </div>
         <div class="pageDescription">F1 is a browser extension that allows you to share links in a fast and fun way. Share links from within the browser, from any webpage, using the same services you already know and love.</div>
+        <a href="javascript:void(0);" class="url overflow selected">http://areallylong.com/url/that/the/user/might/not/see-all-of</a>
+        <a href="javascript:void(0);" class="shorturl">http://shor.ty/d89sa0j</a>
     </div>
 
     <div id="accounts">

@@ -138,7 +138,6 @@ header span.close:active {
     -moz-box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
     -webkit-box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
     box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
-    width: 92px;
 }
 
 #pageInfo .thumbnail img {
@@ -159,6 +158,20 @@ header span.close:active {
     padding: 10px;
     font-size: 10px;
     color: #727272;
+}
+
+#pageInfo .url,
+#pageInfo .shorturl {
+    padding: 3px 10px;
+    font-size: 10px;
+    color: #0051B2;
+    display: block;
+    -moz-border-radius: 3px;
+}
+
+#pageInfo .url.selected,
+#pageInfo .shorturl.selected {
+    background-color: #B2BDC4;
 }
 
 /* 
