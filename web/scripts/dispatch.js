@@ -44,14 +44,17 @@ function ($,    object,     fn) {
 
       var func = function (evt) {
         //Make sure message is from this page.
-        if (evt.origin === targetOrigin) {
+        if (targetOrigin === '*' || evt.origin === targetOrigin) {
           //Assume pub/sub has JSON data with properties named
           //'topic' and 'data'.
-          var message = JSON.parse(evt.data),
-            pubTopic = message.topic;
-          if (pubTopic && pubTopic === topic) {
-            callback(message.data);
-          }
+          try {
+console.log('evt.data: ', evt.data);
+            var message = JSON.parse(evt.data),
+                pubTopic = message.topic;
+            if (pubTopic && pubTopic === topic) {
+              callback(message.data);
+            }
+          } catch (e) {}
         }
       };
 
@@ -66,12 +69,12 @@ function ($,    object,     fn) {
       win.removeEventListener('message', func, false);
     },
 
-    pub: function (topic, data, win) {
+    pub: function (topic, data, win, winOrigin) {
       win = win || window;
       win.postMessage(JSON.stringify({
         topic: topic,
         data: data
-      }), origin);
+      }), winOrigin || origin);
     }
   };
 });

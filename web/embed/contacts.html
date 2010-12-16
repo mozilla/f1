@@ -1,0 +1,71 @@
+ <!-- ***** BEGIN LICENSE BLOCK *****
+   - Version: MPL 1.1
+   -
+   - The contents of this file are subject to the Mozilla Public License Version
+   - 1.1 (the "License"); you may not use this file except in compliance with
+   - the License. You may obtain a copy of the License at
+   - http://www.mozilla.org/MPL/
+   -
+   - Software distributed under the License is distributed on an "AS IS" basis,
+   - WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+   - for the specific language governing rights and limitations under the
+   - License.
+   -
+   - The Original Code is Raindrop.
+   -
+   - The Initial Developer of the Original Code is
+   - Mozilla Messaging, Inc..
+   - Portions created by the Initial Developer are Copyright (C) 2009
+   - the Initial Developer. All Rights Reserved.
+   -
+   - Contributor(s):
+   - -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contacts</title>
+  <link rel="stylesheet" type="text/css" href="../settings/style.css">
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      border: 1px solid black;
+      padding: 10px;
+    }
+  </style>
+  <script data-main="contacts.js" src="../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+</head>
+<body>
+  <div id="auth" class="section hidden">
+      <h1 id="availableHeader" class="hidden">Sign in with your Gmail account.</h1>
+      <ul id="available" class="add>
+        <li class="hbox">
+          <div class="accountType overflow boxFlex"><span class="icon gmail"></span> Gmail</div>
+          <button class="config auth" data-domain="google.com">add <span class="add"></span></button>
+        </li>
+      </ul>
+  </div>
+  <div id="allow" class="section hidden">
+      <ul id="existing"></ul>
+
+      <div id="allowText">Allow <span id="allowDomain"></span> access to your contacts?</div>
+      <button id="allowYes">Yes</button>
+      <button id="allowNo">No</button>
+  </div>
+
+  <script id="accountTemplate" type="text/template">
+    {.acct accounts[0]}
+    <li class="hbox">
+      <div class="accountType overflow boxFlex"><span class="icon gmail"></span> {acct.domain} <span class="username">({displayName})</span></div>
+      <button class="config remove" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}">remove <span class="remove"></span></button>
+    </li>
+  </script>
+
+</body>
+</html>

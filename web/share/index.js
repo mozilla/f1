@@ -242,7 +242,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     dispatch.pub('hide');
     //If embedded, let them know it is done.
     if (parent && parent !== self) {
-      dispatch.pub('shareClose', null, parent);
+      dispatch.pub('share/close', null, parent);
     }
   }
   //For debug tab purpose, make it global.
@@ -262,7 +262,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         });
         //If embedded, let them know it is done.
         if (parent && parent !== self) {
-          dispatch.pub('shareDone', null, parent);
+          dispatch.pub('share/done', null, parent);
         }
       }, 2000);
     } else if (shouldCloseOrMessage) {

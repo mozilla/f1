@@ -30,29 +30,39 @@
   <script src="../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
   <script src="../embed/moz.js" charset="utf-8"></script>
   <script>
-    function shareNotification(topic, data) {
+    function doneNotification(topic, data) {
+      if (topic && topic === 'contacts/receive') {
+        contactsString = JSON.stringify(data);
+        $('#contactsOut').html(contactsString);
+        return;
+      }
+
       $('#' + topic).fadeIn(500).delay(2000).fadeOut();
     }
     $(function () {
-      $('body').delegate('.share', 'click', function (evt) {
-        var target = evt.target,
-            url = target.getAttribute('data-url'),
-            title = target.getAttribute('data-title'),
-            thumbnail = target.getAttribute('data-thumbnail'),
-            args = {};
+      $('body')
+        .delegate('.share', 'click', function (evt) {
+          var target = evt.target,
+              url = target.getAttribute('data-url'),
+              title = target.getAttribute('data-title'),
+              thumbnail = target.getAttribute('data-thumbnail'),
+              args = {};
 
-        if (url) {
-          args.url = url;
-        }
-        if (title) {
-          args.title = title;
-        }
-        if (thumbnail) {
-          args.thumbnail = thumbnail;
-        }
+          if (url) {
+            args.url = url;
+          }
+          if (title) {
+            args.title = title;
+          }
+          if (thumbnail) {
+            args.thumbnail = thumbnail;
+          }
 
-        moz.labs.shareEmbed(args, shareNotification);
-      });
+          moz.labs.shareEmbed(args, doneNotification);
+        })
+        .delegate('.contacts', 'click', function (evt) {
+          moz.labs.contacts(doneNotification);
+        });
     });
   </script>
 </head>
@@ -60,6 +70,8 @@
 <h1>Embed Test</h1>
 
 <button class="share" data-url="http://google.com" data-title="Google">Share Google</button>
+
+<button class="contacts">Contacts</button>
 
 <div id="shareDone" class="status" style="display: none">
   Thanks for sharing!
@@ -69,6 +81,10 @@
   You closed the share UI.
 </div>
 
+
+<div id="contactsOut">
+
+</div>
 
 </body>
 </html>
