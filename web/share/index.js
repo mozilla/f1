@@ -23,7 +23,8 @@
 
 /*jslint plusplus: false, indent: 2 */
 /*global require: false, location: true, window: false, alert: false,
-  document: false, setTimeout: false, localStorage: false */
+  document: false, setTimeout: false, localStorage: false, parent: false,
+  self: false */
 "use strict";
 
 require.def("index",
@@ -239,6 +240,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   function close() {
     dispatch.pub('hide');
+    //If embedded, let them know it is done.
+    if (parent && parent !== self) {
+      dispatch.pub('shareClose', null, parent);
+    }
   }
   //For debug tab purpose, make it global.
   window.closeShare = close;
@@ -255,6 +260,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           username: sendData.username,
           userid: sendData.userid
         });
+        //If embedded, let them know it is done.
+        if (parent && parent !== self) {
+          dispatch.pub('shareDone', null, parent);
+        }
       }, 2000);
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
