@@ -16,26 +16,6 @@ import logging
 
 log = logging.getLogger(__name__)
 
-# openid prefers to use pycurl if available, but that package has a limited
-# certificate store and fails to validate the google openid url.
-# See http://www.cozmanova.com/node/8 for a way to manually install the
-# needed certificates, but for now we just tell openid to prefer urllib2.
-# (XXX - presumably this means *no* certificate validation is done, which
-# probably isn't a good thing...)
-try:
-    import pycurl
-except ImportError:
-    pass
-else:
-    log.warn("pycurl is installed which means openid authentication will use"
-             " ssl certificate validation (good!) but by default the correct"
-             " CA certificates are *not* installed meaning the validation"
-             " fails (bad!).  Thus, raindrop is arranging to not use pycurl"
-             " so will not perform certificate validation (bad!)  This should"
-             " be resolved and %r updated accordingly.", __file__)
-    from openid.fetchers import Urllib2Fetcher, setDefaultFetcher
-    setDefaultFetcher(Urllib2Fetcher())
-
 authentication_token_key = "_authentication_token"
 
 def redirect(url, code=302):
