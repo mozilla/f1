@@ -172,46 +172,6 @@ class responder(OpenIDResponder):
             return None
         return dict(urlparse.parse_qsl(content))
 
-    def _get_credentials(self, result_data):
-        #{'profile': {'preferredUsername': u'mixedpuppy',
-        #     'displayName': u'Shane Caraveo',
-        #     'name':
-        #        {'givenName': u'Shane',
-        #         'formatted': u'Shane Caraveo',
-        #         'familyName': u'Caraveo'},
-        #        'providerName': 'Google',
-        #        'verifiedEmail': u'mixedpuppy@gmail.com',
-        #        'identifier': 'https://www.google.com/accounts/o8/id?id=AItOawnEHbJcEY5EtwX7vf81_x2P4KUjha35VyQ'}}
-        
-        # google OpenID for domains result is:
-        #{'profile': {
-        #    'displayName': u'Shane Caraveo',
-        #    'name': {'givenName': u'Shane', 'formatted': u'Shane Caraveo', 'familyName': u'Caraveo'}, 
-        #    'providerName': 'OpenID',
-        #    'identifier': u'http://g.caraveo.com/openid?id=103543354513986529024',
-        #    'emails': [u'mixedpuppy@g.caraveo.com']}}
-        
-        profile = result_data['profile']
-        provider = domain
-        import sys; print >> sys.stderr, "credential provider is ", profile.get('providerName')
-        if profile.get('providerName').lower() == 'openid':
-            provider = 'googleapps.com'
-        userid = profile.get('verifiedEmail','')
-        emails = profile.get('emails')
-        profile['emails'] = []
-        if userid:
-            profile['emails'] = [{ 'value': userid, 'primary': False }]
-        if emails:
-            # fix the emails list
-            for e in emails:
-                profile['emails'].append({ 'value': e, 'primary': False })
-        profile['emails'][0]['primary'] = True
-        account = {'domain': provider,
-                   'userid': profile['emails'][0]['value'],
-                   'username': profile.get('preferredUsername','') }
-        profile['accounts'] = [account]
-        return result_data
-
 # XXX right now, python-oauth2 does not raise the exception if there is an error,
 # this is copied from oauth2.clients.smtp and fixed
 class SMTP(smtplib.SMTP):

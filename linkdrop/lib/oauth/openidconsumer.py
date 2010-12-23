@@ -23,6 +23,7 @@
 
 import logging
 import re
+import urlparse
 
 from openid.consumer import consumer
 from openid.extensions import ax, sreg, pape
@@ -33,6 +34,7 @@ from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
 from linkdrop.lib.oauth.base import get_oauth_config, AccessException
+from linkdrop.lib.oauth.oid_extensions import UIRequest
 
 log = logging.getLogger("oauth.openid")
 
@@ -131,25 +133,21 @@ def extract_openid_data(identifier, sreg_resp, ax_resp):
     attribs = AttribAccess(sreg_resp, ax_resp)
     
     ud = {'identifier': identifier}
-    if 'google.com' in identifier:
-        ud['providerName'] = 'Google'
-    elif 'yahoo.com' in identifier:
-        ud['providerName'] = 'Yahoo'
-    else:
-        ud['providerName'] = 'OpenID'
+    url = urlparse.urlparse(identifier)
+    provider = re.match(r'^(?:.*?@)?(.*?)(?::.*)?$', url[1]).groups(1)[0]
+    ud['provider'] = provider
     
     # Sort out the display name and preferred username
-    if ud['providerName'] == 'Google':
+    ud['preferredUsername'] = attribs.get('nickname')
+    if not ud['preferredUsername']:
         # Extract the first bit as the username since Google doesn't return
         # any usable nickname info
         email = attribs.get('email')
         if email:
             ud['preferredUsername'] = re.match('(^.*?)@', email).groups()[0]
-    else:
-        ud['preferredUsername'] = attribs.get('nickname')
     
     # We trust that Google and Yahoo both verify their email addresses
-    if ud['providerName'] in ['Google', 'Yahoo']:
+    if 'google' in provider or 'yahoo' in provider:
         ud['verifiedEmail'] = attribs.get('email', ax_only=True)
     else:
         ud['emails'] = [attribs.get('email')]
@@ -189,18 +187,18 @@ def extract_openid_data(identifier, sreg_resp, ax_resp):
     return ud
 
 
-class OpenIDResponder():
+domain = 'openid'
+
+class responder():
     """OpenID Consumer for handling OpenID authentication
     """
 
-    def __init__(self, provider):
+    def __init__(self, provider='openid'):
         self.provider = provider
         self.consumer_class = None
         self.log_debug = logging.DEBUG >= log.getEffectiveLevel()
 
-        self.config = get_oauth_config(provider)
-
-        self.endpoint_regex = self.config.get('endpoint_regex')
+        self.endpoint_regex = None
 
         # application config items, dont use self.config
         store = config.get('openid_store', 'mem')
@@ -212,14 +210,13 @@ class OpenIDResponder():
         elif store==u"sql":
             # TODO: This does not work as we need a connection, not a string
             self.openid_store = sqlstore.SQLStore(sql_connstring, sql_associations_table, sql_connstring)
-        self.scope = self.config.get('scope', None)
         self.return_to_query = {}
 
     def _lookup_identifier(self, identifier):
         """Extension point for inherited classes that want to change or set
         a default identifier"""
         return identifier
-    
+
     def _update_authrequest(self, authrequest):
         """Update the authrequest with the default extensions and attributes
         we ask for
@@ -229,17 +226,37 @@ class OpenIDResponder():
         
         """
         # Add on the Attribute Exchange for those that support that            
+        request_attributes = request.POST.get('ax_attributes', ax_attributes.keys())
         ax_request = ax.FetchRequest()
-        for attrib in attributes.values():
-            ax_request.add(ax.AttrInfo(attrib))
+        for attr in request_attributes:
+            ax_request.add(ax.AttrInfo(attributes[attr], required=True))
         authrequest.addExtension(ax_request)
-        
+
         # Form the Simple Reg request
         sreg_request = sreg.SRegRequest(
             optional=['nickname', 'email', 'fullname', 'dob', 'gender', 'postcode',
                       'country', 'language', 'timezone'],
         )
         authrequest.addExtension(sreg_request)
+
+        # Add PAPE request information. Setting max_auth_age to zero will force a login.
+        requested_policies = []
+        policy_prefix = 'policy_'
+        for k, v in request.POST.iteritems():
+            if k.startswith(policy_prefix):
+                policy_attr = k[len(policy_prefix):]
+                requested_policies.append(getattr(pape, policy_attr))
+
+        pape_request = pape.Request(requested_policies,
+                                    max_auth_age=request.POST.get('pape_max_auth_age',None))
+        authrequest.addExtension(pape_request)
+        
+        if 'popup_mode' in request.POST:
+            kw_args = {'mode': request.POST['popup_mode']}
+            if 'popup_icon' in request.POST:
+                kw_args['icon'] = request.POST['popup_icon']
+            ui_request = UIRequest(**kw_args)
+            authrequest.addExtension(ui_request)
         return None
     
     def _get_access_token(self, request_token):
@@ -258,8 +275,8 @@ class OpenIDResponder():
             log.debug('Handling OpenID login')
         
         # Load default parameters that all Auth Responders take
-        session['end_point_success'] = request.POST.get('end_point_success', self.config.get('oauth_success'))
-        fail_uri = session['end_point_auth_failure'] = request.POST.get('end_point_auth_failure', self.config.get('oauth_failure'))
+        session['end_point_success'] = request.POST.get('end_point_success', config.get('oauth_success'))
+        fail_uri = session['end_point_auth_failure'] = request.POST.get('end_point_auth_failure', config.get('oauth_failure'))
         openid_url = request.POST.get('openid_identifier')
         
         # Let inherited consumers alter the openid identifier if desired
@@ -353,5 +370,37 @@ class OpenIDResponder():
         else:
             raise Exception("Unknown OpenID Failure")
 
-    def _get_credentials(self, access_token):
-        return access_token
+    def _get_credentials(self, result_data):
+        profile = result_data['profile']
+        provider = self.provider
+        # google apps domain fixup
+        if 'google' not in profile.get('provider') and provider == 'google.com':
+            provider = 'googleapps.com'
+        userid = profile.get('verifiedEmail','')
+        emails = profile.get('emails')
+        profile['emails'] = []
+        if userid:
+            profile['emails'] = [{ 'value': userid, 'primary': False }]
+        if emails:
+            # fix the emails list
+            for e in emails:
+                profile['emails'].append({ 'value': e, 'primary': False })
+        profile['emails'][0]['primary'] = True
+        account = {'domain': provider,
+                   'userid': profile['emails'][0]['value'],
+                   'username': profile.get('preferredUsername','') }
+        profile['accounts'] = [account]
+        return result_data
+
+
+class OpenIDResponder(responder):
+    """OpenID Consumer for handling specialized OpenID authentication
+    
+    Base class used by google and yahoo openid+oauth responders
+    """
+
+    def __init__(self, provider):
+        responder.__init__(self, provider)
+        self.config = get_oauth_config(provider)
+        self.endpoint_regex = self.config.get('endpoint_regex')
+        self.scope = self.config.get('scope', None)

@@ -1,0 +1,46 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html
+  xmlns="http://www.w3.org/1999/xhtml"
+  >
+
+  <head>
+    <title>Please Sign In</title>
+
+  </head>
+
+  <body>
+    <h2>Login</h2>
+    <p>
+      This OpenId account will be your login for this account.  During account
+      setup you will also need to seperatly authorize access to your Email,
+      Twitter and other accounts.
+    </p>
+
+    <form action="/api/account/authorize" method="post">    
+      <p>
+          <label for="openid">Your OpenID identity URL:</label>
+
+          <br />
+          <input type="text" id="openid" name="openid_identifier" value="https://www.google.com/accounts/o8/id" size="50"/>
+          <input type="hidden" name="domain" value="openid">
+          <input type="hidden" name="end_point_success" value="/openid_login.html#success">
+          <input type="hidden" name="end_point_auth_failure" value="/openid_login.html#failure">
+          <input type="hidden" name="ax_required" value="http://axschema.org/contact/email,http://axschema.org/namePerson/first,http://axschema.org/namePerson/last,http://axschema.org/pref/language,http://axschema.org/contact/country/home">
+          <input type="hidden" name="sreg_required" value="email,fullname,country,language,nickname">
+          <input type="hidden" name="pape_max_auth_age" value="0">
+          <!--<input type="hidden" name="oauth_scope" value="https://mail.google.com/">-->
+          <br /><br /><input type="submit" name="authform" value="Log in &raquo;" />
+      </p>
+    </form>
+
+    <h3>Don't Have an OpenID?</h3>
+    <p>
+    If you haven't already got an OpenID it is <a
+      href="http://openid.net/get/">easy to get one</a>. Probably the simplest
+    way is sign up with a free OpenID provider such as <a
+      href="https://www.myopenid.com/">https://www.myopenid.com/</a>.
+    </p>
+
+  </body>
+
+</html>

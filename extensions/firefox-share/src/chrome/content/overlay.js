@@ -496,7 +496,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // According to Facebook - (only the first 3 are interesting)
     // Valid values for medium_type are audio, image, video, news, blog, and mult.
     getPageMedium: function () {
-      var metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']");
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:type']");
+      for (var i = 0; i < metas.length; i++) {
+        var content = metas[i].getAttribute("content");
+        if (content) {
+          return unescapeXml(content);
+        }
+      }
+      metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']")
       for (var i = 0; i < metas.length; i++) {
         var content = metas[i].getAttribute("content");
         if (content) {
@@ -545,12 +552,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       // Finally try some hacks for certain sites
-      return this.getURLHacks();
+      return this.getCanonicalURLHacks();
     },
 
     // This will likely be a collection of hacks for certain sites we want to
     // work but currently don't provide the right kind of meta data
-    getURLHacks: function () {
+    getCanonicalURLHacks: function () {
       // Google Maps Hack :( obviously this regex isn't robust
       if (/^maps\.google\.[a-zA-Z]{2,5}/.test(gBrowser.currentURI.host)) {
         return gBrowser.contentDocument.getElementById("link").getAttribute("href");
