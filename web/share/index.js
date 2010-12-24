@@ -37,6 +37,32 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   var showStatus,
     actions = {
+      'linkedin.com': {
+        name: 'LinkedIn',
+        tabName: 'linkedinTab',
+        selectionName: 'linkedin',
+        icon: 'i/linkedinIcon.png',
+        serviceUrl: 'http://linkedin.com',
+        revokeUrl: 'http://linkedin.com/settings/connections',
+        signOutUrl: 'http://linkedin.com/logout',
+        accountLink: function (account) {
+          return 'http://linkedin.com/' + account.username;
+        },
+        validate: function (sendData) {
+          return true;
+        },
+        getFormData: function () {
+          var message = $('#linkedin').find('textarea.message').val().trim() || '';
+          return {
+            message: message
+          };
+        },
+        restoreFormData: function (data) {
+          if (data.message) {
+            $('#linkedin').find('textarea.message').val(data.message);
+          }
+        }
+      },
       'twitter.com': {
         name: 'Twitter',
         tabName: 'twitterTab',

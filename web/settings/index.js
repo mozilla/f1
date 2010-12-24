@@ -34,7 +34,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           dispatch,   storage,   accounts,   dotCompare,   url) {
 
   var domainList = [
-    'twitter.com', 'facebook.com', 'google.com' , 'googleapps.com', 'yahoo.com'
+    'twitter.com', 'facebook.com', 'google.com' , 'googleapps.com', 'yahoo.com', 'linkedin.com'
   ],
   store = storage(),
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
@@ -43,6 +43,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   domains;
 
   domains = {
+    'linkedin.com': {
+      type: 'linkedin',
+      name: 'LinkedIn',
+      serviceUrl: 'http://linkedin.com',
+      revokeUrl: 'http://linkedin.com/settings/connections',
+      signOutUrl: 'http://linkedin.com/logout'
+    },
     'twitter.com': {
       type: 'twitter',
       name: 'Twitter',
