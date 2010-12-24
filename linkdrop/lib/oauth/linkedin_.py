@@ -37,7 +37,7 @@ class responder(OAuth1):
         OAuth1.__init__(self, domain)
 
     def _get_credentials(self, access_token):
-        fields = 'id,first-name,last-name,picture-url,public-profile-url'
+        fields = 'id,first-name,last-name,picture-url,public-profile-url,site-standard-profile-request'
         profile_url = "http://api.linkedin.com/v1/people/~:(%s)" % (fields,)
 
         consumer = oauth.Consumer(self.consumer_key, self.consumer_secret)
@@ -58,6 +58,7 @@ class responder(OAuth1):
         result_data = {'profile': profile,
                        'oauth_token': access_token['oauth_token'], 
                        'oauth_token_secret': access_token['oauth_token_secret']}
+
         return result_data
 
 
@@ -71,3 +72,44 @@ class api():
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         self.sigmethod = oauth.SignatureMethod_HMAC_SHA1()
 
+    def rawcall(self, url, body):
+        client = oauth.Client(self.consumer, self.oauth_token)
+
+        oauth_request = oauth.Request.from_consumer_and_token(self.consumer, token=self.oauth_token, http_url=url, http_method='POST')
+        oauth_request.sign_request(self.sigmethod, self.consumer, self.oauth_token)
+        headers = oauth_request.to_header()
+        headers['x-li-format'] = 'json'
+        
+        body = json.dumps(body)
+        headers['Content-type'] = 'application/json'
+        headers['Content-Length'] = str(len(body))
+        
+        resp, content = httplib2.Http.request(client, url, method='POST', headers=headers, body=body)
+
+        data = content and json.loads(content) or resp
+        
+        result = error = {}
+        if resp['status'] != '201':
+            error = data
+        else:
+            result = data
+
+        return result, error
+
+
+    def sendmessage(self, message, options={}):
+        url = "http://api.linkedin.com/v1/people/~/shares"
+        body = {
+            "comment": message,
+            "content": {
+                "title": options.get('subject', ''),
+                "submitted-url": options.get('link', ''),
+                "submitted-image-url": options.get('picture', ''),
+                "description": options.get('description', ''),
+            },
+            "visibility": {
+                "code": "connections-only", #could be "anyone"
+            }
+        }
+
+        return self.rawcall(url, body)
