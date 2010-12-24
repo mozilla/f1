@@ -238,6 +238,11 @@ ul.nav li a.icon.googleApps {
   background-position: center -161px;
 }
 
+ul.nav li a.icon.linkedin {
+  background-image: url("i/LinkedIn_Logo16px.png");
+  background-position: center;
+}
+
 ul.nav li a.icon.debug {
   background-image: url("i/bug_b.png");
   background-position: center;
@@ -652,6 +657,12 @@ ul.ui-autocomplete li.ui-menu-item a.ui-state-hover {
 #settings ul li h1 .googleAppsIcon {
   background-image: url("i/sprite.png");
   background-position: left -165px;
+  background-repeat: no-repeat;
+}
+
+#settings ul li h1 .linkedinIcon {
+  background-image: url("i/LinkedIn_Logo16px.png");
+  background-position: left -192px;
   background-repeat: no-repeat;
 }
 

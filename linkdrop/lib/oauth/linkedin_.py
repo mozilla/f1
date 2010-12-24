@@ -87,8 +87,8 @@ class api():
         resp, content = httplib2.Http.request(client, url, method='POST', headers=headers, body=body)
 
         data = content and json.loads(content) or resp
-        
-        result = error = {}
+
+        result = error = None
         if resp['status'] != '201':
             error = data
         else:
@@ -111,5 +111,4 @@ class api():
                 "code": "connections-only", #could be "anyone"
             }
         }
-
         return self.rawcall(url, body)

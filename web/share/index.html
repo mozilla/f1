@@ -43,6 +43,7 @@
     <li class="gmailTab leftTab hidden"><a class="icon gmail" name="google mail" href="#gmail">Gmail</a></li>
     <li class="googleappsTab leftTab hidden"><a class="icon googleApps" name="google apps" href="#googleapps">Google Apps</a></li>
     <li class="yahooTab leftTab hidden"><a class="icon yahoo" name="yahoo mail" href="#yahoo">Yahoo!</a></li>
+    <li class="linkedinTab leftTab hidden"><a class="icon linkedin" name="linkedin" href="#linkedin">LinkedIn</a></li>
     <li class="debugTab"><a class="icon debug" name="debug" href="#debug">debug</a></li>
     <div class="user-info">
       <span class="avatar"><img class="avatar" src=""></span>
@@ -178,6 +179,36 @@
       <textarea class="message urlWithSpace" placeholder="Type your message here, and we'll attach the link" name="message"></textarea>
     </div>
     <button class="share" type="submit">share</button>
+    </form>
+  </div>
+
+  <div id="linkedin" class="ui-tabs-hide">
+    <form name="linkedinSend" class="hbox messageForm" action="#">
+      <div class="user inactive col" data-domain="linkedin.com">
+      <input type="hidden" name="domain" value="linkedin.com" />
+      <input type="hidden" name="userid" value="" />
+      <input type="hidden" name="username" value="" />
+      <input type="hidden" name="picture" value="" />
+      <input type="hidden" name="link" value="" />
+      <input type="hidden" name="name" value="" />
+      <input type="hidden" name="description" value="" />
+        <span class="avatar"><img class="avatar" src="i/face2.png"></span>
+        <span class="username">LinkedIn User</span>
+      </div>
+      <div class="thumb">
+        <div class="image"><img class="thumb"/></div>
+        <div class="meta">
+          <div class="title"></div>
+          <div class="description"></div>
+          <a title="The link for this page" class="url"></a>
+          <a title="A smaller, shorter link to use for linkedin" class="surl"></a>
+        </div>
+      </div>
+      <div class="message linkedinCounter boxFlex">
+        <textarea class="message" placeholder="Type your message here, and we'll attach the link" name="message"></textarea>
+        <div class="counter"></div>
+      </div>
+      <button class="share" type="submit">share</button>
     </form>
   </div>
 

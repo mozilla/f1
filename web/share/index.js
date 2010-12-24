@@ -247,7 +247,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     options = {},
     tabDom, bodyDom, clickBlockDom, twitterCounter, timer,
     updateTab = true, tabSelection, accountCache, showNew,
-    gmailDom, yahooDom, autoCompleteWidget, store = storage();
+    gmailDom, yahooDom, linkedinDom, autoCompleteWidget, store = storage();
 
   jig.addFn({
     profilePic: function (photos) {
@@ -609,6 +609,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //storeYahooContacts(userAccounts.yahoo);
     }
 
+    if (userAccounts.linkedin) {
+      updateAccountDisplay('linkedin', userAccounts.linkedin);
+    }
+
     //Session restore, do after form setting above.
     if (sessionRestore) {
       sessionRestore = JSON.parse(sessionRestore);
@@ -696,6 +700,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     clickBlockDom = $('#clickBlock');
     gmailDom = $('#gmail');
     yahooDom = $('#yahoo');
+    linkedinDom = $('#linkedin');
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
@@ -808,6 +813,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     picture = options.previews && options.previews[0];
     if (picture) {
       facebookDom.find('[name="picture"]').val(picture);
+      linkedinDom.find('[name="picture"]').val(picture);
     }
 
     //We default to using the canonical URL instead of the URL shown in the address
@@ -819,6 +825,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       facebookDom.find('[name="link"]').val(options.canonicalUrl || options.url);
       gmailDom.find('[name="link"]').val(options.canonicalUrl || options.url);
       yahooDom.find('[name="link"]').val(options.canonicalUrl || options.url);
+      linkedinDom.find('[name="link"]').val(options.canonicalUrl || options.url);
       appsDom.find('[name="link"]').val(options.canonicalUrl || options.url);
     }
 
@@ -826,6 +833,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       facebookDom.find('[name="name"]').val(options.title);
       gmailDom.find('[name="title"]').val(options.title);
       yahooDom.find('[name="title"]').val(options.title);
+      linkedinDom.find('[name="title"]').val(options.title);
       appsDom.find('[name="title"]').val(options.title);
     }
 
@@ -833,6 +841,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       facebookDom.find('[name="caption"]').val(options.description);
       gmailDom.find('[name="description"]').val(options.description);
       yahooDom.find('[name="description"]').val(options.description);
+      linkedinDom.find('[name="description"]').val(options.description);
       appsDom.find('[name="description"]').val(options.description);
     }
 
