@@ -13,12 +13,15 @@ from linkdrop.lib.oauth.base import OAuth1, get_oauth_config
 domain = 'linkedin.com'
 log = logging.getLogger(domain)
 
+
 def extract_li_data(user):
     poco = {
         'displayName': "%s %s" % (user.get('firstName'), user.get('lastName'),),
     }
     if user.get('publicProfileUrl', False):
-        poco['urls'] = [ { "primary" : False, "value" : user['publicProfileUrl'] }]
+        poco['urls'] = [ { 'type': u'profile', "primary" : False, "value" : user['publicProfileUrl']['url'] }]
+    if user.get('siteStandardProfileRequest', False):
+        poco['urls'] = [ { 'type': u'profile', "primary" : True, "value" : user['siteStandardProfileRequest']['url'] }]
     if user.get('pictureUrl', False):
         poco['photos'] = [ { 'type': u'profile', "value" : user['pictureUrl'] }]
 
@@ -28,6 +31,7 @@ def extract_li_data(user):
     poco['accounts'] = [account]
 
     return poco
+
 
 class responder(OAuth1):
     """Handle LinkedId OAuth login/authentication"""
@@ -58,7 +62,6 @@ class responder(OAuth1):
         result_data = {'profile': profile,
                        'oauth_token': access_token['oauth_token'], 
                        'oauth_token_secret': access_token['oauth_token_secret']}
-
         return result_data
 
 
@@ -72,10 +75,10 @@ class api():
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         self.sigmethod = oauth.SignatureMethod_HMAC_SHA1()
 
-    def rawcall(self, url, body):
+    def rawcall(self, url, body=None, method="GET"):
         client = oauth.Client(self.consumer, self.oauth_token)
 
-        oauth_request = oauth.Request.from_consumer_and_token(self.consumer, token=self.oauth_token, http_url=url, http_method='POST')
+        oauth_request = oauth.Request.from_consumer_and_token(self.consumer, token=self.oauth_token, http_url=url, http_method=method)
         oauth_request.sign_request(self.sigmethod, self.consumer, self.oauth_token)
         headers = oauth_request.to_header()
         headers['x-li-format'] = 'json'
@@ -84,18 +87,18 @@ class api():
         headers['Content-type'] = 'application/json'
         headers['Content-Length'] = str(len(body))
         
-        resp, content = httplib2.Http.request(client, url, method='POST', headers=headers, body=body)
+        resp, content = httplib2.Http.request(client, url, method=method, headers=headers, body=body)
 
         data = content and json.loads(content) or resp
 
         result = error = None
-        if resp['status'] != '201':
+        status = int(resp['status'])
+        if status < 200 or status >= 300:
             error = data
         else:
             result = data
 
         return result, error
-
 
     def sendmessage(self, message, options={}):
         url = "http://api.linkedin.com/v1/people/~/shares"
@@ -111,4 +114,31 @@ class api():
                 "code": "connections-only", #could be "anyone"
             }
         }
-        return self.rawcall(url, body)
+        return self.rawcall(url, body, method="POST")
+
+    def getcontacts(self, start=0, page=25, group=None):
+        contacts = []
+        url = 'http://api.linkedin.com/v1/people/~/connections?count=%d' % (page,)
+        method = 'GET'
+        if start > 0:
+            url = url + "&start=%d" % (start,)
+
+        result, error = self.rawcall(url, method="GET")
+        if error:
+            return result, error
+
+        # poco-ize the results
+        entries = result.get('values')
+        contacts = []
+        for entry in entries:
+            contacts.append(extract_li_data(entry))
+            
+        connectedto = {
+            'entry': contacts,
+            'itemsPerPage': result.get('_count', result.get('_total', 0)),
+            'startIndex':   result.get('_start', 0),
+            'totalResults': result.get('_total'),
+        }
+
+        return connectedto, error
+
