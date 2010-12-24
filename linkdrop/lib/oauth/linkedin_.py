@@ -4,11 +4,15 @@ import json
 import httplib2
 import oauth2 as oauth
 import logging
+from rfc822 import AddressList
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
 from linkdrop.lib.oauth.base import OAuth1, get_oauth_config
+
+from linkdrop.lib.base import render
+from linkdrop.lib.helpers import safeHTML, literal
 
 domain = 'linkedin.com'
 log = logging.getLogger(domain)
@@ -101,19 +105,62 @@ class api():
         return result, error
 
     def sendmessage(self, message, options={}):
-        url = "http://api.linkedin.com/v1/people/~/shares"
-        body = {
-            "comment": message,
-            "content": {
-                "title": options.get('subject', ''),
-                "submitted-url": options.get('link', ''),
-                "submitted-image-url": options.get('picture', ''),
-                "description": options.get('description', ''),
-            },
-            "visibility": {
-                "code": "connections-only", #could be "anyone"
+        direct = options.get('to', 'anyone')
+        if direct in ('anyone', 'connections-only'):
+            url = "http://api.linkedin.com/v1/people/~/shares"
+            body = {
+                "comment": message,
+                "content": {
+                    "title": options.get('subject', ''),
+                    "submitted-url": options.get('link', ''),
+                    "submitted-image-url": options.get('picture', ''),
+                    "description": options.get('description', ''),
+                },
+                "visibility": {
+                    "code": direct
+                }
             }
-        }
+        else:
+            # we have to do a direct message, different api
+            url = "http://api.linkedin.com/v1/people/~/mailbox"
+
+            profile = self.account.get('profile', {})
+            from_email = from_ = profile.get('verifiedEmail')
+            fullname = profile.get('displayName', None)
+
+            to_addrs = AddressList(options['to'])
+            subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
+            title = options.get('title', options.get('link', options.get('shorturl', '')))
+            description = options.get('description', '')[:280]
+
+            to_ = []
+            for a in to_addrs.addresslist:
+                to_.append({'person': {'_path': '/people/'+a[1] }})
+
+            c.safeHTML = safeHTML
+            c.options = options
+            
+            # insert the url if it is not already in the message
+            c.longurl = options.get('link')
+            c.shorturl = options.get('shorturl')
+            
+            # get the title, or the long url or the short url or nothing
+            # wrap these in literal for text email
+            c.from_name = literal(fullname)
+            c.subject = literal(subject)
+            c.from_header = literal(from_)
+            c.to_header = literal(to_)
+            c.title = literal(title)
+            c.description = literal(description)
+            c.message = literal(message)
+    
+            text_message = render('/text_email.mako').encode('utf-8')
+            
+            body = { 
+                'recipients': {'values': to_},
+                'subject': subject,
+                'body': text_message
+            }
         return self.rawcall(url, body, method="POST")
 
     def getcontacts(self, start=0, page=25, group=None):
