@@ -6,6 +6,21 @@
   <head>
     <title>Please Sign In</title>
 
+    <script src="../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+    <script>
+        // hack the account module in so we generate magic broadcasts about
+        // changing.
+        require(["accounts"], function(accounts) {
+          require.ready(function () {
+            // called when loaded.
+            success = location.href.split('#')[1]==='success';
+            if (success) {
+              accounts.changed();
+              window.close();
+            }
+          });
+        });
+    </script>
   </head>
 
   <body>

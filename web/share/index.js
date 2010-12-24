@@ -527,15 +527,22 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   function updateAccounts(accounts) {
+    // Returns true if the user has identified, false otherwise.  Also updates
+    // the accounts param.
     var hasLastSelectionMatch = false,
         userAccounts = {}, selection,
         sessionRestore = store.sessionRestore;
 
+    var identified = false;
     if ((accounts && accounts.length)) {
       //Figure out what accounts we do have
       accounts.forEach(function (account) {
         var name = account.accounts[0].domain;
-        if (name && actions[name]) {
+        if (name=="openid") {
+            // special treatment for the domain 'openid' - it means we are
+            // logged in - so don't return this as a 'normal' account...
+            identified = true;
+        } else if (name && actions[name]) {
           //Make sure to see if there is a match for last selection
           if (!hasLastSelectionMatch) {
             hasLastSelectionMatch = actions[name].selectionName === store.lastSelection;
@@ -548,6 +555,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           userAccounts[name] = account;
         }
       });
+    return identified;
     }
 
     //If no matching accounts match the last selection clear it.
@@ -745,7 +753,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
         //No need to update tab since that will be done inline below.
         updateTab = false;
-        updateAccounts(accountCache);
+        var identified = updateAccounts(accountCache);
         updateTab = true;
 
         tabSelection = determineTab();
@@ -772,7 +780,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           //Make sure first/last tab styles are set up accordingly.
           updateFirstLastTab();
         } else {
-          showStatus('statusSettings');
+          if (identified) {
+            showStatus('statusSettings');
+          } else {
+            showStatus('statusLoggedOut');
+          }
         }
       },
       //Error handler for account fetch
