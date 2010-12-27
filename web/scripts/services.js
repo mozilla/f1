@@ -28,8 +28,8 @@
 'use strict';
 
 require.def('services',
-        ['rdapi', "blade/url"],
-function (rdapi,   url) {
+        ['rdapi', "blade/url", "TextCounter"],
+function (rdapi,   url,         TextCounter) {
 
   var options = url.queryToObject(location.href.split('#')[1] || '') || {},
   showNew = options.show === 'new';
@@ -117,17 +117,22 @@ function (rdapi,   url) {
         }
       }),
       'twitter.com': new svcBase('Twitter', {
+        counter: null,
         serviceUrl: 'http://twitter.com',
         revokeUrl: 'http://twitter.com/settings/connections',
         signOutUrl: 'http://twitter.com/logout',
         accountLink: function (account) {
           return 'http://twitter.com/' + account.username;
         },
+        validate: function (sendData) {
+          return !this.counter || !this.counter.isOver();
+        },
         getFormData: function () {
           var dom = $('#twitter');
           return {
             message: dom.find('textarea.message').val().trim() || '',
-            canonicalUrl: dom.find('[name="link"]').val().trim() || ''
+            canonicalUrl: dom.find('[name="link"]').val().trim() || '',
+            shortUrl: dom.find('[name="surl"]').val().trim() || ''
           };
         },
         setFormData: function (data) {
@@ -138,6 +143,17 @@ function (rdapi,   url) {
           if (data.canonicalUrl || data.url) {
             dom.find('[name="link"]').val(data.canonicalUrl || data.url);
           }
+          if (data.shortUrl) {
+            dom.find('[name="surl"]').val(data.shortUrl);
+          }
+          //Set up twitter text counter
+          if (!this.counter) {
+            this.counter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 114);
+          }
+          //Update counter. If using a short url from the web page itself, it could potentially be a different
+          //length than a bit.ly url so account for that.
+          //The + 1 is to account for a space before adding the URL to the tweet.
+          this.counter.updateLimit(data.shortUrl ? (140 - (data.shortUrl.length + 1)) : 114);
         }
       }),
       'facebook.com': new svcBase('Facebook', {

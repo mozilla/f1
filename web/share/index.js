@@ -40,7 +40,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     hash = location.href.split('#')[1],
     urlArgs, sendData, prop,
     options = {},
-    tabDom, bodyDom, clickBlockDom, twitterCounter, timer,
+    tabDom, bodyDom, clickBlockDom, timer,
     updateTab = true, tabSelection, accountCache, showNew,
     autoCompleteWidget, store = storage();
 
@@ -463,7 +463,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   $(function () {
     var thumbImgDom = $('img.thumb'),
-      twitterDom = $('#twitter'),
       picture,
       sessionRestore = store.sessionRestore,
       tabSelectionDom;
@@ -586,17 +585,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       sessionRestore = JSON.parse(sessionRestore);
     }
 
-    //Set up twitter text counter
-    if (!twitterCounter) {
-      twitterCounter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 114);
-    }
-
-    //Update counter. If using a short url from the web page itself, it could potentially be a different
-    //length than a bit.ly url so account for that.
-    //The + 1 is to account for a space before adding the URL to the tweet.
-    twitterCounter.updateLimit(options.shortUrl ? (140 - (options.shortUrl.length + 1)) : 114);
-
-
     //For the title in facebook/subject in email, set it to the page title
     if (options.title) {
       $('.title').text(options.title);
@@ -625,11 +613,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       .submit(function (evt) {
 
         var form = evt.target;
-
-        //If twitter and message is bigger than allowed, do not submit.
-        if (form.domain.value === 'twitter.com' && twitterCounter.isOver()) {
-          return false;
-        }
 
         //Make sure all form elements are trimmed and username exists.
         //Then collect the form values into the data object.
