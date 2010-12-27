@@ -29,219 +29,14 @@
 require.def("index",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
          "placeholder", "TextCounter", "AutoComplete", "dispatch", "accounts",
-         "storage",
+         "storage", "services",
          "jquery-ui-1.8.6.custom.min", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           placeholder,   TextCounter,   AutoComplete,   dispatch,   accounts,
-          storage) {
+          storage,   services) {
 
   var showStatus,
-    actions = {
-      'linkedin.com': {
-        name: 'LinkedIn',
-        tabName: 'linkedinTab',
-        selectionName: 'linkedin',
-        icon: 'i/linkedinIcon.png',
-        serviceUrl: 'http://linkedin.com',
-        revokeUrl: 'http://linkedin.com/settings/connections',
-        signOutUrl: 'http://linkedin.com/logout',
-        accountLink: function (account) {
-          return 'http://linkedin.com/' + account.username;
-        },
-        validate: function (sendData) {
-          return true;
-        },
-        getFormData: function () {
-          var message = $('#linkedin').find('textarea.message').val().trim() || '';
-          return {
-            message: message
-          };
-        },
-        restoreFormData: function (data) {
-          if (data.message) {
-            $('#linkedin').find('textarea.message').val(data.message);
-          }
-        }
-      },
-      'twitter.com': {
-        name: 'Twitter',
-        tabName: 'twitterTab',
-        selectionName: 'twitter',
-        icon: 'i/twitterIcon.png',
-        serviceUrl: 'http://twitter.com',
-        revokeUrl: 'http://twitter.com/settings/connections',
-        signOutUrl: 'http://twitter.com/logout',
-        accountLink: function (account) {
-          return 'http://twitter.com/' + account.username;
-        },
-        validate: function (sendData) {
-          return true;
-        },
-        getFormData: function () {
-          var message = $('#twitter').find('textarea.message').val().trim() || '';
-          return {
-            message: message
-          };
-        },
-        restoreFormData: function (data) {
-          if (data.message) {
-            $('#twitter').find('textarea.message').val(data.message);
-          }
-        }
-      },
-      'facebook.com': {
-        name: 'Facebook',
-        tabName: 'facebookTab',
-        selectionName: 'facebook',
-        icon: 'i/facebookIcon.png',
-        serviceUrl: 'http://facebook.com',
-        revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
-        signOutUrl: 'http://facebook.com',
-        accountLink: function (account) {
-          return 'http://www.facebook.com/profile.php?id=' + account.userid;
-        },
-        validate: function (sendData) {
-          return true;
-        },
-        getFormData: function () {
-          var message = $('#facebook').find('textarea.message').val().trim() || '';
-          return {
-            message: message
-          };
-        },
-        restoreFormData: function (data) {
-          if (data.message) {
-            $('#facebook').find('textarea.message').val(data.message);
-          }
-        }
-      },
-      'google.com': {
-        name: 'Gmail',
-        tabName: 'gmailTab',
-        selectionName: 'gmail',
-        icon: 'i/gmailIcon.png',
-        serviceUrl: 'https://mail.google.com',
-        revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
-        signOutUrl: 'http://google.com/preferences',
-        accountLink: function (account) {
-          return 'http://google.com/profiles/' + account.username;
-        },
-        validate: function (sendData) {
-          if (!sendData.to || !sendData.to.trim()) {
-            showStatus('statusToError');
-            return false;
-          }
-          return true;
-        },
-        getFormData: function () {
-          var dom = $('#gmail'),
-              to = dom.find('[name="to"]').val().trim() || '',
-              subject = dom.find('[name="subject"]').val().trim() || '',
-              message = dom.find('textarea.message').val().trim() || '';
-          return {
-            to: to,
-            subject: subject,
-            message: message
-          };
-        },
-        restoreFormData: function (data) {
-          var dom = $('#gmail');
-          if (data.to) {
-            dom.find('[name="to"]').val(data.to);
-          }
-          if (data.subject) {
-            dom.find('[name="subject"]').val(data.subject);
-          }
-          if (data.message) {
-            dom.find('textarea.message').val(data.message);
-          }
-        }
-      },
-      'googleapps.com': {
-        name: 'Google Apps',
-        tabName: 'googleAppsTab',
-        selectionName: 'googleapps',
-        icon: 'i/gmailIcon.png',
-        serviceUrl: 'https://mail.google.com',
-        revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
-        signOutUrl: 'http://google.com/preferences',
-        accountLink: function (account) {
-          return 'http://google.com/profiles/' + account.username;
-        },
-        validate: function (sendData) {
-          if (!sendData.to || !sendData.to.trim()) {
-            showStatus('statusToError');
-            return false;
-          }
-          return true;
-        },
-        getFormData: function () {
-          var dom = $('#googleapps'),
-              to = dom.find('[name="to"]').val().trim() || '',
-              subject = dom.find('[name="subject"]').val().trim() || '',
-              message = dom.find('textarea.message').val().trim() || '';
-          return {
-            to: to,
-            subject: subject,
-            message: message
-          };
-        },
-        restoreFormData: function (data) {
-          var dom = $('#googleapps');
-          if (data.to) {
-            dom.find('[name="to"]').val(data.to);
-          }
-          if (data.subject) {
-            dom.find('[name="subject"]').val(data.subject);
-          }
-          if (data.message) {
-            dom.find('textarea.message').val(data.message);
-          }
-        }
-      },
-      'yahoo.com': {
-        name: 'Yahoo!',
-        tabName: 'yahooTab',
-        selectionName: 'yahoo',
-        icon: 'i/yahooIcon.png',
-        serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
-        revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
-        signOutUrl: 'https://login.yahoo.com/config/login?logout=1',
-        accountLink: function (account) {
-          return 'http://profiles.yahoo.com/' + account.username;
-        },
-        validate: function (sendData) {
-          if (!sendData.to || !sendData.to.trim()) {
-            showStatus('statusToError');
-            return false;
-          }
-          return true;
-        },
-        getFormData: function () {
-          var dom = $('#yahoo'),
-              to = dom.find('[name="to"]').val().trim() || '',
-              subject = dom.find('[name="subject"]').val().trim() || '',
-              message = dom.find('textarea.message').val().trim() || '';
-          return {
-            to: to,
-            subject: subject,
-            message: message
-          };
-        },
-        restoreFormData: function (data) {
-          var dom = $('#yahoo');
-          if (data.to) {
-            dom.find('[name="to"]').val(data.to);
-          }
-          if (data.subject) {
-            dom.find('[name="subject"]').val(data.subject);
-          }
-          if (data.message) {
-            dom.find('textarea.message').val(data.message);
-          }
-        }
-      }
-    },
+    actions = services.domains,
     hash = location.href.split('#')[1],
     urlArgs, sendData, prop,
     options = {},
@@ -363,7 +158,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         } else if (json.error) {
           showStatus('statusError', json.error.message);
         } else {
-          store.lastSelection = actions[sendData.domain].selectionName;
+          store.lastSelection = actions[sendData.domain].type;
           showStatusShared();
         }
 
@@ -514,7 +309,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       if (accountCache && accountCache.length) {
         name = accountCache[0].accounts[0].domain;
         if (actions[name]) {
-          selectionName = actions[accountCache[0].accounts[0].domain].selectionName;
+          selectionName = actions[accountCache[0].accounts[0].domain].type;
           if (selectionName) {
             selection = '#' + selectionName;
           }
@@ -555,7 +350,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         if (name && actions[name]) {
           //Make sure to see if there is a match for last selection
           if (!hasLastSelectionMatch) {
-            hasLastSelectionMatch = actions[name].selectionName === store.lastSelection;
+            hasLastSelectionMatch = actions[name].type === store.lastSelection;
           }
           name = name.split('.');
           name = name[name.length - 2];

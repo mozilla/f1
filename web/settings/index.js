@@ -29,77 +29,20 @@
 require.def("index",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
          "dispatch", "storage", "accounts", "dotCompare", "blade/url",
-         "jquery.colorFade", "jquery.textOverflow"],
+         "services", "jquery.colorFade", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,
-          dispatch,   storage,   accounts,   dotCompare,   url) {
-
-  var domainList = [
-    'twitter.com', 'facebook.com', 'google.com' , 'googleapps.com', 'yahoo.com', 'linkedin.com'
-  ],
-  store = storage(),
+          dispatch,   storage,   accounts,   dotCompare,   url, services) {
+  var store = storage(),
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
-  options = url.queryToObject(location.href.split('#')[1] || '') || {},
-  showNew = options.show === 'new',
-  domains;
-
-  domains = {
-    'linkedin.com': {
-      type: 'linkedin',
-      name: 'LinkedIn',
-      serviceUrl: 'http://linkedin.com',
-      revokeUrl: 'http://linkedin.com/settings/connections',
-      signOutUrl: 'http://linkedin.com/logout'
-    },
-    'twitter.com': {
-      type: 'twitter',
-      name: 'Twitter',
-      serviceUrl: 'http://twitter.com',
-      revokeUrl: 'http://twitter.com/settings/connections',
-      signOutUrl: 'http://twitter.com/logout'
-    },
-    'facebook.com': {
-      type: 'facebook',
-      name: 'Facebook',
-      serviceUrl: 'http://facebook.com',
-      revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
-      signOutUrl: 'http://facebook.com'
-    },
-    'google.com': {
-      type: 'gmail',
-      name: 'Gmail',
-      serviceUrl: 'https://mail.google.com',
-      revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
-      signOutUrl: 'http://google.com/preferences',
-      accountLink: function (account) {
-        return 'http://google.com/profiles/' + account.username;
-      }
-    },
-    'googleapps.com': {
-      isNew: showNew,
-      type: 'googleApps',
-      name: 'Google Apps',
-      serviceUrl: 'https://mail.google.com',
-      revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
-      signOutUrl: 'http://google.com/preferences'
-    },
-    'yahoo.com': {
-      isNew: showNew,
-      type: 'yahoo',
-      name: 'Yahoo! Mail',
-      serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
-      revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
-      signOutUrl: 'https://login.yahoo.com/config/login?logout=1'
-    }
-  };
-
+  options = url.queryToObject(location.href.split('#')[1] || '') || {};
 
   jig.addFn({
     domainType: function (account) {
-      var domain = domains[account.accounts[0].domain];
+      var domain = services.domains[account.accounts[0].domain];
       return domain ? domain.type : '';
     },
     domainName: function (account) {
-      var domain = domains[account.accounts[0].domain];
+      var domain = services.domains[account.accounts[0].domain];
       return domain ? domain.name : '';
     }
   });
@@ -139,9 +82,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         //Weed out existing accounts for domains from available domainList,
         //and generate account UI
         json.forEach(function (item) {
-          var index = domainList.indexOf(item.accounts[0].domain);
+          var index = services.domainList.indexOf(item.accounts[0].domain);
           if (index !== -1) {
-            domainList.splice(index, 1);
+            services.domainList.splice(index, 1);
           }
           html += jig('#accountTemplate', item);
         });
@@ -155,10 +98,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         }
 
         html = '';
-        domainList.forEach(function (domain) {
-          var data = domains[domain];
+        services.domainList.forEach(function (domain) {
+          var data = services.domains[domain];
           data.domain = domain;
-          html += jig('#addTemplate', domains[domain]);
+          html += jig('#addTemplate', services.domains[domain]);
         });
         if (html) {
           $('#availableHeader').removeClass('hidden');
@@ -168,7 +111,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         }
 
         //Flash the new items.
-        if (showNew) {
+        if (services.showNew) {
           $(function () {
             $("li.newItem").animate({ backgroundColor: '#ffff99' }, 200)
               .delay(1000).animate({ backgroundColor: '#fafafa' }, 3000);
@@ -184,7 +127,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
 
     //If new items should be shown, refresh the location bar,
     //so further reloads of the page do not trigger showNew
-    if (showNew) {
+    if (services.showNew) {
       delete options.show;
       location.replace(location.href.split('#')[0] + '#' + url.objectToQuery(options));
     }
@@ -208,7 +151,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       .delegate('.auth', 'click', function (evt) {
         var node = evt.target,
           domain = node.getAttribute('data-domain'),
-          selectionName = domains[domain].type;
+          selectionName = services.domains[domain].type;
 
         oauth(domain, function (success) {
           if (success) {
@@ -227,7 +170,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         var buttonNode = evt.target,
             domain = buttonNode.getAttribute('data-domain'),
             userName = buttonNode.getAttribute('data-username'),
-            userId = buttonNode.getAttribute('data-userid');
+            userId = buttonNode.getAttribute('data-userid'),
+            svc = services.domains[domain];
 
         rdapi('account/signout', {
           data: {
@@ -244,10 +188,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         });
 
         //Remove any cached data
-        if (domain === 'google.com' && store.gmailContacts) {
-          delete store.gmailContacts;
-        }
-        if (domains[domain].selectionName === store.lastSelection) {
+        svc.clearCache(store);
+        if (svc.type === store.lastSelection) {
           delete store.lastSelection;
         }
 
