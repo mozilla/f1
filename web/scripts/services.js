@@ -32,233 +32,181 @@ require.def('services',
 function (rdapi,   url) {
 
   var options = url.queryToObject(location.href.split('#')[1] || '') || {},
-  showNew = options.show === 'new',
-  svcs = {
+  showNew = options.show === 'new';
+  
+  function svcBase(name, options) {
+    this.name = name;
+    this.type = name.replace(/\s/g,'').toLowerCase();
+    this.tabName = this.type+'Tab';
+    this.icon = 'i/'+this.type+'Icon.png';
+    
+    for (var i in options) {
+      this[i] = options[i];
+    }
+  }
+  svcBase.constructor = svcBase;
+  svcBase.prototype = {
+    validate: function (sendData) {
+      return true;
+    },
+    getFormData: function () {
+      var dom = $('#'+this.type);
+      return {
+        to: dom.find('[name="to"]').val().trim() || '',
+        subject: dom.find('[name="subject"]').val().trim() || '',
+        message: dom.find('textarea.message').val().trim() || '',
+        picture: dom.find('[name="picture"]').val().trim() || '',
+        canonicalUrl: dom.find('[name="link"]').val().trim() || '',
+        title: dom.find('[name="title"]').val().trim() || '',
+        description: dom.find('[name="description"]').val().trim() || ''
+      };
+    },
+    setFormData: function (data) {
+      var dom = $('#'+this.type);
+      if (data.to) {
+        dom.find('[name="to"]').val(data.to);
+      }
+      if (data.subject) {
+        dom.find('[name="subject"]').val(data.subject);
+      }
+      if (data.message) {
+        dom.find('textarea.message').val(data.message);
+      }
+      var picture = data.previews && data.previews[0];
+      if (picture) {
+        dom.find('[name="picture"]').val(picture);
+      }
+      if (data.canonicalUrl || data.url) {
+        dom.find('[name="link"]').val(data.canonicalUrl || data.url);
+      }
+      if (data.title) {
+        dom.find('[name="title"]').val(data.title);
+      }
+      if (data.description) {
+        dom.find('[name="description"]').val(data.description);
+      }
+    },
+    clearCache: function(store) {
+        
+    }
+  };
+  
+  /* common functionality for email based services */
+  function emailSvcBase() {
+    svcBase.constructor.apply(this, arguments);
+  };
+  emailSvcBase.prototype = svcBase.prototype;
+  emailSvcBase.constructor = emailSvcBase;
+  emailSvcBase.prototype.validate = function (sendData) {
+    if (!sendData.to || !sendData.to.trim()) {
+      showStatus('statusToError');
+      return false;
+    }
+    return true;
+  };
+  
+  var svcs = {
     showNew: showNew,
     domains: {
-      'linkedin.com': {
-        type: 'linkedin',
-        name: 'LinkedIn',
-        tabName: 'linkedinTab',
-        icon: 'i/linkedinIcon.png',
+      'linkedin.com': new svcBase('LinkedIn', {
         serviceUrl: 'http://linkedin.com',
         revokeUrl: 'http://linkedin.com/settings/connections',
         signOutUrl: 'http://linkedin.com/logout',
         accountLink: function (account) {
           return 'http://linkedin.com/' + account.username;
-        },
-        validate: function (sendData) {
-          return true;
-        },
-        getFormData: function () {
-          var message = $('#linkedin').find('textarea.message').val().trim() || '';
-          return {
-            message: message
-          };
-        },
-        restoreFormData: function (data) {
-          if (data.message) {
-            $('#linkedin').find('textarea.message').val(data.message);
-          }
-        },
-        clearCache: function(store) {
-            
         }
-      },
-      'twitter.com': {
-        name: 'Twitter',
-        tabName: 'twitterTab',
-        type: 'twitter',
-        icon: 'i/twitterIcon.png',
+      }),
+      'twitter.com': new svcBase('Twitter', {
         serviceUrl: 'http://twitter.com',
         revokeUrl: 'http://twitter.com/settings/connections',
         signOutUrl: 'http://twitter.com/logout',
         accountLink: function (account) {
           return 'http://twitter.com/' + account.username;
         },
-        validate: function (sendData) {
-          return true;
-        },
         getFormData: function () {
-          var message = $('#twitter').find('textarea.message').val().trim() || '';
+          var dom = $('#twitter');
           return {
-            message: message
+            message: dom.find('textarea.message').val().trim() || '',
+            canonicalUrl: dom.find('[name="link"]').val().trim() || ''
           };
         },
-        restoreFormData: function (data) {
+        setFormData: function (data) {
+          var dom = $('#twitter');
           if (data.message) {
-            $('#twitter').find('textarea.message').val(data.message);
+            dom.find('textarea.message').val(data.message);
           }
-        },
-        clearCache: function(store) {
-            
+          if (data.canonicalUrl || data.url) {
+            dom.find('[name="link"]').val(data.canonicalUrl || data.url);
+          }
         }
-      },
-      'facebook.com': {
-        name: 'Facebook',
-        tabName: 'facebookTab',
-        type: 'facebook',
-        icon: 'i/facebookIcon.png',
+      }),
+      'facebook.com': new svcBase('Facebook', {
         serviceUrl: 'http://facebook.com',
         revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
         signOutUrl: 'http://facebook.com',
         accountLink: function (account) {
           return 'http://www.facebook.com/profile.php?id=' + account.userid;
         },
-        validate: function (sendData) {
-          return true;
-        },
         getFormData: function () {
-          var message = $('#facebook').find('textarea.message').val().trim() || '';
+          var dom = $('#facebook');
           return {
-            message: message
+            message: dom.find('textarea.message').val().trim() || '',
+            picture: dom.find('[name="picture"]').val().trim() || '',
+            canonicalUrl: dom.find('[name="link"]').val().trim() || '',
+            title: dom.find('[name="name"]').val().trim() || '',
+            description: dom.find('[name="caption"]').val().trim() || ''
           };
         },
-        restoreFormData: function (data) {
+        setFormData: function (data) {
+          var dom = $('#facebook');
           if (data.message) {
-            $('#facebook').find('textarea.message').val(data.message);
+            dom.find('textarea.message').val(data.message);
           }
-        },
-        clearCache: function(store) {
-            
+          var picture = data.previews && data.previews[0];
+          if (picture) {
+            dom.find('[name="picture"]').val(picture);
+          }
+          if (data.canonicalUrl || data.url) {
+            dom.find('[name="link"]').val(data.canonicalUrl || data.url);
+          }
+          if (data.title) {
+            dom.find('[name="name"]').val(data.title);
+          }
+          if (data.description) {
+            dom.find('[name="caption"]').val(data.description);
+          }
         }
-      },
-      'google.com': {
-        name: 'Gmail',
-        tabName: 'gmailTab',
-        type: 'gmail',
-        icon: 'i/gmailIcon.png',
+      }),
+      'google.com': new emailSvcBase('Gmail', {
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
         signOutUrl: 'http://google.com/preferences',
         accountLink: function (account) {
           return 'http://google.com/profiles/' + account.username;
-        },
-        validate: function (sendData) {
-          if (!sendData.to || !sendData.to.trim()) {
-            showStatus('statusToError');
-            return false;
-          }
-          return true;
-        },
-        getFormData: function () {
-          var dom = $('#gmail'),
-              to = dom.find('[name="to"]').val().trim() || '',
-              subject = dom.find('[name="subject"]').val().trim() || '',
-              message = dom.find('textarea.message').val().trim() || '';
-          return {
-            to: to,
-            subject: subject,
-            message: message
-          };
-        },
-        restoreFormData: function (data) {
-          var dom = $('#gmail');
-          if (data.to) {
-            dom.find('[name="to"]').val(data.to);
-          }
-          if (data.subject) {
-            dom.find('[name="subject"]').val(data.subject);
-          }
-          if (data.message) {
-            dom.find('textarea.message').val(data.message);
-          }
         },
         clearCache: function(store) {
           if (store.gmailContacts)
             delete store.gmailContacts;
         }
-      },
-      'googleapps.com': {
-        name: 'Google Apps',
-        tabName: 'googleAppsTab',
-        type: 'googleapps',
+      }),
+      'googleapps.com': new emailSvcBase('Google Apps', {
         icon: 'i/gmailIcon.png',
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
         signOutUrl: 'http://google.com/preferences',
         accountLink: function (account) {
           return 'http://google.com/profiles/' + account.username;
-        },
-        validate: function (sendData) {
-          if (!sendData.to || !sendData.to.trim()) {
-            showStatus('statusToError');
-            return false;
-          }
-          return true;
-        },
-        getFormData: function () {
-          var dom = $('#googleapps'),
-              to = dom.find('[name="to"]').val().trim() || '',
-              subject = dom.find('[name="subject"]').val().trim() || '',
-              message = dom.find('textarea.message').val().trim() || '';
-          return {
-            to: to,
-            subject: subject,
-            message: message
-          };
-        },
-        restoreFormData: function (data) {
-          var dom = $('#googleapps');
-          if (data.to) {
-            dom.find('[name="to"]').val(data.to);
-          }
-          if (data.subject) {
-            dom.find('[name="subject"]').val(data.subject);
-          }
-          if (data.message) {
-            dom.find('textarea.message').val(data.message);
-          }
-        },
-        clearCache: function(store) {
-            
         }
-      },
-      'yahoo.com': {
+      }),
+      'yahoo.com': new emailSvcBase('Yahoo', {
         name: 'Yahoo!',
-        tabName: 'yahooTab',
-        type: 'yahoo',
-        icon: 'i/yahooIcon.png',
         serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
         revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
         signOutUrl: 'https://login.yahoo.com/config/login?logout=1',
         accountLink: function (account) {
           return 'http://profiles.yahoo.com/' + account.username;
-        },
-        validate: function (sendData) {
-          if (!sendData.to || !sendData.to.trim()) {
-            showStatus('statusToError');
-            return false;
-          }
-          return true;
-        },
-        getFormData: function () {
-          var dom = $('#yahoo'),
-              to = dom.find('[name="to"]').val().trim() || '',
-              subject = dom.find('[name="subject"]').val().trim() || '',
-              message = dom.find('textarea.message').val().trim() || '';
-          return {
-            to: to,
-            subject: subject,
-            message: message
-          };
-        },
-        restoreFormData: function (data) {
-          var dom = $('#yahoo');
-          if (data.to) {
-            dom.find('[name="to"]').val(data.to);
-          }
-          if (data.subject) {
-            dom.find('[name="subject"]').val(data.subject);
-          }
-          if (data.message) {
-            dom.find('textarea.message').val(data.message);
-          }
-        },
-        clearCache: function(store) {
-            
         }
-      }
+      })
     },
     domainList: []
   };

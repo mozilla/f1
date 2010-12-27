@@ -398,7 +398,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
 
       if (sessionRestore) {
-        actions[sessionRestore.domain].restoreFormData(sessionRestore.formData);
+        actions[sessionRestore.domain].setFormData(sessionRestore.formData);
         //Make sure placeholder text is updated.
         placeholder();
       }
@@ -581,42 +581,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     );
 
-    //Set up hidden form fields for facebook
-    //TODO: try sending data urls via options.thumbnail if no
-    //previews?
-    picture = options.previews && options.previews[0];
-    if (picture) {
-      facebookDom.find('[name="picture"]').val(picture);
-      linkedinDom.find('[name="picture"]').val(picture);
-    }
-
-    //We default to using the canonical URL instead of the URL shown in the address
-    //bar as this should be the better URL to share.
-    //TODO: We might want to do some minimal checking of this URL in a future
-    //UI so we warn people of a major difference and allow them to choose the URL
-    if (options.canonicalUrl || options.url) {
-      twitterDom.find('[name="link"]').val(options.canonicalUrl || options.url);
-      facebookDom.find('[name="link"]').val(options.canonicalUrl || options.url);
-      gmailDom.find('[name="link"]').val(options.canonicalUrl || options.url);
-      yahooDom.find('[name="link"]').val(options.canonicalUrl || options.url);
-      linkedinDom.find('[name="link"]').val(options.canonicalUrl || options.url);
-      appsDom.find('[name="link"]').val(options.canonicalUrl || options.url);
-    }
-
-    if (options.title) {
-      facebookDom.find('[name="name"]').val(options.title);
-      gmailDom.find('[name="title"]').val(options.title);
-      yahooDom.find('[name="title"]').val(options.title);
-      linkedinDom.find('[name="title"]').val(options.title);
-      appsDom.find('[name="title"]').val(options.title);
-    }
-
-    if (options.description) {
-      facebookDom.find('[name="caption"]').val(options.description);
-      gmailDom.find('[name="description"]').val(options.description);
-      yahooDom.find('[name="description"]').val(options.description);
-      linkedinDom.find('[name="description"]').val(options.description);
-      appsDom.find('[name="description"]').val(options.description);
+    for (var svc in services.domains) {
+      services.domains[svc].setFormData(options);
     }
 
     //If the message containder doesn't want URLs then respect that.
