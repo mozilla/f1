@@ -309,7 +309,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       if (accountCache && accountCache.length) {
         name = accountCache[0].accounts[0].domain;
         if (actions[name]) {
-          selectionName = actions[accountCache[0].accounts[0].domain].type;
+          selectionName = actions[name].type;
           if (selectionName) {
             selection = '#' + selectionName;
           }
@@ -372,16 +372,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       delete store.accountAdded;
     }
 
-    if (userAccounts.twitter) {
-      updateAccountDisplay('twitter', userAccounts.twitter);
-    }
-
-    if (userAccounts.facebook) {
-      updateAccountDisplay('facebook', userAccounts.facebook);
+    for (var act in userAccounts) {
+      updateAccountDisplay(act, userAccounts[act]);
     }
 
     if (userAccounts.gmail) {
-      updateAccountDisplay('gmail', userAccounts.gmail);
       //Make sure we have contacts for auto-complete
       storeGmailContacts(userAccounts.gmail);
     } else {
@@ -390,22 +385,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         delete store.gmailContacts;
         updateAutoComplete();
       }
-    }
-
-    if (userAccounts.googleapps) {
-      updateAccountDisplay('googleapps', userAccounts.googleapps);
-      //Make sure we have contacts for auto-complete
-      //storeGmailContacts(userAccounts.googleApps);
-    }
-
-    if (userAccounts.yahoo) {
-      updateAccountDisplay('yahoo', userAccounts.yahoo);
-      //Make sure we have contacts for auto-complete
-      //storeYahooContacts(userAccounts.yahoo);
-    }
-
-    if (userAccounts.linkedin) {
-      updateAccountDisplay('linkedin', userAccounts.linkedin);
     }
 
     //Session restore, do after form setting above.
