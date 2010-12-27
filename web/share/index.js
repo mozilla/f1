@@ -93,6 +93,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   function showStatusShared() {
+    // if no sendData, we're in debug mode, default to twitter to show the
+    // panel for debugging
     var sendDomain = (sendData && sendData.domain) || 'twitter.com',
         siteName = options.siteName,
         url = options.url || "",
@@ -631,12 +633,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           }
         });
 
-        if (sendData.domain === 'twitter.com') {
-          if (options.shortUrl) {
-            sendData.shorturl = options.shortUrl;
-          } else {
-            sendData.shorten = true;
-          }
+        if (options.shortUrl) {
+          sendData.shorturl = options.shortUrl;
+        } else if (services.domains[sendData.domain].shorten) {
+          sendData.shorten = true;
         }
 
         sendMessage();

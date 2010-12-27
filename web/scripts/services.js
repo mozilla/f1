@@ -39,6 +39,7 @@ function (rdapi,   url,         TextCounter) {
     this.type = name.replace(/\s/g,'').toLowerCase();
     this.tabName = this.type+'Tab';
     this.icon = 'i/'+this.type+'Icon.png';
+    this.shorten = false;
     
     for (var i in options) {
       this[i] = options[i];
@@ -118,6 +119,7 @@ function (rdapi,   url,         TextCounter) {
       }),
       'twitter.com': new svcBase('Twitter', {
         counter: null,
+        shorten: true,
         serviceUrl: 'http://twitter.com',
         revokeUrl: 'http://twitter.com/settings/connections',
         signOutUrl: 'http://twitter.com/logout',
