@@ -44,6 +44,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     domainName: function (account) {
       var domain = services.domains[account.accounts[0].domain];
       return domain ? domain.name : '';
+    },
+    accountName: function (displayName, account) {
+      return account.username && account.username != displayName ? displayName+", "+account.username : displayName;
     }
   });
 

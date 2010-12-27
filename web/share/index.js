@@ -286,6 +286,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         photo = account.photos && account.photos[0] && account.photos[0].value,
         serviceDom = $('#' + service);
 
+      // XXX for email services, we should show the email account, but we
+      // cannot rely on userid being a 'pretty' name we can display
+      var username = svcAccount.username;
+      if (username && username != name) {
+        name = name + " <" + username + ">";
+      }
+
       //Add the tab as an option
       $('.' + service + 'Tab').removeClass('hidden');
 
