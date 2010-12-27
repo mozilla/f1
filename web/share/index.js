@@ -42,7 +42,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     options = {},
     tabDom, bodyDom, clickBlockDom, twitterCounter, timer,
     updateTab = true, tabSelection, accountCache, showNew,
-    gmailDom, yahooDom, linkedinDom, autoCompleteWidget, store = storage();
+    autoCompleteWidget, store = storage();
 
   jig.addFn({
     profilePic: function (photos) {
@@ -189,7 +189,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
    * store data.
    */
   function updateAutoComplete() {
-    var toNode = gmailDom.find('[name="to"]')[0],
+    var toNode = $('#gmail').find('[name="to"]')[0],
         data = store.gmailContacts;
 
     if (data) {
@@ -463,18 +463,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   $(function () {
     var thumbImgDom = $('img.thumb'),
-      facebookDom = $('#facebook'),
       twitterDom = $('#twitter'),
-      appsDom = $('#googleapps'),
       picture,
       sessionRestore = store.sessionRestore,
       tabSelectionDom;
 
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
-    gmailDom = $('#gmail');
-    yahooDom = $('#yahoo');
-    linkedinDom = $('#linkedin');
 
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
