@@ -27,7 +27,7 @@ const Cu = Components.utils;
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function _() {
-  return; // comment out for verbose debugging
+  //return; // comment out for verbose debugging
   let msg = Array.join(arguments, " ");
   dump(msg + "\n");
   Cu.reportError(msg);
@@ -35,7 +35,6 @@ function _() {
 _("?loaded");
 
 __defineGetter__("acDataStorage", function() {
-  delete this.ffshareAutoCompleteData;
   Cu.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
   return ffshareAutoCompleteData;
 });
@@ -64,12 +63,15 @@ FFShareAutoComplete.prototype = {
     return false;
   },
 
-  findEmails: function findEmails(query) {
+  findEmails: function findEmails(query, field) {
     _("findEmails", Array.slice(arguments));
-
     let result = Cc["@mozilla.org/autocomplete/simple-result;1"].
                    createInstance(Ci.nsIAutoCompleteSimpleResult);
     result.setSearchString(query);
+
+    let datadomain = field.getAttribute('autocompletestore');
+    if (!datadomain)
+      return result;
 
     //convert the query to only be for things after the comma.
     var parts = query.split(','), previousMatch = '';
@@ -83,13 +85,13 @@ FFShareAutoComplete.prototype = {
 
 _("query is now: [" + query + "]");
 _("previousMatch is now: " + previousMatch);
-
-    let data = acDataStorage.get();
-
+_("data domain is: "+datadomain);
+    let data = acDataStorage.get(datadomain);
+_("matching against "+data.length+" entries");
     data.forEach(function (item) {
       var displayNameLower = item.displayName.toLowerCase(),
           emailLower = item.email.toLowerCase();
-
+_("match? "+displayNameLower+" "+emailLower);
       if (displayNameLower.indexOf(query) !== -1 || emailLower.indexOf(query) !== -1) {
         result.appendMatch(previousMatch + item.email + ', ',
                            (displayNameLower === emailLower ? item.email : item.displayName + '<' + item.email + '>'), null, 'ffshare');
@@ -106,7 +108,7 @@ _("previousMatch is now: " + previousMatch);
     _("FFShareAutoComplete search", Array.slice(arguments));
 
     if (this.isShareType(name, field))
-      return this.findEmails(query);
+      return this.findEmails(query, field);
     return null;
   }
 };

@@ -132,26 +132,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       var flags = Components.interfaces.nsIWebProgressListener;
-      if (aStateFlags & flags.STATE_IS_WINDOW &&
-                 aStateFlags & flags.STATE_STOP) {
-        var status;
-
-        try {
-          status = aRequest.nsIHttpChannel.responseStatus;
-        } catch (e) {
-          //Could be just an invalid URL or not an http thing. Need to be sure to not endlessly
-          //load error page if it is already loaded.
-          if (this.tabFrame.shareFrame.contentWindow.location.href !== ffshare.errorPage) {
-            status = 1000;
-          } else {
-            status = 200;
-          }
-        }
-
-        if (status < 200 || status > 399) {
-          this.tabFrame.shareFrame.contentWindow.location = ffshare.errorPage;
-        } else {
+      if (aStateFlags & flags.STATE_IS_DOCUMENT &&
+                 (aStateFlags & flags.STATE_START)) {
+          dump("YES! adding message listener now!\n");
           this.tabFrame.shareFrame.contentWindow.wrappedJSObject.addEventListener("message", fn.bind(this, function (evt) {
+            dump("message received\n");
             //Make sure we only act on messages from the page we expect.
             if (ffshare.prefs.share_url.indexOf(evt.origin) === 0) {
               //Mesages have the following properties:
@@ -176,6 +161,26 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
               }
             }
           }), false);
+      } else
+      if (aStateFlags & flags.STATE_IS_DOCUMENT &&
+                 aStateFlags & flags.STATE_STOP) {
+        var status;
+
+        try {
+          status = aRequest.nsIHttpChannel.responseStatus;
+        } catch (e) {
+          //Could be just an invalid URL or not an http thing. Need to be sure to not endlessly
+          //load error page if it is already loaded.
+          if (this.tabFrame.shareFrame.contentWindow.location.href !== ffshare.errorPage) {
+            status = 1000;
+          } else {
+            status = 200;
+          }
+        }
+
+        if (status < 200 || status > 399) {
+          this.tabFrame.shareFrame.contentWindow.location = ffshare.errorPage;
+        } else {
         }
       }
     },
@@ -184,7 +189,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
     onSecurityChange: function (aWebProgress, aRequest, aState) {},
     onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {
-        //log("onStatus Change: " + aRequest.nsIHttpChannel.responseStatus + ": " + aRequest.loadFlags + ", " + aRequest + ", " + aMessage);
+        //dump("onStatus Change: " + aRequest.nsIHttpChannel.responseStatus + ": " + aRequest.loadFlags + ", " + aRequest + ", " + aMessage+"\n");
     }
   };
 
@@ -265,7 +270,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var shareFrameProgress = this.shareFrame.webProgress;
 
       this.stateProgressListener = new StateProgressListener(this);
-      shareFrameProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
+      this.shareFrame.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
 
       this.navProgressListener = new NavProgressListener(this);
       gBrowser.getBrowserForTab(this.tab).webProgress.addProgressListener(this.navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
@@ -304,7 +309,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       if (iframeNode === null) {
         //Create the iframe.
-        iframeNode = document.createElement("browser");
+        this.shareFrame = iframeNode = document.createElement("browser");
 
         //Allow the rich autocomplete, something built into gecko.
         iframeNode.setAttribute('autocompletepopup', 'PopupAutoCompleteRichResult');
@@ -342,8 +347,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                   '#options=' + encodeURIComponent(JSON.stringify(options));
 
         iframeNode.setAttribute("type", "content");
-        iframeNode.setAttribute("src", url);
         notificationBox.insertBefore(iframeNode, notificationBox.firstChild);
+        this.registerListener();
+        iframeNode.setAttribute("src", url);
       }
       return (this.shareFrame = iframeNode);
     },
@@ -382,7 +388,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       this.visible = true;
 
-      this.registerListener();
+      //this.registerListener();
     },
 
     /**
@@ -631,6 +637,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     autoCompleteData: function (data) {
+      dump("ffshare got data\n");
+      dump("   autoCompleteData for "+data.domain+"\n");
       ffshareAutoCompleteData.set(data);
     }
   };
