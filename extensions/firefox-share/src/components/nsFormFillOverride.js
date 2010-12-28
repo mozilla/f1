@@ -27,7 +27,7 @@ const Cu = Components.utils;
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function _() {
-  //return; // comment out for verbose debugging
+  return; // comment out for verbose debugging
   let msg = Array.join(arguments, " ");
   dump(msg + "\n");
   Cu.reportError(msg);
@@ -91,7 +91,6 @@ _("matching against "+data.length+" entries");
     data.forEach(function (item) {
       var displayNameLower = item.displayName.toLowerCase(),
           emailLower = item.email.toLowerCase();
-_("match? "+displayNameLower+" "+emailLower);
       if (displayNameLower.indexOf(query) !== -1 || emailLower.indexOf(query) !== -1) {
         result.appendMatch(previousMatch + item.email + ', ',
                            (displayNameLower === emailLower ? item.email : item.displayName + '<' + item.email + '>'), null, 'ffshare');

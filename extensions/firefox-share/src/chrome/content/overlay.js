@@ -132,37 +132,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       var flags = Components.interfaces.nsIWebProgressListener;
-      if (aStateFlags & flags.STATE_IS_DOCUMENT &&
-                 (aStateFlags & flags.STATE_START)) {
-          dump("YES! adding message listener now!\n");
-          this.tabFrame.shareFrame.contentWindow.wrappedJSObject.addEventListener("message", fn.bind(this, function (evt) {
-            dump("message received\n");
-            //Make sure we only act on messages from the page we expect.
-            if (ffshare.prefs.share_url.indexOf(evt.origin) === 0) {
-              //Mesages have the following properties:
-              //name: the string name of the messsage
-              //data: the JSON structure of data for the message.
-              var message = evt.data, skip = false, topic, data;
-              try {
-                //Only some messages are valid JSON, only care about the ones
-                //that are.
-                message = JSON.parse(message);
-              } catch (e) {
-                skip = true;
-              }
-
-              if (!skip) {
-                topic = message.topic;
-                data = message.data;
-
-                if (topic && this.tabFrame[topic]) {
-                  this.tabFrame[topic](data);
-                }
-              }
-            }
-          }), false);
-      } else
-      if (aStateFlags & flags.STATE_IS_DOCUMENT &&
+      if (aStateFlags & flags.STATE_IS_WINDOW &&
                  aStateFlags & flags.STATE_STOP) {
         var status;
 
@@ -180,7 +150,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
         if (status < 200 || status > 399) {
           this.tabFrame.shareFrame.contentWindow.location = ffshare.errorPage;
-        } else {
         }
       }
     },
@@ -270,10 +239,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var shareFrameProgress = this.shareFrame.webProgress;
 
       this.stateProgressListener = new StateProgressListener(this);
-      this.shareFrame.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
+      shareFrameProgress.addProgressListener(this.stateProgressListener,
+                                          Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
 
       this.navProgressListener = new NavProgressListener(this);
-      gBrowser.getBrowserForTab(this.tab).webProgress.addProgressListener(this.navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+      gBrowser.getBrowserForTab(this.tab).webProgress.
+               addProgressListener(this.navProgressListener,
+                                   Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+
+      var obs = Components.classes["@mozilla.org/observer-service;1"].
+                            getService(Components.interfaces.nsIObserverService);
+      obs.addObserver(this, 'content-document-global-created', false);
     },
 
     unregisterListener: function (listener) {
@@ -283,8 +259,52 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(this.navProgressListener);
       this.navProgressListener = null;
+      
+      var obs = Components.classes["@mozilla.org/observer-service;1"].
+                            getService(Components.interfaces.nsIObserverService);
+      obs.removeObserver(this, 'content-document-global-created');
     },
 
+    observe: function(aSubject, aTopic, aData) {
+      if (!aSubject.location.href) return;
+      // is this window a child of OUR XUL window?
+      var mainWindow = aSubject.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                     .getInterface(Components.interfaces.nsIWebNavigation)
+                     .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+                     .rootTreeItem
+                     .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+                     .getInterface(Components.interfaces.nsIDOMWindow); 
+      if (mainWindow != window) {
+        return;
+      }
+      // listen for messages now
+      this.shareFrame.contentWindow.wrappedJSObject.addEventListener("message", fn.bind(this, function (evt) {
+        //Make sure we only act on messages from the page we expect.
+        if (ffshare.prefs.share_url.indexOf(evt.origin) === 0) {
+          //Mesages have the following properties:
+          //name: the string name of the messsage
+          //data: the JSON structure of data for the message.
+          var message = evt.data, skip = false, topic, data;
+          try {
+            //Only some messages are valid JSON, only care about the ones
+            //that are.
+            message = JSON.parse(message);
+          } catch (e) {
+            skip = true;
+          }
+
+          if (!skip) {
+            topic = message.topic;
+            data = message.data;
+
+            if (topic && this[topic]) {
+              this[topic](data);
+            }
+          }
+        }
+      }), false);
+    },
+    
     //Fired when a pref changes from content space. the pref object has
     //a name and value.
     prefChanged: function (pref) {
@@ -387,8 +407,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       */
 
       this.visible = true;
-
-      //this.registerListener();
     },
 
     /**
@@ -637,8 +655,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     autoCompleteData: function (data) {
-      dump("ffshare got data\n");
-      dump("   autoCompleteData for "+data.domain+"\n");
       ffshareAutoCompleteData.set(data);
     }
   };

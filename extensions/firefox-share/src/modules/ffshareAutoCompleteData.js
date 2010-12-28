@@ -27,7 +27,7 @@ let EXPORTED_SYMBOLS = ["ffshareAutoCompleteData"];
 let data = {};
 
 function _() {
-  //return; // comment out for verbose debugging
+  return; // comment out for verbose debugging
   let msg = Array.join(arguments, " ");
   dump(msg + "\n");
   Cu.reportError(msg);

@@ -191,15 +191,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
    * store data.
    */
   function updateAutoComplete(serviceName) {
-    try {
     var svc = services.domains[serviceName];
-    dump("update autocomplete for "+svc.type+"\n");
     var toNode = $('#'+svc.type).find('[name="to"]')[0],
         contacts = svc.getContacts(store);
     if (!contacts) {
         contacts = [];
     }
-    dump("   updating "+contacts.length+" contacts to "+toNode+"\n");
 
     if (!svc.autoCompleteWidget) {
       svc.autoCompleteWidget = new AutoComplete(toNode);
@@ -209,10 +206,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         contacts: contacts
     }
     dispatch.pub('autoCompleteData', acdata);
-    dump("   dispatched "+acdata.domain+" contacts\n");
-    } catch(e) {
-        dump(e+"\n");
-    }
   }
 
   /**
