@@ -230,15 +230,24 @@ class api():
 
           return result, error
 
+     # feed supports message, picture, link, name, caption, description, source
+     # map our stuff to theirs
+     post_map = {
+          'link': 'link',
+          'title': 'name',
+          'description': 'description',
+          'picture': 'picture',
+          'caption': 'caption',
+          'source': 'source'
+     }
      def sendmessage(self, message, options={}):
           url = config.get("oauth.facebook.com.feed", "https://graph.facebook.com/me/feed")
           body = {
                "message": message
           }
-
-          for arg in ['link', 'name', 'description', 'picture']:
-               if arg in options:
-                    body[arg] = options[arg]
+          for ours, yours in self.post_map.items():
+               if ours in options:
+                    body[yours] = options[ours]
 
           return self.rawcall(url, body)
 
