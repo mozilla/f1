@@ -23,7 +23,7 @@ def extract_li_data(user):
         'displayName': "%s %s" % (user.get('firstName'), user.get('lastName'),),
     }
     if user.get('publicProfileUrl', False):
-        poco['urls'] = [ { 'type': u'profile', "primary" : False, "value" : user['publicProfileUrl']['url'] }]
+        poco['urls'] = [ { 'type': u'profile', "primary" : False, "value" : user['publicProfileUrl'] }]
     if user.get('siteStandardProfileRequest', False):
         poco['urls'] = [ { 'type': u'profile', "primary" : True, "value" : user['siteStandardProfileRequest']['url'] }]
     if user.get('pictureUrl', False):
