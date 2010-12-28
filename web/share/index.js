@@ -449,11 +449,21 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   $(function () {
-    var thumbImgDom = $('img.thumb'),
-      picture,
+    var thumbImgDom, picture,
       sessionRestore = store.sessionRestore,
-      tabSelectionDom;
+      tabSelectionDom, tabhtml='', panelhtml='';
 
+    // first thing, fill in the supported services
+    services.domainList.forEach(function (domain) {
+      var data = services.domains[domain];
+      data.domain = domain;
+      tabhtml += jig('#tabsTemplate', services.domains[domain]);
+      panelhtml += jig('#panelsTemplate', services.domains[domain]);
+    });
+    $('.nav .debugTab').before(tabhtml);
+    $('#tabs #debug').before(panelhtml);
+
+    thumbImgDom = $('img.thumb');
     bodyDom = $('body');
     clickBlockDom = $('#clickBlock');
 

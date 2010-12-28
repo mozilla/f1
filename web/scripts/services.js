@@ -35,12 +35,17 @@ function (rdapi,   url,         TextCounter) {
   showNew = options.show === 'new';
   
   function svcBase(name, options) {
+    if (!name) return;
     this.name = name;
     this.type = name.replace(/\s/g,'').toLowerCase();
     this.tabName = this.type+'Tab';
     this.icon = 'i/'+this.type+'Icon.png';
     this.shorten = false;
     this.autoCompleteWidget = null;
+    
+    // set options
+    this.supportsDirect = false;
+    this.supportsCounter = false;
     
     for (var i in options) {
       this[i] = options[i];
@@ -119,8 +124,9 @@ function (rdapi,   url,         TextCounter) {
   /* common functionality for email based services */
   function emailSvcBase() {
     svcBase.constructor.apply(this, arguments);
+    this.supportsDirect = true;
   };
-  emailSvcBase.prototype = svcBase.prototype;
+  emailSvcBase.prototype = new svcBase();
   emailSvcBase.constructor = emailSvcBase;
   emailSvcBase.prototype.validate = function (sendData) {
     if (!sendData.to || !sendData.to.trim()) {
@@ -147,15 +153,8 @@ function (rdapi,   url,         TextCounter) {
   var svcs = {
     showNew: showNew,
     domains: {
-      'linkedin.com': new svcBase('LinkedIn', {
-        serviceUrl: 'http://linkedin.com',
-        revokeUrl: 'http://linkedin.com/settings/connections',
-        signOutUrl: 'http://linkedin.com/logout',
-        accountLink: function (account) {
-          return 'http://linkedin.com/' + account.username;
-        }
-      }),
       'twitter.com': new svcBase('Twitter', {
+        supportsCounter: true,
         counter: null,
         shorten: true,
         serviceUrl: 'http://twitter.com',
@@ -202,35 +201,6 @@ function (rdapi,   url,         TextCounter) {
         signOutUrl: 'http://facebook.com',
         accountLink: function (account) {
           return 'http://www.facebook.com/profile.php?id=' + account.userid;
-        },
-        getFormData: function () {
-          var dom = $('#facebook');
-          return {
-            message: dom.find('textarea.message').val().trim() || '',
-            picture: dom.find('[name="picture"]').val().trim() || '',
-            canonicalUrl: dom.find('[name="link"]').val().trim() || '',
-            title: dom.find('[name="name"]').val().trim() || '',
-            description: dom.find('[name="caption"]').val().trim() || ''
-          };
-        },
-        setFormData: function (data) {
-          var dom = $('#facebook');
-          if (data.message) {
-            dom.find('textarea.message').val(data.message);
-          }
-          var picture = data.previews && data.previews[0];
-          if (picture) {
-            dom.find('[name="picture"]').val(picture);
-          }
-          if (data.canonicalUrl || data.url) {
-            dom.find('[name="link"]').val(data.canonicalUrl || data.url);
-          }
-          if (data.title) {
-            dom.find('[name="name"]').val(data.title);
-          }
-          if (data.description) {
-            dom.find('[name="caption"]').val(data.description);
-          }
         }
       }),
       'google.com': new emailSvcBase('Gmail', {
@@ -261,6 +231,14 @@ function (rdapi,   url,         TextCounter) {
         signOutUrl: 'https://login.yahoo.com/config/login?logout=1',
         accountLink: function (account) {
           return 'http://profiles.yahoo.com/' + account.username;
+        }
+      }),
+      'linkedin.com': new svcBase('LinkedIn', {
+        serviceUrl: 'http://linkedin.com',
+        revokeUrl: 'http://linkedin.com/settings/connections',
+        signOutUrl: 'http://linkedin.com/logout',
+        accountLink: function (account) {
+          return 'http://linkedin.com/' + account.username;
         }
       })
     },
