@@ -234,7 +234,7 @@ ul.nav li a.icon.yahoo {
   background-position: center -128px;
 }
 
-ul.nav li a.icon.googleApps {
+ul.nav li a.icon.googleapps {
   background-position: center -161px;
 }
 
@@ -654,7 +654,7 @@ ul.ui-autocomplete li.ui-menu-item a.ui-state-hover {
   background-repeat: no-repeat;
 }
 
-#settings ul li h1 .googleAppsIcon {
+#settings ul li h1 .googleappsIcon {
   background-image: url("i/sprite.png");
   background-position: left -165px;
   background-repeat: no-repeat;
