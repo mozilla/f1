@@ -233,7 +233,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
             data = svc.getFormattedContacts(entries);
 
-            svc.setContacts(data);
+            svc.setContacts(store, data);
             updateAutoComplete(svcAccount.domain);
           }
         }
