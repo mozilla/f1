@@ -40,6 +40,7 @@ function (rdapi,   url,         TextCounter) {
     this.tabName = this.type+'Tab';
     this.icon = 'i/'+this.type+'Icon.png';
     this.shorten = false;
+    this.autoCompleteWidget = null;
     
     for (var i in options) {
       this[i] = options[i];
@@ -88,7 +89,30 @@ function (rdapi,   url,         TextCounter) {
       }
     },
     clearCache: function(store) {
-        
+      delete store[this.type+'Contacts'];
+    },
+    getContacts: function(store) {
+      if (store[this.type+'Contacts'])
+        return JSON.parse(store[this.type+'Contacts']);
+      return null;
+    },
+    setContacts: function(store, contacts) {
+      store[this.type+'Contacts'] = JSON.stringify(contacts);
+    },
+    getFormattedContacts: function(entries) {
+      var data = [];
+      entries.forEach(function (entry) {
+        if (entry.accounts && entry.accounts.length) {
+          entry.accounts.forEach(function (account) {
+            account.displayName = entry.displayName;
+      // XXX form autocomplete does not really work with this, it wants an
+      // email field
+            account.email = account.value;
+            data.push(account);
+          });
+        }
+      });
+      return data;
     }
   };
   
@@ -105,6 +129,20 @@ function (rdapi,   url,         TextCounter) {
     }
     return true;
   };
+  emailSvcBase.prototype.getFormattedContacts = function(entries) {
+    var data = [];
+    entries.forEach(function (entry) {
+      if (entry.emails && entry.emails.length) {
+        entry.emails.forEach(function (email) {
+          data.push({
+            displayName: entry.displayName,
+            email: email.value
+          });
+        });
+      }
+    });
+    return data;
+  }
   
   var svcs = {
     showNew: showNew,

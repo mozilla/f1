@@ -42,7 +42,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     options = {},
     tabDom, bodyDom, clickBlockDom, timer,
     updateTab = true, tabSelection, accountCache, showNew,
-    autoCompleteWidget, store = storage();
+    store = storage();
 
   jig.addFn({
     profilePic: function (photos) {
@@ -190,31 +190,40 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
    * Makes sure there is an autocomplete set up with the latest
    * store data.
    */
-  function updateAutoComplete() {
-    var toNode = $('#gmail').find('[name="to"]')[0],
-        data = store.gmailContacts;
-
-    if (data) {
-      data = JSON.parse(data);
-    } else {
-      data = [];
+  function updateAutoComplete(serviceName) {
+    try {
+    var svc = services.domains[serviceName];
+    dump("update autocomplete for "+svc.type+"\n");
+    var toNode = $('#'+svc.type).find('[name="to"]')[0],
+        contacts = svc.getContacts(store);
+    if (!contacts) {
+        contacts = [];
     }
+    dump("   updating "+contacts.length+" contacts to "+toNode+"\n");
 
-    if (!autoCompleteWidget) {
-      autoCompleteWidget = new AutoComplete(toNode);
+    if (!svc.autoCompleteWidget) {
+      svc.autoCompleteWidget = new AutoComplete(toNode);
     }
-
-    dispatch.pub('autoCompleteData', data);
+    var acdata = {
+        domain: serviceName,
+        contacts: contacts
+    }
+    dispatch.pub('autoCompleteData', acdata);
+    dump("   dispatched "+acdata.domain+" contacts\n");
+    } catch(e) {
+        dump(e+"\n");
+    }
   }
 
   /**
    * Use store to save gmail contacts, but fetch from API
    * server if there is no store copy.
    */
-  function storeGmailContacts(account) {
-    if (!store.gmailContacts) {
-      var svcAccount = account.accounts[0];
-
+  function storeContacts(serviceName, account) {
+    var svcAccount = account.accounts[0];
+    var svc = services.domains[svcAccount.domain];
+    var contacts = svc.getContacts(store);
+    if (!contacts || contacts.length < 1) {
       rdapi('contacts/' + svcAccount.domain, {
         type: 'POST',
         data: {
@@ -229,19 +238,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             var entries = json.result.entry,
                 data = [];
 
-            entries.forEach(function (entry) {
-              if (entry.emails && entry.emails.length) {
-                entry.emails.forEach(function (email) {
-                  data.push({
-                    displayName: entry.displayName,
-                    email: email.value
-                  });
-                });
-              }
-            });
+            data = svc.getFormattedContacts(entries);
 
-            store.gmailContacts = JSON.stringify(data);
-            updateAutoComplete();
+            svc.setContacts(data);
+            updateAutoComplete(svcAccount.domain);
           }
         }
       });
@@ -249,8 +249,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       //This function could be called before window is loaded, or after. In
       //either case, make sure to let the chrome know about it, since chrome
       //listens after the page is loaded (not after just DOM ready)
-      updateAutoComplete();
-      $(window).bind('load', updateAutoComplete);
+      updateAutoComplete(svcAccount.domain);
+      //$(window).bind('load', updateAutoComplete);
     }
   }
 
@@ -361,12 +361,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           if (!hasLastSelectionMatch) {
             hasLastSelectionMatch = actions[name].type === store.lastSelection;
           }
-          name = name.split('.');
-          name = name[name.length - 2];
-          if (name === 'google') {
-            name = 'gmail';
-          }
-          userAccounts[name] = account;
+          userAccounts[actions[name].type] = account;
         }
       });
     }
@@ -383,17 +378,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     for (var act in userAccounts) {
       updateAccountDisplay(act, userAccounts[act]);
-    }
-
-    if (userAccounts.gmail) {
-      //Make sure we have contacts for auto-complete
-      storeGmailContacts(userAccounts.gmail);
-    } else {
-      //Make sure there is no cached data hanging around.
-      if (store.gmailContacts) {
-        delete store.gmailContacts;
-        updateAutoComplete();
-      }
+      storeContacts(act, userAccounts[act]);
     }
 
     //Session restore, do after form setting above.
