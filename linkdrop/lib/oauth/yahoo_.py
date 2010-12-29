@@ -29,6 +29,7 @@ import httplib2
 import json
 import copy
 from rfc822 import AddressList
+import logging
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -46,6 +47,7 @@ from linkdrop.lib.oauth.base import get_oauth_config
 YAHOO_OAUTH = 'https://api.login.yahoo.com/oauth/v2/get_token'
 
 domain = 'yahoo.com'
+log = logging.getLogger(domain)
 
 class responder(OpenIDResponder):
     def __init__(self, consumer=None, oauth_key=None, oauth_secret=None, request_attributes=None, *args,
@@ -92,6 +94,7 @@ class responder(OpenIDResponder):
 
 
     def _get_credentials(self, result_data):
+        import sys; print >> sys.stderr, result_data
         profile = result_data['profile']
         userid = profile['verifiedEmail']
         username = profile['preferredUsername']
@@ -100,12 +103,14 @@ class responder(OpenIDResponder):
                    'userid': userid,
                    'username': username }
         profile['accounts'] = [account]
+        profile['xoauth_yahoo_guid'] = result_data['xoauth_yahoo_guid']
         return result_data
 
 
 class api():
     endpoints = {
-        "mail":"http://mail.yahooapis.com/ws/mail/v1.1/jsonrpc"
+        "mail":"http://mail.yahooapis.com/ws/mail/v1.1/jsonrpc",
+        "contacts":"http://social.yahooapis.com/v1/user/%s/contacts"
     }
 
     def __init__(self, account):
@@ -117,7 +122,7 @@ class api():
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         self.sigmethod = oauth.SignatureMethod_HMAC_SHA1()
          
-    def rawcall(self, url, method, args, options={}):
+    def jsonrpc(self, url, method, args, options={}):
         headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -158,6 +163,31 @@ class api():
                      'status': int(resp['status']) 
             }
             log.error("unexpected yahoo response: %r", response)
+
+        return result, error
+
+    def restcall(self, url, method="GET", body=None):
+        headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+
+        oauth_request = oauth.Request.from_consumer_and_token(self.consumer,
+                                                              token=self.oauth_token,
+                                                              http_method=method,
+                                                              http_url=url)
+        oauth_request.sign_request(self.sigmethod, self.consumer, self.oauth_token)
+        headers.update(oauth_request.to_header())
+
+        resp, content = httplib2.Http().request(url, method, headers=headers, body=body)
+        data = content and json.loads(content) or resp
+
+        result = error = None
+        status = int(resp['status'])
+        if status < 200 or status >= 300:
+            error = data
+        else:
+            result = data
 
         return result, error
 
@@ -222,6 +252,42 @@ class api():
                  "savecopy":1
                 }]
 
-        return self.rawcall(self.endpoints['mail'], 'SendMessage', params, options)
+        return self.jsonrpc(self.endpoints['mail'], 'SendMessage', params, options)
 
+    def getcontacts(self, start=0, page=25, group=None):
+        profile = self.account.get('profile', {})
+        guid = profile.get('xoauth_yahoo_guid')
 
+        result, error = self.restcall(self.endpoints['contacts'] % (guid,))
+        if error:
+            return result, error
+        ycontacts = result.get('contacts')
+        people = ycontacts.get('contact', [])
+        contacts = []
+
+        # convert yahoo contacts to poco
+        for person in people:
+            poco = {}
+            for f in person.get('fields', []):
+                field = f.get('type')
+                value = f.get('value')
+                if field == 'name':
+                    if  value.get('middleName'):
+                        poco['displayName'] = "%s %s %s" % (value.get('givenName'), value.get('middleName'), value.get('familyName'),)
+                    else:
+                        poco['displayName'] = "%s %s" % (value.get('givenName'), value.get('familyName'),)
+                elif field == 'email':
+                    poco.setdefault('emails',[]).append({ 'value': value, 'primary': False })
+                elif field == 'nickname':
+                    poco['nickname'] = value
+
+            contacts.append(poco)
+            
+        connectedto = {
+            'entry': contacts,
+            'itemsPerPage': ycontacts.get('count', 0),
+            'startIndex':   ycontacts.get('start', 0),
+            'totalResults': ycontacts.get('total', 0),
+        }
+
+        return connectedto, None
