@@ -43,10 +43,17 @@ function (rdapi,   url,         TextCounter) {
     this.shorten = false;
     this.autoCompleteWidget = null;
     
+    // text counter support
+    this.counter = null;
+    this.textlimit = 0;
+    this.urlsize = 26;
+    
     // set options
-    this.directOnly = false;
-    this.supportsDirect = false;
-    this.supportsCounter = false;
+    this.features = {
+      counter: false,
+      direct: false,
+      subject: false
+    }
     
     for (var i in options) {
       this[i] = options[i];
@@ -55,7 +62,26 @@ function (rdapi,   url,         TextCounter) {
   svcBase.constructor = svcBase;
   svcBase.prototype = {
     validate: function (sendData) {
+      if (this.counter)
+        return !this.counter || !this.counter.isOver();
       return true;
+    },
+    startCounter: function(data) {
+      if (this.textlimit < 1)
+        return;
+      //Set up text counter
+      if (!this.counter) {
+        this.counter = new TextCounter($('#'+this.type+' textarea.message'),
+                                       $('#'+this.type+' .counter'),
+                                       this.textlimit - this.urlsize);
+      }
+      // Update counter. If using a short url from the web page itself, it could
+      // potentially be a different length than a bit.ly url so account for
+      // that. The + 1 is to account for a space before adding the URL to the
+      // tweet.
+      this.counter.updateLimit(data.shortUrl ?
+                               (this.textlimit - (data.shortUrl.length + 1)) :
+                               this.textlimit - this.urlsize);
     },
     getFormData: function () {
       var dom = $('#'+this.type);
@@ -66,7 +92,8 @@ function (rdapi,   url,         TextCounter) {
         picture: dom.find('[name="picture"]').val().trim() || '',
         canonicalUrl: dom.find('[name="link"]').val().trim() || '',
         title: dom.find('[name="title"]').val().trim() || '',
-        description: dom.find('[name="description"]').val().trim() || ''
+        description: dom.find('[name="description"]').val().trim() || '',
+        shortUrl: dom.find('[name="surl"]').val().trim() || ''
       };
     },
     setFormData: function (data) {
@@ -93,6 +120,10 @@ function (rdapi,   url,         TextCounter) {
       if (data.description) {
         dom.find('[name="description"]').val(data.description);
       }
+      if (data.shortUrl) {
+        dom.find('[name="surl"]').val(data.shortUrl);
+      }
+      this.startCounter(data);
     },
     clearCache: function(store) {
       delete store[this.type+'Contacts'];
@@ -125,7 +156,8 @@ function (rdapi,   url,         TextCounter) {
   /* common functionality for email based services */
   function emailSvcBase() {
     svcBase.constructor.apply(this, arguments);
-    this.directOnly = true;
+    this.features.direct = true;
+    this.features.subject = true;
   };
   emailSvcBase.prototype = new svcBase();
   emailSvcBase.constructor = emailSvcBase;
@@ -157,50 +189,27 @@ function (rdapi,   url,         TextCounter) {
     showNew: showNew,
     domains: {
       'twitter.com': new svcBase('Twitter', {
-        supportsCounter: true,
-        supportsDirect: true,
-        counter: null,
+        features: {
+          direct: true,
+          subject: false,
+          counter: true
+        },
+        textlimit: 140,
         shorten: true,
         serviceUrl: 'http://twitter.com',
         revokeUrl: 'http://twitter.com/settings/connections',
         signOutUrl: 'http://twitter.com/logout',
         accountLink: function (account) {
           return 'http://twitter.com/' + account.username;
-        },
-        validate: function (sendData) {
-          return !this.counter || !this.counter.isOver();
-        },
-        getFormData: function () {
-          var dom = $('#twitter');
-          return {
-            message: dom.find('textarea.message').val().trim() || '',
-            canonicalUrl: dom.find('[name="link"]').val().trim() || '',
-            shortUrl: dom.find('[name="surl"]').val().trim() || ''
-          };
-        },
-        setFormData: function (data) {
-          var dom = $('#twitter');
-          if (data.message) {
-            dom.find('textarea.message').val(data.message);
-          }
-          if (data.canonicalUrl || data.url) {
-            dom.find('[name="link"]').val(data.canonicalUrl || data.url);
-          }
-          if (data.shortUrl) {
-            dom.find('[name="surl"]').val(data.shortUrl);
-          }
-          //Set up twitter text counter
-          if (!this.counter) {
-            this.counter = new TextCounter($('#twitter textarea.message'), $('#twitter .counter'), 114);
-          }
-          //Update counter. If using a short url from the web page itself, it could potentially be a different
-          //length than a bit.ly url so account for that.
-          //The + 1 is to account for a space before adding the URL to the tweet.
-          this.counter.updateLimit(data.shortUrl ? (140 - (data.shortUrl.length + 1)) : 114);
         }
       }),
       'facebook.com': new svcBase('Facebook', {
-        supportsDirect: true,
+        features: {
+          direct: true,
+          subject: false,
+          counter: true
+        },
+        textlimit: 420,
         serviceUrl: 'http://facebook.com',
         revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
         signOutUrl: 'http://facebook.com',
@@ -214,10 +223,6 @@ function (rdapi,   url,         TextCounter) {
         signOutUrl: 'http://google.com/preferences',
         accountLink: function (account) {
           return 'http://google.com/profiles/' + account.username;
-        },
-        clearCache: function(store) {
-          if (store.gmailContacts)
-            delete store.gmailContacts;
         }
       }),
       'googleapps.com': new emailSvcBase('Google Apps', {
@@ -239,7 +244,11 @@ function (rdapi,   url,         TextCounter) {
         }
       }),
       'linkedin.com': new svcBase('LinkedIn', {
-        supportsDirect: true,
+        features: {
+          direct: true,
+          subject: true,
+          counter: false
+        },
         serviceUrl: 'http://linkedin.com',
         revokeUrl: 'http://linkedin.com/settings/connections',
         signOutUrl: 'http://linkedin.com/logout',

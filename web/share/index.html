@@ -93,12 +93,6 @@
         <span class="avatar"><img class="avatar" src="i/face2.png"></span>
         <span class="username">Username</span>
       </div>
-      { directOnly [}
-      <div class="addressing">
-        <input name="to" placeholder="to" type="text" value="" class="ffshareAutoComplete" autocompletestore="{domain}"/>
-        <input name="subject" placeholder="subject" type="text" value=""/>
-      </div>
-      {] [}
       <div class="thumb hidden">
         <div class="image"><img class="thumb"/></div>
         <div class="meta">
@@ -108,13 +102,17 @@
           <a title="A smaller, shorter link" class="surl"></a>
         </div>
       </div>
+      { features.direct [}
+      <div class="addressing">
+        <input name="to" placeholder="to" type="text" value="" class="ffshareAutoComplete" autocompletestore="{domain}"/>
+      { features.subject [}
+        <input name="subject" placeholder="subject" type="text" value=""/>
+      {]}
+      </div>
       {]}
       <div class="message boxFlex">
-      { supportsDirect [}
-        <input name="to" placeholder="to" type="text" value="" class="ffshareAutoComplete" autocompletestore="{domain}"/>
-      {]}
         <textarea class="message" placeholder="Type your message here, and we'll attach the link when you send." name="message"></textarea>
-      { supportsCounter [}
+      { features.counter [}
         <div class="counter"></div>
       {]}
       </div>

@@ -524,7 +524,7 @@ textarea.placeholder {
 }
 
 /* === TWITTER PANEL === */
-#twitter .counter {
+.message .counter {
   position: absolute;
   bottom: 3px;
   right: 5px;
