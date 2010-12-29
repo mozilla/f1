@@ -333,7 +333,7 @@ class api():
         return result, error
 
     def getgroup_id(self, group):
-        url = 'http://www.google.com/m8/feeds/groups/default/full?v=2'
+        url = 'https://www.google.com/m8/feeds/groups/default/full?v=2'
         method = 'GET'
         client = oauth.Client(self.consumer, self.oauth_token)
         resp, content = client.request(url, method)
@@ -347,7 +347,13 @@ class api():
         
     def getcontacts(self, start=0, page=25, group=None):
         contacts = []
-        url = 'http://www.google.com/m8/feeds/contacts/default/full?v=1&max-results=%d' % (page,)
+        profile = self.account.get('profile', {})
+        accounts = profile.get('accounts', [{}])
+        userdomain = 'default'
+        if accounts[0].get('domain') == 'googleapps.com':
+            userdomain = accounts[0].get('userid').split('@')[-1]
+        url = 'http://www.google.com/m8/feeds/contacts/%s/full?v=1&max-results=%d' % (userdomain, page,)
+
         method = 'GET'
         if start > 0:
             url = url + "&start-index=%d" % (start,)
@@ -363,6 +369,7 @@ class api():
         # itemsPerPage, startIndex, totalResults
         client = oauth.Client(self.consumer, self.oauth_token)
         resp, content = client.request(url, method)
+
         if int(resp.status) != 200:
             error={"provider": domain,
                    "message": content,
