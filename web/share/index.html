@@ -91,15 +91,15 @@
         <input type="hidden" name="caption" value="" />
         <input type="hidden" name="description" value="" />
         <span class="avatar"><img class="avatar" src="i/face2.png"></span>
-        <span class="username">Facebook User</span>
+        <span class="username">Username</span>
       </div>
-      { supportsDirect [}
+      { directOnly [}
       <div class="addressing">
         <input name="to" placeholder="to" type="text" value="" class="ffshareAutoComplete" autocompletestore="{domain}"/>
         <input name="subject" placeholder="subject" type="text" value=""/>
       </div>
       {] [}
-      <div class="thumb">
+      <div class="thumb hidden">
         <div class="image"><img class="thumb"/></div>
         <div class="meta">
           <div class="title"></div>
@@ -110,7 +110,10 @@
       </div>
       {]}
       <div class="message boxFlex">
-        <textarea class="message" placeholder="Type your message here" name="message"></textarea>
+      { supportsDirect [}
+        <input name="to" placeholder="to" type="text" value="" class="ffshareAutoComplete" autocompletestore="{domain}"/>
+      {]}
+        <textarea class="message" placeholder="Type your message here, and we'll attach the link when you send." name="message"></textarea>
       { supportsCounter [}
         <div class="counter"></div>
       {]}

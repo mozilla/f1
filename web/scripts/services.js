@@ -44,6 +44,7 @@ function (rdapi,   url,         TextCounter) {
     this.autoCompleteWidget = null;
     
     // set options
+    this.directOnly = false;
     this.supportsDirect = false;
     this.supportsCounter = false;
     
@@ -105,15 +106,15 @@ function (rdapi,   url,         TextCounter) {
       store[this.type+'Contacts'] = JSON.stringify(contacts);
     },
     getFormattedContacts: function(entries) {
-      var data = [];
+      var data = {};
       entries.forEach(function (entry) {
         if (entry.accounts && entry.accounts.length) {
           entry.accounts.forEach(function (account) {
-            account.displayName = entry.displayName;
-      // XXX form autocomplete does not really work with this, it wants an
-      // email field
-            account.email = account.value;
-            data.push(account);
+            data[entry.displayName] = {
+              email: '',
+              userid: account.userid,
+              username: account.username
+            };
           });
         }
       });
@@ -124,7 +125,7 @@ function (rdapi,   url,         TextCounter) {
   /* common functionality for email based services */
   function emailSvcBase() {
     svcBase.constructor.apply(this, arguments);
-    this.supportsDirect = true;
+    this.directOnly = true;
   };
   emailSvcBase.prototype = new svcBase();
   emailSvcBase.constructor = emailSvcBase;
@@ -136,14 +137,16 @@ function (rdapi,   url,         TextCounter) {
     return true;
   };
   emailSvcBase.prototype.getFormattedContacts = function(entries) {
-    var data = [];
+    var data = {};
     entries.forEach(function (entry) {
       if (entry.emails && entry.emails.length) {
         entry.emails.forEach(function (email) {
-          data.push({
-            displayName: entry.displayName,
-            email: email.value
-          });
+          var displayName = entry.displayName ? entry.displayName : email.value;
+          data[displayName] = {
+              email: email.value,
+              userid: null,
+              username: null
+            };
         });
       }
     });
@@ -155,6 +158,7 @@ function (rdapi,   url,         TextCounter) {
     domains: {
       'twitter.com': new svcBase('Twitter', {
         supportsCounter: true,
+        supportsDirect: true,
         counter: null,
         shorten: true,
         serviceUrl: 'http://twitter.com',
@@ -196,6 +200,7 @@ function (rdapi,   url,         TextCounter) {
         }
       }),
       'facebook.com': new svcBase('Facebook', {
+        supportsDirect: true,
         serviceUrl: 'http://facebook.com',
         revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
         signOutUrl: 'http://facebook.com',
@@ -234,6 +239,7 @@ function (rdapi,   url,         TextCounter) {
         }
       }),
       'linkedin.com': new svcBase('LinkedIn', {
+        supportsDirect: true,
         serviceUrl: 'http://linkedin.com',
         revokeUrl: 'http://linkedin.com/settings/connections',
         signOutUrl: 'http://linkedin.com/logout',

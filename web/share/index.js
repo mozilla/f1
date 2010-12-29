@@ -195,7 +195,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var toNode = $('#'+svc.type).find('[name="to"]')[0],
         contacts = svc.getContacts(store);
     if (!contacts) {
-        contacts = [];
+        contacts = {};
     }
 
     if (!svc.autoCompleteWidget) {
@@ -216,7 +216,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var svcAccount = account.accounts[0];
     var svc = services.domains[svcAccount.domain];
     var contacts = svc.getContacts(store);
-    if (!contacts || contacts.length < 1) {
+    if (!contacts) {
       rdapi('contacts/' + svcAccount.domain, {
         type: 'POST',
         data: {
@@ -627,11 +627,29 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             sendData[node.name] = node.value;
           }
         });
+        var svc = services.domains[sendData.domain];
 
         if (options.shortUrl) {
           sendData.shorturl = options.shortUrl;
-        } else if (services.domains[sendData.domain].shorten) {
+        } else if (svc.shorten) {
           sendData.shorten = true;
+        }
+        
+        // fixup to addressing if necessary
+        if (sendData.to) {
+            var contacts = svc.getContacts(store);
+            var newrecip = []
+            if (contacts) {
+                var recip = sendData.to.split(',');
+                recip.forEach(function(to) {
+                    var acct = contacts[to.trim()];
+                    if (acct && !acct.email)
+                        newrecip.push(acct.userid ? acct.userid : acct.username);
+                })
+            }
+            if (newrecip.length > 0) {
+                sendData.to = newrecip.join(', ');
+            }
         }
 
         sendMessage();

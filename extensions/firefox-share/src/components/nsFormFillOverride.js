@@ -86,16 +86,18 @@ FFShareAutoComplete.prototype = {
 _("query is now: [" + query + "]");
 _("previousMatch is now: " + previousMatch);
 _("data domain is: "+datadomain);
-    let data = acDataStorage.get(datadomain);
-_("matching against "+data.length+" entries");
-    data.forEach(function (item) {
-      var displayNameLower = item.displayName.toLowerCase(),
-          emailLower = item.email.toLowerCase();
+    let data = acDataStorage.get(datadomain) || {};
+    for (let name in data) {
+      var displayNameLower = name.toLowerCase(),
+          emailLower = data[name].email.toLowerCase();
       if (displayNameLower.indexOf(query) !== -1 || emailLower.indexOf(query) !== -1) {
-        result.appendMatch(previousMatch + item.email + ', ',
-                           (displayNameLower === emailLower ? item.email : item.displayName + '<' + item.email + '>'), null, 'ffshare');
+        if (emailLower)
+          addr =  (displayNameLower === emailLower ? data[name].email : name + '<' + data[name].email + '>');
+        else
+          addr =  name;
+        result.appendMatch(previousMatch + addr + ', ', addr , null, 'ffshare');
       }
-    });
+    }
 
     let resultCode = result.matchCount ? "RESULT_SUCCESS" : "RESULT_NOMATCH";
     _("returning autocomplete " +resultCode+ " result with " + result.matchCount + " items");
