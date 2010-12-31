@@ -628,7 +628,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     } else {
       thumbImgDom.attr('src', escapeHtml(options.thumbnail));
     }
-
+    // watch for has changes, reload if we do, this should be fixed up to be
+    // better than doing a reload
+    window.addEventListener("hashchange", function () {
+        location.reload();
+    }, false);
   });
 
 });
