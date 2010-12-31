@@ -76,6 +76,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           username: sendData.username,
           userid: sendData.userid
         });
+        $('div.status').addClass('hidden');
       }, 2000);
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
@@ -633,6 +634,35 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     window.addEventListener("hashchange", function () {
         location.reload();
     }, false);
+    
+
+    //Callback handler for JSONP feed response from Google.
+    window.onFeedLoad = function (x, data) {
+      var title, link, i, entry;
+      if (data && data.feed && data.feed.entries) {
+        for (i = 0; (entry = data.feed.entries[i]); i++) {
+          if (entry.categories && entry.categories.indexOf('Sharing') !== -1) {
+            link = entry.link;
+            title = entry.title;
+            break;
+          }
+        }
+      }
+
+      if (link) {
+        $('#newsBox .headline').removeClass('invisible');
+        $('#rssLink').attr('href', link).text(title);
+      }
+    };
+
+    //Fetch the feed. This is low priority, so done at the bottom.
+    var node = document.createElement("script");
+    node.charset = "utf-8";
+    node.async = true;
+    node.src = 'http://www.google.com/uds/Gfeeds?v=1.0&callback=onFeedLoad&context=' +
+              '&output=json&' +
+              'q=http%3A%2F%2Fmozillalabs.com%2Fmessaging%2Ffeed%2F';
+    $('head')[0].appendChild(node);
   });
 
 });

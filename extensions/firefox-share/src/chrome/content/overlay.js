@@ -32,7 +32,7 @@
 var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 (function () {
-
+var usepopup = false;
   Components.utils.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
   Components.utils.import("resource://ffshare/modules/injector.js");
   Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -236,6 +236,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   TabFrame.prototype = {
 
     registerListener: function () {
+      var obs = Components.classes["@mozilla.org/observer-service;1"].
+                            getService(Components.interfaces.nsIObserverService);
+      obs.addObserver(this, 'content-document-global-created', false);
+
+      if (usepopup) return;
       var shareFrameProgress = this.shareFrame.webProgress;
 
       this.stateProgressListener = new StateProgressListener(this);
@@ -246,23 +251,21 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       gBrowser.getBrowserForTab(this.tab).webProgress.
                addProgressListener(this.navProgressListener,
                                    Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
-
-      var obs = Components.classes["@mozilla.org/observer-service;1"].
-                            getService(Components.interfaces.nsIObserverService);
-      obs.addObserver(this, 'content-document-global-created', false);
     },
 
     unregisterListener: function (listener) {
+      var obs = Components.classes["@mozilla.org/observer-service;1"].
+                            getService(Components.interfaces.nsIObserverService);
+      obs.removeObserver(this, 'content-document-global-created');
+
+      if (usepopup) return;
+
       var shareFrameProgress = this.shareFrame.webProgress;
       shareFrameProgress.removeProgressListener(this.stateProgressListener);
       this.stateProgressListener = null;
 
       gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(this.navProgressListener);
       this.navProgressListener = null;
-      
-      var obs = Components.classes["@mozilla.org/observer-service;1"].
-                            getService(Components.interfaces.nsIObserverService);
-      obs.removeObserver(this, 'content-document-global-created');
     },
 
     observe: function(aSubject, aTopic, aData) {
@@ -313,6 +316,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     hide: function () {
       this.unregisterListener();
+      if (usepopup) {
+        var popup = document.getElementById("share-popup");
+        popup.hidePopup();
+        this.visible = false;
+        return;
+      }
       this.changeHeight(0, fn.bind(this, function () {
         this.shareFrame.parentNode.removeChild(this.shareFrame);
         this.shareFrame = null;
@@ -327,6 +336,44 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           iframeNode = null, url;
       var notificationBox = gBrowser.getNotificationBox(browser);
 
+      if (usepopup) {
+        this.shareFrame = iframeNode = document.getElementById("share-browser");
+        iframeNode.className = 'ffshare-frame';
+        iframeNode.style.width = '640px';
+        iframeNode.style.height = '404px';
+        //Make sure it can go all the way to zero.
+        iframeNode.style.minHeight = 0;
+
+        mixin(options, {
+          version: ffshare.version,
+          title: this.getPageTitle(),
+          description: this.getPageDescription(),
+          medium: this.getPageMedium(),
+          url: gBrowser.currentURI.spec,
+          canonicalUrl: this.getCanonicalURL(),
+          shortUrl: this.getShortURL(),
+          previews: this.previews(),
+          siteName: this.getSiteName(),
+          prefs: {
+            system: ffshare.prefs.system,
+            bookmarking: ffshare.prefs.bookmarking,
+            use_accel_key: ffshare.prefs.use_accel_key
+          }
+        });
+
+        if (!options.previews.length && !options.thumbnail) {
+          // then we need to make our own thumbnail
+          options.thumbnail = this.getThumbnailData();
+        }
+        url = ffshare.prefs.share_url +
+                  '#options=' + encodeURIComponent(JSON.stringify(options));
+
+        iframeNode.setAttribute("type", "content");
+        this.registerListener();
+        
+        iframeNode.loadURI( url );
+        return (this.shareFrame = iframeNode);
+      } else
       if (iframeNode === null) {
         //Create the iframe.
         this.shareFrame = iframeNode = document.createElement("browser");
@@ -383,7 +430,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         return;
       }
 
-      iframeNode = this.shareFrame || this.createShareFrame(options);
+      if (usepopup) {
+        var popup = document.getElementById("share-popup");
+        var position = (getComputedStyle(gNavToolbox, "").direction == "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
+        var button = document.getElementById("ffshare-toolbar-button");
+        popup.openPopup(button, position);
+        iframeNode = this.createShareFrame(options);
+      } else {
+        iframeNode = this.shareFrame || this.createShareFrame(options);
+      }
 
       if (ffshare.prefs.frontpage_url === tabUrl) {
         var browser = gBrowser.getBrowserForTab(this.tab);
@@ -1010,7 +1065,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         tabFrame = new TabFrame(selectedTab);
         selectedTab.ffshareTabFrame = tabFrame;
       }
-
+      if (usepopup) {
+        tabFrame.show(options);
+        return;
+      }
       if (tabFrame.visible) {
         tabFrame.hide();
       } else {
@@ -1022,6 +1080,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   if (!ffshare.prefs.share_url) {
     if (ffshare.prefs.system === 'dev') {
       ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/share/';
+    } else if (ffshare.prefs.system === 'devpopup') {
+      usepopup = true;
+      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/designs/popup';
     } else if (ffshare.prefs.system === 'staging') {
       ffshare.prefs.share_url = 'https://f1-staging.mozillamessaging.com/share/';
     } else {

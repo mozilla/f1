@@ -78,3 +78,9 @@
 .autocomplete-richlistitem[type="ffshare"] .ac-url-box {
     display: none !important;
 }
+
+#share-browser {
+  min-width: 380px !important;
+  width: 640px;
+  height: 400px;
+}
