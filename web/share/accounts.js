@@ -26,44 +26,11 @@
 "use strict";
 
 require.def("disconnect",
-        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig"],
-function (require,   $,        fn,         rdapi,   oauth,   jig) {
+        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "services"],
+function (require,   $,        fn,         rdapi,   oauth,   jig,         services) {
 
     var accounts = {},
-        actions = {
-            'twitter.com': {
-                medium: 'twitter',
-                name: 'Twitter',
-                icon: 'i/twitterIcon.png',
-                revokeUrl: 'http://twitter.com/settings/connections',
-                signOutUrl: 'http://twitter.com/logout',
-                accountLink: function (account) {
-                    return 'http://twitter.com/' + account.username
-                }
-            },
-            'facebook.com': {
-                medium: 'facebook',
-                name: 'Facebook',
-                icon: 'i/facebookIcon.png',
-                revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
-                signOutUrl: 'http://facebook.com',
-                accountLink: function (account) {
-                    return 'http://www.facebook.com/profile.php?id=' + account.userid;
-                }
-            },
-            'google.com': {
-                medium: 'google',
-                name: 'Gmail',
-                icon: 'i/gmailIcon.png',
-                revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
-                signOutUrl: 'http://google.com/preferences',
-                accountLink: function (account) {
-                    return 'http://google.com/profiles/' + account.username;
-                }
-            }
-        },
-        //An ordered list of services, used to show all the services supported
-        services = ['twitter.com', 'facebook.com', 'google.com'];
+        actions = services.domains;
 
     jig.addFn({
         serviceName: function(domain) {
@@ -76,7 +43,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
             return accounts[service];
         },
         getMedium: function (domain) {
-            return actions[domain].medium;
+            return actions[domain].type;
         },
         profilePic: function (photos) {
             //TODO: check for a thumbnail picture, hopefully one that is square.
@@ -128,7 +95,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig) {
                             domainObj = accounts[domain] || (accounts[domain] = []);
                         domainObj.push(account);
                     });
-                    $('#accounts').append(jig('#service', services));
+                    $('#accounts').append(jig('#service', services.domainList));
                 }
             });
         }

@@ -28,11 +28,11 @@
 
 require.def("index",
         ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
-         "placeholder", "TextCounter", "AutoComplete", "dispatch", "accounts",
+         "placeholder", "AutoComplete", "dispatch", "accounts",
          "storage", "services",
-         "jquery-ui-1.8.6.custom.min", "jquery.textOverflow"],
+         "jquery-ui-1.8.7.min", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
-          placeholder,   TextCounter,   AutoComplete,   dispatch,   accounts,
+          placeholder,   AutoComplete,   dispatch,   accounts,
           storage,   services) {
 
   var showStatus,
@@ -40,7 +40,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     hash = location.href.split('#')[1],
     urlArgs, sendData, prop,
     options = {},
-    tabDom, bodyDom, clickBlockDom, timer,
+    tabDom, bodyDom, timer,
     updateTab = true, tabSelection, accountCache, showNew,
     store = storage();
 
@@ -66,7 +66,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   showStatus = function (statusId, shouldCloseOrMessage) {
     $('div.status').addClass('hidden');
-    clickBlockDom.removeClass('hidden');
+    $('#clickBlock').removeClass('hidden');
     $('#' + statusId).removeClass('hidden');
 
     if (shouldCloseOrMessage === true) {
@@ -76,6 +76,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           username: sendData.username,
           userid: sendData.userid
         });
+        $('div.status').addClass('hidden');
       }, 2000);
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
@@ -86,7 +87,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   window.showStatus = showStatus;
 
   function cancelStatus() {
-    clickBlockDom.addClass('hidden');
+    $('#clickBlock').addClass('hidden');
     $('div.status').addClass('hidden');
     //Be sure form field placeholders are up to date.
     placeholder();
@@ -247,31 +248,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     }
   }
 
-  function updateUserTab(evt, ui) {
-    var imageUrl = '',
-      userName = '',
-      inactive = true,
-      domain = '',
-      id = ui.panel.id,
-      userInfoDom = $(".user-info");
-
-    if (id !== 'debug') {
-      imageUrl = $(ui.panel).find("div.user img.avatar").attr("src");
-      userName = $(ui.panel).find("div.user .username").text();
-      inactive = $(ui.panel).find("div.user").hasClass("inactive");
-      domain   = $(ui.panel).find("div.user input[type='hidden'][name='domain']").val();
-    }
-    $(".user-info img.avatar").attr("src", imageUrl);
-    if (!imageUrl) {
-      userInfoDom.hide();
-    } else {
-      userInfoDom.show();
-    }
-    $(".user-info .status").toggleClass("inactive", inactive);
-    $(".user-info .username").text(userName);
-    $(".user-info").attr("data-domain", domain);
-  }
-
   function updateAccountDisplay(service, account) {
     $(function () {
       var name = account.displayName,
@@ -287,10 +263,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
 
       //Add the tab as an option
-      $('.' + service + 'Tab').removeClass('hidden');
+      $('.' + service).removeClass('hidden');
 
       if (name) {
-        serviceDom.find('.username').text(name);
+        $('.' + service).find('.username').text(name);
       }
       if (photo) {
         serviceDom.find('.avatar').attr('src', photo);
@@ -322,24 +298,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     return selection;
   }
 
-  function updateFirstLastTab() {
-    //Apply first and end classes to whatever tabs are shown.
-    $('.ui-tabs-nav > li')
-      //Reset the tabs
-      .removeClass('first')
-      .removeClass('last')
-      //Only grab non-hidden tabs.
-      .filter(function (i) {
-        var tab = $(this),
-            hidden = tab.hasClass('hidden'),
-            debugTab = tab.hasClass('debugTab');
-        return !hidden && !debugTab;
-      })
-      //Apply the new first and last
-      .first().addClass('first').end()
-      .last().addClass('last');
-  }
-
   function updateAccounts(accounts) {
     var hasLastSelectionMatch = false,
         userAccounts = {}, selection,
@@ -347,17 +305,39 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     if ((accounts && accounts.length)) {
       //Figure out what accounts we do have
+      var panelhtml='';
       accounts.forEach(function (account) {
-        var name = account.accounts[0].domain;
-        if (name && actions[name]) {
+        var domain = account.accounts[0].domain;
+        if (domain && actions[domain]) {
           //Make sure to see if there is a match for last selection
           if (!hasLastSelectionMatch) {
-            hasLastSelectionMatch = actions[name].type === store.lastSelection;
+            hasLastSelectionMatch = actions[domain].type === store.lastSelection;
           }
-          userAccounts[actions[name].type] = account;
+          userAccounts[actions[domain].type] = account;
+
+          var data = actions[domain];
+          data.domain = domain;
+          panelhtml += jig('#panelsTemplate', data);
+
         }
       });
+      // add the account panels now
+      $('#accounts').append(panelhtml);
+      // update the dom content of the panels
+      accounts.forEach(function (account) {
+          var domain = account.accounts[0].domain;
+          actions[domain].setFormData(options);
+
+          updateAccountDisplay(actions[domain].type, account);
+          storeContacts(actions[domain].type, account);
+
+      });
+    } else {
+    $("#accounts").accordion();
+      showStatus('statusSettings');
+      return;
     }
+    $("#accounts").accordion();
 
     //If no matching accounts match the last selection clear it.
     if (!hasLastSelectionMatch && !store.accountAdded && store.lastSelection) {
@@ -367,213 +347,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     //Reset the just added state now that accounts have been configured one time.
     if (store.accountAdded) {
       delete store.accountAdded;
-    }
-
-    for (var act in userAccounts) {
-      updateAccountDisplay(act, userAccounts[act]);
-      storeContacts(act, userAccounts[act]);
-    }
-
-    //Session restore, do after form setting above.
-    if (sessionRestore) {
-      sessionRestore = JSON.parse(sessionRestore);
-
-      //If this share is for a different URL, dump the sessionRestore
-      if (options.link !== sessionRestore.link) {
-        sessionRestore = null;
-        delete store.sessionRestore;
-      }
-
-      if (sessionRestore) {
-        actions[sessionRestore.domain].setFormData(sessionRestore.formData);
-        //Make sure placeholder text is updated.
-        placeholder();
-      }
-    }
-
-    if (updateTab) {
-      //Choose a tab to show.
-      selection = determineTab();
-      tabDom.tabs('select', selection);
-
-      //Update the profile pic/account name text for the tab.
-      updateUserTab(null, {panel: $(selection)[0]});
-    }
-
-    updateFirstLastTab();
-  }
-
-  if (hash) {
-    urlArgs = url.queryToObject(hash);
-    if (urlArgs.options) {
-      options = JSON.parse(urlArgs.options);
-    }
-  }
-  options.prefs = options.prefs || {};
-  if (!options.title) {
-    options.title = options.url;
-  }
-  if (!options.prefs.system) {
-    options.prefs.system = 'prod';
-  }
-
-  //Save the extension version in the localStorage, for use in
-  //other pages like settings.
-  if (options.version) {
-    store.extensionVersion = options.version;
-  }
-
-  //Save the preferences in localStorage, for use in
-  //other ppages like setting.
-  if (options.prefs) {
-    for (prop in options.prefs) {
-      if (options.prefs.hasOwnProperty(prop)) {
-        store['prefs.' + prop] = options.prefs[prop];
-      }
-    }
-  }
-
-  //For the "new items" link, only show it for x number of days after showing it.
-  //NOTE: when updating for newer releases, delete the old value from the
-  //storage.
-  timer = store.newTimerV2;
-  if (!timer) {
-    store.newTimerV1 = (new Date()).getTime();
-    showNew = true;
-  } else {
-    timer = JSON.parse(timer);
-    //If time since first seen is greater than three days, hide the new link.
-    if ((new Date()).getTime() - timer < (3 * 24 * 60 * 60 * 1000)) {
-      showNew = true;
-    }
-  }
-
-  $(function () {
-    var thumbImgDom, picture,
-      sessionRestore = store.sessionRestore,
-      tabSelectionDom, tabhtml='', panelhtml='';
-
-    // first thing, fill in the supported services
-    services.domainList.forEach(function (domain) {
-      var data = services.domains[domain];
-      data.domain = domain;
-      tabhtml += jig('#tabsTemplate', services.domains[domain]);
-      panelhtml += jig('#panelsTemplate', services.domains[domain]);
-    });
-    $('.nav .debugTab').before(tabhtml);
-    $('#tabs #debug').before(panelhtml);
-
-    thumbImgDom = $('img.thumb');
-    bodyDom = $('body');
-    clickBlockDom = $('#clickBlock');
-
-    //Set the type of system as a class on the UI to show/hide things in
-    //dev vs. production
-    if (options.prefs.system) {
-      $(document.documentElement).addClass(options.prefs.system);
-    }
-
-    //Debug info on the data that was received.
-    if (options.prefs.system === 'dev') {
-      $('#debugOutput').val(JSON.stringify(options));
-      $('#debugCurrentLocation').val(location.href);
-    }
-
-    //Show the new link if appropriate.
-    if (showNew) {
-      $('#newLink').removeClass('hidden');
-    }
-
-    //Hook up button for share history
-    bodyDom
-      .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
-        cancelStatus();
-      })
-      .delegate('.statusErrorCloseButton', 'click', function (evt) {
-        close();
-      })
-      .delegate('.statusResetErrorButton', 'click', function (evt) {
-        location.reload();
-      })
-      .delegate('.nav .close', 'click', close);
-
-    $('#authOkButton').click(function (evt) {
-      oauth(sendData.domain, function (success) {
-        if (success) {
-          accounts.clear();
-          accounts();
-        } else {
-          showStatus('statusOAuthFailed');
-        }
-      });
-    });
-
-    $('#captchaButton').click(function (evt) {
-      cancelStatus();
-      clickBlockDom.removeClass('hidden');
-      sendData.HumanVerification = $('#captcha').attr('value');
-      sendData.HumanVerificationImage = $('#captchaImage').attr('src');
-      sendMessage();
-    });
-
-    //Set up default handler for account changes triggered from other
-    //windows, or updates to expired cache.
-    accounts.onChange();
-
-    //Only bother with localStorage enabled storage.
-    if (storage.type === 'memory') {
-      showStatus('statusEnableLocalStorage');
-      return;
-    }
-
-    //Fetch the accounts.
-    accounts(function (json) {
-        accountCache = json;
-
-        //No need to update tab since that will be done inline below.
-        updateTab = false;
-        updateAccounts(accountCache);
-        updateTab = true;
-
-        tabSelection = determineTab();
-
-        //Set up HTML so initial jquery UI tabs will not flash away from the selected
-        //tab as we show it. Done for performance and to remove a flash of tab content
-        //that is not the current tab.
-        if (tabSelection) {
-          $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
-          tabSelectionDom = $(tabSelection);
-          tabSelectionDom.removeClass('ui-tabs-hide');
-
-          //Update the profile pic/account name text for the tab.
-          updateUserTab(null, {panel: tabSelectionDom[0]});
-
-          //Set up jQuery UI tabs.
-          tabDom = $("#tabs");
-          tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
-          tabDom.bind("tabsselect", updateUserTab);
-          //Make the tabs visible now to the user, now that tabs have been set up.
-          tabDom.removeClass('invisible');
-          bodyDom.removeClass('loading');
-
-          //Make sure first/last tab styles are set up accordingly.
-          updateFirstLastTab();
-        } else {
-          showStatus('statusSettings');
-        }
-      },
-      //Error handler for account fetch
-      function (xhr, textStatus, err) {
-        if (xhr.status === 503) {
-          showStatus('statusServerBusyClose');
-        } else {
-          showStatus('statusServerError', err);
-        }
-      }
-    );
-
-    for (var svc in services.domains) {
-      services.domains[svc].setFormData(options);
     }
 
     //If the message containder doesn't want URLs then respect that.
@@ -592,17 +365,17 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       $('.description').text(options.description);
     }
 
-    //Set preview image for facebook
-    if (options.previews && options.previews.length) {
-      //TODO: set up all the image previews.
-      thumbImgDom.attr('src', escapeHtml(options.previews[0]));
-    } else {
-      thumbImgDom.attr('src', escapeHtml(options.thumbnail));
+    if (options.shortUrl) {
+      $('.surl').text(options.shortUrl);
+    }
+
+    if (options.url) {
+      $('.url').text(options.url);
     }
 
     //Create ellipsis for thumbnail section
     $('.title').textOverflow(null, true);
-    $('.description').textOverflow(null, true);
+    //$('.description').textOverflow(null, true);
     $('.url').textOverflow(null, true);
     $('.surl').textOverflow(null, true);
 
@@ -658,6 +431,238 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       .each(function (i, node) {
         placeholder(node);
       });
+      
+    //Session restore, do after form setting above.
+    if (sessionRestore) {
+      sessionRestore = JSON.parse(sessionRestore);
+
+      //If this share is for a different URL, dump the sessionRestore
+      if (options.link !== sessionRestore.link) {
+        sessionRestore = null;
+        delete store.sessionRestore;
+      }
+
+      if (sessionRestore) {
+        actions[sessionRestore.domain].setFormData(sessionRestore.formData);
+        //Make sure placeholder text is updated.
+        placeholder();
+      }
+    }
+
+    if (updateTab) {
+      //Choose a tab to show.
+      //selection = determineTab();
+      //tabDom.tabs('select', selection);
+
+      //Update the profile pic/account name text for the tab.
+      //updateUserTab(null, {panel: $(selection)[0]});
+    }
+
+  } // end updateAccounts
+
+  if (hash) {
+    urlArgs = url.queryToObject(hash);
+    if (urlArgs.options) {
+      options = JSON.parse(urlArgs.options);
+    }
+  }
+  options.prefs = options.prefs || {};
+  if (!options.title) {
+    options.title = options.url;
+  }
+  if (!options.prefs.system) {
+    options.prefs.system = 'prod';
+  }
+
+  //Save the extension version in the localStorage, for use in
+  //other pages like settings.
+  if (options.version) {
+    store.extensionVersion = options.version;
+  }
+
+  //Save the preferences in localStorage, for use in
+  //other ppages like setting.
+  if (options.prefs) {
+    for (prop in options.prefs) {
+      if (options.prefs.hasOwnProperty(prop)) {
+        store['prefs.' + prop] = options.prefs[prop];
+      }
+    }
+  }
+
+  //For the "new items" link, only show it for x number of days after showing it.
+  //NOTE: when updating for newer releases, delete the old value from the
+  //storage.
+  timer = store.newTimerV2;
+  if (!timer) {
+    store.newTimerV1 = (new Date()).getTime();
+    showNew = true;
+  } else {
+    timer = JSON.parse(timer);
+    //If time since first seen is greater than three days, hide the new link.
+    if ((new Date()).getTime() - timer < (3 * 24 * 60 * 60 * 1000)) {
+      showNew = true;
+    }
+  }
+
+    //Debug info on the data that was received.
+    if (options.prefs.system === 'dev') {
+      $('#debugOutput').val(JSON.stringify(options));
+      $('#debugCurrentLocation').val(location.href);
+    } else {
+      $('#debugpanel').remove();
+      $('#debugging').remove();
+    }
+
+  $(function () {
+    var thumbImgDom, picture,
+      sessionRestore = store.sessionRestore,
+      tabSelectionDom;
+
+    thumbImgDom = $('img.thumb');
+    bodyDom = $('body');
+
+    //Set the type of system as a class on the UI to show/hide things in
+    //dev vs. production
+    if (options.prefs.system) {
+      $(document.documentElement).addClass(options.prefs.system);
+    }
+
+
+    //Show the new link if appropriate.
+    if (showNew) {
+      $('#newLink').removeClass('hidden');
+    }
+
+    //Hook up button for share history
+    bodyDom
+      .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
+        cancelStatus();
+      })
+      .delegate('.statusErrorCloseButton', 'click', function (evt) {
+        close();
+      })
+      .delegate('.statusResetErrorButton', 'click', function (evt) {
+        location.reload();
+      })
+      .delegate('.nav .close', 'click', close);
+
+    $('#authOkButton').click(function (evt) {
+      oauth(sendData.domain, function (success) {
+        if (success) {
+          accounts.clear();
+          accounts();
+        } else {
+          showStatus('statusOAuthFailed');
+        }
+      });
+    });
+
+    $('#captchaButton').click(function (evt) {
+      cancelStatus();
+      $('#clickBlock').removeClass('hidden');
+      sendData.HumanVerification = $('#captcha').attr('value');
+      sendData.HumanVerificationImage = $('#captchaImage').attr('src');
+      sendMessage();
+    });
+
+    //Set up default handler for account changes triggered from other
+    //windows, or updates to expired cache.
+    accounts.onChange();
+
+    //Only bother with localStorage enabled storage.
+    if (storage.type === 'memory') {
+      showStatus('statusEnableLocalStorage');
+      return;
+    }
+
+    //Fetch the accounts.
+    accounts(function (json) {
+        accountCache = json;
+
+        //No need to update tab since that will be done inline below.
+        updateTab = false;
+        updateAccounts(accountCache);
+        updateTab = true;
+
+        tabSelection = determineTab();
+
+        //Set up HTML so initial jquery UI tabs will not flash away from the selected
+        //tab as we show it. Done for performance and to remove a flash of tab content
+        //that is not the current tab.
+        /*
+        if (tabSelection) {
+          $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
+          tabSelectionDom = $(tabSelection);
+          tabSelectionDom.removeClass('ui-tabs-hide');
+
+          //Update the profile pic/account name text for the tab.
+          //updateUserTab(null, {panel: tabSelectionDom[0]});
+
+          //Set up jQuery UI tabs.
+          tabDom = $("#tabs");
+          tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
+          tabDom.bind("tabsselect", updateUserTab);
+          //Make the tabs visible now to the user, now that tabs have been set up.
+          tabDom.removeClass('invisible');
+          bodyDom.removeClass('loading');
+
+        } else {
+          //showStatus('statusSettings');
+        }
+        */
+      },
+      //Error handler for account fetch
+      function (xhr, textStatus, err) {
+        if (xhr.status === 503) {
+          showStatus('statusServerBusyClose');
+        } else {
+          showStatus('statusServerError', err);
+        }
+      }
+    );
+
+    //Set preview image for facebook
+    if (options.previews && options.previews.length) {
+      //TODO: set up all the image previews.
+      thumbImgDom.attr('src', escapeHtml(options.previews[0]));
+    } else {
+      thumbImgDom.attr('src', escapeHtml(options.thumbnail));
+    }
+    // watch for has changes, reload if we do, this should be fixed up to be
+    // better than doing a reload
+    window.addEventListener("hashchange", function () {
+        location.reload();
+    }, false);
+    
+
+    //Callback handler for JSONP feed response from Google.
+    window.onFeedLoad = function (x, data) {
+      var title, link, i, entry;
+      if (data && data.feed && data.feed.entries) {
+        for (i = 0; (entry = data.feed.entries[i]); i++) {
+          if (entry.categories && entry.categories.indexOf('Sharing') !== -1) {
+            link = entry.link;
+            title = entry.title;
+            break;
+          }
+        }
+      }
+
+      if (link) {
+        $('#newsBox .headline').removeClass('invisible');
+        $('#rssLink').attr('href', link).text(title);
+      }
+    };
+
+    //Fetch the feed. This is low priority, so done at the bottom.
+    var node = document.createElement("script");
+    node.charset = "utf-8";
+    node.async = true;
+    node.src = 'http://www.google.com/uds/Gfeeds?v=1.0&callback=onFeedLoad&context=' +
+              '&output=json&' +
+              'q=http%3A%2F%2Fmozillalabs.com%2Fmessaging%2Ffeed%2F';
+    $('head')[0].appendChild(node);
   });
 
 });

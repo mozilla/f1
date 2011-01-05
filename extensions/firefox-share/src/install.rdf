@@ -4,7 +4,7 @@
     <em:id>ffshare@mozilla.org</em:id>
     <em:type>2</em:type>
     <em:name>F1 by Mozilla Labs</em:name>
-    <em:version>0.7.3</em:version>
+    <em:version>0.7.4</em:version>
     <em:creator>Mozilla</em:creator>
     <em:contributor></em:contributor>
     <em:homepageURL>http://f1.mozillamessaging.com/</em:homepageURL>
@@ -13,7 +13,7 @@
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id> <!-- Firefox -->
-        <em:minVersion>3.6</em:minVersion>
+        <em:minVersion>3.6.6</em:minVersion>
         <em:maxVersion>4.0b9pre</em:maxVersion>
       </Description>
     </em:targetApplication>

@@ -90,7 +90,7 @@
 <script id="accountTemplate" type="text/template">
   {.acct accounts[0]}
   <li class="hbox">
-    <div class="accountType overflow boxFlex"><span class="icon {domainType(_)}"></span> {domainName(_)} <span class="username">({displayName})</span></div>
+    <div class="accountType overflow boxFlex"><span class="icon {domainType(_)}"></span> {domainName(_)} <span class="username">({accountName(displayName, acct)})</span></div>
     <button class="config remove" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}">remove <span class="remove"></span></button>
   </li>
 </script>
