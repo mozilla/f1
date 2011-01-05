@@ -39,7 +39,7 @@ let ffshareAutoCompleteData = {
     return data[domain];
   },
   set: function (acdata) {
-    _("XXX setting "+acdata.contacts.length+" contacts for "+acdata.domain);
+    _("XXX setting "+ (accdata.contacts ? acdata.contacts.length : "none") +" contacts for "+acdata.domain);
     data[acdata.domain] = (acdata.contacts || []);
   }
 };

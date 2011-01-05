@@ -27,12 +27,12 @@
   Application: false, gBrowser: false, window: false, Components: false,
   Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false,
   XPCOMUtils: false, ffshareAutoCompleteData: false, AddonManager: false,
-  BrowserToolboxCustomizeDone: false, InjectorInit: false, injector: false */
+  BrowserToolboxCustomizeDone: false, InjectorInit: false, injector: false,
+  getComputedStyle: false, gNavToolbox: false */
 
 var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 (function () {
-var usepopup = false;
   Components.utils.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
   Components.utils.import("resource://ffshare/modules/injector.js");
   Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -45,6 +45,7 @@ var usepopup = false;
 
   var slice = Array.prototype.slice,
       ostring = Object.prototype.toString,
+      usepopup = false,
       empty = {}, fn,
       buttonId = 'ffshare-toolbar-button';
 
@@ -240,17 +241,18 @@ var usepopup = false;
                             getService(Components.interfaces.nsIObserverService);
       obs.addObserver(this, 'content-document-global-created', false);
 
-      if (usepopup) return;
-      var shareFrameProgress = this.shareFrame.webProgress;
+      if (!usepopup) {
+        var shareFrameProgress = this.shareFrame.webProgress;
 
-      this.stateProgressListener = new StateProgressListener(this);
-      shareFrameProgress.addProgressListener(this.stateProgressListener,
-                                          Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
+        this.stateProgressListener = new StateProgressListener(this);
+        shareFrameProgress.addProgressListener(this.stateProgressListener,
+                                            Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
 
-      this.navProgressListener = new NavProgressListener(this);
-      gBrowser.getBrowserForTab(this.tab).webProgress.
-               addProgressListener(this.navProgressListener,
-                                   Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+        this.navProgressListener = new NavProgressListener(this);
+        gBrowser.getBrowserForTab(this.tab).webProgress.
+                 addProgressListener(this.navProgressListener,
+                                     Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+      }
     },
 
     unregisterListener: function (listener) {
@@ -258,26 +260,29 @@ var usepopup = false;
                             getService(Components.interfaces.nsIObserverService);
       obs.removeObserver(this, 'content-document-global-created');
 
-      if (usepopup) return;
+      if (!usepopup) {
+        var shareFrameProgress = this.shareFrame.webProgress;
+        shareFrameProgress.removeProgressListener(this.stateProgressListener);
+        this.stateProgressListener = null;
 
-      var shareFrameProgress = this.shareFrame.webProgress;
-      shareFrameProgress.removeProgressListener(this.stateProgressListener);
-      this.stateProgressListener = null;
-
-      gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(this.navProgressListener);
-      this.navProgressListener = null;
+        gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(this.navProgressListener);
+        this.navProgressListener = null;
+      }
     },
 
-    observe: function(aSubject, aTopic, aData) {
-      if (!aSubject.location.href) return;
+    observe: function (aSubject, aTopic, aData) {
+      if (!aSubject.location.href) {
+        return;
+      }
+
       // is this window a child of OUR XUL window?
       var mainWindow = aSubject.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
                      .getInterface(Components.interfaces.nsIWebNavigation)
                      .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
                      .rootTreeItem
                      .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                     .getInterface(Components.interfaces.nsIDOMWindow); 
-      if (mainWindow != window) {
+                     .getInterface(Components.interfaces.nsIDOMWindow);
+      if (mainWindow !== window) {
         return;
       }
       // listen for messages now
@@ -307,7 +312,7 @@ var usepopup = false;
         }
       }), false);
     },
-    
+
     //Fired when a pref changes from content space. the pref object has
     //a name and value.
     prefChanged: function (pref) {
@@ -316,16 +321,17 @@ var usepopup = false;
 
     hide: function () {
       this.unregisterListener();
+
       if (usepopup) {
         var popup = document.getElementById("share-popup");
         popup.hidePopup();
-        this.visible = false;
-        return;
+      } else {
+        this.changeHeight(0, fn.bind(this, function () {
+          this.shareFrame.parentNode.removeChild(this.shareFrame);
+          this.shareFrame = null;
+        }));
       }
-      this.changeHeight(0, fn.bind(this, function () {
-        this.shareFrame.parentNode.removeChild(this.shareFrame);
-        this.shareFrame = null;
-      }));
+
       this.visible = false;
     },
 
@@ -370,11 +376,10 @@ var usepopup = false;
 
         iframeNode.setAttribute("type", "content");
         this.registerListener();
-        
-        iframeNode.loadURI( url );
+
+        iframeNode.loadURI(url);
         return (this.shareFrame = iframeNode);
-      } else
-      if (iframeNode === null) {
+      } else if (iframeNode === null) {
         //Create the iframe.
         this.shareFrame = iframeNode = document.createElement("browser");
 
@@ -432,7 +437,7 @@ var usepopup = false;
 
       if (usepopup) {
         var popup = document.getElementById("share-popup");
-        var position = (getComputedStyle(gNavToolbox, "").direction == "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
+        var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
         var button = document.getElementById("ffshare-toolbar-button");
         popup.openPopup(button, position);
         iframeNode = this.createShareFrame(options);
@@ -575,16 +580,17 @@ var usepopup = false;
     // According to Facebook - (only the first 3 are interesting)
     // Valid values for medium_type are audio, image, video, news, blog, and mult.
     getPageMedium: function () {
-      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:type']");
-      for (var i = 0; i < metas.length; i++) {
-        var content = metas[i].getAttribute("content");
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:type']"),
+          i, content;
+      for (i = 0; i < metas.length; i++) {
+        content = metas[i].getAttribute("content");
         if (content) {
           return unescapeXml(content);
         }
       }
-      metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']")
-      for (var i = 0; i < metas.length; i++) {
-        var content = metas[i].getAttribute("content");
+      metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']");
+      for (i = 0; i < metas.length; i++) {
+        content = metas[i].getAttribute("content");
         if (content) {
           return unescapeXml(content);
         }
@@ -1067,12 +1073,12 @@ var usepopup = false;
       }
       if (usepopup) {
         tabFrame.show(options);
-        return;
-      }
-      if (tabFrame.visible) {
-        tabFrame.hide();
       } else {
-        tabFrame.show(options);
+        if (tabFrame.visible) {
+          tabFrame.hide();
+        } else {
+          tabFrame.show(options);
+        }
       }
     }
   };
