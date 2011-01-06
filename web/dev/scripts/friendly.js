@@ -22,10 +22,10 @@
  * */
 
 /*jslint plusplus: false, nomen: false */
-/*global require: false */
+/*global define: false */
 "use strict";
 
-require.def("friendly", function () {
+define(function () {
     var friendly = {
         timestamp: function (timestamp) {
             return friendly.date(new Date(timestamp * 1000));
@@ -34,7 +34,7 @@ require.def("friendly", function () {
         date: function (date) {
             var diff = (((new Date()).getTime() - date.getTime()) / 1000),
                 day_diff = Math.floor(diff / 86400),
-                dObj = { "friendly" : date.toLocaleDateString(), 
+                dObj = { "friendly" : date.toLocaleDateString(),
                         "additional" : date.toLocaleTimeString(),
                         "utc" : date.toUTCString(),
                         "locale" : date.toLocaleString() };
@@ -81,7 +81,7 @@ require.def("friendly", function () {
                 dObj.friendly = "last week";
                 return dObj;
             }
-            /* for this scope: we want day of week and the date 
+            /* for this scope: we want day of week and the date
                  plus the month (if different) */
             if (day_diff < 31) {
                 dObj.friendly = Math.ceil(day_diff / 7) + " weeks ago";
@@ -97,7 +97,7 @@ require.def("friendly", function () {
                 dObj.friendly = Math.ceil(day_diff / 31) + " months ago";
                 return dObj;
             }
-    
+
             /* for this scope: we want month + year */
             if (day_diff >= 365 && day_diff < 730) {
                 dObj.additional = date.toLocaleDateString();
@@ -111,7 +111,7 @@ require.def("friendly", function () {
             }
             return dObj;
         },
-    
+
         name: function (name) {
             var firstName = name.split(' ')[0];
             if (firstName.indexOf('@') !== -1) {
@@ -121,7 +121,7 @@ require.def("friendly", function () {
             firstName = firstName.replace("'", "");
             firstName = firstName.replace('"', "");
             return firstName;
-        }    
+        }
     };
 
     return friendly;

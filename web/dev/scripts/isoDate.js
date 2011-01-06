@@ -26,7 +26,7 @@
 /*jslint nomen: false, regexp: false, plusplus: false */
 /*global require: false */
 
-require('isoDate', function () {
+define([], function () {
 
     // Methods to convert dates to or from a wire (string) format using well-known conventions
     var _isoRegExp = /^(?:(\d{4})(?:-(\d{2})(?:-(\d{2}))?)?)?(?:T(\d{2}):(\d{2})(?::(\d{2})(.\d+)?)?((?:[+\-](\d{2}):(\d{2}))|Z)?)?$/,
@@ -63,10 +63,10 @@ require('isoDate', function () {
             //    defaultTime:
             //        Used for defaults for fields omitted in the formattedString.
             //        Uses 1970-01-01T00:00:00.0Z by default.
-        
+
             var match = _isoRegExp.exec(formattedString),
                 result = null, offset, zoneSign;
-        
+
             if (match) {
                 match.shift();
                 if (match[1]) {
@@ -75,7 +75,7 @@ require('isoDate', function () {
                 if (match[6]) {
                     match[6] *= 1000; // Javascript Date expects fractional seconds as milliseconds
                 }
-        
+
                 if (defaultTime) {
                     // mix in defaultTime.  Relatively expensive, so use || operators for the fast path of defaultTime === 0
                     defaultTime = new Date(defaultTime);
@@ -89,7 +89,7 @@ require('isoDate', function () {
                 if (match[0] < 100) {
                     result.setFullYear(match[0] || 1970);
                 }
-        
+
                 offset = 0;
                 zoneSign = match[7] && match[7].charAt(0);
                 if (zoneSign !== 'Z') {
@@ -105,10 +105,10 @@ require('isoDate', function () {
                     result.setTime(result.getTime() + offset * 60000);
                 }
             }
-        
+
             return result; // Date or null
         };
-  
+
     /*=====
         __Options = function(){
             //    selector: String
@@ -123,7 +123,7 @@ require('isoDate', function () {
             this.milliseconds = milliseconds;
         }
     =====*/
-    
+
     isoDate.toIsoString = function (/*Date*/dateObject, /*__Options?*/options) {
         //    summary:
         //        Format a Date object as a string according a subset of the ISO-8601 standard
@@ -135,7 +135,7 @@ require('isoDate', function () {
         //
         //    dateObject:
         //        A Date object
-    
+
         var _ = function (n) {
                 return (n < 10) ? "0" + n : n;
             },
@@ -160,7 +160,7 @@ require('isoDate', function () {
             } else if (options.selector !== "time") {
                 timezoneOffset = dateObject.getTimezoneOffset();
                 absOffset = Math.abs(timezoneOffset);
-                time += (timezoneOffset > 0 ? "-" : "+") + 
+                time += (timezoneOffset > 0 ? "-" : "+") +
                     _(Math.floor(absOffset / 60)) + ":" + _(absOffset % 60);
             }
             formattedDate.push(time);

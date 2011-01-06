@@ -22,17 +22,16 @@
  * */
 
 /*jslint plusplus: false, indent: 2 */
-/*global require: false, window: false */
+/*global require: false, define: false, window: false */
 "use strict";
 
-require.def('AutoComplete',
-    ['jquery', 'blade/object', 'blade/fn', 'dispatch'],
+define([ 'jquery', 'blade/object', 'blade/fn', 'dispatch'],
 function ($,    object,         fn,         dispatch) {
 
   return object(null, null, {
     init: function (node) {
       this.dom = $(node);
-  
+
       //Wire up events.
       this.dom
       .bind('keyup', fn.bind(this, 'onKeyUp'));
@@ -47,20 +46,20 @@ function ($,    object,         fn,         dispatch) {
         console.log('key: ', evt);
         setTimeout(function () {
           var event = document.createEvent("KeyboardEvent");
-          event.initKeyEvent(                                                                                      
-                 "keydown",        //  in DOMString typeArg,                                                           
-                  true,             //  in boolean canBubbleArg,                                                        
-                  true,             //  in boolean cancelableArg,                                                       
-                  null,             //  in nsIDOMAbstractView viewArg,  Specifies UIEvent.view. This value may be null.     
-                  false,            //  in boolean ctrlKeyArg,                                                               
-                  false,            //  in boolean altKeyArg,                                                        
-                  false,            //  in boolean shiftKeyArg,                                                      
-                  false,            //  in boolean metaKeyArg,                                                       
-                  39,               //  in unsigned long keyCodeArg,                                                      
-                   0);              //  in unsigned long charCodeArg);              
+          event.initKeyEvent(
+                 "keydown",        //  in DOMString typeArg,
+                  true,             //  in boolean canBubbleArg,
+                  true,             //  in boolean cancelableArg,
+                  null,             //  in nsIDOMAbstractView viewArg,  Specifies UIEvent.view. This value may be null.
+                  false,            //  in boolean ctrlKeyArg,
+                  false,            //  in boolean altKeyArg,
+                  false,            //  in boolean shiftKeyArg,
+                  false,            //  in boolean metaKeyArg,
+                  39,               //  in unsigned long keyCodeArg,
+                   0);              //  in unsigned long charCodeArg);
 
           self.dom[0].dispatchEvent(event);
-          
+
           //var value = self.dom.val(),
            //   length = value.length;
           //self.dom[0].value = value;

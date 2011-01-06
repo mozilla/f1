@@ -3,7 +3,7 @@
 <head>
     <title>F1: Popup</title>
     <link rel="stylesheet" type="text/css" href="style.css">
-    <script data-main="index.js" src="/scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+    <script data-main="index.js" src="/scripts/requireplugins-jquery.js" charset="utf-8"></script>
 </head>
 <body>
 
@@ -48,7 +48,7 @@
 
         <div id="debugpanel" class="hbox debugging user">
             <span class="arrow"></span>
-            <span class="icon debug"></span> 
+            <span class="icon debug"></span>
             <h3 class="boxFlex overflow">debug</h3>
             <span class="username">developer</span>
         </div>
@@ -75,31 +75,31 @@
     <!-- Click blocker for status messages. Should be before status messages but
          after main content for z-order purposes -->
     <div id="clickBlock" class="hidden"></div>
-    
+
     <!-- Start status messages -->
 
     <div id="statusSettings" class="status hidden noConfig">
       <img src="/share/i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="/settings/">click here to setup F1</a>
     </div>
-    
+
     <div id="statusSharing" class="status hidden">
       <img src="/share/i/loader.gif"> sharing...
     </div>
-    
+
     <div id="statusOAuthFailed" class="status hidden error">
       Sorry, we couldn't connect to your account. Please try again.
       <button class="statusButton statusErrorButton">ok</button>
     </div>
-    
+
     <div id="statusEnableLocalStorage" class="status hidden">
         Please enable DOM Storage to use Mozilla F1.
     </div>
-    
+
     <div id="statusError" class="status hidden error">
       We're really sorry, F1 done goofed up. <span id="statusErrorMessage"></span>
       <button class="statusButton statusErrorButton">ok</button>
     </div>
-    
+
     <div id="statusCaptcha" class="status hidden intermediate captcha">
       <div class="captcha-wrap vbox boxFlex center">
         <div>
@@ -117,36 +117,36 @@
         </div>
       </div>
     </div>
-    
+
     <div id="statusToError" class="status hidden error">
       The 'to' field is required to send email.
       <button class="statusButton statusErrorButton">ok</button>
     </div>
-    
+
     <div id="statusServerError" class="status hidden error">
       We're really sorry, the F1 server is having problems. Please try again later. <span id="statusServerErrorMessage"></span>
       <button id="statusServerErrorButton" class="statusButton statusErrorCloseButton">ok</button>
     </div>
-    
+
     <div id="statusAuth" class="status hidden intermediate error">
       Sorry, you've been signed out. Sign in again to finish sharing.
       <button id="authOkButton" class="statusButton">sign in</button>
     </div>
-    
+
     <div id="statusServerBusy" class="status hidden warning">
       Sorry, F1 is under heavy load right now, please try again later.
       <button class="statusButton statusErrorButton">ok</button>
     </div>
-    
+
     <div id="statusServerBusyClose" class="status hidden warning">
       Sorry, F1 is under heavy load right now, please try again later.
       <button class="statusButton statusErrorCloseButton">ok</button>
     </div>
-    
+
     <div id="statusShared" class="status hidden">
       Message Shared!
     </div>
-    
+
     <!-- End status messages -->
 
 </div>
@@ -155,7 +155,7 @@
 <script id="panelsTemplate" type="text/template">
     <div class="hbox {type} user">
         <span class="arrow"></span>
-        <span class="icon {type}"></span> 
+        <span class="icon {type}"></span>
         <h3 class="boxFlex overflow">{name}</h3>
         <span class="username">Username</span>
     </div>

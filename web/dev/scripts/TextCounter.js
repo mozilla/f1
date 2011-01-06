@@ -22,11 +22,10 @@
  * */
 
 /*jslint plusplus: false */
-/*global require: false */
+/*global require: false, define: false */
 "use strict";
 
-require.def('TextCounter',
-        ['jquery', 'blade/object', 'blade/fn'],
+define([ 'jquery', 'blade/object', 'blade/fn'],
 function ($,        object,         fn) {
 
     return object(null, null, {
@@ -53,7 +52,7 @@ function ($,        object,         fn) {
             } else {
                 this.countDom.removeClass("TextCountOver");
             }
-            this.countDom.text(count === this.limit ? '' : count);            
+            this.countDom.text(count === this.limit ? '' : count);
         },
 
         updateLimit: function (limit) {

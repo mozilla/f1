@@ -4,11 +4,11 @@
  * see: http://github.com/jrburke/blade for details
  */
 /*jslint  nomen: false, plusplus: false */
-/*global require: false */
+/*global define: false */
 
 'use strict';
 
-require.def('blade/fn', function () {
+define([], function () {
     var slice = Array.prototype.slice,
         ostring = Object.prototype.toString,
 
@@ -38,7 +38,7 @@ require.def('blade/fn', function () {
              * @returns {Function}
              */
             bind: function (obj, f) {
-                //Do not bother if 
+                //Do not bother if
                 if (!f) {
                     return obj;
                 }

@@ -4,11 +4,11 @@
  * see: http://github.com/jrburke/blade for details
  */
 /*jslint  nomen: false, plusplus: false */
-/*global require: false */
+/*global define: false */
 
 'use strict';
 
-require.def('blade/defer', ['blade/fn', 'blade/dispatch'], function (fn, bladeDispatch) {
+define(['./fn', './dispatch'], function (fn, bladeDispatch) {
 
     /**
      * Creates an object representing a deferred action.
@@ -27,7 +27,7 @@ require.def('blade/defer', ['blade/fn', 'blade/dispatch'], function (fn, bladeDi
      * specified other events, then there are listener registration functions
      * for those event names too.
      */
-    function defer(onCancel, otherEventNames) {        
+    function defer(onCancel, otherEventNames) {
         var dfd = {},
             sentName, i, evtName,
             dispatch = bladeDispatch.make(),
@@ -80,8 +80,8 @@ require.def('blade/defer', ['blade/fn', 'blade/dispatch'], function (fn, bladeDi
 
         //Allow wiring up other event names
         if (otherEventNames) {
-            for (var i = 0; (evtName = otherEventNames[i]); i++) {
-                dfd.listener[name] = makeCb[name];
+            for (i = 0; (evtName = otherEventNames[i]); i++) {
+                dfd.listener[evtName] = makeCb[evtName];
             }
         }
 
@@ -90,8 +90,7 @@ require.def('blade/defer', ['blade/fn', 'blade/dispatch'], function (fn, bladeDi
 
     defer.onErrorDefault = function (err) {
         throw err;
-    }
+    };
 
     return defer;
 });
-

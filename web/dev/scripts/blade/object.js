@@ -4,23 +4,23 @@
  * see: http://github.com/jrburke/blade for details
  */
 /*jslint plusplus: false */
-/*global require: false */
+/*global define: false */
 
 'use strict';
 
-require.def('blade/object', ['blade/fn'], function (fn) {
+define(['./fn'], function (fn) {
 
     var empty = {},
 
         /**
          * Creates a new constructor function for generating objects of a certain type.
-         * 
+         *
          * @param {Object} base the base object to inherit from in the
          * prototype chain. Pass null if no parent desired.
-         * 
+         *
          * @param {Array} mixins an array of objects to use to mix in their
          * properties into the new object. Pass null if no mixins desired.
-         * 
+         *
          * @param {Function} objPropertyFunc, a function that returns an object
          * whose properties should be part of this new object's prototype.
          * The function will be passed the function used to call methods
@@ -31,7 +31,7 @@ require.def('blade/object', ['blade/fn'], function (fn) {
          *   - args: an array of arguments. Normally just pass the arguments object.
          * The parent prototype will be a combination of the base object
          * with all mixins applied.
-         * 
+         *
          * @returns {Function} a constructor function.
          */
         object = function (base, mixins, objPropertyFunc) {
@@ -106,11 +106,11 @@ require.def('blade/object', ['blade/fn'], function (fn) {
      *
      * To extend a prototype on a given object, pass in the prototype property
      * to mixin. For example: object.mixin(func.prototype, {a: 'b'});
-     * 
+     *
      * @param {Object} target the object receiving the mixed in properties.
-     * 
+     *
      * @param {Object} source the object that contains the properties to mix in.
-     * 
+     *
      * @param {Boolean} [override] if set to true, then the source's properties
      * will be mixed in even if a property of the same name already exists on
      * the target.

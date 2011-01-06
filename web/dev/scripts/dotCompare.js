@@ -22,10 +22,10 @@
  * */
 
 /*jslint indent: 2, plusplus: false */
-/*global require: false, window: false, location: false */
+/*global define: false, window: false, location: false */
 "use strict";
 
-require.def("dotCompare", function () {
+define([], function () {
 
   /**
    * A function that compares two "x.x.x" version numbers, and returns:

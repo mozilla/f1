@@ -22,11 +22,10 @@
  * */
 
 /*jslint plusplus: false */
-/*global require: false, location: true, window: false, alert: false */
+/*global define: false, location: true, window: false, alert: false */
 "use strict";
 
-require.def("stats",
-        ["require", "jquery", "rdapi", "blade/jig"],
+define([ "require", "jquery", "rdapi", "blade/jig"],
 function (require,   $,        rdapi,   jig) {
     rdapi('stats/accounts', {
         data: {
@@ -41,14 +40,14 @@ function (require,   $,        rdapi,   jig) {
                 var w = 200,
                 h = 200,
                 r = w / 2
-                
+
                 var sum = pv.sum(json.map(function (d) d[0]));
-                
+
                 var vis = new pv.Panel()
                     .width(w)
                     .height(h)
                     .canvas("accounts_per_domain");
-                
+
                 vis.add(pv.Wedge)
                     .data(json)
                     .left(w/2)
@@ -78,14 +77,14 @@ function (require,   $,        rdapi,   jig) {
                 var w = 200,
                 h = 200,
                 r = w / 2
-                
+
                 var sum = pv.sum(json.map(function (d) d[0]));
-                
+
                 var vis = new pv.Panel()
                     .width(w)
                     .height(h)
                     .canvas("shares_per_domain");
-                
+
                 vis.add(pv.Wedge)
                     .data(json)
                     .left(w/2)
@@ -122,7 +121,7 @@ function (require,   $,        rdapi,   jig) {
 //    ["2010-12-01", 1798], ["2010-12-02", 1601]];
                 var max = pv.max(json.map(function (d) d[1]));
                 var days = json.map(function (d) d[0]);
-                
+
                 /* Sizing and scales. */
                 var w = 800,
                     h = 400,
@@ -130,20 +129,20 @@ function (require,   $,        rdapi,   jig) {
                     btm = 100,
                     bsp = 2,
                     bw = (w/json.length-2) - bsp;
-                
+
                 /* The root panel. */
                 var vis = new pv.Panel()
                     .width(w)
                     .height(h)
                     .canvas("shares_per_day");
-                
+
                 /* The bars. */
                 vis.add(pv.Bar)
                     .data(json)
                     .bottom(btm-10).width(bw)
                     .height(function(d) (d[1] / max) * h)
                     .left(function() this.index * (bw+bsp) + left);
-                
+
                 /* y-axis and ticks. */
                 var hmarks = 10;
                 var interval = max/hmarks;
@@ -157,7 +156,7 @@ function (require,   $,        rdapi,   jig) {
                 .anchor("left").add(pv.Label)
                     .visible(function(d) d > 0)
                     .text(function (d) d.toFixed());
-                
+
                 /* X-axis and ticks. */
                 vis.add(pv.Rule)
                     .data(days)
@@ -169,13 +168,13 @@ function (require,   $,        rdapi,   jig) {
                     .textAlign("left")
                     .textBaseline("middle")
                     .textAngle(Math.PI / 2)
-                
-                
+
+
                 vis.render();
 
            }
         }
     });
-    
-    
+
+
 });

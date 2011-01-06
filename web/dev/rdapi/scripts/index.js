@@ -22,11 +22,10 @@
  * */
 'use strict';
 /*jslint plusplus: false, regexp: false */
-/*global require: false, location: true, setTimeout: false, alert: false
-  window: false, document: false */
+/*global require: false, define: false, location: true, setTimeout: false,
+ alert: false, window: false, document: false */
 
-require.def('index',
-        ['jquery', 'rdapi', 'blade/object', 'blade/jig'],
+define([ 'jquery', 'rdapi', 'blade/object', 'blade/jig'],
 function ($,        rdapi,   object,         jig) {
 
     var docs, urlSection, toc = [],
@@ -306,7 +305,7 @@ function ($,        rdapi,   object,         jig) {
                     tocHtml += jig(jig.cache('sectionToc'), tocItem, {});
 
                     //Create content entry
-                    html += jig(jig.cache('sectionContent'), tocItem, {}); 
+                    html += jig(jig.cache('sectionContent'), tocItem, {});
                 });
 
                 $("#toc").append(tocHtml);
@@ -359,7 +358,7 @@ function ($,        rdapi,   object,         jig) {
                         } else {
                             method.queryargs.forEach(function (arg) {
                                 params += '<tr><td class="paramName">' + arg.name + '</td><td class="paramValue">';
-    
+
                                 if (arg.allowed) {
                                     params += '<select name="' + arg.name + '">' +
                                               '<option value=""></option>';
@@ -409,7 +408,8 @@ function ($,        rdapi,   object,         jig) {
                             url = form.find('.apiUrl').html(),
                             editableUrl = form.find('.editApiUrl'),
                             requestBody = form.find('.requestBody').val().trim(),
-                            data = {};
+                            data = {},
+                            options, csrfToken;
 
                         evt.preventDefault();
 
@@ -444,9 +444,9 @@ function ($,        rdapi,   object,         jig) {
 
                             data = requestBody;
                         }
-                        
 
-                        var options = {
+
+                        options = {
                             type: 'POST',
                             url: url,
                             data: data,
@@ -462,13 +462,13 @@ function ($,        rdapi,   object,         jig) {
                                     ERROR: xhr.responseText
                                 }));
                             }
-                        }
+                        };
 
-                        var csrfToken =  getCsrfToken();
+                        csrfToken =  getCsrfToken();
                         if (csrfToken) {
                             options.beforeSend = function (xhr) {
                                 xhr.setRequestHeader('X-CSRF', csrfToken);
-                            }
+                            };
                         }
 
                         //Construct the data call.

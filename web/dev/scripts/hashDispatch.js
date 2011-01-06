@@ -22,17 +22,17 @@
  * */
 
 'use strict';
-/*jslint  */
-/*global require: false, location: true, window: false */
+/*jslint nomen: false */
+/*global define: false, location: true, window: false */
 
-require.def('hashDispatch', function (object) {
+define([], function () {
 
     /**
      * Registers an object to receive hash changes. Expects the object
      * to have property names that match the hash values.
      * It will call the actions object immediately if the current hash
      * matches a method on the object.
-     * 
+     *
      * @param {Object} actions the object that has property names that
      * map to hash values and values for the properties are functions
      * to be called. The name '_default' is used for any default action

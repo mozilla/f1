@@ -22,10 +22,10 @@
  * */
 
 /*jslint indent: 2 */
-/*global require: false, localStorage: false */
+/*global define: false, localStorage: false */
 "use strict";
 
-require.def("storage", function () {
+define([], function () {
   var store = localStorage, type = 'localStorage';
 
   //Capability detect for localStorage. At least one add-on does weird things

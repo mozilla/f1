@@ -22,7 +22,7 @@
  * */
 
 /*jslint plusplus: false, indent: 2 */
-/*global require: false, location: false, window: false */
+/*global require: false, define: false, location: false, window: false */
 "use strict";
 
 /**
@@ -31,9 +31,7 @@
  * to participate in the pub/sub via postMessage without having to
  * participate in this particular module.
  */
-require.def('dispatch',
-    ['jquery'],
-function ($,    object,     fn) {
+define(['jquery'], function ($) {
 
   var origin = location.protocol + "//" + location.host;
 

@@ -25,7 +25,7 @@
 /*global require: false, window: false, location: true, navigator: false */
 'use strict';
 
-require.def(['require', 'jquery', 'hashDispatch'],
+define(['require', 'jquery', 'hashDispatch'],
     function (require,   $,        hashDispatch) {
 
     $(function () {

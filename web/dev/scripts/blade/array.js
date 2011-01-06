@@ -4,11 +4,11 @@
  * see: http://github.com/jrburke/blade for details
  */
 /*jslint  nomen: false, plusplus: false */
-/*global require: false */
+/*global define: false */
 
 'use strict';
 
-require.def('blade/array', function () {
+define([], function () {
     var ostring = Object.prototype.toString,
 
         array = {

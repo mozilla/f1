@@ -35,13 +35,13 @@
         width: 100%;
         border: 0;
     }
-    
+
     #accountForm textarea {
         width: 50%;
         height: 150px;
     }
     </style>
-    <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+    <script src="../../scripts/requireplugins-jquery.js" charset="utf-8"></script>
     <script>
         require(["require", "jquery", "blade/fn", "rdapi", "blade/url"],
         function (require,   $,        fn,         rdapi,   url) {
@@ -49,7 +49,7 @@
                 var accountForm = $('#accountForm'),
                     iframeNode = $('#shareFrame')[0],
                     shareUrl = 'index.html';
-    
+
                 accountForm.bind('submit', function (evt) {
                     var options = JSON.parse(accountForm.find('textarea').val());
                     iframeNode.src = shareUrl +

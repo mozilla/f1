@@ -22,11 +22,10 @@
  * */
 
 /*jslint plusplus: false, nomen: false, regexp: false */
-/*global require: false, document: false, hex_md5: false, localStorage: false, console: false */
+/*global define: false, document: false, hex_md5: false, localStorage: false, console: false */
 "use strict";
 
-require.def('rdapi',
-        ['require', 'jquery', 'blade/object', 'blade/jig', 'friendly', 'isoDate', 'md5'],
+define([ 'require', 'jquery', 'blade/object', 'blade/jig', 'friendly', 'isoDate', 'md5'],
 function (require,   $,        object,         jig,         friendly,   isoDate) {
 
     var rdapi,
@@ -48,7 +47,7 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
                             url = photo.value;
                         }
                     });
-                } else 
+                } else
                 if (contact.emails && contact.emails.length) {
                     // gravatar as a default
                     mailaddr = contact.emails[0].value;

@@ -23,11 +23,10 @@
  * */
 
 /*jslint indent: 2 */
-/*global require: false, window: false, location: false */
+/*global define: false, window: false, location: false */
 "use strict";
 
-require.def("oauth",
-function () {
+define([], function () {
   var authDone, win, lastTime = 0;
 
   //Handle communication from the auth window, when it completes.

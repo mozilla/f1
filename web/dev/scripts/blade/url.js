@@ -4,11 +4,11 @@
  * see: http://github.com/jrburke/blade for details
  */
 /*jslint  nomen: false, plusplus: false */
-/*global require: false */
+/*global define: false */
 
 'use strict';
 
-require.def('blade/url', ['blade/array'], function (array) {
+define(['./array'], function (array) {
     var ostring = Object.prototype.toString;
 
     return {
@@ -19,7 +19,7 @@ require.def('blade/url', ['blade/array'], function (array) {
             //    example:
             //        this object:
             //
-            //        |    { 
+            //        |    {
             //        |        blah: "blah",
             //        |        multi: [
             //        |            "thud",
@@ -28,9 +28,9 @@ require.def('blade/url', ['blade/array'], function (array) {
             //        |    };
             //
             //    yields the following query string:
-            //    
+            //
             //    |    "blah=blah&multi=thud&multi=thonk"
-    
+
             // FIXME: need to implement encodeAscii!!
             var enc = encodeURIComponent,
                 pairs = [],
@@ -63,7 +63,7 @@ require.def('blade/url', ['blade/array'], function (array) {
             //        This string:
             //
             //    |        "foo=bar&foo=baz&thinger=%20spaces%20=blah&zonk=blarg&"
-            //        
+            //
             //        results in this object structure:
             //
             //    |        {
@@ -71,7 +71,7 @@ require.def('blade/url', ['blade/array'], function (array) {
             //    |            thinger: " spaces =blah",
             //    |            zonk: "blarg"
             //    |        }
-            //    
+            //
             //        Note that spaces and other urlencoded entities are correctly
             //        handled.
             var ret = {},

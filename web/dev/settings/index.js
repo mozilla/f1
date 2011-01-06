@@ -22,12 +22,11 @@
  * */
 
 /*jslint indent: 2, plusplus: false */
-/*global require: false, window: false, location: true, localStorage: false,
+/*global define: false, window: false, location: true, localStorage: false,
   opener: false, setTimeout: false, setInterval: false, document: false */
 "use strict";
 
-require.def("index",
-        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
+define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
          "dispatch", "storage", "accounts", "dotCompare", "blade/url",
          "services", "jquery.colorFade", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,
@@ -46,7 +45,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       return domain ? domain.name : '';
     },
     accountName: function (displayName, account) {
-      return account.username && account.username != displayName ? displayName+", "+account.username : displayName;
+      return account.username && account.username !== displayName ? displayName + ", " + account.username : displayName;
     }
   });
 

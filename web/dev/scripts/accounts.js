@@ -22,12 +22,11 @@
  * */
 
 /*jslint indent: 2 */
-/*global require: false, window: false, location: true, localStorage: false,
-  opener: false, setTimeout: false */
+/*global require: false, define: false, window: false, location: true,
+ localStorage: false, opener: false, setTimeout: false */
 'use strict';
 
-require.def('accounts',
-        ['storage', 'dispatch', 'rdapi'],
+define([ 'storage', 'dispatch', 'rdapi'],
 function (storage,   dispatch,   rdapi) {
 
   var store = storage(), impl,

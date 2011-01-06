@@ -4,11 +4,11 @@
  * see: http://github.com/jrburke/blade for details
  */
 /*jslint  nomen: false, plusplus: false */
-/*global require: false */
+/*global define: false */
 
 'use strict';
 
-require.def('blade/dispatch', ['blade/object', 'blade/fn'], function (object, fn) {
+define(['./object', './fn'], function (object, fn) {
     var emptyFunc = function () {},
         mainDispatch,
         slice = Array.prototype.slice,
@@ -94,7 +94,7 @@ require.def('blade/dispatch', ['blade/object', 'blade/fn'], function (object, fn
              * listeners before the default action happens. A "before" listener
              * can also prevent the default action from occurring. "after" listeners
              * only get to be notified of the return value from the event.
-             * 
+             *
              * @param {Object||String} message the message can either be an object
              * with the following properties:
              * @param {String} message.name the name of the message
@@ -114,8 +114,8 @@ require.def('blade/dispatch', ['blade/object', 'blade/fn'], function (object, fn
              * either set the property value on this object that matches the name
              * to the first arg value, or if the name maps to function property
              * on the object, it will call that function with the args.
-             * 
-             * @returns {Object} the returnValue from any 
+             *
+             * @returns {Object} the returnValue from any
              */
             send: function (message) {
                 if (typeof message === 'string') {

@@ -4,13 +4,11 @@
  * see: http://github.com/jrburke/blade for details
  */
 /*jslint  nomen: false, plusplus: false */
-/*global require: false, document: false, console: false, jQuery: false */
+/*global define: false, document: false, console: false, jQuery: false */
 
 'use strict';
 
-require.def('blade/jig',
-        ['require', 'blade/object'],
-function (require,   object) {
+define(['require', './object'], function (require,   object) {
 
     //Fix unit test: something is wrong with it, says it passes, but
     //with attachData change, the string is actually different now.
@@ -601,7 +599,7 @@ function (require,   object) {
      * Script tags with type="text/template" are parsed, as well as DOM elements
      * that have a class of "template" on them. The found nodes will be removed
      * from the DOM as part of the parse operation.
-     * 
+     *
      * @param {Array-Like} [nodes] An array-like list of nodes. Could be a NodeList.
      * @param {Object} [options] A collection of options to use for compilation.
      */
@@ -720,7 +718,9 @@ function (require,   object) {
     /**
      * Track errors by logging to console if available.
      */
-    jig.error = function (msg) { throw msg; };
+    jig.error = function (msg) {
+        throw msg;
+    };
 
     /**
      * Adds functions to the default set of functions that can be used inside
@@ -736,7 +736,7 @@ function (require,   object) {
     /**
      * Gets and sets the data bound to a particular rendered template. Setting
      * the data does not change the already rendered template.
-     * 
+     *
      * @param {String||DOMNode} dataId the data ID, or a DOM node with a
      * data-blade-jig attribute that was generated from a rendered template.
      * @returns {Object} the bound data. Can return undefined if there is
@@ -770,7 +770,7 @@ function (require,   object) {
     /**
      * Gets an object given a string representation. For example,
      * jig.getObject('foo.bar', baz) will return the baz.foo.bar value.
-     * 
+     *
      * @param {String} name the string value to fetch. The following formats
      * are allowed: 'foo.bar', 'foo['bar']', 'foo[0]', 'foo[2:6]'. The last one
      * will return an array subset. Functions are also supported: 'doSomething(foo.bar)'
@@ -856,4 +856,3 @@ function (require,   object) {
 
     return jig;
 });
-

@@ -22,10 +22,10 @@
  * */
 
 /*jslint nomen: false, plusplus: false */
-/*global require: false, clearTimeout: false, setTimeout: false */
+/*global define: false, clearTimeout: false, setTimeout: false */
 "use strict";
 
-require.def("placeholder", ["jquery"], function ($) {
+define(["jquery"], function ($) {
 
     /**
      * Set the input value to use placeholder value if HTML5 placeholder
@@ -83,7 +83,7 @@ require.def("placeholder", ["jquery"], function ($) {
      * attribute, and attach placeholder behavior to it.
      * Allow for the existence of browsers that already have placeholder support
      * built in.
-     * 
+     *
      * @param {DOMNode} domNode
      * @param {Widget} [widget] an optional widget that will track the connect handles.
      *

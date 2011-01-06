@@ -22,12 +22,11 @@
  * */
 
 /*jslint plusplus: false, indent: 2 */
-/*global require: false, location: true, window: false, alert: false,
+/*global require: false, define: false, location: true, window: false, alert: false,
   document: false, setTimeout: false, localStorage: false */
 "use strict";
 
-require.def("index",
-        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
+define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
          "placeholder", "AutoComplete", "dispatch", "accounts",
          "storage", "services",
          "jquery-ui-1.8.7.min", "jquery.textOverflow"],
@@ -407,7 +406,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         } else if (svc.shorten) {
           sendData.shorten = true;
         }
-        
+
         // fixup to addressing if necessary
         if (sendData.to) {
             var contacts = svc.getContacts(store);
@@ -431,7 +430,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       .each(function (i, node) {
         placeholder(node);
       });
-      
+
     //Session restore, do after form setting above.
     if (sessionRestore) {
       sessionRestore = JSON.parse(sessionRestore);
@@ -634,7 +633,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     window.addEventListener("hashchange", function () {
         location.reload();
     }, false);
-    
+
 
     //Callback handler for JSONP feed response from Google.
     window.onFeedLoad = function (x, data) {

@@ -22,39 +22,40 @@
  * */
 
 /*jslint indent: 2 */
-/*global require: false, window: false, location: true, localStorage: false,
+/*global define: false, window: false, location: true, localStorage: false,
   opener: false, setTimeout: false */
 
 'use strict';
 
-require.def('services',
-        ['rdapi', "blade/url", "TextCounter"],
+define([ 'rdapi', "blade/url", "TextCounter"],
 function (rdapi,   url,         TextCounter) {
 
   var options = url.queryToObject(location.href.split('#')[1] || '') || {},
   showNew = options.show === 'new';
-  
+
   function svcBase(name, options) {
-    if (!name) return;
+    if (!name) {
+        return;
+    }
     this.name = name;
     this.type = name.replace(/\s/g,'').toLowerCase();
     this.tabName = this.type+'Tab';
     this.icon = 'i/'+this.type+'Icon.png';
     this.shorten = false;
     this.autoCompleteWidget = null;
-    
+
     // text counter support
     this.counter = null;
     this.textlimit = 0;
     this.urlsize = 26;
-    
+
     // set options
     this.features = {
       counter: false,
       direct: false,
       subject: false
     }
-    
+
     for (var i in options) {
       this[i] = options[i];
     }
@@ -152,7 +153,7 @@ function (rdapi,   url,         TextCounter) {
       return data;
     }
   };
-  
+
   /* common functionality for email based services */
   function emailSvcBase() {
     svcBase.constructor.apply(this, arguments);
@@ -184,7 +185,7 @@ function (rdapi,   url,         TextCounter) {
     });
     return data;
   }
-  
+
   var svcs = {
     showNew: showNew,
     domains: {
@@ -263,6 +264,6 @@ function (rdapi,   url,         TextCounter) {
   for (var i in svcs.domains) {
     svcs.domainList.push(i);
   }
-  
+
   return svcs;
 });

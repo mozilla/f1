@@ -30,7 +30,7 @@
     <title>Send a message</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 
-    <script src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+    <script src="../../scripts/requireplugins-jquery.js" charset="utf-8"></script>
     <script>require(["index.js"]);</script>
     <style>
         html, body {
@@ -70,11 +70,11 @@
                     <input type="hidden" name="end_point_failure" value="/scratch/send/#failure">
                     <input type="hidden" name="end_point_auth_failure" value="/scratch/send/#auth_failure">
                     <button>send</button>
-                        
+
                 </div>
                 <div class="c1">
                     <div class="usernameError error invisible">Please enter your Twitter name</div>
-               </div> 
+               </div>
             </div>
         </form>
     </div>
@@ -90,7 +90,7 @@
     </div>
 
     <!-- auth failure section
-    
+
     This is the end_point for when the *send* request fails auth (but not
     when the explicit auth request fails) - when this happens we do the
     explicit auth.

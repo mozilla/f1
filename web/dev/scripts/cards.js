@@ -22,10 +22,11 @@
  * */
 
 /*jslint */
-/*global require: false, window: false, document: false, cards: true */
+/*global require: false, define: false, window: false, document: false, cards: true */
 'use strict';
 
-require.def('cards', ['jquery', 'text!templates/cardsHeader.html'], function ($, headerTemplate) {
+define([ 'jquery', 'text!templates/cardsHeader.html'],
+function ($,        headerTemplate) {
     var header, display, back, nlCards,
         cardPosition = 0,
         headerText = '',
@@ -89,7 +90,7 @@ require.def('cards', ['jquery', 'text!templates/cardsHeader.html'], function ($,
      * Adds a new card to the list of cards, at the end of the cards.
      * Only adds the card, does not navigate to it. Only adds the card
      * if a DOM element with the info.id does not already exist in the page.
-     * 
+     *
      * @param {Object} info the info about the card. It must have the following
      * properties:
      * @param {String} info.id the ID to use for the new card's DOM element.

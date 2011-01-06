@@ -22,12 +22,11 @@
  * */
 
 /*jslint plusplus: false, indent: 2 */
-/*global require: false, location: true, window: false, alert: false,
+/*global define: false, location: true, window: false, alert: false,
   document: false, setTimeout: false, localStorage: false */
 "use strict";
 
-require.def("index",
-        ["require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
+define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
          "placeholder", "TextCounter", "AutoComplete", "dispatch", "accounts",
          "storage", "services",
          "jquery-ui-1.8.6.custom.min", "jquery.textOverflow"],
@@ -191,20 +190,21 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
    * store data.
    */
   function updateAutoComplete(serviceName) {
-    var svc = services.domains[serviceName];
-    var toNode = $('#'+svc.type).find('[name="to"]')[0],
-        contacts = svc.getContacts(store);
+    var svc = services.domains[serviceName],
+        toNode = $('#' + svc.type).find('[name="to"]')[0],
+        contacts = svc.getContacts(store),
+        acdata;
     if (!contacts) {
-        contacts = {};
+      contacts = {};
     }
 
     if (!svc.autoCompleteWidget) {
       svc.autoCompleteWidget = new AutoComplete(toNode);
     }
-    var acdata = {
-        domain: serviceName,
-        contacts: contacts
-    }
+    acdata = {
+      domain: serviceName,
+      contacts: contacts
+    };
     dispatch.pub('autoCompleteData', acdata);
   }
 
@@ -213,9 +213,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
    * server if there is no store copy.
    */
   function storeContacts(serviceName, account) {
-    var svcAccount = account.accounts[0];
-    var svc = services.domains[svcAccount.domain];
-    var contacts = svc.getContacts(store);
+    var svcAccount = account.accounts[0],
+        svc = services.domains[svcAccount.domain],
+        contacts = svc.getContacts(store);
     if (!contacts) {
       rdapi('contacts/' + svcAccount.domain, {
         type: 'POST',
@@ -277,12 +277,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       var name = account.displayName,
         svcAccount = account.accounts[0],
         photo = account.photos && account.photos[0] && account.photos[0].value,
-        serviceDom = $('#' + service);
+        serviceDom = $('#' + service),
+        username;
 
       // XXX for email services, we should show the email account, but we
       // cannot rely on userid being a 'pretty' name we can display
-      var username = svcAccount.username;
-      if (username && username != name) {
+      username = svcAccount.username;
+      if (username && username !== name) {
         name = name + " <" + username + ">";
       }
 
@@ -343,7 +344,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   function updateAccounts(accounts) {
     var hasLastSelectionMatch = false,
         userAccounts = {}, selection,
-        sessionRestore = store.sessionRestore;
+        sessionRestore = store.sessionRestore,
+        act;
 
     if ((accounts && accounts.length)) {
       //Figure out what accounts we do have
@@ -369,9 +371,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       delete store.accountAdded;
     }
 
-    for (var act in userAccounts) {
-      updateAccountDisplay(act, userAccounts[act]);
-      storeContacts(act, userAccounts[act]);
+    for (act in userAccounts) {
+      if (userAccounts.hasOwnProperty(act)) {
+        updateAccountDisplay(act, userAccounts[act]);
+        storeContacts(act, userAccounts[act]);
+      }
     }
 
     //Session restore, do after form setting above.
@@ -449,9 +453,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   $(function () {
-    var thumbImgDom, picture,
+    var thumbImgDom,
       sessionRestore = store.sessionRestore,
-      tabSelectionDom, tabhtml='', panelhtml='';
+      tabSelectionDom, tabhtml = '', panelhtml = '',
+      svc;
 
     // first thing, fill in the supported services
     services.domainList.forEach(function (domain) {
@@ -572,8 +577,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     );
 
-    for (var svc in services.domains) {
-      services.domains[svc].setFormData(options);
+    for (svc in services.domains) {
+      if (services.domains.hasOwnProperty(svc)) {
+        services.domains[svc].setFormData(options);
+      }
     }
 
     //If the message containder doesn't want URLs then respect that.
@@ -609,7 +616,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     $("form.messageForm")
       .submit(function (evt) {
 
-        var form = evt.target;
+        var form = evt.target,
+            svc, contacts, recip, acct, newrecip;
 
         //Make sure all form elements are trimmed and username exists.
         //Then collect the form values into the data object.
@@ -627,29 +635,30 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             sendData[node.name] = node.value;
           }
         });
-        var svc = services.domains[sendData.domain];
+        svc = services.domains[sendData.domain];
 
         if (options.shortUrl) {
           sendData.shorturl = options.shortUrl;
         } else if (svc.shorten) {
           sendData.shorten = true;
         }
-        
+
         // fixup to addressing if necessary
         if (sendData.to) {
-            var contacts = svc.getContacts(store);
-            var newrecip = []
-            if (contacts) {
-                var recip = sendData.to.split(',');
-                recip.forEach(function(to) {
-                    var acct = contacts[to.trim()];
-                    if (acct && !acct.email)
-                        newrecip.push(acct.userid ? acct.userid : acct.username);
-                })
-            }
-            if (newrecip.length > 0) {
-                sendData.to = newrecip.join(', ');
-            }
+          contacts = svc.getContacts(store);
+          newrecip = [];
+          if (contacts) {
+            recip = sendData.to.split(',');
+            recip.forEach(function (to) {
+              acct = contacts[to.trim()];
+              if (acct && !acct.email) {
+                newrecip.push(acct.userid ? acct.userid : acct.username);
+              }
+            });
+          }
+          if (newrecip.length > 0) {
+            sendData.to = newrecip.join(', ');
+          }
         }
 
         sendMessage();
