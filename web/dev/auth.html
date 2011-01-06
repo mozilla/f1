@@ -27,7 +27,7 @@
   <title>Firefox Share OAuthorization</title>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 
-  <script src="scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+  <script src="/dev/scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
   <style>
     html, body {
       background-color: #fff;
@@ -55,7 +55,7 @@
     .invisible {
       visibility: hidden;
     }
-    
+
     #oauth {
       background-color: #fff;
       width: 100%;
@@ -65,12 +65,12 @@
       margin-left: -150px;
       margin-top: -95px;
       width: 300px;
-      background-image: url("i/f1Logo.png");
+      background-image: url("/dev/i/f1Logo.png");
       background-position: center top;
       background-repeat: no-repeat;
       padding: 100px 0 0 0;
     }
-    
+
     #oauth .text {
       display: block;
       margin: 0 0 7px 0;
@@ -86,7 +86,7 @@
     .controls {
       width: 300px;
     }
-    
+
     button {
       height: 30px;
       border-width: 1px 1px 1px 0;
@@ -94,26 +94,26 @@
       border-color: #888;
       cursor: pointer;
       padding: 0 10px;
-      
+
       -moz-border-radius: 0 2px 2px 0;
       -webkit-border-radius: 0 2px 2px 0;
       border-radius: 0 2px 2px 0;
-      
+
       background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
       background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
     }
-    
+
     button:active {
       -moz-box-shadow: 0 0 1px #666666 inset;
       -webkit-box-shadow: 0 0 1px #666666 inset;
       box-shadow: 0 0 1px #666666 inset;
-      
+
       background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
       background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
     }
-    
+
     input {
-      border-width: 1px; 
+      border-width: 1px;
       border-style: solid;
       border-color: #888;
       font-family: "Lucida Grande", Verdana, sans-serif;
@@ -121,118 +121,118 @@
       line-height: 18px;
       padding: 3px;
       margin: 0;
-      
+
       -moz-border-radius: 2px 0 0 2px;
       -moz-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
     }
-    
+
     input:focus {
       -moz-box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25) inset,  0 1px 0 #fff;
     }
-    
+
     input.google {
-      background-image: url("i/sprite.png");
+      background-image: url("/dev/i/sprite.png");
       background-position: 5px -159px;
       background-repeat: no-repeat;
       padding: 0 0 0 26px;
     }
-    
+
     .hbox {
     	display: -webkit-box;
     	-webkit-box-orient: horizontal;
     	-webkit-box-align: stretch;
-     
+
     	display: -moz-box;
     	-moz-box-orient: horizontal;
     	-moz-box-align: stretch;
-     
+
     	display: box;
     	box-orient: horizontal;
     	box-align: stretch;
     }
-     
+
     .hbox > * {
     	-webkit-box-flex: 0;
     	-moz-box-flex: 0;
     	box-flex: 0;
     	display: block;
     }
-     
+
     .vbox {
     	display: -webkit-box;
     	-webkit-box-orient: vertical;
     	-webkit-box-align: stretch;
-     
+
     	display: -moz-box;
     	-moz-box-orient: vertical;
     	-moz-box-align: stretch;
-     
+
     	display: box;
     	box-orient: vertical;
     	box-align: stretch;
     }
-     
+
     .vbox > * {
     	-webkit-box-flex: 0;
     	-moz-box-flex: 0;
     	box-flex: 0;
     	display: block;
     }
-     
+
     .spacer {
     	-webkit-box-flex: 1;
     	-moz-box-flex: 1;
     	box-flex: 1;
     }
-     
+
     .reverse {
     	-webkit-box-direction: reverse;
     	-moz-box-direction: reverse;
     	box-direction: reverse;
     }
-     
+
     .boxFlex0 {
     	-webkit-box-flex: 0;
     	-moz-box-flex: 0;
     	box-flex: 0;
     }
-     
+
     .boxFlex1, .boxFlex {
     	-webkit-box-flex: 1;
     	-moz-box-flex: 1;
     	box-flex: 1;
     }
-     
+
     .boxFlex2 {
     	-webkit-box-flex: 2;
     	-moz-box-flex: 2;
     	box-flex: 2;
     }
-     
+
     .boxGroup1 {
     	-webkit-box-flex-group: 1;
     	-moz-box-flex-group: 1;
     	box-flex-group: 1;
     }
-     
+
     .boxGroup2 {
     	-webkit-box-flex-group: 2;
     	-moz-box-flex-group: 2;
     	box-flex-group: 2;
     }
-     
+
     .start {
     	-webkit-box-pack: start;
     	-moz-box-pack: start;
     	box-pack: start;
     }
-     
+
     .end {
     	-webkit-box-pack: end;
     	-moz-box-pack: end;
     	box-pack: end;
     }
-     
+
     .center {
     	-webkit-box-pack: center;
     	-moz-box-pack: center;
@@ -245,7 +245,7 @@
     function (require,   $,        url) {
       var target = window.location.href.split('#')[1];
       if (target && (target === 'oauth_success' || target === 'oauth_failure')) {
-        
+
         //TODO: ideally lock down the domain be location.hostname, but
         //a problem for 127 addresses?
         window.opener.postMessage(target, '*');
@@ -295,4 +295,3 @@
   <div id='message' class="connecting"><img src="i/loader-w.gif"> connecting...</div>
 </body>
 </html>
-

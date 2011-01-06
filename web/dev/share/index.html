@@ -24,8 +24,8 @@
 <html>
 <head>
   <title>F1 Alpha</title>
-  <link rel="stylesheet" type="text/css" href="share.css">
-  <script data-main="index.js" src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
+  <link rel="stylesheet" type="text/css" href="/dev/share/share.css">
+  <script data-main="/dev/share/index.js" src="/dev/scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
   <!-- Uncomment if you want to use more jQuery UI besides tabs. -->
   <!-- script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script-->
 </head>
@@ -45,13 +45,13 @@
       <span class="status inactive"></span>
     </div>
     <div class="rightActions">
-      <a id="newLink" href="../settings/#show=new" class="settingsLink new hidden" target="_blank">new accounts!</a>
-      <a href="../settings/" class="settingsLink" target="_blank">settings</a>
+      <a id="newLink" href="/dev/settings/#show=new" class="settingsLink new hidden" target="_blank">new accounts!</a>
+      <a href="/dev/settings/" class="settingsLink" target="_blank">settings</a>
       <a href="http://feedback.mozillalabs.com/forums/68185-messaging-add-ons" target="_blank">feedback</a>
       <span class="close"></span>
     </div>
   </ul>
-  
+
   <div id="debug" class="ui-tabs-hide">
     <div class="hbox messageForm">
       <div style="width:450px;">
@@ -90,7 +90,7 @@
         <input type="hidden" name="title" value="" />
         <input type="hidden" name="caption" value="" />
         <input type="hidden" name="description" value="" />
-        <span class="avatar"><img class="avatar" src="i/face2.png"></span>
+        <span class="avatar"><img class="avatar" src="/dev/share/i/face2.png"></span>
         <span class="username">Username</span>
       </div>
       <div class="thumb hidden">
@@ -149,11 +149,11 @@
 
 <!-- Start status messages, should be last in the page for z-order purposes -->
 <div id="statusSettings" class="status hidden noConfig">
-  <img src="i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="../settings/">click here to setup F1</a>
+  <img src="/dev/share/i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="/dev/settings/">click here to setup F1</a>
 </div>
 
 <div id="statusSharing" class="status hidden">
-  <img src="i/loader.gif"> sharing...
+  <img src="/dev/share/i/loader.gif"> sharing...
 </div>
 
 <div id="statusOAuthFailed" class="status hidden error">
