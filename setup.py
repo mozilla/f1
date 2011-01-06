@@ -63,6 +63,7 @@ setup(
     entry_points="""
     [paste.app_factory]
     main = linkdrop.config.middleware:make_app
+    static = linkdrop.static:make_static
 
     [paste.filter_app_factory]
     csrf = linkdrop.csrf:make_csrf_filter_app
