@@ -33,7 +33,7 @@ class StaticURLParser(object):
         if not path_info:
             return self.add_slash(environ, start_response)
         directory = "%s" % self.directory
-        if (not path_info.startswith('/%s/' % self.version) or version_re.match(path_info) is None) and directory == self.root_directory:
+        if not path_info.startswith('/%s/' % self.version) and version_re.match(path_info) is None and directory == self.root_directory:
             directory = os.path.join(directory, self.version)
         if path_info == '/':
             # @@: This should obviously be configurable
