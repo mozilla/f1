@@ -1085,10 +1085,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   if (!ffshare.prefs.share_url) {
     if (ffshare.prefs.system === 'dev') {
-      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/dev/share/';
+      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/share/';
     } else if (ffshare.prefs.system === 'devpopup') {
       usepopup = true;
-      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/dev/play/designs/popup';
+      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/play/designs/popup';
     } else if (ffshare.prefs.system === 'staging') {
       ffshare.prefs.share_url = 'https://f1-staging.mozillamessaging.com/share/';
     } else {
@@ -1098,7 +1098,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   if (!ffshare.prefs.frontpage_url) {
     if (ffshare.prefs.system === 'dev') {
-      ffshare.prefs.frontpage_url = 'http://linkdrop.caraveo.com:5000/dev/';
+      ffshare.prefs.frontpage_url = 'http://linkdrop.caraveo.com:5000/';
     } else if (ffshare.prefs.system === 'staging') {
       ffshare.prefs.frontpage_url = 'http://f1-staging.mozillamessaging.com/';
     } else {
