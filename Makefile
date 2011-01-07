@@ -73,6 +73,8 @@ web: $(static_dir)
 $(static_dir):
 	rsync -av $(web_dir)/ $(static_dir)/
 
+	find $(static_dir) -name \*.html | xargs perl -i -pe 's:/dev/:/$(version)/:go'
+
 	cd $(static_dir) && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/settings && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/share && $(requirejs_dir)/build/build.sh build.js
