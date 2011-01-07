@@ -1,6 +1,6 @@
 /**
- * @license Copyright (c) 2004-2010, The Dojo Foundation All Rights Reserved.
- * Available via the MIT, GPL or new BSD license.
+ * @license Copyright (c) 2010, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
 
@@ -48,6 +48,26 @@ var parse;
     }
 
     /**
+     * Calls compiler.parse, and if any errors, throws.
+     */
+    function compilerParse(jsSourceFile, fileName) {
+        var result = compiler.parse(jsSourceFile),
+            errorManager = compiler.getErrorManager(),
+            errorMsg = '', errors, i;
+
+        if (errorManager.getErrorCount() > 0) {
+            errorMsg += 'ERROR(S) in file: ' + fileName + ':\n';
+            errors = errorManager.getErrors();
+            for (i = 0; i < errors.length; i++) {
+                errorMsg += errors[i].toString() + '\n';
+            }
+            throw new Error(errorMsg);
+        }
+
+        return result;
+    }
+
+    /**
      * Validates a node as being an object literal (like for i18n bundles)
      * or an array literal with just string members.
      * This function does not need to worry about comments, they are not
@@ -60,7 +80,7 @@ var parse;
             return true;
         }
 
-        //Dependencies can be an object literal or an array. 
+        //Dependencies can be an object literal or an array.
         if (type !== ARRAYLIT) {
             return false;
         }
@@ -74,18 +94,18 @@ var parse;
     }
 
     /**
-     * Main parse function. Returns a string of any valid require or require.def
+     * Main parse function. Returns a string of any valid require or define/require.def
      * calls as part of one JavaScript source string.
      * @param {String} fileName
      * @param {String} fileContents
-     * @returns {String} JS source string or null, if no require or require.def
+     * @returns {String} JS source string or null, if no require or define/require.def
      * calls are found.
      */
     parse = function (fileName, fileContents) {
         //Set up source input
         var matches = [], result = null,
-        jsSourceFile = closurefromCode(String(fileName), String(fileContents)),
-        astRoot = compiler.parse(jsSourceFile);
+            jsSourceFile = closurefromCode(String(fileName), String(fileContents)),
+            astRoot = compilerParse(jsSourceFile, fileName);
 
         parse.recurse(astRoot, matches);
 
@@ -109,7 +129,7 @@ var parse;
                 matches.push(parsed);
             }
             parse.recurse(node, matches);
-        }        
+        }
     };
 
     /**
@@ -120,15 +140,15 @@ var parse;
      */
     parse.definesRequire = function (fileName, fileContents) {
         var jsSourceFile = closurefromCode(String(fileName), String(fileContents)),
-            astRoot = compiler.parse(jsSourceFile);
+            astRoot = compilerParse(jsSourceFile, fileName);
 
         return parse.nodeHasRequire(astRoot);
     };
 
     /**
      * Finds require("") calls inside a CommonJS anonymous module wrapped in a
-     * require.def(function(require, exports, module){}) wrapper. These dependencies
-     * will be added to a modified require.def call that lists the dependencies
+     * define/require.def(function(require, exports, module){}) wrapper. These dependencies
+     * will be added to a modified define() call that lists the dependencies
      * on the outside of the function.
      * @param {String} fileName
      * @param {String} fileContents
@@ -137,10 +157,10 @@ var parse;
      */
     parse.getAnonDeps = function (fileName, fileContents) {
         var jsSourceFile = closurefromCode(String(fileName), String(fileContents)),
-            astRoot = compiler.parse(jsSourceFile),
+            astRoot = compilerParse(jsSourceFile, fileName),
             deps = [],
             defFunc = parse.findAnonRequireDefCallback(astRoot);
-        
+
         //Now look inside the def call's function for require calls.
         if (defFunc) {
             parse.findRequireDepNames(defFunc, deps);
@@ -173,6 +193,16 @@ var parse;
                     //Bingo.
                     return func;
                 }
+            }
+        } else if (node.getType() === EXPR_RESULT &&
+            node.getFirstChild().getType() === CALL &&
+            node.getFirstChild().getFirstChild().getType() === NAME &&
+            nodeString(node.getFirstChild().getFirstChild()) === "define") {
+
+            func = node.getFirstChild().getFirstChild().getLastSibling();
+            if (func.getType() === FUNCTION) {
+                //Bingo.
+                return func;
             }
         }
 
@@ -253,28 +283,95 @@ var parse;
         return false;
     };
 
+    function optionalString(node) {
+        var str = null;
+        if (node) {
+            str = parse.nodeToString(node);
+            //Need to trim off trailing ; that is added by nodeToString too.
+            if (str.charAt(str.length - 1) === ';') {
+                str = str.slice(0, str.length - 1);
+            }
+        }
+        return str;
+    }
+
     /**
-     * Determines if a specific node is a valid require or require.def call.
+     * Convert a require/require.def/define call to a string if it is a valid
+     * call via static analysis of dependencies.
+     * @param {String} callName the name of call (require or define)
+     * @param {Packages.com.google.javascript.rhino.Node} the config node inside the call
+     * @param {Packages.com.google.javascript.rhino.Node} the name node inside the call
+     * @param {Packages.com.google.javascript.rhino.Node} the deps node inside the call
+     */
+    parse.callToString = function (callName, config, name, deps) {
+        //If name is an array, it means it is an anonymous module,
+        //so adjust args appropriately. An anonymous module could
+        //have a FUNCTION as the name type, but just ignore those
+        //since we just want to find dependencies.
+        //TODO: CHANGE THIS if/when support using a tostring
+        //on function to find CommonJS dependencies.
+        var configString, nameString, depString;
+        if (name) {
+            if (name.getType() === ARRAYLIT) {
+                deps = name;
+            }
+        }
+
+        if (deps && !validateDeps(deps)) {
+            return null;
+        }
+
+        //Only serialize the call name, config, module name and dependencies,
+        //otherwise could get local variable names for module value.
+        configString = config && config.getType() === OBJECTLIT && optionalString(config);
+        nameString = optionalString(name);
+        depString = optionalString(deps);
+
+        return callName + "(" +
+            (configString ? configString : "") +
+            (nameString ? (configString ? "," : "") + nameString : "") +
+            (depString ? (configString || nameString ? "," : "") + depString : "") +
+            ");";
+    };
+
+    /**
+     * Determines if a specific node is a valid require or define/require.def call.
      * @param {Packages.com.google.javascript.rhino.Node} node
-     * 
-     * @returns {String} a JS source string with the valid require call.
+     *
+     * @returns {String} a JS source string with the valid require/define call.
      * Otherwise null.
      */
     parse.parseNode = function (node) {
-        var call, methodName, targetName, name, deps, callChildCount;
+        var call, methodName, targetName, name, config, deps, callChildCount;
 
         if (node.getType() === EXPR_RESULT && node.getFirstChild().getType() === CALL) {
             call = node.getFirstChild();
-            
+
             if (call.getFirstChild().getType() === NAME &&
                 nodeString(call.getFirstChild()) === "require") {
 
                 //It is a plain require() call.
-                deps = call.getChildAtIndex(1);
+                config = call.getChildAtIndex(1);
+                deps = call.getChildAtIndex(2);
+                if (config.getType() === ARRAYLIT) {
+                    deps = config;
+                    config = null;
+                }
+
                 if (!validateDeps(deps)) {
                     return null;
                 }
-                return parse.nodeToString(call);
+
+                return parse.callToString("require", null, null, deps);
+
+            } else if (call.getType() === CALL &&
+                call.getFirstChild().getType() === NAME &&
+                nodeString(call.getFirstChild()) === "define") {
+
+                //A define call
+                name = call.getChildAtIndex(1);
+                deps = call.getChildAtIndex(2);
+                return parse.callToString("define", null, name, deps);
 
             } else if (call.getFirstChild().getType() === GETPROP &&
                 call.getFirstChild().getFirstChild().getType() === NAME &&
@@ -289,21 +386,7 @@ var parse;
                     name = call.getChildAtIndex(1);
                     deps = call.getChildAtIndex(2);
 
-                    //If name is an array, it means it is an anonymous module,
-                    //so adjust args appropriately. An anonymous module could
-                    //have a FUNCTION as the name type, but just ignore those
-                    //since we just want to find dependencies.
-                    //TODO: CHANGE THIS if/when support using a tostring
-                    //on function to find CommonJS dependencies.
-                    if (name.getType() === ARRAYLIT) {
-                        deps = name;
-                    }
-
-                    if (deps && !validateDeps(deps)) {
-                        return null;
-                    }
-
-                    return parse.nodeToString(call);
+                    return parse.callToString("define", null, name, deps);
                 } else if (methodName === "modify") {
 
                     //A require.modify() call

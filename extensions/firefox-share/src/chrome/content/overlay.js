@@ -1088,7 +1088,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/share/';
     } else if (ffshare.prefs.system === 'devpopup') {
       usepopup = true;
-      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/designs/popup';
+      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/play/designs/popup';
     } else if (ffshare.prefs.system === 'staging') {
       ffshare.prefs.share_url = 'https://f1-staging.mozillamessaging.com/share/';
     } else {

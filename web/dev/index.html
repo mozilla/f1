@@ -1,0 +1,155 @@
+ <!-- ***** BEGIN LICENSE BLOCK *****
+   - Version: MPL 1.1
+   -
+   - The contents of this file are subject to the Mozilla Public License Version
+   - 1.1 (the "License"); you may not use this file except in compliance with
+   - the License. You may obtain a copy of the License at
+   - http://www.mozilla.org/MPL/
+   -
+   - Software distributed under the License is distributed on an "AS IS" basis,
+   - WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+   - for the specific language governing rights and limitations under the
+   - License.
+   -
+   - The Original Code is Raindrop.
+   -
+   - The Initial Developer of the Original Code is
+   - Mozilla Messaging, Inc..
+   - Portions created by the Initial Developer are Copyright (C) 2009
+   - the Initial Developer. All Rights Reserved.
+   -
+   - Contributor(s):
+   - -->
+<!DOCTYPE html>
+<html xmlns:og="http://opengraphprotocol.org/schema/"
+      xmlns:fb="http://www.facebook.com/2008/fbml">
+<head>
+  <link rel="stylesheet" type="text/css" href="/dev/style.css">
+  <link rel="stylesheet" type="text/css" href="chrome://ffshare-web/content/installed.css">
+  <title>F1 by Mozilla Labs</title>
+  <script type="text/javascript" data-main="/dev/index.js" src="/dev/scripts/requireplugins-jquery.js"></script>
+  <link rel="icon" type="image/x-icon" href="/dev/favicon.png" />
+
+  <!-- https://github.com/mozilla/f1/wiki/Page-Meta-Properties -->
+
+  <link rel="shortlink" href="http://bit.ly/mozillaF1"/>
+  <link rel="canonical" href="http://f1.mozillamessaging.com/"/>
+
+  <meta property="og:title" content="F1 by Mozilla Labs"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="http://f1.mozillamessaging.com/"/>
+  <meta property="og:image" content="http://f1.mozillamessaging.com/i/f1LogoVert.png"/>
+  <meta property="og:site_name" content="Mozilla F1"/>
+  <meta property="og:description"
+        content="F1 is a browser extension that allows you to share links in a
+                 fast and fun way. Share links from within the browser, from any
+                 webpage, using the same services you already know and love."/>
+
+  <meta property="fb:app_id" content="173375079345318,146290642084944"/>
+
+  <meta name="title" content="F1 by Mozilla Labs"/>
+  <meta name="description"
+        content="F1 is a browser extension that allows you to share links in a
+                 fast and fun way. Share links from within the browser, from any
+                 webpage, using the same services you already know and love."/>
+
+  <meta name="application-url" content="http://f1.mozillamessaging.com/"/>
+
+  <link rel="image_src" href="http://f1.mozillamessaging.com/i/f1LogoVert.png"/>
+
+</head>
+<body>
+  <div id="installed">
+    <div class="installWrapper">
+      <div class="c3">
+        <strong style="display:block;">Congratulations on installing F1!</strong>
+          Hit the &nbsp;<img src="/dev/i/f1Icon.png"> button
+      </div>
+    </div>
+    <div id="shareArrow">
+      <img src="/dev/i/arrowBounce.gif">
+    </div>
+  </div>
+  <div id="wrapper">
+    <div id="header" class="row">
+      <div class="c2 logo">
+      </div>
+      <div class="c1 dl">
+        <button id="download" class="download" onclick="location = 'https://addons.mozilla.org/services/install.php?addon_id=252539&addon_name=F1%20by%20Mozilla%20Labs&src=external-f1home'; return false;">
+          <img src="/dev/i/f1Icon.png"> Install F1
+          <span class="meta">available for Firefox 3.6+</span>
+        </button>
+        <button id="firefox" class="download">
+            Get Firefox to use this Add-On.
+        </button>
+        <div id="noButton">
+          <img src="/dev/i/check.png"> status: installed
+        </div>
+      </div>
+    </div>
+    <div class="row headline">
+      <div class="c3">
+        <h1>Share links fast.</h1>
+      </div>
+    </div>
+    <div class="row">
+      <div class="c1 description">
+        <h2>So, what&rsquo;s F1?</h2>
+        F1 is a browser extension that allows you to share links in a fast and fun way. Share links from within the browser, from any webpage, using the same services you already know and love. F1 is made by <a href="http://mozillamessaging.com/">Mozilla Messaging</a>.</div>
+      <div class="c2">
+        <img src="/dev/i/screenshot_01.png">
+      </div>
+    </div>
+    <div class="row">
+      <div id="movie" class="c3">
+        <div class="corner tl"></div>
+        <div class="corner tr"></div>
+        <iframe src="http://player.vimeo.com/video/17619444?title=0&amp;byline=0&amp;portrait=0" width="700" height="446" frameborder="0"></iframe>
+      </div>
+      <div id="tagline" class="c3">
+        &ldquo;A browser extension for sharing&rdquo; <span class="watch">Check out the video to see how it works</span>
+      </div>
+    </div>
+    <div class="row">
+      <div class="c3 description">
+        <h2>Share with your favorite services...</h2>
+      </div>
+      <div class="c1 description steps">
+        <span style="font-weight:bold;color:#00A0FF;display:block;">Twitter</span>
+        With one click F1 automatically shortens URLs using bit.ly so that you don't have to. F1 then inserts the shortened URL into your tweet, making the whole process seamless.
+      </div>
+      <div class="c1 description steps">
+        <span style="font-weight:bold;color:#00A0FF;display:block;">Facebook</span>
+        F1 posts the URL, complete with screenshot and description right to your Facebook wall, instantly sharing the link with all your friends on Facebook.
+      </div>
+      <div class="c1 description steps">
+        <span style="font-weight:bold;color:#00A0FF;display:block;">Gmail</span>
+        F1 automatically inserts the URL into the body of your email - simply type in your recipient's Email addresses and hit share.
+      </div>
+    </div>
+    <div class="row about">
+      <div class="c3 description">
+        <h2>Once you've installed F1 sharing is as easy as...</h2>
+      </div>
+      <div class="c1 description steps">
+        <span class="step">1</span> Hit the share icon in the toolbar
+        <img src="/dev/i/step-01.png">
+      </div>
+      <div class="c1 description steps">
+        <span class="step">2</span> Choose your service in the menu
+        <img src="/dev/i/step-02.png">
+      </div>
+      <div class="c1 description steps">
+        <span class="step">3</span> Express yourself and hit share!
+        <img src="/dev/i/step-03.png">
+      </div>
+    </div>
+    <div id="footer" class="row">
+      <div class="c3">
+        Mozilla Messaging 2010 | <a href="/dev/service/privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+
+  <iframe id="installFrame" src="/dev/blank.html"></iframe>
+</body>
