@@ -331,6 +331,10 @@ span.icon.debug {
     box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;
 }
 
+.placeholder {
+  color: #aaa;
+}
+
 .ui-accordion-content textarea:focus,
 .ui-accordion-content input[type="text"]:focus {
     -moz-box-shadow: 0 0 0 2px #C2ECFF inset;
@@ -740,10 +744,12 @@ div.status img {
 
 #statusSharing {
   background-color: #f2f2f2;
+  -moz-box-shadow: 0 0 200px rgba(0,0,0,0.25) inset;
 }
 
 #statusShared {
   background-color: #77E069;
+  -moz-box-shadow: 0 0 200px rgba(0,0,0,0.25) inset;
 }
 
 #statusShared a {
@@ -761,11 +767,13 @@ div.status.error,
 div.status.warning {
   background-color: #ff5959;
   color: #fff;
-  text-align: left;
+  text-align: center;
+  -moz-box-shadow: 0 0 200px rgba(0,0,0,0.25) inset;
 }
 
 div.status.intermediate.error {
   background-color: #FFA770;
+  -moz-box-shadow: 0 0 200px rgba(0,0,0,0.25) inset;
 }
 
 div.status.intermediate.error .statusButton {
