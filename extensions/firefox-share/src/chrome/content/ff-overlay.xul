@@ -77,14 +77,6 @@
                 accesskey="&ffshareContext.accesskey;"
                 command="cmd_openSharePage"/>
     </popup>
-    <panel id="share-popup"
-           type="arrow"
-           level="top">
-      <browser id="share-browser" type="content" flex="1" src="about:blank"
-        autocompletepopup="PopupAutoCompleteRichResult"
-        contextmenu="contentAreaContextMenu"
-        class="ffshare-frame"/>
-    </panel>
 
   </popupset>
 
