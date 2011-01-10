@@ -4,6 +4,14 @@
     <title>F1: Popup</title>
     <link rel="stylesheet" type="text/css" href="style.css">
     <script data-main="index.js" src="/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+    <script type="text/javascript" src="js/jquery.textOverflow.js"></script>
+
+    <script type="text/javascript">
+        jQuery(function() {
+          jQuery(".overflow").textOverflow(null,true);
+        });
+    </script>
+    
 </head>
 <body>
 
@@ -14,34 +22,25 @@
         <h1 class="boxFlex">Mozilla F1</h1>
         <nav>
             <ul>
-                <li><a href="/settings/" class="configureToggle">configure</a></li>
+                <li><a href="/settings/" class="configureToggle">settings</a></li>
             </ul>
         </nav>
     </header>
 
-    <div class="sharebox hbox">
+    <div class="sharebox">
 
     <div id="pageInfo">
         <div class="hbox">
-            <div class="thumbnail"><img class="thumb" src=""></div>
-            <div class="boxFlex1 overflow pageTitle title"></div>
-        </div>
-        <div class="pageDescription description"></div>
-        <a href="javascript:void(0);" class="url overflow selected"></a>
-        <a href="javascript:void(0);" class="shorturl overflow surl"></a>
-
-    <div id="newsBox">
-        <section id="news" class="hbox boxFlex headline invisible">
             <div>
-                <span class="icon rss"></span>
+                <div class="thumbnail"><img class="thumb" src=""></div>
             </div>
-            <div class="boxFlex">
-                <h3>Latest from the F1 team</h3>
-                <div class="story"><a id="rssLink" href="#" target="_blank">Updating...</a></div>
+            <div class="boxFlex1 shareInfo">
+                <div class="overflow pageTitle title"></div>
+                <div class="overflow pageDescription description"></div>
+                <a href="javascript:void(0);" class="url overflow selected"></a>
+                <a href="javascript:void(0);" class="shorturl overflow surl"></a>
             </div>
-        </section>
-    </div>
-
+        </div>
     </div>
 
     <div id="accounts">
@@ -67,6 +66,18 @@
         </div>
 
     </div>
+    
+    <div id="newsBox">
+        <section id="news" class="hbox boxFlex headline invisible">
+            <div>
+                <span class="icon rss"></span>
+            </div>
+            <div class="boxFlex">
+                <h3>Latest from the F1 team</h3>
+                <div class="story">&ldquo;<a id="rssLink" href="#" target="_blank">Updating...</a>&rdquo;</div>
+            </div>
+        </section>
+    </div>
 
     </div>
 
@@ -79,25 +90,55 @@
     <!-- Start status messages -->
 
     <div id="statusSettings" class="status hidden noConfig">
-      <img src="/share/i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="/settings/">click here to setup F1</a>
+      <table>
+        <tr>
+          <td>
+            <img src="/share/i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="/settings/">click here to setup F1</a>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <div id="statusSharing" class="status hidden">
-      <img src="/share/i/loader.gif"> sharing...
+      <table>
+        <tr>
+          <td>
+            <img src="/share/i/loader.gif"> sharing...
+          </td>
+        </tr>
+      </table>
     </div>
 
     <div id="statusOAuthFailed" class="status hidden error">
-      Sorry, we couldn't connect to your account. Please try again.
-      <button class="statusButton statusErrorButton">ok</button>
+      <table>
+        <tr>
+          <td>
+            Sorry, we couldn't connect to your account. Please try again.
+            <button class="statusButton statusErrorButton">ok</button>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <div id="statusEnableLocalStorage" class="status hidden">
-        Please enable DOM Storage to use Mozilla F1.
+      <table>
+        <tr>
+          <td>
+            Please enable DOM Storage to use Mozilla F1.
+          </td>
+        </tr>
+      </table>
     </div>
 
     <div id="statusError" class="status hidden error">
-      We're really sorry, F1 done goofed up. <span id="statusErrorMessage"></span>
-      <button class="statusButton statusErrorButton">ok</button>
+      <table>
+        <tr>
+          <td>
+            We're really sorry, F1 done goofed up. <span id="statusErrorMessage"></span>
+            <button class="statusButton statusErrorButton">ok</button>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <div id="statusCaptcha" class="status hidden intermediate captcha">
@@ -119,32 +160,68 @@
     </div>
 
     <div id="statusToError" class="status hidden error">
-      The 'to' field is required to send email.
-      <button class="statusButton statusErrorButton">ok</button>
+      <table>
+        <tr>
+          <td>
+            The 'to' field is required to send email.
+            <button class="statusButton statusErrorButton">ok</button>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <div id="statusServerError" class="status hidden error">
-      We're really sorry, the F1 server is having problems. Please try again later. <span id="statusServerErrorMessage"></span>
-      <button id="statusServerErrorButton" class="statusButton statusErrorCloseButton">ok</button>
+      <table>
+        <tr>
+          <td>
+            We're really sorry, the F1 server is having problems. Please try again later. <span id="statusServerErrorMessage"></span>
+            <button id="statusServerErrorButton" class="statusButton statusErrorCloseButton">ok</button>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <div id="statusAuth" class="status hidden intermediate error">
-      Sorry, you've been signed out. Sign in again to finish sharing.
-      <button id="authOkButton" class="statusButton">sign in</button>
+      <table>
+        <tr>
+          <td>
+            Sorry, you've been signed out. Sign in again to finish sharing.
+            <button id="authOkButton" class="statusButton">sign in</button>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <div id="statusServerBusy" class="status hidden warning">
-      Sorry, F1 is under heavy load right now, please try again later.
-      <button class="statusButton statusErrorButton">ok</button>
+      <table>
+        <tr>
+          <td>
+            Sorry, F1 is under heavy load right now, please try again later.
+            <button class="statusButton statusErrorButton">ok</button>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <div id="statusServerBusyClose" class="status hidden warning">
-      Sorry, F1 is under heavy load right now, please try again later.
-      <button class="statusButton statusErrorCloseButton">ok</button>
+      <table>
+        <tr>
+          <td>
+            Sorry, F1 is under heavy load right now, please try again later.
+            <button class="statusButton statusErrorCloseButton">ok</button>
+          </td>
+        </tr>
+      </table>
     </div>
 
     <div id="statusShared" class="status hidden">
-      Message Shared!
+      <table>
+        <tr>
+          <td>
+            Message Shared!
+          </td>
+        </tr>
+      </table>
     </div>
 
     <!-- End status messages -->
@@ -198,7 +275,13 @@
 
 
 <script id="sharedTemplate" type="text/template">
-  Link shared from <span class="shareDomain">{domain}</span> to <a href="{href}" target="_blank">{service}</a>
+      <table>
+        <tr>
+          <td>
+            Link shared from <span class="shareDomain">{domain}</span> to <a href="{href}" target="_blank">{service}</a>
+          </td>
+        </tr>
+      </table>
 </script>
 <!-- End templates -->
 
