@@ -66,15 +66,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     }
   }
 
-  //Do not keep around the tab if the opener for it has disappeared.
-  function confirmOpener() {
-    if (!opener || opener.closed) {
-      window.close();
-    }
-  }
-  confirmOpener();
-  setInterval(confirmOpener, 400);
-
   //Set up knowledge of accounts and changes.
   accounts.onChange();
   accounts(function (json) {
@@ -205,10 +196,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             value = node.checked;
 
         store['prefs.' + prefId] = value;
-        dispatch.pub('prefChanged', {
-          name: prefId,
-          value: value
-        }, opener);
+        if (opener && !opener.closed) {
+          dispatch.pub('prefChanged', {
+            name: prefId,
+            value: value
+          }, opener);
+        }
       });
 
     //Set up state of the prefs.
