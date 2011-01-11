@@ -46,6 +46,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   Cu.import("resource://ffshare/modules/injector.js");
   Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+  var info = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo); 
+  var majorVer = parseInt(info.version[0]);
+
   // This add-on manager is only available in Firefox 4+
   try {
     Cu.import("resource://gre/modules/AddonManager.jsm");
@@ -322,7 +325,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         type: 'arrow',
         level: 'top'
       });
-      panel.setAttribute('class', 'ffshare-panel');
 
       setAttrs(browserNode, {
         type: 'content',
@@ -332,14 +334,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         contextmenu: 'contentAreaContextMenu',
         'disablehistory': true
       });
-      browserNode.setAttribute('class', 'ffshare-browser');
 
       panel.appendChild(browserNode);
       document.getElementById('mainPopupSet').appendChild(panel);
 
       this.shareFrame = browserNode;
-      browserNode.style.width = '640px';
-      browserNode.style.height = '404px';
+      //browserNode.style.width = '640px';
+      //browserNode.style.height = '404px';
       //Make sure it can go all the way to zero.
       browserNode.style.minHeight = 0;
 
@@ -357,11 +358,35 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       this.createShareFrame(options);
-      var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
       var button = document.getElementById("ffshare-toolbar-button");
-      this.panel.openPopup(button, position, 0, 0, false, false);
-      //this.panel.openPopupAtScreen(100, 200, false);
-
+      // fx 4
+      if (majorVer >= 4) {
+        var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
+        this.panel.setAttribute('class', 'ffshare-panel');
+        this.panel.firstChild.setAttribute('class', 'ffshare-browser');
+        this.panel.openPopup(button, position, 0, 0, false, false);
+      } else {
+        // fx 3 doorhanger support
+        // if the button is to the right of th url bar, use ltr, otherwise rtl
+        this.panel.firstChild.setAttribute('class', 'ffshare-browser doorhanger-inner');
+        var navbar = document.getElementById('nav-bar');
+        var urlbar = document.getElementById('urlbar-container');
+        var first = null;
+        for (var c =0; c < navbar.childNodes.length; c++) {
+          if (navbar.childNodes[c] === urlbar || navbar.childNodes[c] === button) {
+            first = navbar.childNodes[c];
+            break;
+          }
+        }
+        if (first === button) {
+          this.panel.setAttribute('class', 'ffshare-panel doorhanger-rtl');
+          this.panel.showPopup(button, -1, -1, 'popup', 'bottomleft', 'topleft');
+        } else {
+          this.panel.setAttribute('class', 'ffshare-panel doorhanger-ltr');
+          this.panel.showPopup(button, -1, -1, 'popup', 'bottomright', 'topright');
+        }
+        this.panel.sizeToContent();
+      }
 
       if (ffshare.prefs.frontpage_url === tabUrl) {
         var browser = gBrowser.getBrowserForTab(this.tab);
