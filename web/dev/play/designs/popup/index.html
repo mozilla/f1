@@ -62,6 +62,7 @@
               <button onclick="window.showStatus('statusAuth', true)">Show Auth Error</button>
               <button onclick="window.showStatus('statusCaptcha', true)">Show Captcha</button>
               <button onclick="alert(localStorage.gmailContacts)">Alert contacts cache</button>
+              <textarea type="text" rows="1" cols="1" id="debugOutput"></textarea>
             </div>
         </div>
 
@@ -249,6 +250,8 @@
         <input type="hidden" name="title" value="" />
         <input type="hidden" name="caption" value="" />
         <input type="hidden" name="description" value="" />
+        <input type="hidden" name="medium" value="" />
+        <input type="hidden" name="source" value="" />
         <span class="avatar"><img class="avatar" src="/share/i/face2.png"></span>
       </div>
       { features.direct [}

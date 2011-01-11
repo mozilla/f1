@@ -94,7 +94,9 @@ function (rdapi,   url,         TextCounter) {
         canonicalUrl: dom.find('[name="link"]').val().trim() || '',
         title: dom.find('[name="title"]').val().trim() || '',
         description: dom.find('[name="description"]').val().trim() || '',
-        shortUrl: dom.find('[name="surl"]').val().trim() || ''
+        shortUrl: dom.find('[name="surl"]').val().trim() || '',
+        source: dom.find('[name="source"]').val().trim() || '',
+        medium: dom.find('[name="medium"]').val().trim() || ''
       };
     },
     setFormData: function (data) {
@@ -123,6 +125,12 @@ function (rdapi,   url,         TextCounter) {
       }
       if (data.shortUrl) {
         dom.find('[name="surl"]').val(data.shortUrl);
+      }
+      if (data.source) {
+        dom.find('[name="source"]').val(data.source);
+      }
+      if (data.medium) {
+        dom.find('[name="medium"]').val(data.medium);
       }
       this.startCounter(data);
     },

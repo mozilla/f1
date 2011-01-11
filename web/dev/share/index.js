@@ -583,11 +583,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     }
 
-    //Handle the Video or Audio source for Facebook
-    if (options.source) {
-      facebookDom.find('[name="source"]').val(options.source);
-    }
-
     //If the message containder doesn't want URLs then respect that.
     //However, skip this if session restore is involved.
     if (sessionRestore) {

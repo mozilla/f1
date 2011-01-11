@@ -368,8 +368,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       $('.surl').text(options.shortUrl);
     }
 
-    if (options.url) {
-      $('.url').text(options.url);
+    if (options.canonicalUrl || options.url) {
+      $('.url').text(options.canonicalUrl || options.url);
     }
 
     //Create ellipsis for thumbnail section
@@ -505,7 +505,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
     //Debug info on the data that was received.
-    if (options.prefs.system === 'dev') {
+    if (options.prefs.system === 'dev' || options.prefs.system === 'devpopup') {
       $('#debugOutput').val(JSON.stringify(options));
       $('#debugCurrentLocation').val(location.href);
     } else {
