@@ -181,6 +181,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
   };
 
+  // width/height tracking for the panel, initial values are defaults to
+  // show the configure status panel
+  var lastWidth = 361;
+  var lastHeight = 180;
+
   var TabFrame = function (tab) {
     tab.ffshareTabFrame = this;
     this.tab = tab;
@@ -243,6 +248,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           }
         }
       }), false);
+      
+
     },
 
     //Fired when a pref changes from content space. the pref object has
@@ -303,11 +310,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       //Add cleanup listener
       this.panelShownListener = fn.bind(this, function (evt) {
         this.panel.removeEventListener('popupshown', this.panelHideListener, false);
-        this.panel.sizeToContent();
         this.visible = true;
       });
 
       panel.addEventListener('popupshown', this.panelShownListener, false);
+      panel.style.width = lastWidth+'px';
+      panel.style.height = lastHeight+'px';
 
       if (!options.previews.length && !options.thumbnail) {
         // then we need to make our own thumbnail
@@ -334,15 +342,42 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       panel.appendChild(browserNode);
       document.getElementById('mainPopupSet').appendChild(panel);
 
+      // hookup esc to also close the panel
+      var self = this;
+      panel.addEventListener('keypress', function(e) {
+        if (e.keyCode == 27 /*"VK_ESC"*/) {
+          self.close();
+        }
+      }, false);
+
       this.shareFrame = browserNode;
-      //browserNode.style.width = '640px';
-      //browserNode.style.height = '404px';
+
+      this.shareFrame.addEventListener("load", fn.bind(this, function(evt) {
+        var self = this;
+        window.setTimeout(function() { self.sizeToContent() }, 0);
+      }), true);
+
       //Make sure it can go all the way to zero.
       browserNode.style.minHeight = 0;
 
       this.registerListener();
 
       browserNode.setAttribute('src', url);
+    },
+
+    sizeToContent: function() {
+      var doc = this.shareFrame.contentDocument.wrappedJSObject;
+      var wrapper = doc.getElementById('wrapper');
+      if (!wrapper) return;
+      // XXX argh, we really should look at the panel and see what margins/padding
+      // sizes are and calculate that way, however this is pretty complex due
+      // to how the background image of the panel is used, 
+      var w = wrapper.scrollWidth + 41;
+      var h = wrapper.scrollHeight + 54;
+      this.panel.sizeTo(w, h);
+      lastWidth = w;
+      lastHeight = h;
+      //dump("content size is "+w+" x "+h+"\n");
     },
 
     show: function (options) {

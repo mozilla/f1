@@ -286,6 +286,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       serviceDom.find('input[name="userid"]').val(svcAccount.userid);
       serviceDom.find('input[name="username"]').val(svcAccount.username);
       serviceDom.find('div.user').removeClass('inactive');
+      
+      // we hide the shareui until we add some accounts to the shareui
+      $('#shareui').removeClass('hidden');
     });
   }
 
@@ -621,7 +624,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     //Get the most recent feed item, not important to do it last.
     rssFeed(function (title, link) {
-      $('#newsBox .headline').removeClass('invisible');
       $('#rssLink').attr('href', link).text(title);
     });
 

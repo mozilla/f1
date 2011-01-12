@@ -9,7 +9,7 @@
 
 <div id="wrapper">
 
-    <div id="shareui">
+    <div id="shareui" class="hidden">
     <header class="hbox">
         <h1 class="boxFlex">Mozilla F1</h1>
         <nav>
@@ -37,13 +37,13 @@
 
     <div id="accounts">
 
-        <div id="debugpanel" class="hbox debugging user">
+        <div id="debugpanel" class="hbox debugging user hidden">
             <span class="arrow"></span>
             <span class="icon debug"></span>
             <h3 class="boxFlex overflow">debug</h3>
             <span class="username">developer</span>
         </div>
-        <div id="debugging">
+        <div id="debugging" class="hidden">
             <div class="padding">
               <button onclick="window.closeShare()">Close</button>
               <button onclick="window.showStatus('statusSharing', true)">Show Sharing</button>
@@ -60,7 +60,7 @@
     </div>
 
     <div id="newsBox">
-        <section id="news" class="hbox boxFlex headline invisible">
+        <section id="news" class="hbox boxFlex headline">
             <div>
                 <span class="icon rss"></span>
             </div>
