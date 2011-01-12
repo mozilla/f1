@@ -26,24 +26,36 @@
   document: false, setTimeout: false, localStorage: false */
 "use strict";
 
+require({
+  paths: {
+    widgets: '../play/designs/popup/scripts/widgets'
+  }
+});
+
 define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
          "placeholder", "AutoComplete", "dispatch", "accounts",
-         "storage", "services",
+         "storage", "services", "shareOptions", "widgets/PageInfo", "rssFeed",
          "jquery-ui-1.8.7.min", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           placeholder,   AutoComplete,   dispatch,   accounts,
-          storage,   services) {
+          storage,   services,   shareOptions,   PageInfo,           rssFeed) {
 
   var showStatus,
     actions = services.domains,
-    hash = location.href.split('#')[1],
     urlArgs, sendData, prop,
-    options = {},
+    options = shareOptions(),
     tabDom, bodyDom, timer,
     updateTab = true, tabSelection, accountCache, showNew,
     store = storage();
 
   jig.addFn({
+    thumb: function (options) {
+      if (options.previews && options.previews.length) {
+        return escapeHtml(options.previews[0]);
+      } else {
+        return escapeHtml(options.thumbnail);
+      }
+    },
     profilePic: function (photos) {
       //TODO: check for a thumbnail picture, hopefully one that is square.
       return photos && photos[0] && photos[0].value || 'i/face2.png';
@@ -258,7 +270,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       // cannot rely on userid being a 'pretty' name we can display
       var username = svcAccount.username;
       if (username && username != name) {
-        name = name + " <" + username + ">";
+        name = name + " (" + username + ")";
       }
 
       //Add the tab as an option
@@ -332,7 +344,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
       });
     } else {
-    $("#accounts").accordion();
       showStatus('statusSettings');
       return;
     }
@@ -373,10 +384,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     }
 
     //Create ellipsis for thumbnail section
-    $('.title').textOverflow(null, true);
-    //$('.description').textOverflow(null, true);
-    $('.url').textOverflow(null, true);
-    $('.surl').textOverflow(null, true);
+    $(".overflow").textOverflow(null,true);
 
     $("form.messageForm")
       .submit(function (evt) {
@@ -459,35 +467,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   } // end updateAccounts
 
-  if (hash) {
-    urlArgs = url.queryToObject(hash);
-    if (urlArgs.options) {
-      options = JSON.parse(urlArgs.options);
-    }
-  }
-  options.prefs = options.prefs || {};
-  if (!options.title) {
-    options.title = options.url;
-  }
-  if (!options.prefs.system) {
-    options.prefs.system = 'prod';
-  }
 
-  //Save the extension version in the localStorage, for use in
-  //other pages like settings.
-  if (options.version) {
-    store.extensionVersion = options.version;
-  }
 
-  //Save the preferences in localStorage, for use in
-  //other ppages like setting.
-  if (options.prefs) {
-    for (prop in options.prefs) {
-      if (options.prefs.hasOwnProperty(prop)) {
-        store['prefs.' + prop] = options.prefs[prop];
-      }
-    }
-  }
+  new PageInfo({
+    options: options
+  }, $('.sharebox')[0], 'prepend');
+
+
 
   //For the "new items" link, only show it for x number of days after showing it.
   //NOTE: when updating for newer releases, delete the old value from the
@@ -527,10 +513,16 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       $(document.documentElement).addClass(options.prefs.system);
     }
 
-
     //Show the new link if appropriate.
     if (showNew) {
       $('#newLink').removeClass('hidden');
+    }
+
+    //Set preview image
+    if (options.previews && options.previews.length) {
+      thumbImgDom.attr('src', escapeHtml(options.previews[0]));
+    } else {
+      thumbImgDom.attr('src', escapeHtml(options.thumbnail));
     }
 
     //Hook up button for share history
@@ -621,47 +613,17 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     );
 
-    //Set preview image for facebook
-    if (options.previews && options.previews.length) {
-      //TODO: set up all the image previews.
-      thumbImgDom.attr('src', escapeHtml(options.previews[0]));
-    } else {
-      thumbImgDom.attr('src', escapeHtml(options.thumbnail));
-    }
-    // watch for has changes, reload if we do, this should be fixed up to be
+    // watch for hash changes, reload if we do, this should be fixed up to be
     // better than doing a reload
     window.addEventListener("hashchange", function () {
         location.reload();
     }, false);
 
+    //Get the most recent feed item, not important to do it last.
+    rssFeed(function (title, link) {
+      $('#newsBox .headline').removeClass('invisible');
+      $('#rssLink').attr('href', link).text(title);
+    });
 
-    //Callback handler for JSONP feed response from Google.
-    window.onFeedLoad = function (x, data) {
-      var title, link, i, entry;
-      if (data && data.feed && data.feed.entries) {
-        for (i = 0; (entry = data.feed.entries[i]); i++) {
-          if (entry.categories && entry.categories.indexOf('Sharing') !== -1) {
-            link = entry.link;
-            title = entry.title;
-            break;
-          }
-        }
-      }
-
-      if (link) {
-        $('#newsBox .headline').removeClass('invisible');
-        $('#rssLink').attr('href', link).text(title);
-      }
-    };
-
-    //Fetch the feed. This is low priority, so done at the bottom.
-    var node = document.createElement("script");
-    node.charset = "utf-8";
-    node.async = true;
-    node.src = 'http://www.google.com/uds/Gfeeds?v=1.0&callback=onFeedLoad&context=' +
-              '&output=json&' +
-              'q=http%3A%2F%2Fmozillalabs.com%2Fmessaging%2Ffeed%2F';
-    $('head')[0].appendChild(node);
   });
-
 });
