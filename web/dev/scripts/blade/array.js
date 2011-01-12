@@ -10,6 +10,8 @@
 
 define([], function () {
     var ostring = Object.prototype.toString,
+        ap = Array.prototype,
+        aps = ap.slice,
 
         array = {
             /**
@@ -19,6 +21,16 @@ define([], function () {
              */
             is: function (it) {
                 return ostring.call(it) === "[object Array]";
+            },
+
+            /**
+             * Converts an array-like thing into a real array
+             * @param{ArrayLike} arrayLike something that looks like an array,
+             * has a length and can access members via indices.
+             * @returns {Array}
+             */
+            to: function (arrayLike) {
+                return [].concat(aps.call(arguments, 0));
             }
         };
 
