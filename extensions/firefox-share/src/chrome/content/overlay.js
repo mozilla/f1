@@ -183,8 +183,18 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   // width/height tracking for the panel, initial values are defaults to
   // show the configure status panel
-  var lastWidth = 361;
-  var lastHeight = 180;
+  // with fx3, we have to set the dimensions of the panel, with fx4, we have to
+  // set the dimensions of the browser in the panel.
+  var defaultWidth = 361;
+  var defaultHeight = 180;
+  var panelWidthMargin = 41;
+  var panelHeightMargin = 45;
+  if (majorVer >= 4) {
+    defaultWidth = 320;
+    defaultHeight = 180;
+  }
+  var lastWidth = defaultWidth;
+  var lastHeight = defaultHeight;
 
   var TabFrame = function (tab) {
     tab.ffshareTabFrame = this;
@@ -314,8 +324,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       });
 
       panel.addEventListener('popupshown', this.panelShownListener, false);
-      panel.style.width = lastWidth+'px';
-      panel.style.height = lastHeight+'px';
+      if (majorVer < 4) {
+        panel.style.width = lastWidth+'px';
+        panel.style.height = lastHeight+'px';
+      }
 
       if (!options.previews.length && !options.thumbnail) {
         // then we need to make our own thumbnail
@@ -338,7 +350,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         contextmenu: 'contentAreaContextMenu',
         'disablehistory': true
       });
-
+      browserNode.setAttribute('class', 'ffshare-browser');
+      panel.setAttribute('class', 'ffshare-panel');
       panel.appendChild(browserNode);
       document.getElementById('mainPopupSet').appendChild(panel);
 
@@ -351,6 +364,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }, false);
 
       this.shareFrame = browserNode;
+      if (majorVer >= 4) {
+        browserNode.style.width = lastWidth+'px';
+        browserNode.style.height = lastHeight+'px';
+      }
 
       this.shareFrame.addEventListener("load", fn.bind(this, function(evt) {
         var self = this;
@@ -371,13 +388,18 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (!wrapper) return;
       // XXX argh, we really should look at the panel and see what margins/padding
       // sizes are and calculate that way, however this is pretty complex due
-      // to how the background image of the panel is used, 
-      var w = wrapper.scrollWidth + 41;
-      var h = wrapper.scrollHeight + 54;
-      this.panel.sizeTo(w, h);
-      lastWidth = w;
-      lastHeight = h;
-      //dump("content size is "+w+" x "+h+"\n");
+      // to how the background image of the panel is used,
+      //dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
+      if (majorVer >= 4) {
+        lastWidth = wrapper.scrollWidth;
+        lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight : defaultHeight;
+        this.shareFrame.style.width = lastWidth+"px";
+        this.shareFrame.style.height = lastHeight+"px";
+      } else {
+        lastWidth = wrapper.scrollWidth + panelWidthMargin;
+        lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight + panelHeightMargin : defaultHeight;
+        this.panel.sizeTo(lastWidth, lastHeight);
+      }
     },
 
     show: function (options) {
@@ -395,8 +417,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // fx 4
       if (majorVer >= 4) {
         var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
-        this.panel.setAttribute('class', 'ffshare-panel');
-        this.panel.firstChild.setAttribute('class', 'ffshare-browser');
         this.panel.openPopup(button, position, 0, 0, false, false);
       } else {
         // fx 3 doorhanger support
