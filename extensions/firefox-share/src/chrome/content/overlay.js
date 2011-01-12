@@ -172,38 +172,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     onLocationChange: function (aWebProgress, aRequest, aLocation) {
       ffshare.canShareURI(aLocation);
+      ffshare.switchTab();
     },
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
     onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
     onSecurityChange: function (aWebProgress, aRequest, aState) {},
-    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
-  };
-
-  function NavProgressListener(tabFrame) {
-    this.tabFrame = tabFrame;
-  }
-
-  NavProgressListener.prototype = {
-    // detect navigational events for the tab, so we can close
-
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
-                                           Ci.nsISupportsWeakReference,
-                                           Ci.nsISupports]),
-
-    onLocationChange: function (/*in nsIWebProgress*/ aWebProgress,
-                          /*in nsIRequest*/ aRequest,
-                          /*in nsIURI*/ aLocation) {
-      this.tabFrame.hide();
-    },
-
-    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
-    onSecurityChange: function (aWebProgress, aRequest, aState) {},
-    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
     onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
   };
 
   var TabFrame = function (tab) {
+    tab.ffshareTabFrame = this;
     this.tab = tab;
     this.visible = false;
   };
@@ -274,10 +253,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     hide: function () {
       this.panel.hidePopup();
+      this.visible = false;
+    },
+    
+    close: function() {
+      this.hide();
+      this.unregisterListener();
+      this.panel.removeEventListener('popuphidden', this.panelHideListener, false);
+      this.panel.parentNode.removeChild(this.panel);
+      this.panel = null;
+      this.tab.ffshareTabFrame = null;
     },
 
     createShareFrame: function (options) {
-      options = options || {};
+      options = options || this.options || {};
 
       var browser = gBrowser.getBrowserForTab(this.tab), url,
           notificationBox = gBrowser.getNotificationBox(browser),
@@ -300,19 +289,25 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           use_accel_key: ffshare.prefs.use_accel_key
         }
       });
+      this.options = options;
 
       this.panel = panel;
 
       //Add cleanup listener
       this.panelHideListener = fn.bind(this, function (evt) {
-        this.unregisterListener();
-        this.panel.removeEventListener('popuphidden', this.panelHideListener, false);
-        this.panel.parentNode.removeChild(this.panel);
-        this.panel = null;
         this.visible = false;
       });
 
       panel.addEventListener('popuphidden', this.panelHideListener, false);
+
+      //Add cleanup listener
+      this.panelShownListener = fn.bind(this, function (evt) {
+        this.panel.removeEventListener('popupshown', this.panelHideListener, false);
+        this.panel.sizeToContent();
+        this.visible = true;
+      });
+
+      panel.addEventListener('popupshown', this.panelShownListener, false);
 
       if (!options.previews.length && !options.thumbnail) {
         // then we need to make our own thumbnail
@@ -323,7 +318,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       setAttrs(panel, {
         type: 'arrow',
-        level: 'top'
+        level: 'parent',
+        noautohide: 'true'
       });
 
       setAttrs(browserNode, {
@@ -357,7 +353,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         return;
       }
 
-      this.createShareFrame(options);
+      if (!this.panel)
+        this.createShareFrame(options);
+
       var button = document.getElementById("ffshare-toolbar-button");
       // fx 4
       if (majorVer >= 4) {
@@ -385,7 +383,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           this.panel.setAttribute('class', 'ffshare-panel doorhanger-ltr');
           this.panel.showPopup(button, -1, -1, 'popup', 'bottomright', 'topright');
         }
-        this.panel.sizeToContent();
       }
 
       if (ffshare.prefs.frontpage_url === tabUrl) {
@@ -659,7 +656,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     keycodeId: "key_ffshare",
     keycode : "VK_F1",
     oldKeycodeId: "key_old_ffshare",
-
+    currentTabFrame: null,
+    
     onInstallUpgrade: function (version) {
       ffshare.version = version;
 
@@ -966,6 +964,26 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       } catch (ignore) { }
     },
 
+    switchTab: function() {
+      var selectedTab = gBrowser.selectedTab,
+          tabFrame = selectedTab.ffshareTabFrame;
+      if (this.currentTabFrame) {
+        if (this.currentTabFrame != tabFrame) {
+          this.currentTabFrame.hide();
+          this.currentTabFrame = null;
+        } else
+        if (gBrowser.currentURI.spec != tabFrame.options.url) {
+          this.currentTabFrame.close();
+          this.currentTabFrame = null;
+          return;
+        }
+      }
+      if (tabFrame) {
+        window.setTimeout(function () { tabFrame.show({}); }, 0);
+        this.currentTabFrame = tabFrame;
+      }
+    },
+    
     onOpenShareCommand: function (e) {
       this.toggle();
     },
@@ -975,10 +993,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           tabFrame = selectedTab.ffshareTabFrame;
       if (!tabFrame) {
         tabFrame = new TabFrame(selectedTab);
-        selectedTab.ffshareTabFrame = tabFrame;
+        this.currentTabFrame = tabFrame;
       }
-
-      tabFrame.show(options);
+      if (tabFrame.panel) {
+        tabFrame.close();
+        this.currentTabFrame = null;
+      } else {
+        tabFrame.show(options);
+      }
     }
   };
 
