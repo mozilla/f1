@@ -223,12 +223,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   function updateAccounts(accounts) {
-    var hasLastSelectionMatch = false,
+    var hasLastSelectionMatch = -1,
         accountsDom = $('#accounts'),
         fragment = document.createDocumentFragment(),
-        debugPanel;
+        debugPanel,
+        i = 0;
 
     if ((accounts && accounts.length)) {
+      $('#shareui').removeClass('hidden');
+
       //Figure out what accounts we do have
       accounts.forEach(function (account) {
         var domain = account.accounts[0].domain,
@@ -248,6 +251,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             svc: data
           }, fragment));
         }
+
+        i++;
       });
 
       // add the account panels now
