@@ -389,7 +389,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // XXX argh, we really should look at the panel and see what margins/padding
       // sizes are and calculate that way, however this is pretty complex due
       // to how the background image of the panel is used,
-      //dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
+      dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
       if (majorVer >= 4) {
         lastWidth = wrapper.scrollWidth;
         lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight : defaultHeight;
@@ -1050,7 +1050,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         tabFrame = new TabFrame(selectedTab);
         this.currentTabFrame = tabFrame;
       }
-      if (tabFrame.panel) {
+      if (tabFrame.visible) {
         tabFrame.close();
         this.currentTabFrame = null;
       } else {

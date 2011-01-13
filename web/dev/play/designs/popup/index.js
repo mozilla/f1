@@ -70,7 +70,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   function close() {
-    dispatch.pub('hide');
+    dispatch.pub('close');
   }
   //For debug tab purpose, make it global.
   window.closeShare = close;
