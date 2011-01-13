@@ -313,26 +313,27 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   function updateAccounts(accounts) {
-    var hasLastSelectionMatch = false,
+    var lastSelectionMatch = -1,
         userAccounts = {}, selection,
         sessionRestore = store.sessionRestore;
 
     if ((accounts && accounts.length)) {
       //Figure out what accounts we do have
+      var i = 0;
       var panelhtml='';
       accounts.forEach(function (account) {
         var domain = account.accounts[0].domain;
         if (domain && actions[domain]) {
           //Make sure to see if there is a match for last selection
-          if (!hasLastSelectionMatch) {
-            hasLastSelectionMatch = actions[domain].type === store.lastSelection;
+          if (actions[domain].type === store.lastSelection) {
+            lastSelectionMatch = i;
           }
           userAccounts[actions[domain].type] = account;
 
           var data = actions[domain];
           data.domain = domain;
           panelhtml += jig('#panelsTemplate', data);
-
+          i++;
         }
       });
       // add the account panels now
@@ -350,12 +351,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       showStatus('statusSettings');
       return;
     }
-    $("#accounts").accordion();
 
     //If no matching accounts match the last selection clear it.
-    if (!hasLastSelectionMatch && !store.accountAdded && store.lastSelection) {
+    if (lastSelectionMatch < 0 && !store.accountAdded && store.lastSelection) {
       delete store.lastSelection;
+      lastSelectionMatch = 0;
     }
+
+    // which domain was last active?
+    $("#accounts").accordion({ active: lastSelectionMatch });
 
     //Reset the just added state now that accounts have been configured one time.
     if (store.accountAdded) {
