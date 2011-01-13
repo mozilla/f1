@@ -78,7 +78,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   });
 
   function close() {
-    dispatch.pub('hide');
+    dispatch.pub('close');
   }
   //For debug tab purpose, make it global.
   window.closeShare = close;
@@ -235,8 +235,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             data;
         if (domain && actions[domain]) {
           //Make sure to see if there is a match for last selection
-          if (!hasLastSelectionMatch) {
-            hasLastSelectionMatch = actions[domain].type === store.lastSelection;
+          if (actions[domain].type === store.lastSelection) {
+            lastSelectionMatch = i;
           }
 
           data = actions[domain];
@@ -262,12 +262,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       showStatus('statusSettings');
       return;
     }
-    $("#accounts").accordion();
 
     //If no matching accounts match the last selection clear it.
-    if (!hasLastSelectionMatch && !store.accountAdded && store.lastSelection) {
+    if (lastSelectionMatch < 0 && !store.accountAdded && store.lastSelection) {
       delete store.lastSelection;
+      lastSelectionMatch = 0;
     }
+
+    // which domain was last active?
+    $("#accounts").accordion({ active: lastSelectionMatch });
 
     //Reset the just added state now that accounts have been configured one time.
     if (store.accountAdded) {
@@ -424,7 +427,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     //Get the most recent feed item, not important to do it last.
     rssFeed(function (title, link) {
-      $('#newsBox .headline').removeClass('invisible');
       $('#rssLink').attr('href', link).text(title);
     });
 

@@ -2,5 +2,5 @@
 <!ENTITY ffshareContext.accesskey "S">
 <!ENTITY ffshareMenu.label "Share Page…">
 <!ENTITY ffshareMenu.accesskey "h">
-<!ENTITY ffshareToolbarButton.label "Share This Page">
+<!ENTITY ffshareToolbarButton.label "F1">
 <!ENTITY ffshareToolbarButton.tooltip "Use F1 to share the current page via Twitter, Facebook, and more.">

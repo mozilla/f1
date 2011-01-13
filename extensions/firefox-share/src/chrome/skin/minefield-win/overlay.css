@@ -21,13 +21,13 @@
  * Contributor(s):
  * */
 
-#ffshare-toolbar-button
-{
-  list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
+#ffshare-toolbar-button > label {
+  display: -moz-box;
+  font-weight: bold;
 }
+
 #ffshare-toolbar-button > image {
-  width: auto;
-  height: auto;
+  display: none;
 }
 
 /* Styles to style the autocomplete results */
