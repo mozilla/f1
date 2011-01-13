@@ -347,7 +347,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       .delegate('.statusResetErrorButton', 'click', function (evt) {
         location.reload();
       })
-      .delegate('.nav .close', 'click', close);
+      .delegate('nav .close', 'click', close);
 
     $('#authOkButton').click(function (evt) {
       oauth(sendData.domain, function (success) {

@@ -1,7 +1,7 @@
 * {
   padding: 0;
   margin: 0;
-  
+
   -webkit-box-sizing: border-box;
      -moz-box-sizing: border-box;
           box-sizing: border-box;
@@ -38,11 +38,11 @@ button {
   border-color: #aaa;
   cursor: pointer;
   padding: 0 10px;
-  
+
   -webkit-border-radius: 2px;
      -moz-border-radius: 2px;
           border-radius: 2px;
-  
+
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
   background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
 }
@@ -51,7 +51,7 @@ button:active {
   -webkit-box-shadow: 0 0 1px #666666 inset;
      -moz-box-shadow: 0 0 1px #666666 inset;
           box-shadow: 0 0 1px #666666 inset;
-  
+
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
   background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
 }
@@ -70,7 +70,7 @@ h3 {
 }
 
 /*
-    header 
+    header
 */
 
 header {
@@ -115,6 +115,7 @@ header span.close {
   background-image: url("i/sprite.png");
   background-position: center 0;
   display: block;
+  cursor: pointer;
 }
 
 header span.close:active {
@@ -123,7 +124,7 @@ header span.close:active {
 
 #pageInfo, #accounts {
   width: 100%;
-  
+
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #d4dde5), color-stop(100%, #c6d1da));
   background-image: -moz-linear-gradient(top, #d4dde5 0%, #c6d1da 100%);
 }
@@ -133,14 +134,14 @@ header span.close:active {
 */
 #pageInfo {
   padding: 10px 10px 20px;
-  
+
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #d4dde5), color-stop(100%, #c6d1da));
   background-image: -moz-linear-gradient(top, #d4dde5 0%, #c6d1da 100%);
 }
 
 #pageInfo .thumbnail {
   border: 1px solid #a6afb6;
-  
+
   -webkit-box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
      -moz-box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
           box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
@@ -186,7 +187,7 @@ header span.close:active {
   padding: 3px 5px;
   background-color: #E1E7ED;
   color: #848B91;
-  
+
   -webkit-border-radius: 5px;
      -moz-border-radius: 5px;
           border-radius: 5px;
@@ -202,7 +203,7 @@ header span.close:active {
   color: #535F6D;
 }
 
-/* 
+/*
     generic styles for account panels
 */
 
@@ -217,9 +218,9 @@ header span.close:active {
   padding: 10px;
   cursor: pointer;
   width: 100%;
-  
+
   -moz-user-select: none;
-  
+
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #d4dde5), color-stop(100%, #c6d1da));
   background-image: -moz-linear-gradient(top, #d4dde5 0%, #c6d1da 100%);
 }
@@ -243,7 +244,7 @@ img.avatar {
   height: 23px;
   margin: 2px 5px 0 0;
   width: 23px;
-  
+
   -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
      -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
           box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
@@ -346,7 +347,7 @@ span.icon.debug {
   border-style: solid;
   border-color: #A6AFB6;
 
-  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;    
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;
      -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;
           box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;
 }
@@ -358,7 +359,7 @@ span.icon.debug {
 .ui-accordion-content textarea:focus,
 .ui-accordion-content input[type="text"]:focus {
   outline: none;
-  
+
   -webkit-box-shadow: 0 0 0 2px #C2ECFF inset;
      -moz-box-shadow: 0 0 0 2px #C2ECFF inset;
           box-shadow: 0 0 0 2px #C2ECFF inset;
@@ -439,11 +440,11 @@ span.icon.twitter {
   width: 24px;
   background-position: center -157px, center top;
   background-repeat: no-repeat;
-  
+
   -webkit-border-radius: 0 2px 2px 0;
      -moz-border-radius: 0 2px 2px 0;
           border-radius: 0 2px 2px 0;
-  
+
   background-image: url("i/sprite.png"), -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
   background-image: url("i/sprite.png"), -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
 }
@@ -475,7 +476,7 @@ span.icon.google {
 #news {
   padding: 10px;
   width: 100%;
-} 
+}
 
 #news span.icon.rss {
   background-position: center -183px;
@@ -489,112 +490,112 @@ span.icon.google {
 /*
     hbox & vbox
 */
- 
+
 .hbox {
 	display: -webkit-box;
 	-webkit-box-orient: horizontal;
 	-webkit-box-align: stretch;
- 
+
 	display: -moz-box;
 	-moz-box-orient: horizontal;
 	-moz-box-align: stretch;
- 
+
 	display: box;
 	box-orient: horizontal;
 	box-align: stretch;
         width: 100%;
 }
- 
+
 .hbox > * {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 	display: block;
 }
- 
+
 .vbox {
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
 	-webkit-box-align: stretch;
- 
+
 	display: -moz-box;
 	-moz-box-orient: vertical;
 	-moz-box-align: stretch;
- 
+
 	display: box;
 	box-orient: vertical;
 	box-align: stretch;
 }
- 
+
 .vbox > * {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 	display: block;
 }
- 
+
 .spacer {
 	-webkit-box-flex: 1;
 	-moz-box-flex: 1;
 	box-flex: 1;
 }
- 
+
 .reverse {
 	-webkit-box-direction: reverse;
 	-moz-box-direction: reverse;
 	box-direction: reverse;
 }
- 
+
 .boxFlex0 {
 	-webkit-box-flex: 0;
 	-moz-box-flex: 0;
 	box-flex: 0;
 }
- 
+
 .boxFlex1, .boxFlex {
 	-webkit-box-flex: 1;
 	-moz-box-flex: 1;
 	box-flex: 1;
 }
- 
+
 .boxFlex2 {
 	-webkit-box-flex: 2;
 	-moz-box-flex: 2;
 	box-flex: 2;
 }
- 
+
 .boxGroup1 {
 	-webkit-box-flex-group: 1;
 	-moz-box-flex-group: 1;
 	box-flex-group: 1;
 }
- 
+
 .boxGroup2 {
 	-webkit-box-flex-group: 2;
 	-moz-box-flex-group: 2;
 	box-flex-group: 2;
 }
- 
+
 .start {
 	-webkit-box-pack: start;
 	-moz-box-pack: start;
 	box-pack: start;
 }
- 
+
 .end {
 	-webkit-box-pack: end;
 	-moz-box-pack: end;
 	box-pack: end;
 }
- 
+
 .center {
 	-webkit-box-pack: center;
 	-moz-box-pack: center;
 	box-pack: center;
 }
 
-/* 
-    clearfix 
+/*
+    clearfix
 */
 
 .clearfix:after {
@@ -605,16 +606,16 @@ span.icon.google {
 	line-height: 0;
 	height: 0;
 }
- 
+
 html[xmlns] .clearfix {
 	display: block;
 }
- 
+
 * html .clearfix {
 	height: 1%;
 }
 
-/* 
+/*
     webkit specific styles
 */
 @media screen and (-webkit-min-device-pixel-ratio:0) {
@@ -622,33 +623,33 @@ html[xmlns] .clearfix {
   #wrapper {
     background-color: #404040;
   }
-  
+
   .overflow {
     text-overflow: ellipsis;
     overflow-x: hidden;
     white-space: nowrap;
   }
-  
+
   div.title {
     white-space: wrap;
   }
-  
+
   .flip {
     -webkit-transform-style: preserve-3d;
     -webkit-backface-visibility: hidden;
     -webkit-transition: -webkit-transform 0.7s ease-in-out;
   }
-  
-  .front_flip { 
-    -webkit-transform: rotateY(-180deg); 
-    z-index: 900; 
+
+  .front_flip {
+    -webkit-transform: rotateY(-180deg);
+    z-index: 900;
   }
-  
-  .back_flip { 
-    -webkit-transform: rotateY(0deg) !important; 
-    z-index: 1000; 
+
+  .back_flip {
+    -webkit-transform: rotateY(0deg) !important;
+    z-index: 1000;
   }
-  
+
 }
 
 /* === STATUS MESSAGES === */
@@ -713,11 +714,11 @@ div.captcha-wrap button {
   cursor: pointer;
   padding: 0 10px;
   margin: 0;
-  
+
   -webkit-border-radius: 0 2px 2px 0;
      -moz-border-radius: 0 2px 2px 0;
           border-radius: 0 2px 2px 0;
-  
+
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
   background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
 }
@@ -726,7 +727,7 @@ div.captcha-wrap button:active {
   -webkit-box-shadow: 0 0 1px #666666 inset;
      -moz-box-shadow: 0 0 1px #666666 inset;
           box-shadow: 0 0 1px #666666 inset;
-          
+
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
   background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
 }
@@ -740,12 +741,12 @@ div.captcha-wrap input {
   line-height: 18px;
   padding: 3px;
   margin: 0;
-  
+
   -webkit-border-radius: 2px 0 0 2px;
      -moz-border-radius: 2px 0 0 2px;
           border-radius: 2px 0 0 2px;
 
-  -webkit-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;          
+  -webkit-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
      -moz-box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
           box-shadow:0 3px 3px -3px rgba(0, 0, 0, 0.25) inset,  0 1px 0 #fff;
 }
@@ -769,7 +770,7 @@ div.status img {
 
 #statusSharing {
   background-color: #f2f2f2;
-  
+
   -webkit-box-shadow: 0 0 200px rgba(0,0,0,0.25) inset;
      -moz-box-shadow: 0 0 200px rgba(0,0,0,0.25) inset;
           box-shadow: 0 0 200px rgba(0,0,0,0.25) inset;
@@ -845,7 +846,7 @@ div.status.noConfig a:hover {
   position: absolute;
   right: 10px;
   bottom: 10px;
-  
+
   -webkit-box-shadow: none;
      -moz-box-shadow: none;
           box-shadow: none;
