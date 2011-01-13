@@ -180,6 +180,144 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
   };
 
+
+  var nsIHttpActivityObserver = Ci.nsIHttpActivityObserver;
+  function httpActivityObserver(frame) {
+    this.frame = frame;
+  }
+  httpActivityObserver.prototype = {
+    // copied largely from firebug net.js
+    registered: false,
+
+    registerObserver: function()
+    {
+        if (!Ci.nsIHttpActivityDistributor)
+            return;
+
+        if (this.registered)
+            return;
+
+        var distributor = this.getActivityDistributor();
+        if (!distributor)
+            return;
+
+        distributor.addObserver(this);
+        this.registered = true;
+    },
+
+    unregisterObserver: function()
+    {
+        if (!Ci.nsIHttpActivityDistributor)
+            return;
+
+        if (!this.registered)
+            return;
+
+        var distributor = this.getActivityDistributor();
+        if (!distributor)
+            return;
+
+        distributor.removeObserver(this);
+        this.registered = false;
+    },
+
+    getActivityDistributor: function() {
+      var activityDistributor = null;
+      try {
+        var dist = Cc["@mozilla.org/network/http-activity-distributor;1"];
+        if (dist)
+          activityDistributor = dist.getService(Ci.nsIHttpActivityDistributor);
+      } catch (e) {
+        dump("nsIHttpActivityDistributor no available "+e+"\n");
+      }
+      delete this.activityDistributor;
+      return (this.activityDistributor = activityDistributor);
+    },
+    
+    getWindowForRequest: function(channel) {
+      if (channel && channel.loadGroup && channel.loadGroup.notificationCallbacks) {
+        var lctx = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext);
+        var win = lctx.associatedWindow;
+        //dump("got a window "+win+ " isContent? "+lctx.isContent+"\n");
+        return win;
+      }
+      return null;
+    },
+    
+    getXULWindowForWin: function(win) {
+      var xulWindow = win.QueryInterface(Ci.nsIInterfaceRequestor)
+        .getInterface(Ci.nsIWebNavigation)
+                        .QueryInterface(Ci.nsIDocShell)
+                        .chromeEventHandler.ownerDocument.defaultView;
+      //dump("got a XUL window "+xulWindow+"\n");
+      try {
+        return XPCNativeWrapper.unwrap(xulWindow);
+      } catch(e) {
+        return xulWindow.wrappedJSObject;
+      }
+      return null;
+    },
+
+    getBrowserForRequest: function(channel) {
+      var win = this.getWindowForRequest(channel);
+      if (!win)
+        return null;
+      var xulWindow = this.getXULWindowForWin(win);
+      if (xulWindow !== this.frame.panel.ownerDocument.defaultView) 
+        return null;
+      return this.frame.shareFrame;
+    },
+
+    /* nsIActivityObserver */
+    observeActivity: function(httpChannel, activityType, activitySubtype,
+                              timestamp, extraSizeData, extraStringData) {
+      try {
+        if (httpChannel instanceof Ci.nsIHttpChannel)
+            this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
+                extraSizeData, extraStringData);
+      } catch (e) {
+        dump("observeActivity: EXCEPTION "+e+"\n");
+      }
+    },
+
+    observeRequest: function(httpChannel, activityType, activitySubtype,
+                             timestamp, extraSizeData, extraStringData) {
+      var browser = this.getBrowserForRequest(httpChannel);
+      if (!browser) {
+        return;
+      }
+        
+      if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION) {
+        if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER) {
+          //dump("ACTIVITY_SUBTYPE_REQUEST_HEADER for "+httpChannel.name+" \n");
+          browser.__response_headers_received = false;
+        } else
+        if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE) {
+          // If we don't have response headers then we did not recieve a response
+          if (!browser.__response_headers_received) {
+            //dump("ACTIVITY_SUBTYPE_TRANSACTION_CLOSE for "+httpChannel.name+" \n");
+            browser.loadURI('chrome://ffshare/content/servererror.html');
+          }
+        } else
+        if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_HEADER) {
+          //dump("ACTIVITY_SUBTYPE_RESPONSE_HEADER for "+httpChannel.name+" \n");
+          browser.__response_headers_received = true;
+        }
+      }
+    },
+
+    /* nsISupports */
+    QueryInterface: function(iid)
+    {
+        if (iid.equals(Ci.nsISupports) ||
+            iid.equals(Ci.nsIActivityObserver)) {
+            return this;
+         }
+
+        throw Cr.NS_ERROR_NO_INTERFACE;
+    }
+  }
+
   // width/height tracking for the panel, initial values are defaults to
   // show the configure status panel
   // with fx3, we have to set the dimensions of the panel, with fx4, we have to
@@ -207,12 +345,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var obs = Cc["@mozilla.org/observer-service;1"].
                             getService(Components.interfaces.nsIObserverService);
       obs.addObserver(this, 'content-document-global-created', false);
+      
+      this.httpObserver = new httpActivityObserver(this);
+      this.httpObserver.registerObserver();
     },
 
     unregisterListener: function (listener) {
       var obs = Cc["@mozilla.org/observer-service;1"].
                             getService(Ci.nsIObserverService);
       obs.removeObserver(this, 'content-document-global-created');
+
+      this.httpObserver.unregisterObserver();
     },
 
     observe: function (aSubject, aTopic, aData) {
