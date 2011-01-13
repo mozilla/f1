@@ -36,27 +36,6 @@
     </div -->
 
     <div id="accounts">
-
-        <div id="debugpanel" class="hbox debugging user">
-            <span class="arrow"></span>
-            <span class="icon debug"></span>
-            <h3 class="boxFlex overflow">debug</h3>
-            <span class="username">developer</span>
-        </div>
-        <div id="debugging">
-            <div class="padding">
-              <button onclick="window.closeShare()">Close</button>
-              <button onclick="window.showStatus('statusSharing', true)">Show Sharing</button>
-              <button onclick="window.showStatus('statusServerBusy', true)">Show Server Busy</button>
-              <button onclick="window.showStatus('statusError', true)">Show Error</button>
-              <button onclick="window.showStatusShared()">Show Shared</button>
-              <button onclick="window.showStatus('statusServerError', true)">Show Server Error</button>
-              <button onclick="window.showStatus('statusAuth', true)">Show Auth Error</button>
-              <button onclick="window.showStatus('statusCaptcha', true)">Show Captcha</button>
-              <button onclick="alert(localStorage.gmailContacts)">Alert contacts cache</button>
-            </div>
-        </div>
-
     </div>
 
     <div id="newsBox">
@@ -221,51 +200,6 @@
 </div>
 
 <!-- Start templates -->
-<script id="panelsTemplate" type="text/template">
-    <div class="hbox {type} user">
-        <span class="arrow"></span>
-        <span class="icon {type}"></span>
-        <h3 class="boxFlex overflow">{name}</h3>
-        <span class="username">Username</span>
-    </div>
-
-  <div id="{type}" class="{type}">
-    <div class="padding">
-    <form name="{type}Send" class="hbox messageForm" action="#">
-      <div class="user inactive col">
-        <input type="hidden" name="domain" value="{domain}" />
-        <input type="hidden" name="userid" value="" />
-        <input type="hidden" name="username" value="" />
-        <input type="hidden" name="picture" value="" />
-        <input type="hidden" name="link" value="" />
-        <input type="hidden" name="title" value="" />
-        <input type="hidden" name="caption" value="" />
-        <input type="hidden" name="description" value="" />
-        <span class="avatar"><img class="avatar" src="/share/i/face2.png"></span>
-      </div>
-      { features.direct [}
-      <div class="message boxFlex addressing">
-        <input name="to" placeholder="to" type="text" value="" class="ffshareAutoComplete" autocompletestore="{domain}"/>
-      { features.subject [}
-        <input name="subject" placeholder="subject" type="text" value=""/>
-      {]}
-      {]}
-        <textarea class="message compose" placeholder="Type your message here, and we'll attach the link when you send." name="message"></textarea>
-        <div class="accountActions hbox">
-        <div class="boxFlex">
-      { features.counter [}
-          <div class="counter"></div>
-      {]}
-        </div>
-          <button class="share" type="submit">share</button>
-        </div>
-      </div>
-    </form>
-    </div>
-  </div>
-</script>
-
-
 <script id="sharedTemplate" type="text/template">
       <table>
         <tr>

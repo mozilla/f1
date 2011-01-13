@@ -3,7 +3,7 @@
  * Available via the MIT, GPL or new BSD license.
  * see: http://github.com/jrburke/blade for details
  */
-/*jslint  */
+/*jslint  plusplus: false, nomen: false */
 /*global define: false, document */
 
 'use strict';
@@ -13,9 +13,16 @@
  * dojo._toDom()
  */
 
-define(['require', './object', './jig'], function (require, object, jig) {
+define([ 'require', './object', './jig', 'module'],
+function (require,   object,     jig,     module) {
 
     var tempNode,
+        baseAttrName = 'data-' + module.id.replace(/\//g, '-') + '-' +
+                       (Math.random() + '').replace(/\d\./, ''),
+        typeAttr = baseAttrName + '-wtype',
+        idAttr = baseAttrName + '-wid',
+        idCounter = 0,
+        registry = {},
 
         Widget = object(null, null, {
             template: null,
@@ -54,12 +61,13 @@ define(['require', './object', './jig'], function (require, object, jig) {
             },
 
             render: function (relativeNode) {
-                var doc, fc, renderedNode;
+                var doc, child, renderedNode, id;
                 if (this.template) {
                     //Normalize template by trimming whitespace.
                     this.template = this.template.trim();
 
                     doc = relativeNode && relativeNode.ownerDocument || document;
+                    id = 'id' + idCounter++;
 
                     //Set up a temp node to hold template
                     if (!tempNode || tempNode.ownerDocument !== doc) {
@@ -70,14 +78,23 @@ define(['require', './object', './jig'], function (require, object, jig) {
 
                     // one node shortcut => return the node itself
                     if (tempNode.childNodes.length === 1) {
-                        return tempNode.removeChild(tempNode.firstChild);
+                        renderedNode = tempNode.removeChild(tempNode.firstChild);
+                        renderedNode.setAttribute(idAttr, id);
+                        renderedNode.setAttribute(typeAttr, this.moduleId);
                     } else {
                         // return multiple nodes as a document fragment
                         renderedNode = doc.createDocumentFragment();
-                        while ((fc = tempNode.firstChild)) {
-                            renderedNode.appendChild(fc);
+                        while ((child = tempNode.firstChild)) {
+                            renderedNode.appendChild(child);
+                            if (child.nodeType === 1) {
+                                child.setAttribute(idAttr, id);
+                                child.setAttribute(typeAttr, this.moduleId);
+                            }
                         }
                     }
+
+                    this._widgetId = id;
+                    registry[id] = this;
                 }
 
                 return renderedNode;
@@ -100,8 +117,31 @@ define(['require', './object', './jig'], function (require, object, jig) {
                     this.node.parentNode.removeChild(this.node);
                 }
                 delete this.node;
+                delete registry[this._widgetId];
             }
         });
+
+    Widget.closest = function (widgetType, evt, funcName) {
+        var refNode = evt.target,
+            widget;
+
+        //Walk up the list of nodes until a match with the type is found.
+        while (refNode) {
+            if (refNode.getAttribute(typeAttr) === widgetType) {
+                break;
+            }
+            refNode = refNode.parentNode;
+        }
+
+        if (refNode) {
+            widget = registry[refNode.getAttribute(idAttr)];
+            if (widget) {
+                widget[funcName](evt);
+            }
+        }
+    };
+
+    Widget.registry = registry;
 
     return Widget;
 });

@@ -35,18 +35,24 @@ require({
 define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
          "placeholder", "AutoComplete", "dispatch", "accounts",
          "storage", "services", "shareOptions", "widgets/PageInfo", "rssFeed",
+         "widgets/DebugPanel", "widgets/AccountPanel",
          "jquery-ui-1.8.7.min", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           placeholder,   AutoComplete,   dispatch,   accounts,
-          storage,   services,   shareOptions,   PageInfo,           rssFeed) {
+          storage,   services,   shareOptions,   PageInfo,           rssFeed,
+          DebugPanel,           AccountPanel) {
 
   var showStatus,
     actions = services.domains,
-    urlArgs, sendData, prop,
     options = shareOptions(),
-    tabDom, bodyDom, timer,
+    bodyDom, timer, pageInfo, sendData,
     updateTab = true, tabSelection, accountCache, showNew,
+    accountPanels = [],
     store = storage();
+
+  function escapeHtml(text) {
+    return text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : text;
+  }
 
   jig.addFn({
     thumb: function (options) {
@@ -56,18 +62,20 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         return escapeHtml(options.thumbnail);
       }
     },
+    preview: function (options) {
+      return options.previews && options.previews[0];
+    },
+    link: function (options) {
+      return options.canonicalUrl || options.url;
+    },
     profilePic: function (photos) {
       //TODO: check for a thumbnail picture, hopefully one that is square.
-      return photos && photos[0] && photos[0].value || 'i/face2.png';
+      return photos && photos[0] && photos[0].value || '/dev/share/i/face2.png';
     },
     serviceName: function (domain) {
       return actions[domain].name;
     }
   });
-
-  function escapeHtml(text) {
-    return text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : text;
-  }
 
   function close() {
     dispatch.pub('hide');
@@ -132,24 +140,18 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   window.handleCaptcha = handleCaptcha;
 
   function reAuth() {
-    //First, save form state so their message can be recovered after
+    //Save form state so their message can be recovered after
     //binding accounts.
-    var data = {
-      "link": sendData.link,
-      "domain": sendData.domain,
-      "formData": actions[sendData.domain].getFormData()
-    };
-    store.sessionRestore = JSON.stringify(data);
+    accountPanels.forEach(function (panel) {
+      panel.saveData();
+    });
     showStatus('statusAuth');
   }
 
-  function sendMessage() {
+  function sendMessage(data) {
     showStatus('statusSharing');
 
-    //Allow for data validation before sending.
-    if (!actions[sendData.domain].validate(sendData)) {
-      return;
-    }
+    sendData = data;
 
     rdapi('send', {
       type: 'POST',
@@ -177,7 +179,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         }
 
         //Be sure to delete sessionRestore data
-        delete store.sessionRestore;
+        accountPanels.forEach(function (panel) {
+          panel.clearSavedData();
+        });
       },
       error: function (xhr, textStatus, err) {
         if (xhr.status === 403) {
@@ -195,97 +199,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           showStatus('statusError', err);
         }
       }
-    });
-  }
-
-  /**
-   * Makes sure there is an autocomplete set up with the latest
-   * store data.
-   */
-  function updateAutoComplete(serviceName) {
-    var svc = services.domains[serviceName];
-    var toNode = $('#'+svc.type).find('[name="to"]')[0],
-        contacts = svc.getContacts(store);
-    if (!contacts) {
-        contacts = {};
-    }
-
-    if (!svc.autoCompleteWidget) {
-      svc.autoCompleteWidget = new AutoComplete(toNode);
-    }
-    var acdata = {
-        domain: serviceName,
-        contacts: contacts
-    }
-    dispatch.pub('autoCompleteData', acdata);
-  }
-
-  /**
-   * Use store to save gmail contacts, but fetch from API
-   * server if there is no store copy.
-   */
-  function storeContacts(serviceName, account) {
-    var svcAccount = account.accounts[0];
-    var svc = services.domains[svcAccount.domain];
-    var contacts = svc.getContacts(store);
-    if (!contacts) {
-      rdapi('contacts/' + svcAccount.domain, {
-        type: 'POST',
-        data: {
-          username: svcAccount.username,
-          userid: svcAccount.userid,
-          startindex: 0,
-          maxresults: 500
-        },
-        success: function (json) {
-          //Transform data to a form usable by autocomplete.
-          if (json && !json.error) {
-            var entries = json.result.entry,
-                data = [];
-
-            data = svc.getFormattedContacts(entries);
-
-            svc.setContacts(store, data);
-            updateAutoComplete(svcAccount.domain);
-          }
-        }
-      });
-    } else {
-      //This function could be called before window is loaded, or after. In
-      //either case, make sure to let the chrome know about it, since chrome
-      //listens after the page is loaded (not after just DOM ready)
-      updateAutoComplete(svcAccount.domain);
-      //$(window).bind('load', updateAutoComplete);
-    }
-  }
-
-  function updateAccountDisplay(service, account) {
-    $(function () {
-      var name = account.displayName,
-        svcAccount = account.accounts[0],
-        photo = account.photos && account.photos[0] && account.photos[0].value,
-        serviceDom = $('#' + service);
-
-      // XXX for email services, we should show the email account, but we
-      // cannot rely on userid being a 'pretty' name we can display
-      var username = svcAccount.username;
-      if (username && username != name) {
-        name = name + " (" + username + ")";
-      }
-
-      //Add the tab as an option
-      $('.' + service).removeClass('hidden');
-
-      if (name) {
-        $('.' + service).find('.username').text(name);
-      }
-      if (photo) {
-        serviceDom.find('.avatar').attr('src', photo);
-      }
-
-      serviceDom.find('input[name="userid"]').val(svcAccount.userid);
-      serviceDom.find('input[name="username"]').val(svcAccount.username);
-      serviceDom.find('div.user').removeClass('inactive');
     });
   }
 
@@ -311,38 +224,40 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   function updateAccounts(accounts) {
     var hasLastSelectionMatch = false,
-        userAccounts = {}, selection,
-        sessionRestore = store.sessionRestore;
+        accountsDom = $('#accounts'),
+        fragment = document.createDocumentFragment(),
+        debugPanel;
 
     if ((accounts && accounts.length)) {
       //Figure out what accounts we do have
-      var panelhtml='';
       accounts.forEach(function (account) {
-        var domain = account.accounts[0].domain;
+        var domain = account.accounts[0].domain,
+            data;
         if (domain && actions[domain]) {
           //Make sure to see if there is a match for last selection
           if (!hasLastSelectionMatch) {
             hasLastSelectionMatch = actions[domain].type === store.lastSelection;
           }
-          userAccounts[actions[domain].type] = account;
 
-          var data = actions[domain];
+          data = actions[domain];
           data.domain = domain;
-          panelhtml += jig('#panelsTemplate', data);
 
+          accountPanels.push(new AccountPanel({
+            options: options,
+            account: account,
+            svc: data
+          }, fragment));
         }
       });
+
       // add the account panels now
-      $('#accounts').append(panelhtml);
-      // update the dom content of the panels
-      accounts.forEach(function (account) {
-          var domain = account.accounts[0].domain;
-          actions[domain].setFormData(options);
+      accountsDom.append(fragment);
 
-          updateAccountDisplay(actions[domain].type, account);
-          storeContacts(actions[domain].type, account);
+      //Add debug panel if it is allowed.
+      if (options.prefs.system === 'dev') {
+        debugPanel = new DebugPanel({}, accountsDom[0]);
+      }
 
-      });
     } else {
       showStatus('statusSettings');
       return;
@@ -359,102 +274,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       delete store.accountAdded;
     }
 
-    //If the message containder doesn't want URLs then respect that.
-    //However, skip this if session restore is involved.
-    if (sessionRestore) {
-      sessionRestore = JSON.parse(sessionRestore);
-    }
-
-    //For the title in facebook/subject in email, set it to the page title
-    if (options.title) {
-      $('.title').text(options.title);
-    }
-
-    //For pages with built in descriptions add that to the meta information
-    if (options.description) {
-      $('.description').text(options.description);
-    }
-
-    if (options.shortUrl) {
-      $('.surl').text(options.shortUrl);
-    }
-
-    if (options.url) {
-      $('.url').text(options.url);
-    }
-
-    //Create ellipsis for thumbnail section
-    $(".overflow").textOverflow(null,true);
-
-    $("form.messageForm")
-      .submit(function (evt) {
-
-        var form = evt.target;
-
-        //Make sure all form elements are trimmed and username exists.
-        //Then collect the form values into the data object.
-        sendData = {};
-        $.each(form.elements, function (i, node) {
-          var trimmed = node.value.trim();
-
-          if (node.getAttribute("placeholder") === trimmed) {
-            trimmed = "";
-          }
-
-          node.value = trimmed;
-
-          if (node.value) {
-            sendData[node.name] = node.value;
-          }
-        });
-        var svc = services.domains[sendData.domain];
-
-        if (options.shortUrl) {
-          sendData.shorturl = options.shortUrl;
-        } else if (svc.shorten) {
-          sendData.shorten = true;
-        }
-
-        // fixup to addressing if necessary
-        if (sendData.to) {
-            var contacts = svc.getContacts(store);
-            var newrecip = []
-            if (contacts) {
-                var recip = sendData.to.split(',');
-                recip.forEach(function(to) {
-                    var acct = contacts[to.trim()];
-                    if (acct && !acct.email)
-                        newrecip.push(acct.userid ? acct.userid : acct.username);
-                })
-            }
-            if (newrecip.length > 0) {
-                sendData.to = newrecip.join(', ');
-            }
-        }
-
-        sendMessage();
-        return false;
-      })
-      .each(function (i, node) {
-        placeholder(node);
-      });
-
-    //Session restore, do after form setting above.
-    if (sessionRestore) {
-      sessionRestore = JSON.parse(sessionRestore);
-
-      //If this share is for a different URL, dump the sessionRestore
-      if (options.link !== sessionRestore.link) {
-        sessionRestore = null;
-        delete store.sessionRestore;
-      }
-
-      if (sessionRestore) {
-        actions[sessionRestore.domain].setFormData(sessionRestore.formData);
-        //Make sure placeholder text is updated.
-        placeholder();
-      }
-    }
+    //Create ellipsis for anything wanting ... overflow
+    $(".overflow").textOverflow(null, true);
 
     if (updateTab) {
       //Choose a tab to show.
@@ -468,8 +289,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   } // end updateAccounts
 
 
-
-  new PageInfo({
+  pageInfo = new PageInfo({
     options: options
   }, $('.sharebox')[0], 'prepend');
 
@@ -490,23 +310,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     }
   }
 
-  //Debug info on the data that was received.
-  if (options.prefs.system === 'dev') {
-    $('#debugOutput').val(JSON.stringify(options));
-    $('#debugCurrentLocation').val(location.href);
-  } else {
-    $('#debugpanel').remove();
-    $('#debugging').remove();
-  }
-
   $(function () {
-    var thumbImgDom, picture,
-      sessionRestore = store.sessionRestore,
-      tabSelectionDom;
-
-    thumbImgDom = $('img.thumb');
-    bodyDom = $('body');
-
     //Set the type of system as a class on the UI to show/hide things in
     //dev vs. production
     if (options.prefs.system) {
@@ -518,14 +322,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       $('#newLink').removeClass('hidden');
     }
 
-    //Set preview image
-    if (options.previews && options.previews.length) {
-      thumbImgDom.attr('src', escapeHtml(options.previews[0]));
-    } else {
-      thumbImgDom.attr('src', escapeHtml(options.thumbnail));
-    }
+    //Listen to sendMessage events from the AccountPanels
+    $(document).bind('sendMessage', function (evt, data) {
+      sendMessage(data);
+    });
 
     //Hook up button for share history
+    bodyDom = $('body');
     bodyDom
       .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
         cancelStatus();
@@ -554,7 +357,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       $('#clickBlock').removeClass('hidden');
       sendData.HumanVerification = $('#captcha').attr('value');
       sendData.HumanVerificationImage = $('#captchaImage').attr('src');
-      sendMessage();
+      sendMessage(sendData);
     });
 
     //Set up default handler for account changes triggered from other
@@ -616,7 +419,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     // watch for hash changes, reload if we do, this should be fixed up to be
     // better than doing a reload
     window.addEventListener("hashchange", function () {
-        location.reload();
+      location.reload();
     }, false);
 
     //Get the most recent feed item, not important to do it last.

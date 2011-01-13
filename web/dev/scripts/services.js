@@ -44,11 +44,6 @@ function (rdapi,   url,         TextCounter) {
     this.shorten = false;
     this.autoCompleteWidget = null;
 
-    // text counter support
-    this.counter = null;
-    this.textlimit = 0;
-    this.urlsize = 26;
-
     // set options
     this.features = {
       counter: false,
@@ -62,70 +57,6 @@ function (rdapi,   url,         TextCounter) {
   }
   svcBase.constructor = svcBase;
   svcBase.prototype = {
-    validate: function (sendData) {
-      if (this.counter)
-        return !this.counter || !this.counter.isOver();
-      return true;
-    },
-    startCounter: function(data) {
-      if (this.textlimit < 1)
-        return;
-      //Set up text counter
-      if (!this.counter) {
-        this.counter = new TextCounter($('#'+this.type+' textarea.message'),
-                                       $('#'+this.type+' .counter'),
-                                       this.textlimit - this.urlsize);
-      }
-      // Update counter. If using a short url from the web page itself, it could
-      // potentially be a different length than a bit.ly url so account for
-      // that. The + 1 is to account for a space before adding the URL to the
-      // tweet.
-      this.counter.updateLimit(data.shortUrl ?
-                               (this.textlimit - (data.shortUrl.length + 1)) :
-                               this.textlimit - this.urlsize);
-    },
-    getFormData: function () {
-      var dom = $('#'+this.type);
-      return {
-        to: dom.find('[name="to"]').val().trim() || '',
-        subject: dom.find('[name="subject"]').val().trim() || '',
-        message: dom.find('textarea.message').val().trim() || '',
-        picture: dom.find('[name="picture"]').val().trim() || '',
-        canonicalUrl: dom.find('[name="link"]').val().trim() || '',
-        title: dom.find('[name="title"]').val().trim() || '',
-        description: dom.find('[name="description"]').val().trim() || '',
-        shortUrl: dom.find('[name="surl"]').val().trim() || ''
-      };
-    },
-    setFormData: function (data) {
-      var dom = $('#'+this.type);
-      if (data.to) {
-        dom.find('[name="to"]').val(data.to);
-      }
-      if (data.subject) {
-        dom.find('[name="subject"]').val(data.subject);
-      }
-      if (data.message) {
-        dom.find('textarea.message').val(data.message);
-      }
-      var picture = data.previews && data.previews[0];
-      if (picture) {
-        dom.find('[name="picture"]').val(picture);
-      }
-      if (data.canonicalUrl || data.url) {
-        dom.find('[name="link"]').val(data.canonicalUrl || data.url);
-      }
-      if (data.title) {
-        dom.find('[name="title"]').val(data.title);
-      }
-      if (data.description) {
-        dom.find('[name="description"]').val(data.description);
-      }
-      if (data.shortUrl) {
-        dom.find('[name="surl"]').val(data.shortUrl);
-      }
-      this.startCounter(data);
-    },
     clearCache: function(store) {
       delete store[this.type+'Contacts'];
     },
@@ -195,7 +126,7 @@ function (rdapi,   url,         TextCounter) {
           subject: false,
           counter: true
         },
-        textlimit: 140,
+        textLimit: 140,
         shorten: true,
         serviceUrl: 'http://twitter.com',
         revokeUrl: 'http://twitter.com/settings/connections',
@@ -210,7 +141,7 @@ function (rdapi,   url,         TextCounter) {
           subject: false,
           counter: true
         },
-        textlimit: 420,
+        textLimit: 420,
         serviceUrl: 'http://facebook.com',
         revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
         signOutUrl: 'http://facebook.com',
