@@ -27,48 +27,46 @@
 
 'use strict';
 
-define([ 'rdapi', "blade/url", "TextCounter"],
-function (rdapi,   url,         TextCounter) {
+define([ 'rdapi', "blade/object", "TextCounter"],
+function (rdapi,   object,         TextCounter) {
 
-  var options = url.queryToObject(location.href.split('#')[1] || '') || {},
-  showNew = options.show === 'new';
+  var svcs, prop;
 
-  function svcBase(name, options) {
+  function SvcBase(name, options) {
     if (!name) {
-        return;
+      return;
     }
     this.name = name;
-    this.type = name.replace(/\s/g,'').toLowerCase();
-    this.tabName = this.type+'Tab';
-    this.icon = 'i/'+this.type+'Icon.png';
+    this.type = name.replace(/\s/g, '').toLowerCase();
+    this.tabName = this.type + 'Tab';
+    this.icon = 'i/' + this.type + 'Icon.png';
     this.shorten = false;
     this.autoCompleteWidget = null;
 
-    // set options
+    // set features
     this.features = {
       counter: false,
       direct: false,
       subject: false
-    }
+    };
 
-    for (var i in options) {
-      this[i] = options[i];
-    }
+    object.mixin(this, options);
   }
-  svcBase.constructor = svcBase;
-  svcBase.prototype = {
-    clearCache: function(store) {
-      delete store[this.type+'Contacts'];
+  SvcBase.constructor = SvcBase;
+  SvcBase.prototype = {
+    clearCache: function (store) {
+      delete store[this.type + 'Contacts'];
     },
-    getContacts: function(store) {
-      if (store[this.type+'Contacts'])
-        return JSON.parse(store[this.type+'Contacts']);
+    getContacts: function (store) {
+      if (store[this.type + 'Contacts']) {
+        return JSON.parse(store[this.type + 'Contacts']);
+      }
       return null;
     },
-    setContacts: function(store, contacts) {
-      store[this.type+'Contacts'] = JSON.stringify(contacts);
+    setContacts: function (store, contacts) {
+      store[this.type + 'Contacts'] = JSON.stringify(contacts);
     },
-    getFormattedContacts: function(entries) {
+    getFormattedContacts: function (entries) {
       var data = {};
       entries.forEach(function (entry) {
         if (entry.accounts && entry.accounts.length) {
@@ -86,21 +84,21 @@ function (rdapi,   url,         TextCounter) {
   };
 
   /* common functionality for email based services */
-  function emailSvcBase() {
-    svcBase.constructor.apply(this, arguments);
+  function EmailSvcBase() {
+    SvcBase.constructor.apply(this, arguments);
     this.features.direct = true;
     this.features.subject = true;
-  };
-  emailSvcBase.prototype = new svcBase();
-  emailSvcBase.constructor = emailSvcBase;
-  emailSvcBase.prototype.validate = function (sendData) {
+  }
+
+  EmailSvcBase.prototype = new SvcBase();
+  EmailSvcBase.constructor = EmailSvcBase;
+  EmailSvcBase.prototype.validate = function (sendData) {
     if (!sendData.to || !sendData.to.trim()) {
-      showStatus('statusToError');
       return false;
     }
     return true;
   };
-  emailSvcBase.prototype.getFormattedContacts = function(entries) {
+  EmailSvcBase.prototype.getFormattedContacts = function (entries) {
     var data = {};
     entries.forEach(function (entry) {
       if (entry.emails && entry.emails.length) {
@@ -115,12 +113,11 @@ function (rdapi,   url,         TextCounter) {
       }
     });
     return data;
-  }
+  };
 
-  var svcs = {
-    showNew: showNew,
+  svcs = {
     domains: {
-      'twitter.com': new svcBase('Twitter', {
+      'twitter.com': new SvcBase('Twitter', {
         features: {
           direct: true,
           subject: false,
@@ -135,7 +132,7 @@ function (rdapi,   url,         TextCounter) {
           return 'http://twitter.com/' + account.username;
         }
       }),
-      'facebook.com': new svcBase('Facebook', {
+      'facebook.com': new SvcBase('Facebook', {
         features: {
           direct: true,
           subject: false,
@@ -149,7 +146,7 @@ function (rdapi,   url,         TextCounter) {
           return 'http://www.facebook.com/profile.php?id=' + account.userid;
         }
       }),
-      'google.com': new emailSvcBase('Gmail', {
+      'google.com': new EmailSvcBase('Gmail', {
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
         signOutUrl: 'http://google.com/preferences',
@@ -157,7 +154,7 @@ function (rdapi,   url,         TextCounter) {
           return 'http://google.com/profiles/' + account.username;
         }
       }),
-      'googleapps.com': new emailSvcBase('Google Apps', {
+      'googleapps.com': new EmailSvcBase('Google Apps', {
         icon: 'i/gmailIcon.png',
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
@@ -166,7 +163,7 @@ function (rdapi,   url,         TextCounter) {
           return 'http://google.com/profiles/' + account.username;
         }
       }),
-      'yahoo.com': new emailSvcBase('Yahoo', {
+      'yahoo.com': new EmailSvcBase('Yahoo', {
         name: 'Yahoo!',
         serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
         revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
@@ -175,7 +172,8 @@ function (rdapi,   url,         TextCounter) {
           return 'http://profiles.yahoo.com/' + account.username;
         }
       }),
-      'linkedin.com': new svcBase('LinkedIn', {
+      'linkedin.com': new SvcBase('LinkedIn', {
+        isNew: true,
         features: {
           direct: true,
           subject: true,
@@ -189,11 +187,17 @@ function (rdapi,   url,         TextCounter) {
         }
       })
     },
-    domainList: []
+    domainList: [],
+
+    //Patch to allow old share UI to work
+    //Remove when it goes away.
+    svcBaseProto: SvcBase.prototype
   };
 
-  for (var i in svcs.domains) {
-    svcs.domainList.push(i);
+  for (prop in svcs.domains) {
+    if (svcs.domains.hasOwnProperty(prop)) {
+      svcs.domainList.push(prop);
+    }
   }
 
   return svcs;
