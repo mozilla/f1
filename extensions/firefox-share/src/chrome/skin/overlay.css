@@ -21,18 +21,20 @@
  * Contributor(s):
  * */
 
-#ffshare-toolbar-button
-{
+#ffshare-toolbar-button {
   list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
   -moz-image-region: rect(0px, 35px, 23px, 0px);
 }
 #ffshare-toolbar-button[disabled="true"],
-#ffshare-toolbar-button[disabled="true"]:active
-{
+#ffshare-toolbar-button[disabled="true"]:active {
   -moz-image-region: rect(23px, 35px, 46px, 0px);
 }
-#ffshare-toolbar-button:active
-{
+#ffshare-toolbar-button:active {
+  -moz-image-region: rect(46px, 35px, 69px, 0px);
+}
+#ffshare-toolbar-button[checked="true"] {
+  background: none;
+  border-color: transparent;
   -moz-image-region: rect(46px, 35px, 69px, 0px);
 }
 

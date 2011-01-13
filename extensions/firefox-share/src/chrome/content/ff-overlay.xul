@@ -119,6 +119,7 @@
                  class="toolbarbutton-1 chromeclass-toolbar-additional"
                  label="&ffshareToolbarButton.label;"
                  tooltiptext="&ffshareToolbarButton.tooltip;"
+                 type="checkbox"
                  command="cmd_openSharePage"/>
 
   <tabbrowser id="content"/>

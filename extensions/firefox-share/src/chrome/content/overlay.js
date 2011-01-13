@@ -270,6 +270,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     hide: function () {
       this.panel.hidePopup();
       this.visible = false;
+      // Always ensure the button is unchecked when the panel is hidden
+      getButton().removeAttribute("checked");
     },
     
     close: function() {
@@ -338,7 +340,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       setAttrs(panel, {
         type: 'arrow',
         level: 'parent',
-        noautohide: 'true'
+        noautohide: 'true',
+        'class' : 'ffshare-panel'
       });
 
       setAttrs(browserNode, {
@@ -347,20 +350,19 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         src: 'about:blank',
         autocompletepopup: 'PopupAutoCompleteRichResult',
         contextmenu: 'contentAreaContextMenu',
-        'disablehistory': true
+        'disablehistory': true,
+        'class' : 'ffshare-browser'
       });
-      browserNode.setAttribute('class', 'ffshare-browser');
-      panel.setAttribute('class', 'ffshare-panel');
+
       panel.appendChild(browserNode);
       document.getElementById('mainPopupSet').appendChild(panel);
 
       // hookup esc to also close the panel
-      var self = this;
-      panel.addEventListener('keypress', function(e) {
+      panel.addEventListener('keypress', fn.bind(this, function(e) {
         if (e.keyCode == 27 /*"VK_ESC"*/) {
-          self.close();
+          this.close();
         }
-      }, false);
+      }), false);
 
       this.shareFrame = browserNode;
       if (majorVer >= 4) {
@@ -412,7 +414,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (!this.panel)
         this.createShareFrame(options);
 
-      var button = document.getElementById("ffshare-toolbar-button");
+      var button = getButton();
+      // Always ensure the button is checked if the panel is open
+      button.setAttribute("checked", true);
+
       // fx 4
       if (majorVer >= 4) {
         var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
@@ -953,7 +958,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     setAccelKey: function (keyOn) {
       var oldKey = document.getElementById(this.oldKeycodeId),
           f1Key = document.getElementById(this.keycodeId),
-          keyset = document.getElementById("mainKeyset");
+          keyset = document.getElementById("mainKeyset"),
+          p;
 
       if (keyOn) {
         try {
@@ -976,7 +982,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       // now we invalidate the keyset cache so our changes take effect
-      var p = keyset.parentNode;
+      p = keyset.parentNode;
       p.appendChild(p.removeChild(keyset));
 
     },
