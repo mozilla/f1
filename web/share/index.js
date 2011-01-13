@@ -390,6 +390,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       autoCompleteWidget = new AutoComplete(toNode);
     }
 
+    // no listeners for this in the 'embed' branch, so just to prove we
+    // got contacts...
+    var msg = "Got " + data.length + " contact(s)."
+    if (data.length)
+      msg += "  First contact is " + data[0].displayName + " <" + data[0].email + ">"
+    alert(msg)
     dispatch.pub('autoCompleteData', data);
   }
 
@@ -399,38 +405,26 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
    */
   function storeGmailContacts(account) {
     if (!store.gmailContacts) {
-      var svcAccount = account.accounts[0];
 
-      rdapi('contacts/' + svcAccount.domain, {
-        type: 'POST',
-        data: {
-          username: svcAccount.username,
-          userid: svcAccount.userid,
-          startindex: 0,
-          maxresults: 500
-        },
-        success: function (json) {
-          //Transform data to a form usable by autocomplete.
-          if (json && !json.error) {
-            var entries = json.result.entry,
-                data = [];
-
-            entries.forEach(function (entry) {
-              if (entry.emails && entry.emails.length) {
-                entry.emails.forEach(function (email) {
-                  data.push({
-                    displayName: entry.displayName,
-                    email: email.value
-                  });
+      var args = {
+        callback: function (entries) {
+          var data = [];
+          entries.forEach(function (entry) {
+            if (entry.emails && entry.emails.length) {
+              entry.emails.forEach(function (email) {
+                data.push({
+                  displayName: entry.displayName,
+                  email: email.value
                 });
-              }
-            });
+              });
+            }
+          });
 
-            store.gmailContacts = JSON.stringify(data);
-            updateAutoComplete();
-          }
+          store.gmailContacts = JSON.stringify(data);
+          updateAutoComplete();
         }
-      });
+      };
+      navigator.apps.services.contacts.get(args);
     } else {
       //This function could be called before window is loaded, or after. In
       //either case, make sure to let the chrome know about it, since chrome
@@ -527,22 +521,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   function updateAccounts(accounts) {
-    // Returns true if the user has identified, false otherwise.  Also updates
-    // the accounts param.
     var hasLastSelectionMatch = false,
         userAccounts = {}, selection,
         sessionRestore = store.sessionRestore;
 
-    var identified = false;
     if ((accounts && accounts.length)) {
       //Figure out what accounts we do have
       accounts.forEach(function (account) {
         var name = account.accounts[0].domain;
-        if (name=="openid") {
-            // special treatment for the domain 'openid' - it means we are
-            // logged in - so don't return this as a 'normal' account...
-            identified = true;
-        } else if (name && actions[name]) {
+        if (name && actions[name]) {
           //Make sure to see if there is a match for last selection
           if (!hasLastSelectionMatch) {
             hasLastSelectionMatch = actions[name].selectionName === store.lastSelection;
@@ -555,7 +542,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           userAccounts[name] = account;
         }
       });
-    return identified;
     }
 
     //If no matching accounts match the last selection clear it.
@@ -753,10 +739,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
         //No need to update tab since that will be done inline below.
         updateTab = false;
-        var identified = updateAccounts(accountCache);
-        updateTab = true;
-
-        tabSelection = determineTab();
+        var identified = json!==null;
+        tabSelection = undefined;
+        if (identified) {
+          updateAccounts(accountCache);
+          tabSelection = determineTab();
+          updateTab = true;
+        }
 
         //Set up HTML so initial jquery UI tabs will not flash away from the selected
         //tab as we show it. Done for performance and to remove a flash of tab content

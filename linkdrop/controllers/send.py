@@ -126,8 +126,8 @@ Site provided description of the shared item, not supported by all services.
                 'code': constants.INVALID_PARAMS
             }
             return {'result': result, 'error': error}
-        keys = session.get('account_keys', '').split(',')
-        if not keys:
+        extuid = session.get('extuid')
+        if not extuid:
             error = {'provider': domain,
                      'message': "no user session exists, auth required",
                      'status': 401
@@ -135,11 +135,9 @@ Site provided description of the shared item, not supported by all services.
             return {'result': result, 'error': error}
 
         provider = get_provider(domain)
-        # even if we have a session key, we must have an account for that
-        # user for the specified domain.
+        # We must have an account for that user for the specified domain.
         acct = None
-        for k in keys:
-            a = session.get(k)
+        for aid, a in session.get('accounts', {}).iteritems():
             if a and a.get('domain') == domain and (a.get('username')==username or a.get('userid')==userid):
                 acct = a
                 break

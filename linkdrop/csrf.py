@@ -45,6 +45,30 @@ class CsrfMiddleware(object):
             csrf_token = session['csrf'] = str(random.getrandbits(128))
             session.save()
 
+        # This shouldn't be here, but will do for now...
+        moz_uid_cookie = request.cookies.get('uid')
+        if moz_uid_cookie is None:
+            session['extuid'] = None
+            session['extuid_cookie'] = None
+            session.save()
+            print "CSRFy - no uid cookie at all"
+        else:
+            # We have a secure cookie from our auth server - check it is the
+            # same as we recorded before - if so, the user-id we have remains
+            # valid.
+            if session.get('extuid') and session.get('extuid_cookie')==moz_uid_cookie:
+                # our extuid remains valid
+                pass
+                #print "external userid of", session['extuid'], "remains valid"
+            else:
+                # need to make a request to the auth server to resolve the userid.
+                import urllib2, json
+                raw = urllib2.urlopen("http://localhost:8301/backchannel/uid?uid=%s" % moz_uid_cookie).read()
+                data = json.loads(raw)
+                session['extuid'] = data['uid']
+                session['extuid_cookie'] = moz_uid_cookie
+                session.save()
+
         if request.method == 'POST':
             # check to see if we want to process the post at all
             if (self.unprotected_path is not None

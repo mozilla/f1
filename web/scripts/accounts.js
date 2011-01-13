@@ -68,7 +68,7 @@ function (storage,   dispatch,   rdapi) {
         fetch: function (ok, error) {
           rdapi('account/get', {
             success: function (json) {
-              if (json.error) {
+              if (json != null && json.error) {
                 json = [];
               }
 
@@ -81,17 +81,19 @@ function (storage,   dispatch,   rdapi) {
               //Check for changes, and if so, then trigger accounts changed.
               var accountCache = store.accountCache, same;
 
-              accountCache = accountCache ? JSON.parse(accountCache) : [];
-              same = json.length === accountCache.length;
+              accountCache = accountCache ? JSON.parse(accountCache) : null;
+              same = (json === null || accountCache === null) ?
+                          (json === null && accountCache === null) :
+                          (json.length === accountCache.length);
 
-              if (same) {
+              if (json != null && same) {
                 same = !json.some(function (account, i) {
                   return account.identifier !== accountCache[i].identifier;
                 });
               }
 
               if (!same) {
-                store.accountCache = JSON.stringify(json);
+                store.accountCache = json===null ? null : JSON.stringify(json);
                 impl.changed();
               }
             },

@@ -56,9 +56,17 @@ OAuth authorization api.
     @api_response
     @json_exception_response
     def get(self, domain=None):
-        keys = [k for k in session.get('account_keys', '').split(',') if k]
-        return [p for p in [session[k].get('profile') for k in keys] if p]
-        
+        extuid = session.get('extuid')
+        if not extuid:
+            return None
+        accts = session.get('accounts')
+        if accts is None:
+            accts = session['accounts'] = {}
+            for dbacct in Session.query(Account).filter(Account.key==extuid).all():
+                accts[dbacct.id] = dbacct.to_dict()
+
+        return [a.get('profile') for a in accts.itervalues()]
+
     def signout(self):
         domain = request.params.get('domain')
         username = request.params.get('username')
@@ -73,10 +81,10 @@ OAuth authorization api.
                     _and.append(Account.username==username)
                 if userid:
                     _and.append(Account.userid==userid)
+                sess_accounts = session['accounts'] = {}
                 accts = Session.query(Account).filter(Account.key.in_(keys)).filter(not_(and_(*_and))).all()
-                session['account_keys'] = ','.join([a.key for a in accts])
                 for a in accts:
-                    session[a.key] = a.to_dict()
+                    sess_accounts[a.id] = a.to_dict()
             except:
                 session.clear()
         else:
@@ -84,20 +92,21 @@ OAuth authorization api.
         session.save()
 
     def _get_or_create_account(self, domain, userid, username):
-        keys = [k for k in session.get('account_keys', '').split(',') if k]
+        extuid = session.get('extuid')
+        assert extuid, "need login (but shouldn't be able to get here without it!)"
+
+        acct_ids = session.get('accounts', {})
         # Find or create an account
         try:
-            acct = Session.query(Account).filter(and_(Account.domain==domain, Account.userid==userid)).one()
+            acct = Session.query(Account).filter(and_(Account.key==extuid, Account.domain==domain, Account.userid==userid)).one()
         except NoResultFound:
-            acct = Account()
+            acct = Account(extuid)
             acct.domain = domain
             acct.userid = userid
             acct.username = username
             Session.add(acct)
-        if acct.key not in keys:
-            keys.append(acct.key)
-            session['account_keys'] = ','.join(keys)
-            session[acct.key] = acct.to_dict()
+        if acct.id not in acct_ids:
+            session.setdefault('accounts', {})[acct.id] = acct.to_dict()
             session.save()
         return acct
 
@@ -130,7 +139,7 @@ OAuth authorization api.
                 raise e
             # XXX argh, this is also done in get_or_create above, but we have to
             # ensure we have the updated data
-            session[acct.key] = acct.to_dict()
+            session.setdefault('accounts', {})[acct.id] = acct.to_dict()
             session.save()
         except AccessException, e:
             self._redirectException(e)

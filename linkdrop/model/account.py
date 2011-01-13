@@ -37,7 +37,7 @@ class Account(JsonExpandoMixin, SerializerMixin, Base):
 
     id = Column(Integer, primary_key=True)
 
-    key = Column(RDUnicode(64), index=True)
+    key = Column(RDUnicode(64), index=True, nullable=False) # in this mockup, key is really the external user ID.
     # The external account identity information
     domain = Column(RDUnicode(64), nullable=False)
     username = Column(RDUnicode(64), nullable=False)
@@ -45,8 +45,7 @@ class Account(JsonExpandoMixin, SerializerMixin, Base):
     created = Column(UTCDateTime)
     updated = Column(UTCDateTime)
 
-    def __init__(self):
-        # can be overridden later, but always have a default for new accounts
-        self.key = str(uuid1())
+    def __init__(self, key):
+        self.key = key
         self.updated = self.created = UTCDateTime.now()
 

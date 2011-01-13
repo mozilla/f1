@@ -25,6 +25,8 @@
 <head>
   <title>F1 Alpha</title>
   <link rel="stylesheet" type="text/css" href="share.css">
+  <!-- include the contacts application -->
+  <script src="http://localhost:8300/static/include.js" type="text/javascript"></script>
   <script data-main="index.js" src="../../scripts/requireplugins-jquery-1.4.2.js" charset="utf-8"></script>
   <!-- Uncomment if you want to use more jQuery UI besides tabs. -->
   <!-- script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script-->
@@ -51,6 +53,7 @@
     </div>
     <div class="rightActions">
       <a id="newLink" href="../settings/#show=new" class="settingsLink new hidden" target="_blank">new accounts!</a>
+      <a href="http://localhost:8301/logout?return_to=http://localhost:5000/share" class="settingsLink">logout</a>
       <a href="../settings/" class="settingsLink" target="_blank">settings</a>
       <a href="http://feedback.mozillalabs.com/forums/68185-messaging-add-ons" target="_blank">feedback</a>
       <span class="close"></span>
@@ -231,7 +234,7 @@
 
 <!-- Start status messages, should be last in the page for z-order purposes -->
 <div id="statusLoggedOut" class="status hidden">
-  <img src="i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="/openid_login.html">click here to login to F1</a>
+  <img src="i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="http://localhost:8301/?return_to=http://localhost:5000/share/login_complete.html">click here to login to Mozilla Applications</a>
 </div>
 
 <div id="statusSettings" class="status hidden noConfig">
