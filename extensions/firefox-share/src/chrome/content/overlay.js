@@ -227,7 +227,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                      .rootTreeItem
                      .QueryInterface(Ci.nsIInterfaceRequestor)
                      .getInterface(Ci.nsIDOMWindow);
-      if (mainWindow !== window) {
+      if (mainWindow.wrappedJSObject !== this.panel.ownerDocument.defaultView) {
         return;
       }
 
