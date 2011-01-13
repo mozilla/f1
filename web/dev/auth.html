@@ -248,8 +248,15 @@
 
         //TODO: ideally lock down the domain be location.hostname, but
         //a problem for 127 addresses?
-        window.opener.postMessage(target, '*');
-        window.close();
+        // XXX hacky way to handle fennec, since we didn't open a window,
+        // catch the exception when using window.opener and redirect
+        try {
+          window.opener.postMessage(target, '*');
+          window.close();
+        } catch(e) {
+          var url = location.protocol + "//" + location.host + "/settings/?target="+target;
+          window.location = url;
+        }
       }
       var search = window.location.href.split('?')[1];
       if (search) {

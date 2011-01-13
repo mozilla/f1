@@ -68,10 +68,16 @@ define([], function () {
     //but just trying to reduce the edge cases of seeing multiple windows.
     if ((currentTime > lastTime + 4000)) {
       lastTime = currentTime;
-      win = window.open(url + "?domain=" + domain,
-        "ffshareOAuth",
-        "dialog=yes, modal=yes, width=900, height=500, scrollbars=yes");
-      win.focus();
+      var newlocation = url + "?domain=" + domain;
+      try {
+        win = window.open(newlocation,
+          "ffshareOAuth",
+          "dialog=yes, modal=yes, width=900, height=500, scrollbars=yes");
+        win.focus();
+      } catch(e) {
+        // XXX dialog=yes fails on fennec, lets just do window.location
+        window.location = newlocation+"&end_point_success="+encodeURI(window.location);
+      }
     } else if (win) {
       win.focus();
     }
