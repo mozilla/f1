@@ -122,6 +122,11 @@ header span.close:active {
   background-position: center -13px;
 }
 
+header a.new {
+  color: #ff5959;
+  font-weight: bold;
+}
+
 #pageInfo, #accounts {
   width: 100%;
 

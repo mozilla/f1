@@ -45,8 +45,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   var showStatus,
     actions = services.domains,
     options = shareOptions(),
-    bodyDom, timer, pageInfo, sendData,
-    updateTab = true, tabSelection, accountCache, showNew,
+    bodyDom, timer, pageInfo, sendData, showNew,
     accountPanels = [],
     store = storage();
 
@@ -202,28 +201,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     });
   }
 
-  function determineTab() {
-    var selection, selectionName, name;
-
-    if (store.lastSelection) {
-      selection = '#' + store.lastSelection;
-    } else {
-      if (accountCache && accountCache.length) {
-        name = accountCache[0].accounts[0].domain;
-        if (actions[name]) {
-          selectionName = actions[name].type;
-          if (selectionName) {
-            selection = '#' + selectionName;
-          }
-        }
-      }
-    }
-
-    return selection;
-  }
-
   function updateAccounts(accounts) {
-    var hasLastSelectionMatch = -1,
+    var lastSelectionMatch = -1,
         accountsDom = $('#accounts'),
         fragment = document.createDocumentFragment(),
         debugPanel,
@@ -285,16 +264,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     //Create ellipsis for anything wanting ... overflow
     $(".overflow").textOverflow(null, true);
 
-    if (updateTab) {
-      //Choose a tab to show.
-      //selection = determineTab();
-      //tabDom.tabs('select', selection);
-
-      //Update the profile pic/account name text for the tab.
-      //updateUserTab(null, {panel: $(selection)[0]});
-    }
-
-  } // end updateAccounts
+  }
 
 
   pageInfo = new PageInfo({
@@ -306,9 +276,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   //For the "new items" link, only show it for x number of days after showing it.
   //NOTE: when updating for newer releases, delete the old value from the
   //storage.
-  timer = store.newTimerV2;
+  delete store.newTimerV1;
+  delete store.newTimerV2;
+  timer = store.newTimerV3;
   if (!timer) {
-    store.newTimerV1 = (new Date()).getTime();
+    store.newTimerV3 = (new Date()).getTime();
     showNew = true;
   } else {
     timer = JSON.parse(timer);
@@ -379,41 +351,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     }
 
     //Fetch the accounts.
-    accounts(function (json) {
-        accountCache = json;
+    accounts(
+      updateAccounts,
 
-        //No need to update tab since that will be done inline below.
-        updateTab = false;
-        updateAccounts(accountCache);
-        updateTab = true;
-
-        tabSelection = determineTab();
-
-        //Set up HTML so initial jquery UI tabs will not flash away from the selected
-        //tab as we show it. Done for performance and to remove a flash of tab content
-        //that is not the current tab.
-        /*
-        if (tabSelection) {
-          $('.' + tabSelection.slice(1) + 'Tab').addClass('ui-tabs-selected ui-state-active');
-          tabSelectionDom = $(tabSelection);
-          tabSelectionDom.removeClass('ui-tabs-hide');
-
-          //Update the profile pic/account name text for the tab.
-          //updateUserTab(null, {panel: tabSelectionDom[0]});
-
-          //Set up jQuery UI tabs.
-          tabDom = $("#tabs");
-          tabDom.tabs({ fx: { opacity: 'toggle', duration: 100 } });
-          tabDom.bind("tabsselect", updateUserTab);
-          //Make the tabs visible now to the user, now that tabs have been set up.
-          tabDom.removeClass('invisible');
-          bodyDom.removeClass('loading');
-
-        } else {
-          //showStatus('statusSettings');
-        }
-        */
-      },
       //Error handler for account fetch
       function (xhr, textStatus, err) {
         if (xhr.status === 503) {
