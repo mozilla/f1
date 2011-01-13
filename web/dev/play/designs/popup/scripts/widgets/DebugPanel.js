@@ -21,17 +21,17 @@
  * Contributor(s):
  * */
 
-#ffshare-toolbar-button > label {
-  display: -moz-box;
-  font-weight: bold;
-}
+/*jslint indent: 2 */
+/*global define: false */
+"use strict";
 
-#ffshare-toolbar-button > image {
-  display: none;
-}
+define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./DebugPanel.html'],
+function (object,         Widget,         $,        template) {
 
-/* Styles to style the autocomplete results */
-.autocomplete-richlistitem[type="ffshare"] .ac-site-icon,
-.autocomplete-richlistitem[type="ffshare"] .ac-url-box {
-    display: none !important;
-}
+  //Define the widget.
+  return object(Widget, null, function (parent) {
+    return {
+      template: template
+    };
+  });
+});
