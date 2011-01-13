@@ -33,7 +33,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           dispatch,   storage,   accounts,   dotCompare,   url, services) {
   var store = storage(),
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
-  options = url.queryToObject(location.href.split('#')[1] || '') || {};
+  options = url.queryToObject(location.href.split('#')[1] || '') || {},
+  showNew = options.show === 'new';
 
   jig.addFn({
     domainType: function (account) {
@@ -104,7 +105,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         }
 
         //Flash the new items.
-        if (services.showNew) {
+        if (showNew) {
           $(function () {
             $("li.newItem").animate({ backgroundColor: '#ffff99' }, 200)
               .delay(1000).animate({ backgroundColor: '#fafafa' }, 3000);
@@ -120,7 +121,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
 
     //If new items should be shown, refresh the location bar,
     //so further reloads of the page do not trigger showNew
-    if (services.showNew) {
+    if (showNew) {
       delete options.show;
       location.replace(location.href.split('#')[0] + '#' + url.objectToQuery(options));
     }

@@ -28,11 +28,11 @@
 
 define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
          "placeholder", "TextCounter", "AutoComplete", "dispatch", "accounts",
-         "storage", "services",
+         "storage", "services", "blade/object",
          "jquery-ui-1.8.6.custom.min", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           placeholder,   TextCounter,   AutoComplete,   dispatch,   accounts,
-          storage,   services) {
+          storage,   services,   object) {
 
   var showStatus,
     actions = services.domains,
@@ -42,6 +42,78 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     tabDom, bodyDom, clickBlockDom, timer,
     updateTab = true, tabSelection, accountCache, showNew,
     store = storage();
+
+  //Add some old methods to services.
+  object.mixin(services.svcBaseProto, {
+    validate: function (sendData) {
+      if (this.counter) {
+        return !this.counter || !this.counter.isOver();
+      }
+      return true;
+    },
+    startCounter: function (data) {
+      if (this.textlimit < 1) {
+        return;
+      }
+      //Set up text counter
+      if (!this.counter) {
+        this.counter = new TextCounter($('#' + this.type + ' textarea.message'),
+                                       $('#' + this.type + ' .counter'),
+                                       this.textlimit - this.urlsize);
+      }
+      // Update counter. If using a short url from the web page itself, it could
+      // potentially be a different length than a bit.ly url so account for
+      // that. The + 1 is to account for a space before adding the URL to the
+      // tweet.
+      this.counter.updateLimit(data.shortUrl ?
+                               (this.textlimit - (data.shortUrl.length + 1)) :
+                               this.textlimit - this.urlsize);
+    },
+    getFormData: function () {
+      var dom = $('#' + this.type);
+      return {
+        to: dom.find('[name="to"]').val().trim() || '',
+        subject: dom.find('[name="subject"]').val().trim() || '',
+        message: dom.find('textarea.message').val().trim() || '',
+        picture: dom.find('[name="picture"]').val().trim() || '',
+        canonicalUrl: dom.find('[name="link"]').val().trim() || '',
+        title: dom.find('[name="title"]').val().trim() || '',
+        description: dom.find('[name="description"]').val().trim() || '',
+        shortUrl: dom.find('[name="surl"]').val().trim() || ''
+      };
+    },
+    setFormData: function (data) {
+      var dom = $('#' + this.type),
+          picture;
+
+      if (data.to) {
+        dom.find('[name="to"]').val(data.to);
+      }
+      if (data.subject) {
+        dom.find('[name="subject"]').val(data.subject);
+      }
+      if (data.message) {
+        dom.find('textarea.message').val(data.message);
+      }
+      picture = data.previews && data.previews[0];
+      if (picture) {
+        dom.find('[name="picture"]').val(picture);
+      }
+      if (data.canonicalUrl || data.url) {
+        dom.find('[name="link"]').val(data.canonicalUrl || data.url);
+      }
+      if (data.title) {
+        dom.find('[name="title"]').val(data.title);
+      }
+      if (data.description) {
+        dom.find('[name="description"]').val(data.description);
+      }
+      if (data.shortUrl) {
+        dom.find('[name="surl"]').val(data.shortUrl);
+      }
+      this.startCounter(data);
+    }
+  });
 
   jig.addFn({
     profilePic: function (photos) {
@@ -135,6 +207,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     //Allow for data validation before sending.
     if (!actions[sendData.domain].validate(sendData)) {
+      showStatus('statusToError');
       return;
     }
 
