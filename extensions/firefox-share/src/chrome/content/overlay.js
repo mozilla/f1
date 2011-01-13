@@ -36,7 +36,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   var Cc = Components.classes,
       Ci = Components.interfaces,
       Cu = Components.utils,
-      xulNs = 'http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul',
       slice = Array.prototype.slice,
       ostring = Object.prototype.toString,
       empty = {}, fn,
