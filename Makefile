@@ -78,6 +78,7 @@ $(static_dir):
 	cd $(static_dir) && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/settings && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/share && $(requirejs_dir)/build/build.sh build.js
+	cd $(static_dir)/play/designs/popup && $(requirejs_dir)/build/build.sh build.js
 
 clean:
 	rm -rf $(objdir)
