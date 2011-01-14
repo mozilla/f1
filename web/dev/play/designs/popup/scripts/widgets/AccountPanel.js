@@ -65,18 +65,22 @@ function (object,         Widget,         $,        template,
 
         //Set up the svcAccount property
         this.svcAccount = this.account.accounts[0];
+        this.storeId = 'AccountPanel-' + this.svcAccount.domain;
 
         //Check for saved data. Only use if the URL
         //and the account match
-        savedOptions = store['AccountPanel-' + this.svcAccount.domain];
+        savedOptions = store[this.storeId];
         if (savedOptions) {
           savedOptions = JSON.parse(savedOptions);
-          if (savedOptions.url !== this.options.url ||
+          if (savedOptions.link !== this.options.url ||
               savedOptions.userid !== this.svcAccount.userid ||
               savedOptions.domain !== this.svcAccount.domain ||
               savedOptions.username !== this.svcAccount.username) {
             this.clearSavedData();
             savedOptions = null;
+          } else {
+            //Mix in the savedOptions with options.
+            this.options = object.create(this.options, [savedOptions]);
           }
         }
 
@@ -114,12 +118,12 @@ function (object,         Widget,         $,        template,
       },
 
       clearSavedData: function () {
-        delete store['AccountPanel-' + this.svcAccount.domain];
+        delete store[this.storeId];
       },
 
       saveData: function () {
         var data = this.getFormData();
-        store['AccountPanel-' + this.svcAccount.domain] = JSON.stringify(data);
+        store[this.storeId] = JSON.stringify(data);
       },
 
       validate: function (sendData) {
