@@ -23,7 +23,7 @@
 
 'use strict';
 /*jslint indent: 2, es5: true, plusplus: false, onevar: false, bitwise: false */
-/*global document: false, setInterval: false, clearInterval: false,
+/*global document: false, setInterval: false, clearInterval: false, Services: false,
   Application: false, gBrowser: false, window: false, Components: false,
   Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false,
   XPCOMUtils: false, ffshareAutoCompleteData: false, AddonManager: false,
@@ -39,14 +39,63 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       slice = Array.prototype.slice,
       ostring = Object.prototype.toString,
       empty = {}, fn,
+      iServices = {}, Services,
       buttonId = 'ffshare-toolbar-button';
 
   Cu.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
   Cu.import("resource://ffshare/modules/injector.js");
   Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-  var info = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo); 
-  var majorVer = parseInt(info.version[0]);
+  try {
+    // Firefox 4 has the nice Services module
+    Cu.import("resource://gre/modules/Services.jsm", iServices);
+    Services = iServices.Services;
+  } catch (e)  {
+    // FF3: required for FF3 support
+    Services = iServices;
+    // Mimic the Services module, only for services we need
+    // http://mxr.mozilla.org/mozilla-central/source/toolkit/content/Services.jsm
+    XPCOMUtils.defineLazyGetter(Services, "prefs", function () {
+      return Cc["@mozilla.org/preferences-service;1"]
+               .getService(Ci.nsIPrefService)
+               .QueryInterface(Ci.nsIPrefBranch2);
+    });
+
+    XPCOMUtils.defineLazyGetter(Services, "appinfo", function () {
+      return Cc["@mozilla.org/xre/app-info;1"]
+               .getService(Ci.nsIXULAppInfo)
+               .QueryInterface(Ci.nsIXULRuntime);
+    });
+
+    XPCOMUtils.defineLazyServiceGetter(Services, "wm",
+                                       "@mozilla.org/appshell/window-mediator;1",
+                                       "nsIWindowMediator");
+
+    XPCOMUtils.defineLazyServiceGetter(Services, "obs",
+                                       "@mozilla.org/observer-service;1",
+                                       "nsIObserverService");
+
+    XPCOMUtils.defineLazyServiceGetter(Services, "io",
+                                       "@mozilla.org/network/io-service;1",
+                                       "nsIIOService2");
+
+    XPCOMUtils.defineLazyServiceGetter(Services, "console",
+                                       "@mozilla.org/consoleservice;1",
+                                       "nsIConsoleService");
+  }
+
+  //////  Extensions to the Services object //////
+
+  XPCOMUtils.defineLazyServiceGetter(Services, "bookmarks",
+                                     "@mozilla.org/browser/nav-bookmarks-service;1",
+                                     "nsINavBookmarksService");
+
+  // FF3: required for FF3 support
+  XPCOMUtils.defineLazyServiceGetter(Services, "em",
+                                     "@mozilla.org/extensions/manager;1",
+                                     "nsIExtensionManager");
+
+  var majorVer = parseInt(Services.appinfo.version[0], 10);
 
   // This add-on manager is only available in Firefox 4+
   try {
@@ -86,7 +135,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   }
 
   function log(msg) {
-    Application.console.log('.' + msg); // avoid clearing on empty log
+    Services.console.log('.' + msg); // avoid clearing on empty log
   }
 
   function error(msg) {
@@ -342,18 +391,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   TabFrame.prototype = {
 
     registerListener: function () {
-      var obs = Cc["@mozilla.org/observer-service;1"].
-                            getService(Components.interfaces.nsIObserverService);
-      obs.addObserver(this, 'content-document-global-created', false);
+      Services.obs.addObserver(this, 'content-document-global-created', false);
       
       this.httpObserver = new httpActivityObserver(this);
       this.httpObserver.registerObserver();
     },
 
     unregisterListener: function (listener) {
-      var obs = Cc["@mozilla.org/observer-service;1"].
-                            getService(Ci.nsIObserverService);
-      obs.removeObserver(this, 'content-document-global-created');
+      Services.obs.removeObserver(this, 'content-document-global-created');
 
       this.httpObserver.unregisterObserver();
     },
@@ -614,12 +659,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           tags.push("facebook");
         }
 
-        var ios = Cc["@mozilla.org/network/io-service;1"].
-               getService(Ci.nsIIOService);
-        var nsiuri = ios.newURI(gBrowser.currentURI.spec, null, null);
-        var bmsvc = Cc["@mozilla.org/browser/nav-bookmarks-service;1"]
-                    .getService(Ci.nsINavBookmarksService);
-        bmsvc.insertBookmark(bmsvc.unfiledBookmarksFolder, nsiuri, bmsvc.DEFAULT_INDEX, this.getPageTitle().trim());
+        var nsiuri = Services.io.newURI(gBrowser.currentURI.spec, null, null);
+        Services.bookmarks.insertBookmark(Services.bookmarks.unfiledBookmarksFolder,
+                                          nsiuri, Services.bookmarks.DEFAULT_INDEX,
+                                          this.getPageTitle().trim());
 
         PlacesUtils.tagging.tagURI(nsiuri, tags);
       }
@@ -842,6 +885,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     version: '',
     prefs: {
+      // We only use Application.prefs for the nice getValue/setValue methods
       system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
       share_url: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
       frontpage_url: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
@@ -919,11 +963,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           ffshare.onInstallUpgrade(addon.version);
         });
       } else {
-        //Firefox before version 4.
+        // FF3: only required for FF3 support
         try {
-          var em = Cc["@mozilla.org/extensions/manager;1"]
-                   .getService(Ci.nsIExtensionManager),
-              addon = em.getItemForID(FFSHARE_EXT_ID);
+          var addon = Services.em.getItemForID(FFSHARE_EXT_ID);
           ffshare.onInstallUpgrade(addon.version);
         } catch (e) {}
       }
@@ -938,13 +980,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       this.initKeyCode();
 
-      this.prefService = Cc["@mozilla.org/preferences-service;1"]
-                             .getService(Ci.nsIPrefService)
-                             .getBranch("extensions." + FFSHARE_EXT_ID + ".")
-                             .QueryInterface(Ci.nsIPrefBranch2);
-
-      this.prefService.addObserver("", this, false);
-
+      Services.prefs.addObserver("extensions." + FFSHARE_EXT_ID + ".", this, false);
     },
 
     onUnload: function () {
@@ -961,9 +997,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
 
-      this.prefService.removeObserver("", this);
-      this.prefService = null;
-
+      Services.prefs.removeObserver("extensions." + FFSHARE_EXT_ID + ".", this);
     },
 
     onFirstRun: function () {
@@ -980,9 +1014,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       //Taken from https://developer.mozilla.org/en/Code_snippets/Tabbed_browser
       function openAndReuseOneTabPerURL(url) {
-        var wm = Cc["@mozilla.org/appshell/window-mediator;1"]
-                           .getService(Ci.nsIWindowMediator);
-        var browserEnumerator = wm.getEnumerator("navigator:browser"),
+        var browserEnumerator = Services.wm.getEnumerator("navigator:browser"),
             rect, browser, buttonNode;
 
         // Check each browser instance for our URL
@@ -1083,19 +1115,21 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     observe: function (subject, topic, data) {
+      var pref;
+
       if (topic !== "nsPref:changed") {
         return;
       }
 
-      if ("use_accel_key" === data) {
+      if ("extensions." + FFSHARE_EXT_ID + ".use_accel_key" === data) {
         try {
-          var pref = subject.QueryInterface(Ci.nsIPrefBranch);
-          ffshare.setAccelKey(pref.getBoolPref("use_accel_key"));
+          pref = subject.QueryInterface(Ci.nsIPrefBranch);
+          //dump("topic: " + topic + " -- data: " + data + " == pref: " + pref.getBoolPref(data) + "\n");
+          ffshare.setAccelKey(pref.getBoolPref(data));
         } catch (e) {
           error(e);
         }
       }
-
     },
 
     setAccelKey: function (keyOn) {
