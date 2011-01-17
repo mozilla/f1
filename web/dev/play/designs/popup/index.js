@@ -68,7 +68,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       return options.canonicalUrl || options.url;
     },
     cleanLink: function(url) {
-      return url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+      return url ? url.replace(/^https?:\/\//, '').replace(/^www\./, '') : url;
     },
     profilePic: function (photos) {
       //TODO: check for a thumbnail picture, hopefully one that is square.
