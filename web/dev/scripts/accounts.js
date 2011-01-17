@@ -42,7 +42,7 @@ function (storage,   dispatch,   rdapi) {
               currentTime = (new Date()).getTime(),
               fetch = false;
 
-          if (impl.options.fetch || !accountCache || (currentTime - lastCheck) > 3000) {
+          if ((impl.options && impl.options.fetch) || !accountCache || (currentTime - lastCheck) > 3000) {
             fetch = true;
           }
 
