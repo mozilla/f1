@@ -17,12 +17,12 @@ body {
   line-height: 110%;
   overflow: hidden;
   width: 100%;
+  height: 100%;
     background-color: #D4DDE5;
 }
 
 #wrapper {
   width: 100%;
-  position: relative;
   height: 100%;
 }
 
@@ -661,7 +661,7 @@ html[xmlns] .clearfix {
 div.status {
   position: absolute;
   height: 100%;
-  width: 320px;
+  width: 100%;
   min-height: 180px;
   top: 0;
   left: 0;
@@ -679,6 +679,7 @@ div.status table {
 
 div.status td {
   vertical-align: center;
+  height: 100%;
 }
 
 #statusCaptcha {
