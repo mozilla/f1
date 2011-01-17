@@ -42,7 +42,7 @@ function (storage,   dispatch,   rdapi) {
               currentTime = (new Date()).getTime(),
               fetch = false;
 
-          if (!accountCache || (currentTime - lastCheck) > 3000) {
+          if (impl.options.fetch || !accountCache || (currentTime - lastCheck) > 3000) {
             fetch = true;
           }
 
@@ -55,6 +55,11 @@ function (storage,   dispatch,   rdapi) {
 
           //Call ok callback with current knowledge. If there is a change in the
           //account info, then the fetch will trigger changed event later.
+          if (impl.options.fetch) {
+            impl.fetch(ok, error);
+            return;
+          }
+          
           if (ok) {
             ok(accountCache);
           }
@@ -112,6 +117,10 @@ function (storage,   dispatch,   rdapi) {
               action();
             }
           }, false);
+        },
+        
+        config: function(options) {
+          impl.options = options;
         }
       },
       //Some extensions mess with localStorage, so in that case, fall back to
@@ -149,7 +158,11 @@ function (storage,   dispatch,   rdapi) {
 
         onChange: function (action) {
           dispatch.sub('accountsChanged', action);
+        },
+        config: function(options) {
+          impl.options = options;
         }
+        
       }
     };
 
@@ -171,6 +184,10 @@ function (storage,   dispatch,   rdapi) {
    */
   accounts.fetch = function (ok, error) {
     impl.fetch(ok, error);
+  };
+
+  accounts.config = function (options) {
+    impl.config(options);
   };
 
   /**

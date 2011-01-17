@@ -16,13 +16,12 @@ body {
   font-size: 11px;
   line-height: 110%;
   overflow: hidden;
-  max-width: 320px;
-  width: 320px;
+  width: 100%;
+    background-color: #D4DDE5;
 }
 
 #wrapper {
-  width: 320px;
-  max-width: 320px;
+  width: 100%;
   position: relative;
   height: 100%;
 }

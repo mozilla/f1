@@ -69,12 +69,12 @@ define([], function () {
     if ((currentTime > lastTime + 4000)) {
       lastTime = currentTime;
       var newlocation = url + "?domain=" + domain;
-      try {
+      if(0) {
         win = window.open(newlocation,
           "ffshareOAuth",
           "dialog=yes, modal=yes, width=900, height=500, scrollbars=yes");
         win.focus();
-      } catch(e) {
+      } else {
         // XXX dialog=yes fails on fennec, lets just do window.location
         window.location = newlocation+"&end_point_success="+encodeURI(window.location);
       }

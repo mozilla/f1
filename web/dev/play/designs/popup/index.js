@@ -345,6 +345,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     //Set up default handler for account changes triggered from other
     //windows, or updates to expired cache.
+    accounts.config({fetch: true});
     accounts.onChange();
 
     //Only bother with localStorage enabled storage.

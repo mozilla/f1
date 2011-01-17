@@ -24,6 +24,7 @@
 
 <html>
 <head>
+  <meta name="viewport" content="width=320, initial-scale=1, maximum-scale=1">
   <title>Firefox Share OAuthorization</title>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 
@@ -254,7 +255,8 @@
           window.opener.postMessage(target, '*');
           window.close();
         } catch(e) {
-          var url = location.protocol + "//" + location.host + "/settings/?target="+target;
+          // XXX need to detect what type of browser
+          var url = location.protocol + "//" + location.host + "/m/settings/?d=#fetch=1";
           window.location = url;
         }
       }
