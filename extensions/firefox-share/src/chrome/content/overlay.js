@@ -356,15 +356,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     /* nsISupports */
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsIActivityObserver)) {
-            return this;
-         }
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports,
+                                           Ci.nsIActivityObserver])
 
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    }
   }
 
   // width/height tracking for the panel, initial values are defaults to
