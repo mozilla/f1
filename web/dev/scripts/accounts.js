@@ -55,7 +55,7 @@ function (storage,   dispatch,   rdapi) {
 
           //Call ok callback with current knowledge. If there is a change in the
           //account info, then the fetch will trigger changed event later.
-          if (impl.options.fetch) {
+          if (impl.options && impl.options.fetch) {
             impl.fetch(ok, error);
             return;
           }
