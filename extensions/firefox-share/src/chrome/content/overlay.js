@@ -282,7 +282,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       delete this.activityDistributor;
       return (this.activityDistributor = activityDistributor);
     },
-    
+
     getWindowForRequest: function(channel) {
       if (channel && channel.loadGroup && channel.loadGroup.notificationCallbacks) {
         var lctx = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext);
@@ -292,7 +292,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
       return null;
     },
-    
+
     getXULWindowForWin: function(win) {
       var xulWindow = win.QueryInterface(Ci.nsIInterfaceRequestor)
         .getInterface(Ci.nsIWebNavigation)
@@ -312,7 +312,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (!win)
         return null;
       var xulWindow = this.getXULWindowForWin(win);
-      if (xulWindow !== this.frame.panel.ownerDocument.defaultView) 
+      if (xulWindow !== this.frame.panel.ownerDocument.defaultView)
         return null;
       return this.frame.shareFrame;
     },
@@ -335,7 +335,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (!browser) {
         return;
       }
-        
+
       if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION) {
         if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER) {
           //dump("ACTIVITY_SUBTYPE_REQUEST_HEADER for "+httpChannel.name+" \n");
@@ -386,7 +386,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     registerListener: function () {
       Services.obs.addObserver(this, 'content-document-global-created', false);
-      
+
       this.httpObserver = new httpActivityObserver(this);
       this.httpObserver.registerObserver();
     },
@@ -439,7 +439,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           }
         }
       }), false);
-      
+
 
     },
 
@@ -455,7 +455,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // Always ensure the button is unchecked when the panel is hidden
       getButton().removeAttribute("checked");
     },
-    
+
     close: function() {
       this.hide();
       this.unregisterListener();
@@ -871,9 +871,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   }
 
   function makeInstalledLoadHandler(browser, rect) {
-    return function () {
+    var handler = function () {
+      browser.removeEventListener("load", handler, true);
       sendJustInstalledEvent(browser, rect);
     };
+
+    return handler;
   }
 
   ffshare = {
@@ -898,7 +901,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     keycode : "VK_F1",
     oldKeycodeId: "key_old_ffshare",
     currentTabFrame: null,
-    
+
     onInstallUpgrade: function (version) {
       ffshare.version = version;
 
@@ -1066,14 +1069,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                                                                inBackground: false,
                                                                allowThirdPartyFixup: null });
               browser = gBrowser.getBrowserForTab(tab);
-              browser.addEventListener("load",
-                                      function buttonX() {
-                                        browser.removeEventListener("load", buttonX, true);
-                                        browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
-                                        var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
-                                        evt.initEvent("buttonX", true, false);
-                                        browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
-                                      }, true);
+              browser.addEventListener("load", makeInstalledLoadHandler(browser, rect), true);
             }
           }
           else {
@@ -1215,7 +1211,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         this.currentTabFrame = tabFrame;
       }
     },
-    
+
     onOpenShareCommand: function (e) {
       this.toggle();
     },
