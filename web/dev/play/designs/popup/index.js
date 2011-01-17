@@ -205,7 +205,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   }
 
   function updateAccounts(accounts) {
-    var lastSelectionMatch = -1,
+    var lastSelectionMatch = 0,
         accountsDom = $('#accounts'),
         fragment = document.createDocumentFragment(),
         debugPanel,
