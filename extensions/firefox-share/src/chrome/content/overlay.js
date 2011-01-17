@@ -356,15 +356,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     /* nsISupports */
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsIActivityObserver)) {
-            return this;
-         }
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports,
+                                           Ci.nsIActivityObserver])
 
-        throw Cr.NS_ERROR_NO_INTERFACE;
-    }
   }
 
   // width/height tracking for the panel, initial values are defaults to
@@ -579,14 +573,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // sizes are and calculate that way, however this is pretty complex due
       // to how the background image of the panel is used,
       dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
+      var h = lastWidth > defaultHeight ? lastWidth: defaultHeight;
       if (majorVer >= 4) {
         lastWidth = wrapper.scrollWidth;
-        lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight : defaultHeight;
+        lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight : h;
         this.shareFrame.style.width = lastWidth+"px";
         this.shareFrame.style.height = lastHeight+"px";
       } else {
         lastWidth = wrapper.scrollWidth + panelWidthMargin;
-        lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight + panelHeightMargin : defaultHeight;
+        lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight + panelHeightMargin : h;
         this.panel.sizeTo(lastWidth, lastHeight);
       }
     },
@@ -1058,7 +1053,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
         // Our URL isn't open. Open it now.
         if (!found) {
-          var recentWindow = wm.getMostRecentWindow("navigator:browser");
+          var recentWindow = Services.wm.getMostRecentWindow("navigator:browser");
           if (recentWindow) {
             buttonNode = recentWindow.document.getElementById(buttonId);
             //Button may not be there if customized and removed from toolbar.
