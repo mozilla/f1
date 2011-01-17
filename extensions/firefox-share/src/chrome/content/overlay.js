@@ -1058,7 +1058,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
         // Our URL isn't open. Open it now.
         if (!found) {
-          var recentWindow = wm.getMostRecentWindow("navigator:browser");
+          var recentWindow = Services.wm.getMostRecentWindow("navigator:browser");
           if (recentWindow) {
             buttonNode = recentWindow.document.getElementById(buttonId);
             //Button may not be there if customized and removed from toolbar.
