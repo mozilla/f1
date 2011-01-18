@@ -45,6 +45,7 @@ import gdata.contacts
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 from email.header import Header
 
 from pylons import config, request, response, session, tmpl_context as c, url
@@ -285,8 +286,25 @@ class api():
         c.description = description
         c.message = message
 
-        part2 = MIMEText(render('/html_email.mako').encode('utf-8'), 'html')
-        part2.set_charset('utf-8')
+        c.thumbnail = (options.get('picture_base64', "") != "")
+
+        if c.thumbnail:
+            part2 = MIMEMultipart('related')
+
+            html = MIMEText(render('/html_email.mako').encode('utf-8'), 'html')
+            html.set_charset('utf-8')
+
+            # FIXME: we decode the base64 data just so MIMEImage can re-encode it as base64
+            image = MIMEImage(base64.b64decode(options.get('picture_base64')), 'png')
+            image.add_header('Content-Id', '<thumbnail>')
+            image.add_header('Content-Disposition', 'inline; filename=thumbnail.png')
+
+            part2.attach(html)
+            part2.attach(image)
+        else:
+            part2 = MIMEText(render('/html_email.mako').encode('utf-8'), 'html')
+            part2.set_charset('utf-8')
+
 
         # get the title, or the long url or the short url or nothing
         # wrap these in literal for text email

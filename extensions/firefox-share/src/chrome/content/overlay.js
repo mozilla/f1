@@ -512,10 +512,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         panel.style.height = lastHeight+'px';
       }
 
-      if (!options.previews.length && !options.thumbnail) {
-        // then we need to make our own thumbnail
-        options.thumbnail = this.getThumbnailData();
-      }
       url = ffshare.prefs.share_url +
                 '#options=' + encodeURIComponent(JSON.stringify(options));
 
@@ -835,16 +831,30 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       for (i = 0; i < metas.length; i++) {
         content = metas[i].getAttribute("content");
         if (content) {
-          previews.push(content);
+          previews.push({
+            http_url : content,
+            base64 : ""
+          });
         }
       }
 
       for (i = 0; i < links.length; i++) {
         content = links[i].getAttribute("href");
         if (content) {
-          previews.push(content);
+          previews.push({
+            http_url : content,
+            base64 : ""
+          });
         }
       }
+
+      // Push in the page thumbnail last in case there aren't others
+      previews.push(
+        {
+          http_url : "",
+          base64 : this.getThumbnailData()
+        }
+      );
       return previews;
     },
 

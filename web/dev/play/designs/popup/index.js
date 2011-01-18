@@ -55,14 +55,19 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
   jig.addFn({
     thumb: function (options) {
-      if (options.previews && options.previews.length) {
-        return escapeHtml(options.previews[0]);
-      } else {
-        return escapeHtml(options.thumbnail);
+      if (!options.previews) { return ""; }
+      if (options.previews[0]["http_url"]) {
+        return escapeHtml(options.previews[0]["http_url"]);
       }
+      // Return our data url, this is the thumbnail
+      return options.previews[0]["base64"];
     },
     preview: function (options) {
-      return options.previews && options.previews[0];
+      return options.previews && options.previews[0]["http_url"];
+    },
+    preview_base64: function (options) {
+      // Strip the URL down to just the base64 content
+      return options.previews && options.previews[0]["base64"].replace("data:image/png;base64,","");
     },
     link: function (options) {
       return options.canonicalUrl || options.url;

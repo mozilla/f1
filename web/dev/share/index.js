@@ -76,6 +76,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         subject: dom.find('[name="subject"]').val().trim() || '',
         message: dom.find('textarea.message').val().trim() || '',
         picture: dom.find('[name="picture"]').val().trim() || '',
+        picture_base64: dom.find('[name="picture_base64"]').val().trim() || '',
         canonicalUrl: dom.find('[name="link"]').val().trim() || '',
         title: dom.find('[name="title"]').val().trim() || '',
         description: dom.find('[name="description"]').val().trim() || '',
@@ -95,9 +96,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       if (data.message) {
         dom.find('textarea.message').val(data.message);
       }
-      picture = data.previews && data.previews[0];
-      if (picture) {
-        dom.find('[name="picture"]').val(picture);
+      if (data.previews) {
+        dom.find('[name="picture"]').val(data.previews[0]["http_url"]);
+        dom.find('[name="picture_base64"]').val(options.previews[0]["base64"].replace("data:image/png;base64,",""));
       }
       if (data.canonicalUrl || data.url) {
         dom.find('[name="link"]').val(data.canonicalUrl || data.url);
@@ -675,9 +676,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     //Set preview image for facebook
     if (options.previews && options.previews.length) {
       //TODO: set up all the image previews.
-      thumbImgDom.attr('src', escapeHtml(options.previews[0]));
-    } else {
-      thumbImgDom.attr('src', escapeHtml(options.thumbnail));
+      // XXX: we might not want to default to the base64 as that won't be sent/used by Facebook
+      var url = escapeHtml(options.previews[0]["http_url"] ||
+                           options.previews[0]["base64"]);
+      thumbImgDom.attr('src', url);
     }
 
     //Create ellipsis for thumbnail section
