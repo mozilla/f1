@@ -22,7 +22,8 @@
  * */
 
 'use strict';
-/*jslint indent: 2, es5: true, plusplus: false, onevar: false, bitwise: false */
+/*jslint indent: 2, es5: true, plusplus: false, onevar: false,
+  bitwise: false, nomen: false */
 /*global document: false, setInterval: false, clearInterval: false, Services: false,
   Application: false, gBrowser: false, window: false, Components: false,
   Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false,
@@ -135,7 +136,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   }
 
   function log(msg) {
-    Services.console.log('.' + msg); // avoid clearing on empty log
+    Application.console.log('.' + msg); // avoid clearing on empty log
   }
 
   function error(msg) {
@@ -238,52 +239,57 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // copied largely from firebug net.js
     registered: false,
 
-    registerObserver: function()
-    {
-        if (!Ci.nsIHttpActivityDistributor)
-            return;
+    registerObserver: function () {
+      if (!Ci.nsIHttpActivityDistributor) {
+        return;
+      }
 
-        if (this.registered)
-            return;
+      if (this.registered) {
+        return;
+      }
 
-        var distributor = this.getActivityDistributor();
-        if (!distributor)
-            return;
+      var distributor = this.getActivityDistributor();
+      if (!distributor) {
+        return;
+      }
 
-        distributor.addObserver(this);
-        this.registered = true;
+      distributor.addObserver(this);
+      this.registered = true;
     },
 
-    unregisterObserver: function()
-    {
-        if (!Ci.nsIHttpActivityDistributor)
-            return;
+    unregisterObserver: function () {
+      if (!Ci.nsIHttpActivityDistributor) {
+        return;
+      }
 
-        if (!this.registered)
-            return;
+      if (!this.registered) {
+        return;
+      }
 
-        var distributor = this.getActivityDistributor();
-        if (!distributor)
-            return;
+      var distributor = this.getActivityDistributor();
+      if (!distributor) {
+        return;
+      }
 
-        distributor.removeObserver(this);
-        this.registered = false;
+      distributor.removeObserver(this);
+      this.registered = false;
     },
 
-    getActivityDistributor: function() {
+    getActivityDistributor: function () {
       var activityDistributor = null;
       try {
         var dist = Cc["@mozilla.org/network/http-activity-distributor;1"];
-        if (dist)
+        if (dist) {
           activityDistributor = dist.getService(Ci.nsIHttpActivityDistributor);
+        }
       } catch (e) {
-        dump("nsIHttpActivityDistributor no available "+e+"\n");
+        dump("nsIHttpActivityDistributor no available " + e + "\n");
       }
       delete this.activityDistributor;
       return (this.activityDistributor = activityDistributor);
     },
 
-    getWindowForRequest: function(channel) {
+    getWindowForRequest: function (channel) {
       if (channel && channel.loadGroup && channel.loadGroup.notificationCallbacks) {
         var lctx = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext);
         var win = lctx.associatedWindow;
@@ -293,7 +299,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       return null;
     },
 
-    getXULWindowForWin: function(win) {
+    getXULWindowForWin: function (win) {
       var xulWindow = win.QueryInterface(Ci.nsIInterfaceRequestor)
         .getInterface(Ci.nsIWebNavigation)
                         .QueryInterface(Ci.nsIDocShell)
@@ -301,54 +307,57 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       //dump("got a XUL window "+xulWindow+"\n");
       try {
         return XPCNativeWrapper.unwrap(xulWindow);
-      } catch(e) {
+      } catch (e) {
         return xulWindow.wrappedJSObject;
       }
       return null;
     },
 
-    getBrowserForRequest: function(channel) {
+    getBrowserForRequest: function (channel) {
       var win = this.getWindowForRequest(channel);
-      if (!win)
+      if (!win) {
         return null;
+      }
       var xulWindow = this.getXULWindowForWin(win);
-      if (xulWindow !== this.frame.panel.ownerDocument.defaultView)
+      if (xulWindow !== this.frame.panel.ownerDocument.defaultView) {
         return null;
+      }
       return this.frame.shareFrame;
     },
 
     /* nsIActivityObserver */
-    observeActivity: function(httpChannel, activityType, activitySubtype,
+    observeActivity: function (httpChannel, activityType, activitySubtype,
                               timestamp, extraSizeData, extraStringData) {
       try {
-        if (httpChannel instanceof Ci.nsIHttpChannel)
-            this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
+        if (httpChannel instanceof Ci.nsIHttpChannel) {
+          this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
                 extraSizeData, extraStringData);
+        }
       } catch (e) {
-        dump("observeActivity: EXCEPTION "+e+"\n");
+        dump("observeActivity: EXCEPTION " + e + "\n");
       }
     },
 
-    observeRequest: function(httpChannel, activityType, activitySubtype,
+    observeRequest: function (httpChannel, activityType, activitySubtype,
                              timestamp, extraSizeData, extraStringData) {
       var browser = this.getBrowserForRequest(httpChannel);
       if (!browser) {
         return;
       }
 
-      if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION) {
-        if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER) {
+      if (activityType === nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION) {
+        if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER) {
           //dump("ACTIVITY_SUBTYPE_REQUEST_HEADER for "+httpChannel.name+" \n");
           browser.__response_headers_received = false;
         } else
-        if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE) {
+        if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE) {
           // If we don't have response headers then we did not recieve a response
           if (!browser.__response_headers_received) {
             //dump("ACTIVITY_SUBTYPE_TRANSACTION_CLOSE for "+httpChannel.name+" \n");
             browser.loadURI('chrome://ffshare/content/servererror.html');
           }
         } else
-        if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_HEADER) {
+        if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_HEADER) {
           //dump("ACTIVITY_SUBTYPE_RESPONSE_HEADER for "+httpChannel.name+" \n");
           browser.__response_headers_received = true;
         }
@@ -359,7 +368,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports,
                                            Ci.nsIActivityObserver])
 
-  }
+  };
 
   // width/height tracking for the panel, initial values are defaults to
   // show the configure status panel
@@ -421,6 +430,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           //name: the string name of the messsage
           //data: the JSON structure of data for the message.
           var message = evt.data, skip = false, topic, data;
+
           try {
             //Only some messages are valid JSON, only care about the ones
             //that are.
@@ -818,6 +828,53 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ctx.drawWindow(win, 0, 0, w, h, "rgb(255,255,255)");
       ctx.restore();
       return canvas.toDataURL("image/png", "");
+    },
+
+    /**
+     * Method used to generate thumbnail data from a postMessage
+     * originating from the share UI in content-space
+     */
+    generateBase64Preview: function (imgUrl) {
+      var img = new Image();
+      img.onload = fn.bind(this, function () {
+
+        var canvas = gBrowser.contentDocument.createElement("canvas"),
+            win = this.shareFrame.contentWindow.wrappedJSObject,
+            w = img.width,
+            h = img.height,
+            dataUrl, canvasW, canvasH, ctx, scale;
+
+        //Put upper constraints on the image size.
+        if (w > 10000) {
+          w = 10000;
+        }
+        if (h > 10000) {
+          h = 10000;
+        }
+
+        canvas.setAttribute('width', '90');
+        canvas.setAttribute('height', '70');
+
+        canvasW = canvas.width;
+        canvasH = canvas.height;
+        ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvasW, canvasH);
+        ctx.save();
+
+        scale = canvasH / h;
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0, w, h);
+        ctx.restore();
+        dataUrl = canvas.toDataURL("image/png", "");
+
+        win.postMessage(JSON.stringify({
+          topic: 'base64Preview',
+          data: dataUrl
+        }), win.location.protocol + "//" + win.location.host);
+
+      });
+      img.src = imgUrl;
+
     },
 
     previews: function () {

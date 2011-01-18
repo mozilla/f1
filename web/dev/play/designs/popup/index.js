@@ -53,21 +53,30 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     return text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : text;
   }
 
+  function rawBase64(dataUrl) {
+    return dataUrl && dataUrl.replace("data:image/png;base64,", "");
+  }
+
   jig.addFn({
     thumb: function (options) {
-      if (!options.previews) { return ""; }
-      if (options.previews[0]["http_url"]) {
-        return escapeHtml(options.previews[0]["http_url"]);
+      var preview = options.previews && options.previews[0];
+      if (!preview) {
+        return "";
+      }
+      if (preview.http_url) {
+        return escapeHtml(preview.http_url);
       }
       // Return our data url, this is the thumbnail
-      return options.previews[0]["base64"];
+      return preview.base64;
     },
     preview: function (options) {
-      return options.previews && options.previews[0]["http_url"];
+      var preview = options.previews && options.previews[0];
+      return preview && preview.http_url;
     },
     preview_base64: function (options) {
       // Strip the URL down to just the base64 content
-      return options.previews && options.previews[0]["base64"].replace("data:image/png;base64,","");
+      var preview = options.previews && options.previews[0];
+      return preview && rawBase64(preview.base64);
     },
     link: function (options) {
       return options.canonicalUrl || options.url;
@@ -222,7 +231,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var lastSelectionMatch = 0,
         accountsDom = $('#accounts'),
         fragment = document.createDocumentFragment(),
-        debugPanel,
+        debugPanel, preview,
         i = 0;
 
     if ((accounts && accounts.length)) {
@@ -259,6 +268,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         debugPanel = new DebugPanel({}, accountsDom[0]);
       }
 
+      //Ask extension to generate base64 data if none available.
+      //Useful for sending previews in email.
+      preview = options.previews && options.previews[0];
+      if (accounts.length && preview && preview.http_url && !preview.base64) {
+        dispatch.sub('base64Preview', function (dataUrl) {
+          $('[name="picture_base64"]').val(rawBase64(dataUrl));
+        });
+        dispatch.pub('generateBase64Preview', preview.http_url);
+      }
     } else {
       showStatus('statusSettings');
       return;
