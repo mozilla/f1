@@ -156,6 +156,7 @@ header a.new {
   border: none;
   max-width: 90px;
   max-height: 60px;
+  display: block;
 }
 
 #pageInfo .shareInfo {
