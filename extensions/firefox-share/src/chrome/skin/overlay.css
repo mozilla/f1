@@ -45,8 +45,8 @@
 }
 
 .ffshare-panel {
-  width: 361px; /* note this value hard-coded in overlay.js */
-  min-width: 361px !important;
+  width: 441px; /* note this value hard-coded in overlay.js */
+  min-width: 441px !important;
   min-height: 234px !important;
 }
 
