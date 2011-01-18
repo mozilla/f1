@@ -60,10 +60,10 @@ define(['require', './object'], function (require,   object) {
                 return a <= b;
             },
             or: function (a, b) {
-                return !!(a || b);
+                return a || b;
             },
             and: function (a, b) {
-                return !!(a && b);
+                return a && b;
             },
             is: function (a) {
                 return !!a;

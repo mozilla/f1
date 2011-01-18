@@ -36,9 +36,17 @@ function (object,         Widget,         $,        template,
       className = module.id.replace(/\//g, '-');
 
   //Set up event handlers.
-  $('body').delegate('.' + className + ' form.messageForm', 'submit', function (evt) {
-    Widget.closest(module.id, evt, 'onSubmit');
-  });
+  $('body')
+    .delegate('.' + className + ' form.messageForm', 'submit', function (evt) {
+      Widget.closest(module.id, evt, 'onSubmit');
+    })
+    .delegate('.' + className + ' .shareType', 'change', function (evt) {
+      Widget.closest(module.id, evt, 'onShareTypeChange');
+    })
+    .delegate('.' + className + ' .shareType2', 'click', function (evt) {
+      Widget.closest(module.id, evt, 'selectSecondShareType');
+      evt.preventDefault();
+    });
 
   /**
    * Define the widget.
@@ -167,6 +175,47 @@ function (object,         Widget,         $,        template,
         });
 
         return data;
+      },
+
+      getShareType: function (shareTypeValue) {
+        for (var i = 0, item; (item = this.svc.shareTypes[i]); i++) {
+          if (item.type === shareTypeValue) {
+            return item;
+          }
+        }
+        return null;
+      },
+
+      selectSecondShareType: function () {
+        $('.shareType', this.bodyNode)[0].options[1].selected = true;
+        this.changeShareType(this.svc.shareTypes[1]);
+      },
+
+      changeShareType: function (shareType) {
+        var toSectionDom = $('.toSection', this.bodyNode),
+            shareTypeSectionDom = $('.shareTypeSelectSection', this.bodyNode),
+            shareType2Dom = $('.shareType2', this.bodyNode),
+            toInputDom = $('.toSection input', this.bodyNode);
+
+        //If there is a special to value (like linkedin my connections), drop it in
+        toInputDom.val(shareType.specialTo ? shareType.specialTo : '');
+        placeholder(toInputDom[0]);
+
+        if (shareType.showTo) {
+          toSectionDom.removeClass('hiddenImportant');
+          shareTypeSectionDom.addClass('fixedSize');
+          shareType2Dom.addClass('hiddenImportant');
+          toInputDom.focus();
+        } else {
+          toSectionDom.addClass('hiddenImportant');
+          shareTypeSectionDom.remove('fixedSize');
+          shareType2Dom.removeClass('hiddenImportant');
+        }
+      },
+
+      onShareTypeChange: function (evt) {
+        var shareType = this.getShareType($('.shareType', this.bodyNode).val());
+        this.changeShareType(shareType);
       },
 
       onSubmit: function (evt) {

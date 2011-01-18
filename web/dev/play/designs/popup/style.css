@@ -16,13 +16,13 @@ body {
   font-size: 11px;
   line-height: 110%;
   overflow: hidden;
-  max-width: 320px;
-  width: 320px;
+  max-width: 400px;
+  width: 400px;
 }
 
 #wrapper {
-  width: 320px;
-  max-width: 320px;
+  width: 400px;
+  max-width: 400px;
   position: relative;
   height: 100%;
 }
@@ -260,6 +260,10 @@ img.avatar {
   display: none;
 }
 
+.hiddenImportant {
+  display: none !important;
+}
+
 span.arrow,
 span.icon {
   display: inline-block;
@@ -401,6 +405,35 @@ button:focus {
 .ui-accordion-content label {
   display: block;
   margin: 0 0 5px 0;
+}
+
+/* Generic AccountPanel styles */
+
+.shareTypeSection label {
+    color: #535F6D;
+}
+
+.shareTypeSelectSection.fixedSize {
+    width: 100px;
+}
+
+.shareTypeSelectSection.fixedSize select {
+    width: 100px;
+}
+
+.toSection {
+    padding-left: 10px;
+}
+
+body .toSection input[type="text"] {
+    width: 242px;
+}
+
+.shareType2 {
+    margin: 18px 0 0 10px;
+    text-decoration: none;
+    font-style: italic;
+    color: #535F6D;
 }
 
 /*
@@ -663,7 +696,7 @@ html[xmlns] .clearfix {
 div.status {
   position: absolute;
   height: 100%;
-  width: 320px;
+  width: 400px;
   min-height: 180px;
   top: 0;
   left: 0;

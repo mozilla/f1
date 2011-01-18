@@ -20,10 +20,31 @@
         <span class="avatar"><img class="avatar" src="{profilePic(account.photos)}"></span>
       </div>
       <div class="message boxFlex addressing">
-        {svc.features.direct [}
-          <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}"/>
-          {svc.features.subject [}
-            <input name="subject" placeholder="subject" type="text" value="{options.subject}"/>
+        {gt(svc.shareTypes.length, 1) [}
+          <div class="shareTypeSection hbox">
+            <div class="shareTypeSelectSection">
+              <label for="shareType" class="shareTypeLabel">send to:</label>
+              <select name="shareType" class="shareType">
+                {svc.shareTypes [}
+                  <option value="{type}">{name}</option>
+                {]}
+              </select>
+            </div>
+            {eq(svc.shareTypes.length, 2) [}
+              <a class="shareType2" href="#shareType2">send to {svc.shareTypes[1].name} instead?</a>
+            {]}
+            <div class="toSection hiddenImportant">
+              {. lastType lastToShareType(svc.shareTypes)}
+              <label for="to" class="toLabel">{lastType.toLabel}:</label>
+              <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}"/>
+            </div>
+          </div>
+        {] [}
+          {svc.features.direct [}
+            <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}"/>
+            {svc.features.subject [}
+              <input name="subject" placeholder="subject" type="text" value="{options.subject}"/>
+            {]}
           {]}
         {]}
         <textarea class="message compose" placeholder="Type your message here, and we'll attach the link when you send." name="message">{options.message}</textarea>
