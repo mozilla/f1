@@ -67,7 +67,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     link: function (options) {
       return options.canonicalUrl || options.url;
     },
-    cleanLink: function(url) {
+    cleanLink: function (url) {
       return url ? url.replace(/^https?:\/\//, '').replace(/^www\./, '') : url;
     },
     profilePic: function (photos) {
@@ -76,6 +76,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     },
     serviceName: function (domain) {
       return actions[domain].name;
+    },
+    lastToShareType: function (shareTypes) {
+      var i, shareType;
+      for (i = shareTypes.length - 1; (shareType = shareTypes[i]); i--) {
+        if (shareType.showTo) {
+          return shareType;
+        }
+      }
+      return null;
     }
   });
 

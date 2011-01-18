@@ -365,12 +365,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   // show the configure status panel
   // with fx3, we have to set the dimensions of the panel, with fx4, we have to
   // set the dimensions of the browser in the panel.
-  var defaultWidth = 361;
+  var defaultWidth = 441;
   var defaultHeight = 180;
   var panelWidthMargin = 41;
   var panelHeightMargin = 45;
   if (majorVer >= 4) {
-    defaultWidth = 320;
+    defaultWidth = 400;
     defaultHeight = 180;
   }
   var lastWidth = defaultWidth;
