@@ -32,9 +32,9 @@
               </select>
             </div>
             {eq(svc.shareTypes.length, 2) [}
-              <a class="shareType2" href="#shareType2">send to {svc.shareTypes[1].name} instead?</a>
+              <a class="shareType2 boxFlex" href="#shareType2">send to {svc.shareTypes[1].name} instead?</a>
             {]}
-            <div class="toSection hiddenImportant">
+            <div class="toSection hiddenImportant boxFlex">
               {. lastType lastToShareType(svc.shareTypes)}
               <label for="to" class="toLabel">{lastType.toLabel}:</label>
               <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}"/>
