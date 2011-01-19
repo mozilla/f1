@@ -186,14 +186,14 @@ header a.new {
   color: #A6AFB6;
   display: table;
   text-decoration: none;
+  padding: 3px 5px;
+  cursor: default;
 }
 
 #pageInfo .url.selected,
 #pageInfo .shorturl.selected {
-  padding: 3px 5px;
   background-color: #E1E7ED;
   color: #848B91;
-
   -webkit-border-radius: 5px;
      -moz-border-radius: 5px;
           border-radius: 5px;
