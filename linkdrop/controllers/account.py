@@ -65,7 +65,7 @@ OAuth authorization api.
             for dbacct in Session.query(Account).filter(Account.key==extuid).all():
                 accts[dbacct.id] = dbacct.to_dict()
 
-        return [a.get('profile') for a in accts.itervalues()]
+        return [a['profile'] for a in accts.itervalues() if 'profile' in a]
 
     def signout(self):
         domain = request.params.get('domain')
