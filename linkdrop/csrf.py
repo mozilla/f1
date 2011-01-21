@@ -51,7 +51,6 @@ class CsrfMiddleware(object):
             session['extuid'] = None
             session['extuid_cookie'] = None
             session.save()
-            print "CSRFy - no uid cookie at all"
         else:
             # We have a secure cookie from our auth server - check it is the
             # same as we recorded before - if so, the user-id we have remains
