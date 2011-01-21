@@ -33,7 +33,7 @@ from linkdrop.model.serializer_mixin import SerializerMixin
 
 class Account(JsonExpandoMixin, SerializerMixin, Base):
     __tablename__ = 'accounts'
-    __table_args__ = make_table_args(UniqueConstraint('domain', 'username', 'userid'))
+    __table_args__ = make_table_args(UniqueConstraint('key', 'domain', 'username', 'userid'))
 
     id = Column(Integer, primary_key=True)
 
