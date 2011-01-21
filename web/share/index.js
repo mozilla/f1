@@ -404,9 +404,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
    * server if there is no store copy.
    */
   function storeGmailContacts(account) {
-    if (!store.gmailContacts) {
+    // XXX - caching needs work - hence 'true' below... :(
+    if (true || !store.gmailContacts) {
 
       var args = {
+        allPermissions: ['contacts.get', 'share.send'],
         callback: function (entries) {
           var data = [];
           entries.forEach(function (entry) {
