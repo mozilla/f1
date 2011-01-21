@@ -129,9 +129,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       $(function () {
         var html = '';
 
+        var accts = json || [];
         //Weed out existing accounts for domains from available domainList,
         //and generate account UI
-        json.forEach(function (item) {
+        accts.forEach(function (item) {
           var index = domainList.indexOf(item.accounts[0].domain);
           if (index !== -1) {
             domainList.splice(index, 1);

@@ -51,7 +51,7 @@ function (storage,   dispatch,   rdapi) {
           if (accountCache) {
             accountCache = JSON.parse(accountCache);
           } else {
-            accountCache = [];
+            accountCache = null;
           }
 
           //Call ok callback with current knowledge. If there is a change in the
