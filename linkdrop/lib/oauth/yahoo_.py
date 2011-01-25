@@ -224,6 +224,7 @@ class api():
         c.title = title
         c.description = description
         c.message = message
+        c.thumbnail = False
 
         html_message = render('/html_email.mako').encode('utf-8')
 

@@ -45,13 +45,13 @@
 }
 
 .ffshare-panel {
-  width: 361px; /* note this value hard-coded in overlay.js */
-  min-width: 361px !important;
+  width: 441px; /* note this value hard-coded in overlay.js */
+  min-width: 441px !important;
   min-height: 234px !important;
 }
 
 .ffshare-browser {
-  width: 320px; /* note this value tied to ffshare-panel width as well */
+  width: 400px; /* note this value tied to ffshare-panel width as well */
   height: 100%;
 }
 
@@ -64,7 +64,7 @@
   margin-top: -10px;
   margin-left: -16px;
   min-width: 280px;
-  -moz-border-image: url(chrome://browser/skin/hud-panel.png) 26 10 22 50 / 26px 18px 22px 50px repeat; 
+  -moz-border-image: url(chrome://browser/skin/hud-panel.png) 26 10 22 50 / 26px 18px 22px 50px repeat;
 }
 
 .doorhanger-ltr {
@@ -74,7 +74,7 @@
   margin-top: -10px;
   margin-right: -16px;
   min-width: 280px;
-  -moz-border-image: url(chrome://browser/skin/hud-panel.png) 26 50 22 10 / 26px 50px 22px 18px repeat; 
+  -moz-border-image: url(chrome://browser/skin/hud-panel.png) 26 50 22 10 / 26px 50px 22px 18px repeat;
 }
 
 .doorhanger-rtl .doorhanger-inner {

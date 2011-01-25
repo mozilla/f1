@@ -119,10 +119,21 @@ function (rdapi,   object,         TextCounter) {
     domains: {
       'twitter.com': new SvcBase('Twitter', {
         features: {
+          //TODO: remove direct when old UI is no longer in use,
+          //or remove it from use.
           direct: true,
           subject: false,
           counter: true
         },
+        shareTypes: [{
+          type: 'public',
+          name: 'public'
+        }, {
+          type: 'direct',
+          name: 'direct message',
+          showTo: true,
+          toLabel: 'type in name of recipient'
+        }],
         textLimit: 140,
         shorten: true,
         serviceUrl: 'http://twitter.com',
@@ -134,10 +145,21 @@ function (rdapi,   object,         TextCounter) {
       }),
       'facebook.com': new SvcBase('Facebook', {
         features: {
+          //TODO: remove direct when old UI is no longer in use,
+          //or remove it from use.
           direct: true,
           subject: false,
           counter: true
         },
+        shareTypes: [{
+          type: 'wall',
+          name: 'my wall'
+        }, {
+          type: 'groupWall',
+          name: 'group wall',
+          showTo: true,
+          toLabel: 'type in the name of the group'
+        }],
         textLimit: 420,
         serviceUrl: 'http://facebook.com',
         revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
@@ -147,6 +169,11 @@ function (rdapi,   object,         TextCounter) {
         }
       }),
       'google.com': new EmailSvcBase('Gmail', {
+        shareTypes: [{
+          type: 'direct',
+          name: 'direct',
+          showTo: true
+        }],
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
         signOutUrl: 'http://google.com/preferences',
@@ -155,6 +182,11 @@ function (rdapi,   object,         TextCounter) {
         }
       }),
       'googleapps.com': new EmailSvcBase('Google Apps', {
+        shareTypes: [{
+          type: 'direct',
+          name: 'direct',
+          showTo: true
+        }],
         icon: 'i/gmailIcon.png',
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
@@ -164,6 +196,11 @@ function (rdapi,   object,         TextCounter) {
         }
       }),
       'yahoo.com': new EmailSvcBase('Yahoo', {
+        shareTypes: [{
+          type: 'direct',
+          name: 'direct',
+          showTo: true
+        }],
         name: 'Yahoo!',
         serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
         revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
@@ -175,10 +212,25 @@ function (rdapi,   object,         TextCounter) {
       'linkedin.com': new SvcBase('LinkedIn', {
         isNew: true,
         features: {
+          //TODO: remove direct when old UI is no longer in use,
+          //or remove it from use.
           direct: true,
           subject: true,
           counter: false
         },
+        shareTypes: [{
+          type: 'public',
+          name: 'public'
+        }, {
+          type: 'myConnections',
+          name: 'my connections',
+          specialTo: 'connections-only'
+        }, {
+          type: 'contact',
+          name: 'my contacts',
+          showTo: true,
+          toLabel: 'type in the name of the contact'
+        }],
         serviceUrl: 'http://linkedin.com',
         revokeUrl: 'http://linkedin.com/settings/connections',
         signOutUrl: 'http://linkedin.com/logout',

@@ -22,12 +22,13 @@
  * */
 
 #ffshare-toolbar-button > label {
-  display: -moz-box;
-  font-weight: bold;
+  display: none;
 }
 
 #ffshare-toolbar-button > image {
-  display: none;
+  list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
+  width: auto;
+  height: auto;
 }
 
 /* Styles to style the autocomplete results */
