@@ -211,6 +211,7 @@ header a.new {
   border: none;
   max-width: 90px;
   max-height: 60px;
+  display: block;
 }
 
 #pageInfo .shareInfo {
@@ -240,14 +241,14 @@ header a.new {
   color: #A6AFB6;
   display: table;
   text-decoration: none;
+  padding: 3px 5px;
+  cursor: default;
 }
 
 #pageInfo .url.selected,
 #pageInfo .shorturl.selected {
-  padding: 3px 5px;
   background-color: #E1E7ED;
   color: #848B91;
-
   -webkit-border-radius: 5px;
      -moz-border-radius: 5px;
           border-radius: 5px;
@@ -313,7 +314,7 @@ header a.new {
 img.avatar {
   border: 1px solid #FFFFFF;
   height: 23px;
-  margin: 2px 5px 0 0;
+  margin: 2px 10px 0 0;
   width: 23px;
 
   -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
@@ -321,8 +322,17 @@ img.avatar {
           box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
 }
 
+.shareTypeSection {
+    padding: 2px 0 5px;
+    height: 52px;
+}
+
 .hidden {
   display: none;
+}
+
+.hiddenImportant {
+  display: none !important;
 }
 
 span.arrow,
@@ -415,10 +425,16 @@ span.icon.debug {
 .ui-accordion-content textarea,
 .ui-accordion-content input[type="text"] {
   width: 100%;
+<<<<<<< HEAD
   font-family: "DroidSansRegular", Verdana, Sans-serif;
   font-size: 14px;
   line-height: 21px;
   padding: 2px 5px;
+=======
+  font-family: "Lucida Grande", Verdana, Sans-serif;
+  font-size: 11px;
+  padding: 2px;
+>>>>>>> 41f3d74e12da9aa38c1eba4e80ea40f7dca6f9b2
   margin: 2px 0;
   border-width: 1px;
   border-style: solid;
@@ -472,6 +488,41 @@ button:focus {
 .ui-accordion-content label {
   display: block;
   margin: 0 0 5px 0;
+}
+
+/* Generic AccountPanel styles */
+
+.shareTypeSection label {
+    color: #535F6D;
+}
+
+.shareTypeSelectSection.fixedSize {
+    width: 100px;
+}
+
+select.shareType {
+    margin: 2px 0 0 0;
+}
+
+.shareTypeSelectSection.fixedSize select {
+    width: 100px;
+    margin: 2px 0 0 0;
+}
+
+.toSection {
+    padding-left: 10px;
+}
+
+body .toSection input[type="text"] {
+    width: 100%;
+}
+
+.shareType2 {
+    line-height: 52px;
+    padding: 0 0 0 10px;
+    text-decoration: none;
+    font-style: italic;
+    color: #535F6D;
 }
 
 /*
