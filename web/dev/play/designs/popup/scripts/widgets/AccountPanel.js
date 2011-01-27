@@ -285,7 +285,7 @@ function (object,         Widget,         $,        template,
       },
 
       /**
-       * Use store to save gmail contacts, but fetch from API
+       * Use store to save contacts, but fetch from API
        * server if there is no store copy.
        */
       storeContacts: function () {

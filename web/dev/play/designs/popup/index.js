@@ -297,6 +297,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     } else {
       showStatus('statusSettings');
+
+      //Clean up storage
+      services.domainList.forEach(function (domain) {
+        delete store[services.domains[domain].type + 'Contacts'];
+      });
     }
 
     dispatch.pub('sizeToContent');
