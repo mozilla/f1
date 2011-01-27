@@ -277,28 +277,29 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         });
         dispatch.pub('generateBase64Preview', preview.http_url);
       }
+
+      //If no matching accounts match the last selection clear it.
+      if (lastSelectionMatch < 0 && !store.accountAdded && store.lastSelection) {
+        delete store.lastSelection;
+        lastSelectionMatch = 0;
+      }
+
+      // which domain was last active?
+      $("#accounts").accordion({ active: lastSelectionMatch });
+
+      //Reset the just added state now that accounts have been configured one time.
+      if (store.accountAdded) {
+        delete store.accountAdded;
+      }
+
+      //Create ellipsis for anything wanting ... overflow
+      $(".overflow").textOverflow(null, true);
+
     } else {
       showStatus('statusSettings');
-      return;
     }
 
-    //If no matching accounts match the last selection clear it.
-    if (lastSelectionMatch < 0 && !store.accountAdded && store.lastSelection) {
-      delete store.lastSelection;
-      lastSelectionMatch = 0;
-    }
-
-    // which domain was last active?
-    $("#accounts").accordion({ active: lastSelectionMatch });
-
-    //Reset the just added state now that accounts have been configured one time.
-    if (store.accountAdded) {
-      delete store.accountAdded;
-    }
-
-    //Create ellipsis for anything wanting ... overflow
-    $(".overflow").textOverflow(null, true);
-
+    dispatch.pub('sizeToContent');
   }
 
 

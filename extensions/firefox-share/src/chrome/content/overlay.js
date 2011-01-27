@@ -578,7 +578,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // XXX argh, we really should look at the panel and see what margins/padding
       // sizes are and calculate that way, however this is pretty complex due
       // to how the background image of the panel is used,
-      dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
+      //dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
       var h = lastWidth > defaultHeight ? lastWidth: defaultHeight;
       if (majorVer >= 4) {
         lastWidth = wrapper.scrollWidth;

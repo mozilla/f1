@@ -727,6 +727,11 @@ div.status td {
   vertical-align: center;
 }
 
+#statusSettings {
+    position: relative;
+    height: 180px;
+}
+
 #statusCaptcha {
   line-height: normal;
 }
