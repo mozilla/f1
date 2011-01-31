@@ -41,8 +41,9 @@ define(['jquery'], function ($) {
       targetOrigin = targetOrigin || origin;
 
       var func = function (evt) {
-        //Make sure message is from this page.
-        if (evt.origin === targetOrigin) {
+        //Make sure message is from this page, or from the browser extension
+        //that wants to communicate information back to the page.
+        if (evt.origin === targetOrigin || evt.origin === 'chrome://browser') {
           //Assume pub/sub has JSON data with properties named
           //'topic' and 'data'.
           var message = JSON.parse(evt.data),

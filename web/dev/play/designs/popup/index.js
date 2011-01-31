@@ -125,6 +125,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
     }
+
+    //Tell the extension that the size of the content may have changed.
+    dispatch.pub('sizeToContent');
   };
 
   //Make it globally visible for debug purposes
