@@ -186,6 +186,60 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
+  /**
+   * This progress listener looks for HTTP codes that are errors/not
+   * successses and puts up the "server down" page bundled in the extension.
+   * This listener is related to the HttpActivityObserver, but that one handles
+   * cases when the server is just not reachable via the network. This one
+   * handles the cases where the server is reachable but is freaking out.
+   */
+  function StateProgressListener(tabFrame) {
+    this.tabFrame = tabFrame;
+  }
+
+  StateProgressListener.prototype = {
+    // detect communication from the iframe via location setting
+    QueryInterface: function (aIID) {
+      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
+          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
+          aIID.equals(Components.interfaces.nsISupports)) {
+        return this;
+      }
+      throw Components.results.NS_NOINTERFACE;
+    },
+
+    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
+      var flags = Components.interfaces.nsIWebProgressListener;
+      if (aStateFlags & flags.STATE_IS_WINDOW &&
+                 aStateFlags & flags.STATE_STOP) {
+        var status;
+
+        try {
+          status = aRequest.nsIHttpChannel.responseStatus;
+        } catch (e) {
+          //Could be just an invalid URL or not an http thing. Need to be sure to not endlessly
+          //load error page if it is already loaded.
+          if (this.tabFrame.shareFrame.contentWindow.location.href !== ffshare.errorPage) {
+            status = 1000;
+          } else {
+            status = 200;
+          }
+        }
+
+        if (status < 200 || status > 399) {
+          this.tabFrame.shareFrame.contentWindow.location = ffshare.errorPage;
+        }
+      }
+    },
+
+    onLocationChange: function (aWebProgress, aRequest, aLocation) {},
+    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
+    onSecurityChange: function (aWebProgress, aRequest, aState) {},
+    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {
+        //log("onStatus Change: " + aRequest.nsIHttpChannel.responseStatus + ": " + aRequest.loadFlags + ", " + aRequest + ", " + aMessage);
+    }
+  };
+
   var firstRunProgressListener = {
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
                                            Ci.nsISupportsWeakReference,
@@ -231,6 +285,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   };
 
 
+  /**
+   * This observer looks for conditions where the server is not reachable
+   * by the network, and puts up the "server down" page. This observer is
+   * related to the StateProgressListener, but that one handles the cases
+   * where the server is reachable by the network but causes an error.
+   */
   var nsIHttpActivityObserver = Ci.nsIHttpActivityObserver;
   function httpActivityObserver(frame) {
     this.frame = frame;
@@ -354,7 +414,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           // If we don't have response headers then we did not recieve a response
           if (!browser.__response_headers_received) {
             //dump("ACTIVITY_SUBTYPE_TRANSACTION_CLOSE for "+httpChannel.name+" \n");
-            browser.loadURI('chrome://ffshare/content/servererror.html');
+            browser.loadURI(ffshare.errorPage);
           }
         } else
         if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_HEADER) {
@@ -398,12 +458,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       this.httpObserver = new httpActivityObserver(this);
       this.httpObserver.registerObserver();
+
+      var shareFrameProgress = this.shareFrame.webProgress;
+      this.stateProgressListener = new StateProgressListener(this);
+      shareFrameProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
     },
 
     unregisterListener: function (listener) {
       Services.obs.removeObserver(this, 'content-document-global-created');
 
       this.httpObserver.unregisterObserver();
+
+      var shareFrameProgress = this.shareFrame.webProgress;
+      shareFrameProgress.removeProgressListener(this.stateProgressListener);
+      this.stateProgressListener = null;
     },
 
     observe: function (aSubject, aTopic, aData) {
