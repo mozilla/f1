@@ -22,11 +22,11 @@
  * */
 
 /*jslint */
-/*global require: false, window: false, location: true, navigator: false */
+/*global define: false, window: false, location: true, navigator: false */
 'use strict';
 
-define(['require', 'jquery', 'hashDispatch'],
-    function (require,   $,        hashDispatch) {
+define([ 'require', 'jquery', 'hashDispatch', 'jquery.fancybox-1.3.4'],
+function (require,   $,        hashDispatch) {
 
     $(function () {
         //Goofy test, but just need to weed out big non-Gecko browsers, not
@@ -42,6 +42,14 @@ define(['require', 'jquery', 'hashDispatch'],
             $('#download').hide();
             $('#firefox').show();
         }
+
+        //Initialize fancybox for the video
+        $('.fancybox').fancybox({
+            'type': 'iframe',
+            href: 'http://player.vimeo.com/video/17619444?title=0&amp;byline=0&amp;portrait=0',
+            width: 700,
+            height: 446
+        });
 
         $('body')
             .delegate('#firefox', 'click', function (evt) {
