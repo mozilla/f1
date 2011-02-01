@@ -53,6 +53,20 @@ strong {
   font-weight: bold;
 }
 
+.textRight {
+  text-align: right;
+}
+
+hr {
+  display: block;
+  width: 700px;
+  height: 1px;
+  background-color: #e6e6e6;
+  color: #e6e6e6;
+  border: none;
+  margin: 0 auto 20px;
+}
+
 /* grid */
 
 .c1, .c2, .c3 {
@@ -134,28 +148,34 @@ strong {
 
 #header.row button.download {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 14px;
+  font-size: 18px;
+  color: #004607;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
   width: 100%;
-  background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
-  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
-  border: 1px solid #888888;
+  border: 1px solid #004607;
   padding: 5px 0;
-  -moz-border-radius: 2px;
-  -webkit-border-radius: 2px;
   cursor: pointer;
   position: absolute;
   top: 50%;
+  
+  -webkit-border-radius: 2px;
+     -moz-border-radius: 2px;
+          border-radius: 2px;
+  
+  background-image: -moz-linear-gradient(center top , #10f220 0%, #03b810 100%);
+  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #10f220), color-stop(100%, #03b810));
 }
 
 #header.row button.download:hover {
-  border: 1px solid #444;
+  -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.5);
+     -moz-box-shadow: 0 0 10px rgba(0,0,0,0.5);
+          box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
 #header.row button.download:active {
-  background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
-  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
-  -webkit-box-shadow: 0 0 1px #666666 inset;
-  -moz-box-shadow: 0 0 1px #666666 inset;
+  -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.5) inset;
+     -moz-box-shadow: 0 0 5px rgba(0,0,0,0.5) inset;
+          box-shadow: 0 0 5px rgba(0,0,0,0.5) inset;
 }
 
 #header.row button.download img {
@@ -166,7 +186,7 @@ strong {
 #header.row button.download span.meta {
   display: block;
   font-size: 10px;
-  color: #888;
+  color: #004607;
 }
 
 #header.row #firefox {
@@ -177,14 +197,38 @@ strong {
   display: none;
 }
 
-.row.headline {
-  margin: 20px 0;
-}
-
 .row.headline h1 {
+  margin: 100px 0 20px;
   color: #00A0FF;
   font-weight: normal;
   font-size: 24px;
+}
+
+.row.headline button {
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin: 20px 0 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  
+  background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
+  
+  border: 1px solid #888888;
+  padding: 5px 0;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  cursor: pointer;
+}
+
+.row.headline button:hover {
+  border: 1px solid #444;
+}
+
+.row.headline button:active {
+  -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.5) inset;
+  -moz-box-shadow: 0 0 5px rgba(0,0,0,0.5) inset;
 }
 
 #movie.c3 {
@@ -260,6 +304,12 @@ strong {
 .description h2 {
   font-size: 14px;
   color: #0a0a0a;
+}
+
+.description h3 {
+  color:#00A0FF;
+  margin-top:10px;
+  font-size: 12px;
 }
 
 .description.steps {
