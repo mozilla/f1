@@ -48,7 +48,9 @@ function (require,   $,        hashDispatch) {
             'type': 'iframe',
             href: 'http://player.vimeo.com/video/17619444?title=0&amp;byline=0&amp;portrait=0',
             width: 700,
-            height: 446
+            height: 446,
+            autoScale: false,
+            autoDimensions: false
         });
 
         $('body')
