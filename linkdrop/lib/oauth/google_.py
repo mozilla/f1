@@ -194,7 +194,6 @@ class responder(OpenIDResponder):
         
         profile = result_data['profile']
         provider = domain
-        import sys; print >> sys.stderr, "credential provider is ", profile.get('providerName')
         if profile.get('providerName').lower() == 'openid':
             provider = 'googleapps.com'
         userid = profile.get('verifiedEmail','')
