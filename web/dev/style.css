@@ -162,8 +162,8 @@ hr {
      -moz-border-radius: 2px;
           border-radius: 2px;
   
-  background-image: -moz-linear-gradient(center top , #10f220 0%, #03b810 100%);
-  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #10f220), color-stop(100%, #03b810));
+  background-image: -moz-linear-gradient(center top , #84c63c 0%, #5ea330 100%);
+  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #84c63c), color-stop(100%, #5ea330));
 }
 
 #header.row button.download:hover {
@@ -191,6 +191,8 @@ hr {
 
 #header.row #firefox {
     display: none;
+    font-size: 14px;
+    padding: 10px 0;
 }
 
 #header.row #noButton {
