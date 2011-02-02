@@ -45,9 +45,9 @@ setup(
         "python-dateutil",
         "python-openid",
         "python-memcached",
-        "twitter",
         "gdata", # google api support
         "sqlalchemy-migrate>=0.5.4",
+        "twitter>=1.4.2"
     ],
     setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),

@@ -94,7 +94,6 @@ class responder(OpenIDResponder):
 
 
     def _get_credentials(self, result_data):
-        import sys; print >> sys.stderr, result_data
         profile = result_data['profile']
         userid = profile['verifiedEmail']
         username = profile['preferredUsername']
