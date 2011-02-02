@@ -230,74 +230,105 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     });
   }
 
-  function updateAccounts(accounts) {
+  /**
+   * Shows the accounts after any AccountPanel overlays have been loaded.
+   */
+  function displayAccounts(accounts, panelOverlayMap) {
     var lastSelectionMatch = 0,
         accountsDom = $('#accounts'),
         fragment = document.createDocumentFragment(),
         debugPanel, preview,
         i = 0;
 
-    if ((accounts && accounts.length)) {
-      $('#shareui').removeClass('hidden');
+    $('#shareui').removeClass('hidden');
 
-      //Figure out what accounts we do have
-      accounts.forEach(function (account) {
-        var domain = account.accounts[0].domain,
-            data;
-        if (domain && actions[domain]) {
-          //Make sure to see if there is a match for last selection
-          if (actions[domain].type === store.lastSelection) {
-            lastSelectionMatch = i;
-          }
+    //Figure out what accounts we do have
+    accounts.forEach(function (account) {
+      var domain = account.accounts[0].domain,
+          data, PanelCtor;
 
-          data = actions[domain];
-          data.domain = domain;
-
-          accountPanels.push(new AccountPanel({
-            options: options,
-            account: account,
-            svc: data
-          }, fragment));
+      if (domain && actions[domain]) {
+        //Make sure to see if there is a match for last selection
+        if (actions[domain].type === store.lastSelection) {
+          lastSelectionMatch = i;
         }
 
-        i++;
+        data = actions[domain];
+        data.domain = domain;
+
+        // Get the contructor function for the panel.
+        PanelCtor = require(panelOverlayMap[domain] || 'widgets/AccountPanel');
+
+        accountPanels.push(new PanelCtor({
+          options: options,
+          account: account,
+          svc: data
+        }, fragment));
+      }
+
+      i++;
+    });
+
+    // add the account panels now
+    accountsDom.append(fragment);
+
+    //Add debug panel if it is allowed.
+    if (options.prefs.system === 'dev') {
+      debugPanel = new DebugPanel({}, accountsDom[0]);
+    }
+
+    //Ask extension to generate base64 data if none available.
+    //Useful for sending previews in email.
+    preview = options.previews && options.previews[0];
+    if (accounts.length && preview && preview.http_url && !preview.base64) {
+      dispatch.sub('base64Preview', function (dataUrl) {
+        $('[name="picture_base64"]').val(rawBase64(dataUrl));
+      });
+      dispatch.pub('generateBase64Preview', preview.http_url);
+    }
+
+    //If no matching accounts match the last selection clear it.
+    if (lastSelectionMatch < 0 && !store.accountAdded && store.lastSelection) {
+      delete store.lastSelection;
+      lastSelectionMatch = 0;
+    }
+
+    // which domain was last active?
+    $("#accounts").accordion({ active: lastSelectionMatch });
+
+    //Reset the just added state now that accounts have been configured one time.
+    if (store.accountAdded) {
+      delete store.accountAdded;
+    }
+
+    //Create ellipsis for anything wanting ... overflow
+    $(".overflow").textOverflow(null, true);
+  }
+
+  function updateAccounts(accounts) {
+    var panelOverlays = [],
+        panelOverlayMap = {};
+
+    if ((accounts && accounts.length)) {
+      //Collect any UI overrides used for AccountPanel based on the services
+      //the user has configured.
+      accounts.forEach(function (account) {
+        var domain = account.accounts[0].domain,
+            overlays = actions[domain].overlays,
+            overlay = overlays && overlays['widgets/AccountPanel'];
+        if (overlay) {
+          panelOverlays.push(overlay);
+          panelOverlayMap[domain] = overlay;
+        }
       });
 
-      // add the account panels now
-      accountsDom.append(fragment);
-
-      //Add debug panel if it is allowed.
-      if (options.prefs.system === 'dev') {
-        debugPanel = new DebugPanel({}, accountsDom[0]);
-      }
-
-      //Ask extension to generate base64 data if none available.
-      //Useful for sending previews in email.
-      preview = options.previews && options.previews[0];
-      if (accounts.length && preview && preview.http_url && !preview.base64) {
-        dispatch.sub('base64Preview', function (dataUrl) {
-          $('[name="picture_base64"]').val(rawBase64(dataUrl));
+      if (panelOverlays.length) {
+        require(panelOverlays, function () {
+          displayAccounts(accounts, panelOverlayMap);
         });
-        dispatch.pub('generateBase64Preview', preview.http_url);
+      } else {
+        displayAccounts(accounts, panelOverlayMap);
       }
-
-      //If no matching accounts match the last selection clear it.
-      if (lastSelectionMatch < 0 && !store.accountAdded && store.lastSelection) {
-        delete store.lastSelection;
-        lastSelectionMatch = 0;
-      }
-
-      // which domain was last active?
-      $("#accounts").accordion({ active: lastSelectionMatch });
-
-      //Reset the just added state now that accounts have been configured one time.
-      if (store.accountAdded) {
-        delete store.accountAdded;
-      }
-
-      //Create ellipsis for anything wanting ... overflow
-      $(".overflow").textOverflow(null, true);
-
     } else {
       showStatus('statusSettings');
 

@@ -69,6 +69,10 @@ function (object,         Widget,         $,        template,
 
       template: template,
 
+      strings: {
+        shareTypeLabel: 'send to'
+      },
+
       onCreate: function () {
         var name = this.account.displayName,
             userName, savedOptions;
@@ -210,7 +214,7 @@ function (object,         Widget,         $,        template,
           toInputDom.focus();
         } else {
           toSectionDom.addClass('hiddenImportant');
-          shareTypeSectionDom.remove('fixedSize');
+          shareTypeSectionDom.removeClass('fixedSize');
           shareType2Dom.removeClass('hiddenImportant');
         }
       },

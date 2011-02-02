@@ -447,6 +447,10 @@ body .toSection input[type="text"] {
     color: #535F6D;
 }
 
+.lineSeparatorOption {
+    border-top: 1px solid #CCCCCC;
+}
+
 /*
     twitter styles
 
