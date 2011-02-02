@@ -310,13 +310,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     dispatch.pub('sizeToContent');
   }
 
-
-  pageInfo = new PageInfo({
-    options: options
-  }, $('.sharebox')[0], 'prepend');
-
-
-
   //For the "new items" link, only show it for x number of days after showing it.
   //NOTE: when updating for newer releases, delete the old value from the
   //storage.
@@ -393,6 +386,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       showStatus('statusEnableLocalStorage');
       return;
     }
+
+    //Show the page info at the top.
+    pageInfo = new PageInfo({
+      options: options
+    }, $('.sharebox')[0], 'prepend');
 
     //Fetch the accounts.
     accounts(
