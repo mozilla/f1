@@ -36,17 +36,19 @@ function (object,         Widget,         $,        template,
       className = module.id.replace(/\//g, '-');
 
   //Set up event handlers.
-  $('body')
-    .delegate('.' + className + ' form.messageForm', 'submit', function (evt) {
-      Widget.closest(module.id, evt, 'onSubmit');
-    })
-    .delegate('.' + className + ' .shareType', 'change', function (evt) {
-      Widget.closest(module.id, evt, 'onShareTypeChange');
-    })
-    .delegate('.' + className + ' .shareType2', 'click', function (evt) {
-      Widget.closest(module.id, evt, 'selectSecondShareType');
-      evt.preventDefault();
-    });
+  $(function () {
+    $('body')
+      .delegate('.' + className + ' form.messageForm', 'submit', function (evt) {
+        Widget.closest(module.id, evt, 'onSubmit');
+      })
+      .delegate('.' + className + ' .shareType', 'change', function (evt) {
+        Widget.closest(module.id, evt, 'onShareTypeChange');
+      })
+      .delegate('.' + className + ' .shareType2', 'click', function (evt) {
+        Widget.closest(module.id, evt, 'selectSecondShareType');
+        evt.preventDefault();
+      });
+  });
 
   /**
    * Define the widget.
@@ -285,7 +287,7 @@ function (object,         Widget,         $,        template,
       },
 
       /**
-       * Use store to save gmail contacts, but fetch from API
+       * Use store to save contacts, but fetch from API
        * server if there is no store copy.
        */
       storeContacts: function () {

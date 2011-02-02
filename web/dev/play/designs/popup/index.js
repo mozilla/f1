@@ -125,6 +125,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
     }
+
+    //Tell the extension that the size of the content may have changed.
+    dispatch.pub('sizeToContent');
   };
 
   //Make it globally visible for debug purposes
@@ -277,28 +280,34 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         });
         dispatch.pub('generateBase64Preview', preview.http_url);
       }
+
+      //If no matching accounts match the last selection clear it.
+      if (lastSelectionMatch < 0 && !store.accountAdded && store.lastSelection) {
+        delete store.lastSelection;
+        lastSelectionMatch = 0;
+      }
+
+      // which domain was last active?
+      $("#accounts").accordion({ active: lastSelectionMatch });
+
+      //Reset the just added state now that accounts have been configured one time.
+      if (store.accountAdded) {
+        delete store.accountAdded;
+      }
+
+      //Create ellipsis for anything wanting ... overflow
+      $(".overflow").textOverflow(null, true);
+
     } else {
       showStatus('statusSettings');
-      return;
+
+      //Clean up storage
+      services.domainList.forEach(function (domain) {
+        delete store[services.domains[domain].type + 'Contacts'];
+      });
     }
 
-    //If no matching accounts match the last selection clear it.
-    if (lastSelectionMatch < 0 && !store.accountAdded && store.lastSelection) {
-      delete store.lastSelection;
-      lastSelectionMatch = 0;
-    }
-
-    // which domain was last active?
-    $("#accounts").accordion({ active: lastSelectionMatch });
-
-    //Reset the just added state now that accounts have been configured one time.
-    if (store.accountAdded) {
-      delete store.accountAdded;
-    }
-
-    //Create ellipsis for anything wanting ... overflow
-    $(".overflow").textOverflow(null, true);
-
+    dispatch.pub('sizeToContent');
   }
 
 

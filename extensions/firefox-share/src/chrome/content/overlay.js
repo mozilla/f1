@@ -29,7 +29,8 @@
   Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false,
   XPCOMUtils: false, ffshareAutoCompleteData: false, AddonManager: false,
   BrowserToolboxCustomizeDone: false, InjectorInit: false, injector: false,
-  getComputedStyle: false, gNavToolbox: false */
+  getComputedStyle: false, gNavToolbox: false, XPCNativeWrapper: false,
+  Image: false */
 
 var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
@@ -101,7 +102,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   // This add-on manager is only available in Firefox 4+
   try {
     Cu.import("resource://gre/modules/AddonManager.jsm");
-  } catch (e) {
+  } catch (ex) {
   }
 
   function getButton() {
@@ -186,6 +187,60 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
+  /**
+   * This progress listener looks for HTTP codes that are errors/not
+   * successses and puts up the "server down" page bundled in the extension.
+   * This listener is related to the HttpActivityObserver, but that one handles
+   * cases when the server is just not reachable via the network. This one
+   * handles the cases where the server is reachable but is freaking out.
+   */
+  function StateProgressListener(tabFrame) {
+    this.tabFrame = tabFrame;
+  }
+
+  StateProgressListener.prototype = {
+    // detect communication from the iframe via location setting
+    QueryInterface: function (aIID) {
+      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
+          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
+          aIID.equals(Components.interfaces.nsISupports)) {
+        return this;
+      }
+      throw Components.results.NS_NOINTERFACE;
+    },
+
+    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
+      var flags = Components.interfaces.nsIWebProgressListener;
+      if (aStateFlags & flags.STATE_IS_WINDOW &&
+                 aStateFlags & flags.STATE_STOP) {
+        var status;
+
+        try {
+          status = aRequest.nsIHttpChannel.responseStatus;
+        } catch (e) {
+          //Could be just an invalid URL or not an http thing. Need to be sure to not endlessly
+          //load error page if it is already loaded.
+          if (this.tabFrame.shareFrame.contentWindow.location.href !== ffshare.errorPage) {
+            status = 1000;
+          } else {
+            status = 200;
+          }
+        }
+
+        if (status < 200 || status > 399) {
+          this.tabFrame.shareFrame.contentWindow.location = ffshare.errorPage;
+        }
+      }
+    },
+
+    onLocationChange: function (aWebProgress, aRequest, aLocation) {},
+    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
+    onSecurityChange: function (aWebProgress, aRequest, aState) {},
+    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {
+        //log("onStatus Change: " + aRequest.nsIHttpChannel.responseStatus + ": " + aRequest.loadFlags + ", " + aRequest + ", " + aMessage);
+    }
+  };
+
   var firstRunProgressListener = {
     QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
                                            Ci.nsISupportsWeakReference,
@@ -231,11 +286,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   };
 
 
+  /**
+   * This observer looks for conditions where the server is not reachable
+   * by the network, and puts up the "server down" page. This observer is
+   * related to the StateProgressListener, but that one handles the cases
+   * where the server is reachable by the network but causes an error.
+   */
   var nsIHttpActivityObserver = Ci.nsIHttpActivityObserver;
-  function httpActivityObserver(frame) {
+  function HttpActivityObserver(frame) {
     this.frame = frame;
   }
-  httpActivityObserver.prototype = {
+  HttpActivityObserver.prototype = {
     // copied largely from firebug net.js
     registered: false,
 
@@ -283,7 +344,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           activityDistributor = dist.getService(Ci.nsIHttpActivityDistributor);
         }
       } catch (e) {
-        dump("nsIHttpActivityDistributor no available " + e + "\n");
+        log("nsIHttpActivityDistributor no available " + e + "\n");
       }
       delete this.activityDistributor;
       return (this.activityDistributor = activityDistributor);
@@ -334,7 +395,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                 extraSizeData, extraStringData);
         }
       } catch (e) {
-        dump("observeActivity: EXCEPTION " + e + "\n");
+        log("observeActivity: EXCEPTION " + e + "\n");
       }
     },
 
@@ -354,7 +415,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           // If we don't have response headers then we did not recieve a response
           if (!browser.__response_headers_received) {
             //dump("ACTIVITY_SUBTYPE_TRANSACTION_CLOSE for "+httpChannel.name+" \n");
-            browser.loadURI('chrome://ffshare/content/servererror.html');
+            browser.loadURI(ffshare.errorPage);
           }
         } else
         if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_HEADER) {
@@ -396,14 +457,22 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     registerListener: function () {
       Services.obs.addObserver(this, 'content-document-global-created', false);
 
-      this.httpObserver = new httpActivityObserver(this);
+      this.httpObserver = new HttpActivityObserver(this);
       this.httpObserver.registerObserver();
+
+      var shareFrameProgress = this.shareFrame.webProgress;
+      this.stateProgressListener = new StateProgressListener(this);
+      shareFrameProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
     },
 
     unregisterListener: function (listener) {
       Services.obs.removeObserver(this, 'content-document-global-created');
 
       this.httpObserver.unregisterObserver();
+
+      var shareFrameProgress = this.shareFrame.webProgress;
+      shareFrameProgress.removeProgressListener(this.stateProgressListener);
+      this.stateProgressListener = null;
     },
 
     observe: function (aSubject, aTopic, aData) {
@@ -466,7 +535,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       getButton().removeAttribute("checked");
     },
 
-    close: function() {
+    close: function () {
       this.hide();
       this.unregisterListener();
       this.panel.removeEventListener('popuphidden', this.panelHideListener, false);
@@ -518,8 +587,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       panel.addEventListener('popupshown', this.panelShownListener, false);
       if (majorVer < 4) {
-        panel.style.width = lastWidth+'px';
-        panel.style.height = lastHeight+'px';
+        panel.style.width = lastWidth + 'px';
+        panel.style.height = lastHeight + 'px';
       }
 
       url = ffshare.prefs.share_url +
@@ -546,21 +615,23 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       document.getElementById('mainPopupSet').appendChild(panel);
 
       // hookup esc to also close the panel
-      panel.addEventListener('keypress', fn.bind(this, function(e) {
-        if (e.keyCode == 27 /*"VK_ESC"*/) {
+      panel.addEventListener('keypress', fn.bind(this, function (e) {
+        if (e.keyCode === 27 /*"VK_ESC"*/) {
           this.close();
         }
       }), false);
 
       this.shareFrame = browserNode;
       if (majorVer >= 4) {
-        browserNode.style.width = lastWidth+'px';
-        browserNode.style.height = lastHeight+'px';
+        browserNode.style.width = lastWidth + 'px';
+        browserNode.style.height = lastHeight + 'px';
       }
 
-      this.shareFrame.addEventListener("load", fn.bind(this, function(evt) {
+      this.shareFrame.addEventListener("load", fn.bind(this, function (evt) {
         var self = this;
-        window.setTimeout(function() { self.sizeToContent() }, 0);
+        window.setTimeout(function () {
+          self.sizeToContent();
+        }, 0);
       }), true);
 
       //Make sure it can go all the way to zero.
@@ -571,20 +642,22 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       browserNode.setAttribute('src', url);
     },
 
-    sizeToContent: function() {
+    sizeToContent: function () {
       var doc = this.shareFrame.contentDocument.wrappedJSObject;
       var wrapper = doc.getElementById('wrapper');
-      if (!wrapper) return;
+      if (!wrapper) {
+        return;
+      }
       // XXX argh, we really should look at the panel and see what margins/padding
       // sizes are and calculate that way, however this is pretty complex due
       // to how the background image of the panel is used,
-      dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
+      //dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
       var h = lastWidth > defaultHeight ? lastWidth: defaultHeight;
       if (majorVer >= 4) {
         lastWidth = wrapper.scrollWidth;
         lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight : h;
-        this.shareFrame.style.width = lastWidth+"px";
-        this.shareFrame.style.height = lastHeight+"px";
+        this.shareFrame.style.width = lastWidth + "px";
+        this.shareFrame.style.height = lastHeight + "px";
       } else {
         lastWidth = wrapper.scrollWidth + panelWidthMargin;
         lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight + panelHeightMargin : h;
@@ -600,8 +673,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         return;
       }
 
-      if (!this.panel)
+      if (!this.panel) {
         this.createShareFrame(options);
+      }
 
       var button = getButton();
       // Always ensure the button is checked if the panel is open
@@ -618,7 +692,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         var navbar = document.getElementById('nav-bar');
         var urlbar = document.getElementById('urlbar-container');
         var first = null;
-        for (var c =0; c < navbar.childNodes.length; c++) {
+        for (var c = 0; c < navbar.childNodes.length; c++) {
           if (navbar.childNodes[c] === urlbar || navbar.childNodes[c] === button) {
             first = navbar.childNodes[c];
             break;
@@ -1006,7 +1080,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           catch (e) {}
         }
       }
-      catch (e) {}
+      catch (ex) {}
 
       if (ffshare.prefs.firstRun) {
         //Make sure to set the pref first to avoid bad things if later code
@@ -1037,8 +1111,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       try {
         gBrowser.addProgressListener(canShareProgressListener);
-      } catch (e) {
-        error(e);
+      } catch (ex) {
+        error(ex);
       }
 
       document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
@@ -1211,8 +1285,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           if (oldKey) {
             oldKey.setAttribute("keycode", this.keycode);
           }
-        } catch (e) {
-          error(e);
+        } catch (ex) {
+          error(ex);
         }
       }
 
@@ -1259,22 +1333,24 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       } catch (ignore) { }
     },
 
-    switchTab: function() {
+    switchTab: function () {
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
       if (this.currentTabFrame) {
-        if (this.currentTabFrame != tabFrame) {
+        if (this.currentTabFrame !== tabFrame) {
           this.currentTabFrame.hide();
           this.currentTabFrame = null;
         } else
-        if (gBrowser.currentURI.spec != tabFrame.options.url) {
+        if (gBrowser.currentURI.spec !== tabFrame.options.url) {
           this.currentTabFrame.close();
           this.currentTabFrame = null;
           return;
         }
       }
       if (tabFrame) {
-        window.setTimeout(function () { tabFrame.show({}); }, 0);
+        window.setTimeout(function () {
+          tabFrame.show({});
+        }, 0);
         this.currentTabFrame = tabFrame;
       }
     },
