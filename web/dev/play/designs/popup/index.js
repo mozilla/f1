@@ -86,7 +86,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     },
     profilePic: function (photos) {
       //TODO: check for a thumbnail picture, hopefully one that is square.
-      return photos && photos[0] && photos[0].value || '/dev/share/i/face2.png';
+      return photos && photos[0] && photos[0].value || '/share/i/face2.png';
     },
     serviceName: function (domain) {
       return actions[domain].name;
