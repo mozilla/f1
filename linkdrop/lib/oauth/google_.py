@@ -395,7 +395,6 @@ class api():
             return None, error
             
         feed = gdata.contacts.ContactsFeedFromString(content)
-        from pprint import pprint
         for entry in feed.entry:
             #print entry.group_membership_info
             p = {
