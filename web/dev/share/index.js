@@ -96,9 +96,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       if (data.message) {
         dom.find('textarea.message').val(data.message);
       }
-      if (data.previews) {
-        dom.find('[name="picture"]').val(data.previews[0]["http_url"]);
-        dom.find('[name="picture_base64"]').val(options.previews[0]["base64"].replace("data:image/png;base64,",""));
+      if (data.previews && data.previews.length) {
+        dom.find('[name="picture"]').val(data.previews[0]);
+        dom.find('[name="picture_base64"]').val(options.previews[0]);
       }
       if (data.canonicalUrl || data.url) {
         dom.find('[name="link"]').val(data.canonicalUrl || data.url);
@@ -677,9 +677,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (options.previews && options.previews.length) {
       //TODO: set up all the image previews.
       // XXX: we might not want to default to the base64 as that won't be sent/used by Facebook
-      var url = escapeHtml(options.previews[0]["http_url"] ||
-                           options.previews[0]["base64"]);
+      var url = escapeHtml(options.previews[0]);
       thumbImgDom.attr('src', url);
+    } else if (options.thumbnail) {
+      thumbImgDom.attr('src', escapeHtml(options.thumbnail));
     }
 
     //Create ellipsis for thumbnail section
