@@ -1377,13 +1377,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   if (!ffshare.prefs.share_url) {
     if (ffshare.prefs.system === 'dev') {
-      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/play/designs/popup/';
-    } else if (ffshare.prefs.system === 'devpopup') {
-      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/play/designs/popup/';
+      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/share/panel/';
     } else if (ffshare.prefs.system === 'staging') {
-      ffshare.prefs.share_url = 'https://f1-staging.mozillamessaging.com/play/designs/popup/';
+      ffshare.prefs.share_url = 'https://f1-staging.mozillamessaging.com/share/panel/';
     } else {
-      ffshare.prefs.share_url = 'https://f1.mozillamessaging.com/play/designs/popup/';
+      ffshare.prefs.share_url = 'https://f1.mozillamessaging.com/share/panel/';
     }
   }
 

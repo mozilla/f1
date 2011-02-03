@@ -28,7 +28,7 @@
 
 require({
   paths: {
-    widgets: '../play/designs/popup/scripts/widgets'
+    widgets: '../share/panel/scripts/widgets'
   }
 });
 

@@ -1,9 +1,9 @@
 ({
-    baseUrl: "../../../scripts/",
+    baseUrl: "../../scripts/",
     paths: {
-        "index": "../play/designs/popup/index",
+        "index": "../share/panel/index",
         "jquery": "jqueryStub",
-        "widgets": "../play/designs/popup/scripts/widgets"
+        "widgets": "../share/panel/scripts/widgets"
     },
     name: "index",
     include: ['widgets/AccountPanelLinkedIn'],
