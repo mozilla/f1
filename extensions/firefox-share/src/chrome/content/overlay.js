@@ -220,7 +220,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         } catch (e) {
           //Could be just an invalid URL or not an http thing. Need to be sure to not endlessly
           //load error page if it is already loaded.
-          if (this.tabFrame.shareFrame.contentWindow.location.href !== ffshare.errorPage) {
+          //Also ignore this state for about:blank which is apparently used as
+          //a placeholder by FF while first creating the panel/browser element.
+          var href = this.tabFrame.shareFrame.contentWindow.location.href;
+          if (href !== ffshare.errorPage && href !== 'about:blank') {
             status = 1000;
           } else {
             status = 200;
@@ -644,7 +647,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     sizeToContent: function () {
       var doc = this.shareFrame.contentDocument.wrappedJSObject;
-      var wrapper = doc.getElementById('wrapper');
+      var wrapper = doc && doc.getElementById('wrapper');
       if (!wrapper) {
         return;
       }
