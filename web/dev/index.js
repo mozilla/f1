@@ -70,24 +70,6 @@ function (require,   $,        hashDispatch) {
             });
 
         $(window)
-            .bind('buttonX', function () {
-              //If this is after an install, then show the "click the button" UI.
-                var x = window.buttonX;
-                if (x) {
-                    //TODO: fix this hardcoded 8px offset. Need to make it half the width
-                    //of the arrow, but cannot dynamically ask for it because it is hidden
-                    //so has no width. Would need to take it out of DOM, show it, then get
-                    //width.
-                    x = x - 8;
-                    $('#installed').fadeIn(500);
-                    $('#shareArrow').css({left: x});
-                }
-            })
-            .bind('hideInstalled', function () {
-                //Once a person clicks on the toolbar button for the first time we
-                // should get a hideInstalled event
-                $('#installed').fadeOut("fast");
-            })
             .bind('load resize', function () {
                 var h = $('button.download').height();
                 $('button.download').css({ 'margin-top' : (-h / 2) });
