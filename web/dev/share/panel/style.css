@@ -452,6 +452,10 @@ body .toSection input[type="text"] {
     border-top: 1px solid #CCCCCC;
 }
 
+.widgets-AccountPanel button.share:focus {
+  box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
+}
+
 /*
     twitter styles
 
