@@ -24,6 +24,7 @@ body {
   width: 400px;
   max-width: 400px;
   position: relative;
+  min-height: 180px;
   height: 100%;
 }
 
@@ -729,11 +730,6 @@ div.status table {
 
 div.status td {
   vertical-align: center;
-}
-
-#statusSettings {
-    position: relative;
-    height: 180px;
 }
 
 #statusCaptcha {
