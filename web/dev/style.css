@@ -100,31 +100,6 @@ hr {
 
 /* end grid */
 
-#installed {
-  display: none;
-  background-color: #fdff94;
-  border-bottom: 1px solid #e6e6e6;
-  padding: 50px 0;
-}
-
-#installed .installWrapper {
-  width: 720px;
-  margin: 0 auto;
-  overflow: hidden;
-  text-align: center;
-}
-
-#installed img {
-  vertical-align: text-bottom;
-  margin: -1px 4px 0 0;
-}
-
-#shareArrow {
-  position: fixed;
-  top: 0;
-  color: #ff5959;
-}
-
 #wrapper {
   width: 720px;
   margin: 0 auto;

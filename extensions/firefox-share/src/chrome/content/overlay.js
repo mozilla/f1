@@ -684,6 +684,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // Always ensure the button is checked if the panel is open
       button.setAttribute("checked", true);
 
+      // Always ensure we aren't glowing if the person clicks on the button
+      button.removeAttribute("firstRun");
+
       // fx 4
       if (majorVer >= 4) {
         var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
@@ -708,14 +711,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           this.panel.setAttribute('class', 'ffshare-panel doorhanger-ltr');
           this.panel.showPopup(button, -1, -1, 'popup', 'bottomright', 'topright');
         }
-      }
-
-      if (ffshare.prefs.frontpage_url === tabUrl) {
-        var browser = gBrowser.getBrowserForTab(this.tab);
-        // If we're looking at the front page we should clear the first run helper
-        var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
-        evt.initEvent("hideInstalled", true, false);
-        browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
       }
 
       this.visible = true;
@@ -1007,19 +1002,30 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
-  function sendJustInstalledEvent(browser, rect) {
-    browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
-    var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
-    evt.initEvent("buttonX", true, false);
-    browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
+  function sendJustInstalledEvent(win, url) {
+    var buttonNode = win.document.getElementById(buttonId);
+    //Button may not be there if customized and removed from toolbar.
+    if (buttonNode) {
+      var tab = win.gBrowser.loadOneTab(url, { referrerURI: null,
+                                               charset: null,
+                                               postData: null,
+                                               inBackground: false,
+                                               allowThirdPartyFixup: null });
+      // select here and there in case the load was quick
+      win.gBrowser.selectedTab = tab;
+      tab.addEventListener("load", function tabevent() {
+                                      tab.removeEventListener("load", tabevent, true);
+                                      win.gBrowser.selectedTab  = tab;
+                                    }, true);
+      buttonNode.setAttribute("firstRun", "true");
+    }
   }
 
-  function makeInstalledLoadHandler(browser, rect) {
+  function makeInstalledLoadHandler(win, url) {
     var handler = function () {
-      browser.removeEventListener("load", handler, true);
-      sendJustInstalledEvent(browser, rect);
+      win.removeEventListener("load", handler, true);
+      sendJustInstalledEvent(win, url);
     };
-
     return handler;
   }
 
@@ -1158,62 +1164,54 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       function openAndReuseOneTabPerURL(url) {
         var browserEnumerator = Services.wm.getEnumerator("navigator:browser"),
             rect, browser, buttonNode;
-
         // Check each browser instance for our URL
         var found = false;
-        while (!found && browserEnumerator.hasMoreElements()) {
-          var browserWin = browserEnumerator.getNext();
-          var tabbrowser = browserWin.gBrowser;
+        try {
+          while (!found && browserEnumerator.hasMoreElements()) {
+            var browserWin = browserEnumerator.getNext();
+            var tabbrowser = browserWin.gBrowser;
 
-          // Check each tab of this browser instance
-          var numTabs = tabbrowser.browsers.length;
-          for (var index = 0; index < numTabs; index++) {
-            var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-            if (url === currentBrowser.currentURI.spec) {
+            // Sometimes we don't get a tabbrowser element
+            if (tabbrowser) {
+              // Check each tab of this browser instance
+              var numTabs = tabbrowser.browsers.length;
+              for (var index = 0; index < numTabs; index++) {
+                var currentBrowser = tabbrowser.getBrowserAtIndex(index);
+                if (currentBrowser.currentURI &&
+                    url === currentBrowser.currentURI.spec) {
 
-              // The URL is already opened. Select this tab.
-              tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
+                  // The URL is already opened. Select this tab.
+                  tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
 
-              // Focus *this* browser-window
-              browserWin.focus();
+                  // Focus *this* browser-window
+                  browserWin.focus();
 
-              buttonNode = browserWin.document.getElementById(buttonId);
-              //Button may not be there if customized and removed from toolbar.
-              if (buttonNode) {
-                rect = buttonNode.getBoundingClientRect();
-                browser = gBrowser.getBrowserForTab(tabbrowser.selectedTab);
+                  var buttonNode = browserWin.document.getElementById(buttonId);
+                  //Button may not be there if customized and removed from toolbar.
+                  if (buttonNode) {
+                    buttonNode.setAttribute("firstRun", "true");
+                  }
 
-                // try setting the button location as the window may have already loaded
-                try {
-                  sendJustInstalledEvent(browser, rect);
-                } catch (ignore) { }
-
-                // Add the load handler in case the window hasn't finished loaded (unlikely)
-                browser.addEventListener("load", makeInstalledLoadHandler(browser, rect), true);
+                  found = true;
+                  break;
+                }
               }
-
-              found = true;
-              break;
             }
           }
-        }
+        // Minefield likes to error out in this loop sometimes
+        } catch (ignore) { }
 
         // Our URL isn't open. Open it now.
         if (!found) {
           var recentWindow = Services.wm.getMostRecentWindow("navigator:browser");
           if (recentWindow) {
-            buttonNode = recentWindow.document.getElementById(buttonId);
-            //Button may not be there if customized and removed from toolbar.
-            if (buttonNode) {
-              rect = buttonNode.getBoundingClientRect();
-              // Use the existing browser (recent) Window
-              var tab = recentWindow.gBrowser.loadOneTab(url, { referrerURI: null,
-                                                               charset: null,
-                                                               postData: null,
-                                                               inBackground: false,
-                                                               allowThirdPartyFixup: null });
-              browser = gBrowser.getBrowserForTab(tab);
-              browser.addEventListener("load", makeInstalledLoadHandler(browser, rect), true);
+            // If our window is opened and ready just open the tab
+            //   possible values: (loading, complete, or uninitialized)
+            if (recentWindow.document.readyState == "complete") {
+              sendJustInstalledEvent(recentWindow, url);
+            } else {
+              // Otherwise the window, while existing, might not be ready yet so we wait to open our tab
+              recentWindow.addEventListener("load", makeInstalledLoadHandler(recentWindow, url), true);
             }
           }
           else {
