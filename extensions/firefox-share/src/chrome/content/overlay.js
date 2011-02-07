@@ -415,8 +415,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           browser.__response_headers_received = false;
         } else
         if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE) {
-          // If we don't have response headers then we did not recieve a response
-          if (!browser.__response_headers_received) {
+          // If we don't have response headers then we did not recieve a response,
+          // but skip the case where the page is the about:blank filler used
+          // by the browser when first loading a browser.
+          if (!browser.__response_headers_received && browser.currentURI.spec !== 'about:blank') {
             //dump("ACTIVITY_SUBTYPE_TRANSACTION_CLOSE for "+httpChannel.name+" \n");
             browser.loadURI(ffshare.errorPage);
           }
