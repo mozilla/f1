@@ -94,6 +94,7 @@
         <span class="avatar"><img class="avatar" src="/dev/share/i/face2.png"></span>
         <span class="username">Username</span>
       </div>
+      { !features.direct [}
       <div class="thumb hidden">
         <div class="image"><img class="thumb"/></div>
         <div class="meta">
@@ -103,6 +104,7 @@
           <a title="A smaller, shorter link" class="surl"></a>
         </div>
       </div>
+      {]}
       { features.direct [}
       <div class="addressing">
         <input name="to" placeholder="to" type="text" value="" class="ffshareAutoComplete" autocompletestore="{domain}"/>

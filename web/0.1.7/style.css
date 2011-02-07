@@ -1,0 +1,347 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Raindrop.
+ *
+ * The Initial Developer of the Original Code is
+ * Mozilla Messaging, Inc..
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ * */
+
+* {
+  margin: 0;
+  padding: 0;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  list-style-type: none;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 21px;
+  color: #0a0a0a;
+}
+
+button::-moz-focus-inner {
+  border: 0;
+}
+
+a {
+  color: #00a0ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+strong {
+  font-weight: bold;
+}
+
+.textRight {
+  text-align: right;
+}
+
+hr {
+  display: block;
+  width: 700px;
+  height: 1px;
+  background-color: #e6e6e6;
+  color: #e6e6e6;
+  border: none;
+  margin: 0 auto 20px;
+}
+
+/* grid */
+
+.c1, .c2, .c3 {
+  display: inline-block;
+  float: left;
+  min-height: 1%;
+  margin: 0 10px;
+  position: relative;
+}
+
+.c1 {
+  width: 220px;
+}
+
+.c2 {
+  width: 460px;
+}
+
+.c3 {
+  width: 700px;
+}
+
+.row {
+  float: left;
+  margin: 10px 0;
+}
+
+.row.about {
+  margin: 20px 0;
+}
+
+/* end grid */
+
+#installed {
+  display: none;
+  background-color: #fdff94;
+  border-bottom: 1px solid #e6e6e6;
+  padding: 50px 0;
+}
+
+#installed .installWrapper {
+  width: 720px;
+  margin: 0 auto;
+  overflow: hidden;
+  text-align: center;
+}
+
+#installed img {
+  vertical-align: text-bottom;
+  margin: -1px 4px 0 0;
+}
+
+#shareArrow {
+  position: fixed;
+  top: 0;
+  color: #ff5959;
+}
+
+#wrapper {
+  width: 720px;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+#header.row {
+  margin: 36px 0;
+}
+
+#header.row .c1,
+#header.row .c2 {
+  height: 90px;
+  line-height: 90px;
+}
+
+#header.row .logo {
+  background-image: url("i/f1Logo.png");
+  background-repeat: no-repeat;
+}
+
+#header.row button.download {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  color: #004607;
+  text-shadow: 1px 1px 0 rgba(255,255,255,0.4);
+  width: 100%;
+  border: 1px solid #004607;
+  padding: 5px 0;
+  cursor: pointer;
+  position: absolute;
+  top: 50%;
+  
+  -webkit-border-radius: 2px;
+     -moz-border-radius: 2px;
+          border-radius: 2px;
+  
+  background-image: -moz-linear-gradient(center top , #10f220 0%, #03b810 100%);
+  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #10f220), color-stop(100%, #03b810));
+}
+
+#header.row button.download:hover {
+  -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.5);
+     -moz-box-shadow: 0 0 10px rgba(0,0,0,0.5);
+          box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+#header.row button.download:active {
+  -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.5) inset;
+     -moz-box-shadow: 0 0 5px rgba(0,0,0,0.5) inset;
+          box-shadow: 0 0 5px rgba(0,0,0,0.5) inset;
+}
+
+#header.row button.download img {
+  vertical-align: middle;
+  margin: -1px 4px 0 0;
+}
+
+#header.row button.download span.meta {
+  display: block;
+  font-size: 10px;
+  color: #004607;
+}
+
+#header.row #firefox {
+    display: none;
+}
+
+#header.row #noButton {
+  display: none;
+}
+
+.row.headline h1 {
+  margin: 100px 0 20px;
+  color: #00A0FF;
+  font-weight: normal;
+  font-size: 24px;
+}
+
+.row.headline button {
+  display: block;
+  width: 100%;
+  height: 40px;
+  margin: 20px 0 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  
+  background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+  background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
+  
+  border: 1px solid #888888;
+  padding: 5px 0;
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  cursor: pointer;
+}
+
+.row.headline button:hover {
+  border: 1px solid #444;
+}
+
+.row.headline button:active {
+  -webkit-box-shadow: 0 0 5px rgba(0,0,0,0.5) inset;
+  -moz-box-shadow: 0 0 5px rgba(0,0,0,0.5) inset;
+}
+
+#movie.c3 {
+  -moz-box-shadow: 0 5px 10px 0 #666;
+  -webkit-box-shadow: 0 5px 10px 0 #666;
+  position: relative;
+  overflow-x: hidden;
+}
+
+#movie.c3 .corner {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  display: block;
+  z-index: 1;
+}
+
+#movie.c3 .corner.tl {
+  top: 0;
+  left: 0;
+  background-image: url("i/cornerTopLeft.png");
+}
+
+#movie.c3 .corner.tr {
+  top: 0;
+  right: 0;
+  background-image: url("i/cornerTopRight.png");
+}
+
+/*
+#movie.c3 .corner.br {
+  bottom: 0;
+  right: 0;
+  background-image: url("i/cornerBottomRight.png");
+}
+
+#movie.c3 .corner.bl {
+  bottom: 0;
+  left: 0;
+  background-image: url("i/cornerBottomLeft.png");
+}
+*/
+
+#movie.c3 iframe {
+  float: left;
+  z-index: 0;
+  position: relative;
+}
+
+#tagline.c3 {
+  padding: 10px 0;
+  border-width: 0 0 1px 0;
+  border-color: #e6e6e6;
+  border-style: solid;
+  font-style: italic;
+  font-size: 16px;
+  color: #00A0FF;
+}
+
+#tagline.c3 span.watch {
+  color: #888;
+  font-size: 12px;
+  float: right;
+  font-style: normal
+}
+
+.description {
+  font-size: 12px;
+  color: #666;
+}
+
+.description h1,
+.description h2 {
+  font-size: 14px;
+  color: #0a0a0a;
+}
+
+.description h3 {
+  color:#00A0FF;
+  margin-top:10px;
+  font-size: 12px;
+}
+
+.description.steps {
+  margin-top: 14px
+}
+
+.description.steps img {
+  margin-top: 7px;
+}
+
+.description.steps span.step {
+  color: #fff;
+  background-color: orange;
+  width: 21px;
+  font-family: monospace;
+  -moz-border-radius: 12px;
+  -webkit-border-radius: 12px;
+  display: inline-block;
+  text-align: center;
+  margin-right: 5px;
+}
+
+#footer.row {
+  font-size: 10px;
+  color: #888;
+}
+
+#footer .c3 {
+  border-top: 1px solid #e6e6e6;
+  padding: 10px 0 0 0;
+}
+
+#installFrame {
+    display: none;
+}

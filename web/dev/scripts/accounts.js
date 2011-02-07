@@ -105,6 +105,12 @@ function (storage,   dispatch,   rdapi) {
 
         changed: function () {
           store.accountChanged = (new Date()).getTime();
+          //Force the onchange events to occur. Sometimes the storage
+          //events do not fire?
+          if (opener && !opener.closed) {
+            dispatch.pub('accountsChanged', null, opener);
+          }
+          dispatch.pub('accountsChanged');
         },
 
         onChange: function (action) {
@@ -121,6 +127,8 @@ function (storage,   dispatch,   rdapi) {
         
         config: function(options) {
           impl.options = options;
+          //Also use direct notification in case storage events fail.
+          dispatch.sub('accountsChanged', action);
         }
       },
       //Some extensions mess with localStorage, so in that case, fall back to

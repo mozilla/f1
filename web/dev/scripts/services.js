@@ -220,14 +220,14 @@ function (rdapi,   object,         TextCounter) {
         },
         shareTypes: [{
           type: 'public',
-          name: 'public'
+          name: 'anyone'
         }, {
           type: 'myConnections',
-          name: 'my connections',
+          name: 'connections only',
           specialTo: 'connections-only'
         }, {
           type: 'contact',
-          name: 'my contacts',
+          name: 'send message',
           showTo: true,
           toLabel: 'type in the name of the contact'
         }],
@@ -236,6 +236,9 @@ function (rdapi,   object,         TextCounter) {
         signOutUrl: 'http://linkedin.com/logout',
         accountLink: function (account) {
           return 'http://linkedin.com/' + account.username;
+        },
+        overlays: {
+          'widgets/AccountPanel': 'widgets/AccountPanelLinkedIn'
         }
       })
     },

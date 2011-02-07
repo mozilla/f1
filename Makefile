@@ -1,4 +1,4 @@
-version := 0.1.7
+version := 0.1.8
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
@@ -68,8 +68,9 @@ $(static_dir):
 	cd $(static_dir) && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/settings && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/share && $(requirejs_dir)/build/build.sh build.js
-	cd $(static_dir)/play/designs/popup && $(requirejs_dir)/build/build.sh build.js
+	cd $(static_dir)/share/panel && $(requirejs_dir)/build/build.sh build.js
 
+	cd $(static_dir)/.. && ln -n -f -s $(version) current
 clean:
 	rm -rf $(objdir)
 	rm -rf $(static_dir)
