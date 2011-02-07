@@ -532,19 +532,23 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     hide: function () {
-      this.panel.hidePopup();
-      this.visible = false;
-      // Always ensure the button is unchecked when the panel is hidden
-      getButton().removeAttribute("checked");
+      if (this.panel) {
+        this.panel.hidePopup();
+        this.visible = false;
+        // Always ensure the button is unchecked when the panel is hidden
+        getButton().removeAttribute("checked");
+      }
     },
 
     close: function () {
-      this.hide();
-      this.unregisterListener();
-      this.panel.removeEventListener('popuphidden', this.panelHideListener, false);
-      this.panel.parentNode.removeChild(this.panel);
-      this.panel = null;
-      this.tab.ffshareTabFrame = null;
+      if (this.panel) {
+        this.hide();
+        this.unregisterListener();
+        this.panel.removeEventListener('popuphidden', this.panelHideListener, false);
+        this.panel.parentNode.removeChild(this.panel);
+        this.panel = null;
+        this.tab.ffshareTabFrame = null;
+      }
     },
 
     createShareFrame: function (options) {
@@ -721,7 +725,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @param {Object} data info about the share.
      */
     success: function (data) {
-      this.hide();
+      this.close();
 
       if (ffshare.prefs.bookmarking) {
         var tags = ['shared', 'f1'];
