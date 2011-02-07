@@ -1066,19 +1066,29 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ffshare.prefs.previous_version = version;
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".previous_version", version);
 
-      // Place the button in the toolbar.
+      // Place the button in the toolbar, before the URL bar.
       try {
-        //Not needed since we add to the end.
-        //var afterId = "urlbar-container";   // ID of element to insert after
+        var beforeId = "urlbar-container";   // ID of element to insert before
+
         var navBar  = document.getElementById("nav-bar"),
-            curSet  = navBar.currentSet.split(","), set;
+            curSet  = navBar.currentSet.split(","),
+            set, pos;
+
+        //TODO: REMOVE this at some point. 0.7.x versions of the extension
+        //added the button to the end of the list, and this list is not updated
+        //on uninstall. So for now remove the buttonId from the end of the list.
+        //This could be frustrating for users how explicitly move it to the end
+        //for for at least the first 0.8.x release, do this so that most people
+        //get the new position, then remove this line in the next release.
+        if (curSet[curSet.length - 1] === buttonId) {
+          curSet.pop();
+        }
 
         if (curSet.indexOf(buttonId) === -1) {
-          //The next two lines place it between url and search bars.
-          //pos = curSet.indexOf(afterId) + 1 || curSet.length;
-          //var set = curSet.slice(0, pos).concat(buttonId).concat(curSet.slice(pos));
-          //Add it to the end of the toolbar.
-          set = curSet.concat(buttonId).join(",");
+          //Insert our ID before the URL bar ID.
+          pos = curSet.indexOf(beforeId) || curSet.length;
+          curSet.splice(pos, 0, buttonId);
+          set = curSet.join(",");
 
           navBar.setAttribute("currentset", set);
           navBar.currentSet = set;
@@ -1186,7 +1196,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                   // Focus *this* browser-window
                   browserWin.focus();
 
-                  var buttonNode = browserWin.document.getElementById(buttonId);
+                  buttonNode = browserWin.document.getElementById(buttonId);
                   //Button may not be there if customized and removed from toolbar.
                   if (buttonNode) {
                     buttonNode.setAttribute("firstRun", "true");
@@ -1207,7 +1217,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           if (recentWindow) {
             // If our window is opened and ready just open the tab
             //   possible values: (loading, complete, or uninitialized)
-            if (recentWindow.document.readyState == "complete") {
+            if (recentWindow.document.readyState === "complete") {
               sendJustInstalledEvent(recentWindow, url);
             } else {
               // Otherwise the window, while existing, might not be ready yet so we wait to open our tab
