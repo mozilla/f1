@@ -303,6 +303,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     //Create ellipsis for anything wanting ... overflow
     $(".overflow").textOverflow(null, true);
+
+    //Inform extension the content size has changed.
+    dispatch.pub('sizeToContent');
   }
 
   function updateAccounts(accounts) {
@@ -336,9 +339,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       services.domainList.forEach(function (domain) {
         delete store[services.domains[domain].type + 'Contacts'];
       });
+
+      dispatch.pub('sizeToContent');
     }
 
-    dispatch.pub('sizeToContent');
   }
 
   //For the "new items" link, only show it for x number of days after showing it.
