@@ -1312,8 +1312,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     isValidURI: function (aURI) {
-      //Only open the share frame for http/https urls, file urls for testing.
-      return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') || aURI.schemeIs('file')));
+      //Only open the share frame for http/https/ftp urls, file urls for testing.
+      return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') ||
+                       aURI.schemeIs('file') || aURI.schemeIs('ftp')));
     },
 
     canShareURI: function (aURI) {
