@@ -1145,6 +1145,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.initKeyCode();
 
       Services.prefs.addObserver("extensions." + FFSHARE_EXT_ID + ".", this, false);
+
+      //Events triggered by TabView (panorama)
+      this.tabViewShowListener = fn.bind(this, ffshare.onTabViewShow);
+      this.tabViewHideListener = fn.bind(this, ffshare.onTabViewHide);
+      window.addEventListener('tabviewshow', this.tabViewShowListener, false);
+      window.addEventListener('tabviewhide', this.tabViewHideListener, false);
     },
 
     onUnload: function () {
@@ -1162,6 +1168,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
 
       Services.prefs.removeObserver("extensions." + FFSHARE_EXT_ID + ".", this);
+
+      //Events triggered by TabView (panorama)
+      window.removeEventListener('tabviewshow', this.tabViewShowListener, false);
+      window.removeEventListener('tabviewhide', this.tabViewHideListener, false);
+      this.tabViewShowListener = null;
+      this.tabViewHideListener = null;
     },
 
     onFirstRun: function () {
@@ -1358,8 +1370,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         if (this.currentTabFrame !== tabFrame) {
           this.currentTabFrame.hide();
           this.currentTabFrame = null;
-        } else
-        if (gBrowser.currentURI.spec !== tabFrame.options.url) {
+        } else if (gBrowser.currentURI.spec !== tabFrame.options.url) {
           this.currentTabFrame.close();
           this.currentTabFrame = null;
           return;
@@ -1373,6 +1384,22 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
     },
 
+    onTabViewShow: function (e) {
+      // Triggered by TabView (panorama). Always hide it if being shown.
+      if (this.currentTabFrame) {
+        this.currentTabFrame.hide();
+        this.currentTabFrame = null;
+      }
+    },
+
+    onTabViewHide: function (e) {
+      // Triggered by TabView (panorama). Restore share panel if needed.
+      // Hmm this never seems to be called? browser-tabview.js shows
+      // creation of a 'tabviewhide' event, but this function does
+      // not seem to be called.
+      this.switchTab();
+    },
+
     onOpenShareCommand: function (e) {
       this.toggle();
     },
@@ -1382,13 +1409,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           tabFrame = selectedTab.ffshareTabFrame;
       if (!tabFrame) {
         tabFrame = new TabFrame(selectedTab);
-        this.currentTabFrame = tabFrame;
       }
       if (tabFrame.visible) {
         tabFrame.close();
         this.currentTabFrame = null;
       } else {
         tabFrame.show(options);
+        this.currentTabFrame = tabFrame;
       }
     }
   };
