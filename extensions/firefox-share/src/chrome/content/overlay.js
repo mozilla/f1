@@ -450,14 +450,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   }
   var lastWidth = defaultWidth;
   var lastHeight = defaultHeight;
-
-  var TabFrame = function (tab) {
+  
+  var uiBase = function (tab) {
     tab.ffshareTabFrame = this;
     this.tab = tab;
     this.visible = false;
   };
 
-  TabFrame.prototype = {
+  uiBase.prototype = {
 
     registerListener: function () {
       Services.obs.addObserver(this, 'content-document-global-created', false);
@@ -482,6 +482,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     observe: function (aSubject, aTopic, aData) {
       if (!aSubject.location.href) {
+        dump("i has no location!\n");
+
         return;
       }
 
@@ -492,12 +494,19 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                      .rootTreeItem
                      .QueryInterface(Ci.nsIInterfaceRequestor)
                      .getInterface(Ci.nsIDOMWindow);
-      if (mainWindow.wrappedJSObject !== this.panel.ownerDocument.defaultView) {
+      if (mainWindow.wrappedJSObject && mainWindow.wrappedJSObject !== this.panel.ownerDocument.defaultView) {
+        dump("is not me! win: "+mainWindow+" "+mainWindow.wrappedJSObject+" != "+this.panel.ownerDocument.defaultView+"\n");
+        return;
+      } else
+      if (mainWindow !== this.panel.ownerDocument.defaultView) {
+        dump("Still is not me!\n");
         return;
       }
 
       // listen for messages now
-      this.shareFrame.contentWindow.wrappedJSObject.addEventListener("message", fn.bind(this, function (evt) {
+      var contentWindow = this.shareFrame.contentWindow;
+      contentWindow = contentWindow.wrappedJSObject ? contentWindow.wrappedJSObject : contentWindow;
+      contentWindow.addEventListener("message", fn.bind(this, function (evt) {
         //Make sure we only act on messages from the page we expect.
         if (ffshare.prefs.share_url.indexOf(evt.origin) === 0) {
           //Mesages have the following properties:
@@ -533,34 +542,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + "." + pref.name, pref.value);
     },
 
-    hide: function () {
-      if (this.panel) {
-        this.panel.hidePopup();
-        this.visible = false;
-        // Always ensure the button is unchecked when the panel is hidden
-        getButton().removeAttribute("checked");
-      }
-    },
-
-    close: function () {
-      if (this.panel) {
-        this.hide();
-        this.unregisterListener();
-        this.panel.removeEventListener('popuphidden', this.panelHideListener, false);
-        this.panel.parentNode.removeChild(this.panel);
-        this.panel = null;
-        this.tab.ffshareTabFrame = null;
-      }
-    },
-
-    createShareFrame: function (options) {
+    getOptions: function(options) {
       options = options || this.options || {};
-
-      var browser = gBrowser.getBrowserForTab(this.tab), url,
-          notificationBox = gBrowser.getNotificationBox(browser),
-          panel = document.createElement('panel'),
-          browserNode = document.createElement('browser');
-
       mixin(options, {
         version: ffshare.version,
         title: this.getPageTitle(),
@@ -577,149 +560,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           use_accel_key: ffshare.prefs.use_accel_key
         }
       });
-      this.options = options;
-
-      this.panel = panel;
-
-      //Add cleanup listener
-      this.panelHideListener = fn.bind(this, function (evt) {
-        this.visible = false;
-      });
-
-      panel.addEventListener('popuphidden', this.panelHideListener, false);
-
-      //Add cleanup listener
-      this.panelShownListener = fn.bind(this, function (evt) {
-        this.panel.removeEventListener('popupshown', this.panelHideListener, false);
-        this.visible = true;
-      });
-
-      panel.addEventListener('popupshown', this.panelShownListener, false);
-      if (majorVer < 4) {
-        panel.style.width = lastWidth + 'px';
-        panel.style.height = lastHeight + 'px';
-      }
-
-      url = ffshare.prefs.share_url +
-                '#options=' + encodeURIComponent(JSON.stringify(options));
-
-      setAttrs(panel, {
-        type: 'arrow',
-        level: 'parent',
-        noautohide: 'true',
-        'class' : 'ffshare-panel'
-      });
-
-      setAttrs(browserNode, {
-        type: 'content',
-        flex: '1',
-        src: 'about:blank',
-        autocompletepopup: 'PopupAutoCompleteRichResult',
-        contextmenu: 'contentAreaContextMenu',
-        'disablehistory': true,
-        'class' : 'ffshare-browser'
-      });
-
-      panel.appendChild(browserNode);
-      document.getElementById('mainPopupSet').appendChild(panel);
-
-      // hookup esc to also close the panel
-      panel.addEventListener('keypress', fn.bind(this, function (e) {
-        if (e.keyCode === 27 /*"VK_ESC"*/) {
-          this.close();
-        }
-      }), false);
-
-      this.shareFrame = browserNode;
-      if (majorVer >= 4) {
-        browserNode.style.width = lastWidth + 'px';
-        browserNode.style.height = lastHeight + 'px';
-      }
-
-      this.shareFrame.addEventListener("load", fn.bind(this, function (evt) {
-        var self = this;
-        window.setTimeout(function () {
-          self.sizeToContent();
-        }, 0);
-      }), true);
-
-      //Make sure it can go all the way to zero.
-      browserNode.style.minHeight = 0;
-
-      this.registerListener();
-
-      browserNode.setAttribute('src', url);
-    },
-
-    sizeToContent: function () {
-      var doc = this.shareFrame.contentDocument.wrappedJSObject;
-      var wrapper = doc && doc.getElementById('wrapper');
-      if (!wrapper) {
-        return;
-      }
-      // XXX argh, we really should look at the panel and see what margins/padding
-      // sizes are and calculate that way, however this is pretty complex due
-      // to how the background image of the panel is used,
-      //dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
-      var h = lastWidth > defaultHeight ? lastWidth: defaultHeight;
-      if (majorVer >= 4) {
-        lastWidth = wrapper.scrollWidth;
-        lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight : h;
-        this.shareFrame.style.width = lastWidth + "px";
-        this.shareFrame.style.height = lastHeight + "px";
-      } else {
-        lastWidth = wrapper.scrollWidth + panelWidthMargin;
-        lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight + panelHeightMargin : h;
-        this.panel.sizeTo(lastWidth, lastHeight);
-      }
-    },
-
-    show: function (options) {
-      var tabURI = gBrowser.getBrowserForTab(this.tab).currentURI,
-          tabUrl = tabURI.spec;
-
-      if (!ffshare.isValidURI(tabURI)) {
-        return;
-      }
-
-      if (!this.panel) {
-        this.createShareFrame(options);
-      }
-
-      var button = getButton();
-      // Always ensure the button is checked if the panel is open
-      button.setAttribute("checked", true);
-
-      // Always ensure we aren't glowing if the person clicks on the button
-      button.removeAttribute("firstRun");
-
-      // fx 4
-      if (majorVer >= 4) {
-        var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
-        this.panel.openPopup(button, position, 0, 0, false, false);
-      } else {
-        // fx 3 doorhanger support
-        // if the button is to the right of th url bar, use ltr, otherwise rtl
-        this.panel.firstChild.setAttribute('class', 'ffshare-browser doorhanger-inner');
-        var navbar = document.getElementById('nav-bar');
-        var urlbar = document.getElementById('urlbar-container');
-        var first = null;
-        for (var c = 0; c < navbar.childNodes.length; c++) {
-          if (navbar.childNodes[c] === urlbar || navbar.childNodes[c] === button) {
-            first = navbar.childNodes[c];
-            break;
-          }
-        }
-        if (first === button) {
-          this.panel.setAttribute('class', 'ffshare-panel doorhanger-rtl');
-          this.panel.showPopup(button, -1, -1, 'popup', 'bottomleft', 'topleft');
-        } else {
-          this.panel.setAttribute('class', 'ffshare-panel doorhanger-ltr');
-          this.panel.showPopup(button, -1, -1, 'popup', 'bottomright', 'topright');
-        }
-      }
-
-      this.visible = true;
+      return this.options = options;
     },
 
     /**
@@ -1007,6 +848,228 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ffshareAutoCompleteData.set(data);
     }
   };
+
+  var PanelUI = function (tab) {
+    uiBase.apply(this, [tab]);
+  };
+  PanelUI.prototype = {
+    __proto__: uiBase.prototype,
+
+    hide: function () {
+      if (!this.panel) return;
+      this.panel.hidePopup();
+      this.visible = false;
+      // Always ensure the button is unchecked when the panel is hidden
+      getButton().removeAttribute("checked");
+    },
+
+    close: function () {
+      if (!this.panel) return;
+      this.hide();
+      this.unregisterListener();
+      this.panel.removeEventListener('popuphidden', this.panelHideListener, false);
+      this.panel.parentNode.removeChild(this.panel);
+      this.panel = null;
+      this.tab.ffshareTabFrame = null;
+    },
+
+    createShareFrame: function (options) {
+      options = this.getOptions(options);
+
+      var browser = gBrowser.getBrowserForTab(this.tab), url,
+          notificationBox = gBrowser.getNotificationBox(browser),
+          panel = document.createElement('panel'),
+          browserNode = document.createElement('browser');
+
+      this.panel = panel;
+
+      //Add cleanup listener
+      this.panelHideListener = fn.bind(this, function (evt) {
+        this.visible = false;
+      });
+
+      panel.addEventListener('popuphidden', this.panelHideListener, false);
+
+      //Add cleanup listener
+      this.panelShownListener = fn.bind(this, function (evt) {
+        this.panel.removeEventListener('popupshown', this.panelHideListener, false);
+        this.visible = true;
+      });
+
+      panel.addEventListener('popupshown', this.panelShownListener, false);
+
+      url = ffshare.prefs.share_url +
+                '#options=' + encodeURIComponent(JSON.stringify(options));
+
+      setAttrs(panel, {
+        type: 'arrow',
+        level: 'parent',
+        noautohide: 'true',
+        'class' : 'ffshare-panel'
+      });
+
+      setAttrs(browserNode, {
+        type: 'content',
+        flex: '1',
+        src: 'about:blank',
+        autocompletepopup: 'PopupAutoCompleteRichResult',
+        contextmenu: 'contentAreaContextMenu',
+        'disablehistory': true,
+        'class' : 'ffshare-browser'
+      });
+
+      panel.appendChild(browserNode);
+      document.getElementById('mainPopupSet').appendChild(panel);
+
+      // hookup esc to also close the panel
+      panel.addEventListener('keypress', fn.bind(this, function (e) {
+        if (e.keyCode === 27 /*"VK_ESC"*/) {
+          this.close();
+        }
+      }), false);
+
+      this.shareFrame = browserNode;
+      browserNode.style.width = lastWidth + 'px';
+      browserNode.style.height = lastHeight + 'px';
+
+      this.shareFrame.addEventListener("load", fn.bind(this, function (evt) {
+        var self = this;
+        window.setTimeout(function () {
+          self.sizeToContent();
+        }, 0);
+      }), true);
+
+      //Make sure it can go all the way to zero.
+      browserNode.style.minHeight = 0;
+
+      this.registerListener();
+
+      browserNode.setAttribute('src', url);
+      //browserNode.loadURI(url);
+    },
+
+    sizeToContent: function () {
+      var doc = this.shareFrame.contentDocument.wrappedJSObject;
+      var wrapper = doc && doc.getElementById('wrapper');
+      if (!wrapper) {
+        return;
+      }
+      // XXX argh, we really should look at the panel and see what margins/padding
+      // sizes are and calculate that way, however this is pretty complex due
+      // to how the background image of the panel is used,
+      //dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
+      var h = lastWidth > defaultHeight ? lastWidth: defaultHeight;
+      lastWidth = wrapper.scrollWidth;
+      lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight : h;
+      this.shareFrame.style.width = lastWidth + "px";
+      this.shareFrame.style.height = lastHeight + "px";
+    },
+
+    show: function (options) {
+      var tabURI = gBrowser.getBrowserForTab(this.tab).currentURI,
+          tabUrl = tabURI.spec;
+
+      if (!ffshare.isValidURI(tabURI)) {
+        return;
+      }
+
+      if (!this.panel) {
+        this.createShareFrame(options);
+      }
+
+      var button = getButton();
+      // Always ensure the button is checked if the panel is open
+      button.setAttribute("checked", true);
+
+      // Always ensure we aren't glowing if the person clicks on the button
+      button.removeAttribute("firstRun");
+
+      // fx 4
+      var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
+      this.panel.openPopup(button, position, 0, 0, false, false);
+
+      this.visible = true;
+    }
+    
+  }; // PanelUI
+
+
+  var TabbedUI = function (tab) {
+    uiBase.apply(this, [tab]);
+  };
+  TabbedUI.prototype = {
+    __proto__: uiBase.prototype,
+
+    get visible() {
+      return document.getElementById('viewShareSidebar').getAttribute('checked');
+    },
+    
+    set visible(val) {
+      document.getElementById('viewShareSidebar').setAttribute('checked', val);
+    },
+    
+    hide: function () {
+      // hide the browser
+      toggleSidebar('viewShareSidebar');
+    },
+
+    close: function () {
+      this.hide();
+      this.unregisterListener();
+      //this.tab.ffshareTabFrame = null;
+      var sidebarWindow = document.getElementById('sidebar');
+      sidebarWindow.contentWindow.location.href = 'about:blank';
+    },
+
+    createShareFrame: function (options) {
+      options = this.getOptions(options);
+
+      var browser = gBrowser.getBrowserForTab(this.tab), url,
+          sidebarWindow = document.getElementById('sidebar');
+
+      url = ffshare.prefs.share_url +
+                '#options=' + encodeURIComponent(JSON.stringify(options));
+
+      setAttrs(sidebarWindow, {
+        type: 'content',
+        flex: '1',
+        src: 'about:blank',
+        autocompletepopup: 'PopupAutoCompleteRichResult',
+        contextmenu: 'contentAreaContextMenu',
+        'disablehistory': true,
+        'class' : 'ffshare-browser ffshare-tabbed'
+      });
+
+      this.panel = this.shareFrame = sidebarWindow;
+
+      this.registerListener();
+      sidebarWindow.contentWindow.location.href = url;
+    },
+
+    sizeToContent: function () {
+
+    },
+
+    show: function (options) {
+      var tabURI = gBrowser.getBrowserForTab(this.tab).currentURI,
+          tabUrl = tabURI.spec;
+
+      if (!ffshare.isValidURI(tabURI)) {
+        return;
+      }
+
+      this.createShareFrame(options);
+
+      var button = getButton();
+
+      // Always ensure we aren't glowing if the person clicks on the button
+      button.removeAttribute("firstRun");
+
+      // make certain the browser is visible
+      toggleSidebar('viewShareSidebar');
+    }
+    
+  }; // TabbedUI
 
   function sendJustInstalledEvent(win, url) {
     var buttonNode = win.document.getElementById(buttonId);
@@ -1408,7 +1471,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
       if (!tabFrame) {
-        tabFrame = new TabFrame(selectedTab);
+        if (majorVer >= 4) {
+          tabFrame = new PanelUI(selectedTab);
+        } else {
+          tabFrame = new TabbedUI(selectedTab);
+        }
+        this.currentTabFrame = tabFrame;
       }
       if (tabFrame.visible) {
         tabFrame.close();

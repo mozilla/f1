@@ -59,6 +59,12 @@
   height: 100%;
 }
 
+.ffshare-tabbed {
+  position: relative;
+  top: 0;
+  left: 0;
+  float: left;
+}
 /* Popup Bounding Box */
 
 .doorhanger-rtl {
