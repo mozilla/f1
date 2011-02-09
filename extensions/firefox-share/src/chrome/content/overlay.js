@@ -851,6 +851,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   var PanelUI = function (tab) {
     uiBase.apply(this, [tab]);
+    this.autohide = true;
   };
   PanelUI.prototype = {
     __proto__: uiBase.prototype,
@@ -996,6 +997,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   var TabbedUI = function (tab) {
     uiBase.apply(this, [tab]);
+    this.autohide = false;
   };
   TabbedUI.prototype = {
     __proto__: uiBase.prototype,
@@ -1066,7 +1068,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       button.removeAttribute("firstRun");
 
       // make certain the browser is visible
-      toggleSidebar('viewShareSidebar');
+      if (!this.visible)
+        toggleSidebar('viewShareSidebar');
     }
     
   }; // TabbedUI
@@ -1425,18 +1428,33 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         document.getElementById("context-selected-ffshare-separator").hidden = hideSelected;
       } catch (ignore) { }
     },
+    
+    createTab: function() {
+      var selectedTab = gBrowser.selectedTab;
+      if (majorVer >= 4) {
+        tabFrame = new PanelUI(selectedTab);
+      } else {
+        tabFrame = new TabbedUI(selectedTab);
+      }
+      return tabFrame;
+    },
 
     switchTab: function () {
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
       if (this.currentTabFrame) {
-        if (this.currentTabFrame !== tabFrame) {
-          this.currentTabFrame.hide();
-          this.currentTabFrame = null;
-        } else if (gBrowser.currentURI.spec !== tabFrame.options.url) {
-          this.currentTabFrame.close();
-          this.currentTabFrame = null;
-          return;
+        if (this.currentTabFrame.autohide) {
+          if (this.currentTabFrame !== tabFrame) {
+            this.currentTabFrame.hide();
+            this.currentTabFrame = null;
+          } else if (gBrowser.currentURI.spec !== tabFrame.options.url) {
+            this.currentTabFrame.close();
+            this.currentTabFrame = null;
+            return;
+          }
+        } else
+        if (this.currentTabFrame.visible && !tabFrame) {
+          tabFrame = this.createTab();
         }
       }
       if (tabFrame) {
@@ -1471,12 +1489,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
       if (!tabFrame) {
-        if (majorVer >= 4) {
-          tabFrame = new PanelUI(selectedTab);
-        } else {
-          tabFrame = new TabbedUI(selectedTab);
-        }
-        this.currentTabFrame = tabFrame;
+        this.currentTabFrame = tabFrame = this.createTab();
       }
       if (tabFrame.visible) {
         tabFrame.close();
