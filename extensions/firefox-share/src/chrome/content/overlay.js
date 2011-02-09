@@ -450,7 +450,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   }
   var lastWidth = defaultWidth;
   var lastHeight = defaultHeight;
-  
+
   var uiBase = function (tab) {
     tab.ffshareTabFrame = this;
     this.tab = tab;
@@ -991,7 +991,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       this.visible = true;
     }
-    
+
   }; // PanelUI
 
 
@@ -1005,11 +1005,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     get visible() {
       return document.getElementById('viewShareSidebar').getAttribute('checked');
     },
-    
+
     set visible(val) {
       document.getElementById('viewShareSidebar').setAttribute('checked', val);
     },
-    
+
     hide: function () {
       // hide the browser
       toggleSidebar('viewShareSidebar');
@@ -1093,7 +1093,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       button.removeAttribute("firstRun");
 
     }
-    
+
   }; // TabbedUI
 
   function sendJustInstalledEvent(win, url) {
@@ -1450,9 +1450,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         document.getElementById("context-selected-ffshare-separator").hidden = hideSelected;
       } catch (ignore) { }
     },
-    
+
     createTab: function() {
-      var selectedTab = gBrowser.selectedTab;
+      var selectedTab = gBrowser.selectedTab,
+          tabFrame;
       if (majorVer >= 4) {
         tabFrame = new PanelUI(selectedTab);
       } else {
