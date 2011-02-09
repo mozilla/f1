@@ -998,21 +998,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   var TabbedUI = function (tab) {
     uiBase.apply(this, [tab]);
     this.autohide = false;
+    this.visible = false;
   };
   TabbedUI.prototype = {
     __proto__: uiBase.prototype,
-
-    get visible() {
-      return document.getElementById('viewShareSidebar').getAttribute('checked');
-    },
-    
-    set visible(val) {
-      document.getElementById('viewShareSidebar').setAttribute('checked', val);
-    },
     
     hide: function () {
       // hide the browser
       toggleSidebar('viewShareSidebar');
+      this.visible = false;
     },
     
     get browser() {
@@ -1067,6 +1061,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         'disablehistory': true,
         'class' : 'ffshare-browser ffshare-tabbed'
       });
+      this.visible = true;
     },
 
     sizeToContent: function () {
@@ -1081,9 +1076,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       // make certain the browser is visible
-      if (!this.visible) {
-        toggleSidebar('viewShareSidebar');
-      }
+      toggleSidebar('viewShareSidebar', true);
 
       this.createShareFrame();
 
@@ -1239,6 +1232,19 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.tabViewHideListener = fn.bind(this, ffshare.onTabViewHide);
       window.addEventListener('tabviewshow', this.tabViewShowListener, false);
       window.addEventListener('tabviewhide', this.tabViewHideListener, false);
+      
+      // fx3, if our sidebar is loaded, be sure to initialize
+      if (majorVer < 4) {
+        var sidebarWindow = document.getElementById("sidebar").contentWindow;
+        var visible = sidebarWindow.location.href == "chrome://ffshare/content/sidebar.xul";
+        document.getElementById('viewShareSidebar').setAttribute('checked', visible);
+        if (visible) {
+          let self=this;
+          window.setTimeout(function () {
+            self.switchTab();
+          }, 0)
+        }
+      }
     },
 
     onUnload: function () {
@@ -1464,20 +1470,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     switchTab: function () {
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
-      if (this.currentTabFrame) {
-        if (this.currentTabFrame.autohide) {
-          if (this.currentTabFrame !== tabFrame) {
-            this.currentTabFrame.hide();
-            this.currentTabFrame = null;
-          } else if (gBrowser.currentURI.spec !== tabFrame.options.url) {
-            this.currentTabFrame.close();
-            this.currentTabFrame = null;
-            return;
-          }
-        } else
-        if (!tabFrame) {
-          tabFrame = this.createTab();
+      var sidebarWindow = document.getElementById("sidebar").contentWindow;
+      var visible = sidebarWindow.location.href == "chrome://ffshare/content/sidebar.xul";
+      if (this.currentTabFrame && this.currentTabFrame.autohide) {
+        if (this.currentTabFrame !== tabFrame) {
+          this.currentTabFrame.hide();
+          this.currentTabFrame = null;
+        } else if (gBrowser.currentURI.spec !== tabFrame.options.url) {
+          this.currentTabFrame.close();
+          this.currentTabFrame = null;
+          return;
         }
+      }
+      if (visible && !tabFrame) {
+        tabFrame = this.createTab();
       }
       if (tabFrame) {
         window.setTimeout(function () {
