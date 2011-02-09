@@ -27,10 +27,10 @@
 
 define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./AccountPanel.html',
          'TextCounter', 'storage', 'module', 'placeholder', 'dispatch',
-         'AutoComplete', 'rdapi', 'blade/fn'],
+         'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs'],
 function (object,         Widget,         $,        template,
           TextCounter,   storage,   module,   placeholder,   dispatch,
-          AutoComplete,   rdapi,   fn) {
+          AutoComplete,   rdapi,   fn,         jigFuncs) {
 
   var store = storage(),
       className = module.id.replace(/\//g, '-');
@@ -110,6 +110,23 @@ function (object,         Widget,         $,        template,
         }
 
         this.displayName = name;
+
+        //Listen for options changes and update the account.
+        this.optionsChangedSub = dispatch.sub('optionsChanged', fn.bind(this, function (options) {
+          this.options = options;
+          this.optionsChanged();
+        }));
+
+        //Listen for updates to base63Preview
+        this.base64PreviewSub = dispatch.sub('base64Preview', function (dataUrl) {
+          $('[name="picture_base64"]', this.bodyNode).val(jigFuncs.rawBase64(dataUrl));
+        });
+      },
+
+      destroy: function () {
+        dispatch.unsub(this.optionsChangedSub);
+        dispatch.unsub(this.base64PreviewSub);
+        parent(this, 'destroy');
       },
 
       onRender: function () {
@@ -159,6 +176,23 @@ function (object,         Widget,         $,        template,
         this.counter.updateLimit(this.options.shortUrl ?
                                  (this.svc.textLimit - (this.options.shortUrl.length + 1)) :
                                  this.svc.textLimit - this.urlSize);
+      },
+
+      //The page options have changed, update the relevant HTML bits.
+      optionsChanged: function () {
+        var root = $(this.bodyNode),
+            opts = this.options;
+
+        root.find('[name="picture"]').val(jigFuncs.preview(opts));
+        root.find('[name="picture_base64"]').val(jigFuncs.preview_base64(opts));
+        root.find('[name="link"]').val(jigFuncs.link(opts));
+        root.find('[name="title"]').val(opts.title);
+        root.find('[name="caption"]').val(opts.caption);
+        root.find('[name="description"]').val(opts.description);
+
+        root.find('[name="to"]').val(opts.to);
+        root.find('[name="subject"]').val(opts.subject);
+        root.find('[name="message"]').val(opts.message);
       },
 
       getFormData: function () {
