@@ -78,6 +78,7 @@ OAuth authorization api.
                 for a in accts:
                     session[a.key] = a.to_dict()
             except:
+                log.exception('failed to signout from domain %s', domain)
                 session.clear()
         else:
             session.clear()
@@ -136,8 +137,7 @@ OAuth authorization api.
         except AccessException, e:
             self._redirectException(e)
         except Exception, e:
-            import traceback
-            traceback.print_exc()
+            log.exception('failed to verify the account')
             self._redirectException(e)
         return redirect(session.get('end_point_success', config.get('oauth_success')))
 

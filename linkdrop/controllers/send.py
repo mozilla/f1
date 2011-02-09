@@ -162,8 +162,8 @@ Site provided description of the shared item, not supported by all services.
         try:
             result, error = provider.api(acct).sendmessage(message, args)
         except ValueError, e:
-            import traceback
-            traceback.print_exc()
+            # XXX - I doubt we really want a full exception logged here?
+            log.exception('error providing item to %s: %s', domain, e)
             # XXX we need to handle this better, but if for some reason the
             # oauth values are bad we will get a ValueError raised
             error = {'provider': domain,
