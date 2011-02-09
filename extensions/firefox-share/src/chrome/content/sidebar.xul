@@ -5,8 +5,5 @@
 
 <page id="shareSidebar" title="&sharesidebar.title;"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
-  <vbox flex="1">
-    <label id="sharetitle" value="&sharesidebar.title;" />
-  </vbox>
-  <browser type="content" id="sharepanel"/>
+  <browser type="content" id="sharepanel" flex="1"/>
 </page>

@@ -90,13 +90,13 @@
                  autoCheck="false"
                  type="checkbox"
                  group="sidebar"
-                 sidebarurl="about:blank"
+                 sidebarurl="chrome://ffshare/content/sidebar.xul"
                  sidebartitle="&sharesidebar.title;"
                  oncommand="ffshare.onOpenShareCommand();" />
     <broadcaster id="cmd_openSharePage" 
                  label="&sharesidebar.title;"
                  group="sidebar"
-                 sidebarurl="about:blank"
+                 sidebarurl="chrome://ffshare/content/sidebar.xul"
                  sidebartitle="&sharesidebar.title;"
                  oncommand="ffshare.onOpenShareCommand();" />
   </broadcasterset>

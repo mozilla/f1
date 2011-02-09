@@ -455,11 +455,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     tab.ffshareTabFrame = this;
     this.tab = tab;
     this.visible = false;
+    this.registered = false;
   };
 
   uiBase.prototype = {
 
     registerListener: function () {
+      if (this.registered) return;
       Services.obs.addObserver(this, 'content-document-global-created', false);
 
       this.httpObserver = new HttpActivityObserver(this);
@@ -468,9 +470,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var shareFrameProgress = this.shareFrame.webProgress;
       this.stateProgressListener = new StateProgressListener(this);
       shareFrameProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
+      this.registered = true;
     },
 
     unregisterListener: function (listener) {
+      if (!this.registered) return;
       Services.obs.removeObserver(this, 'content-document-global-created');
 
       this.httpObserver.unregisterObserver();
@@ -478,12 +482,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var shareFrameProgress = this.shareFrame.webProgress;
       shareFrameProgress.removeProgressListener(this.stateProgressListener);
       this.stateProgressListener = null;
+      this.registered = false;
     },
 
     observe: function (aSubject, aTopic, aData) {
       if (!aSubject.location.href) {
-        dump("i has no location!\n");
-
         return;
       }
 
@@ -494,12 +497,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                      .rootTreeItem
                      .QueryInterface(Ci.nsIInterfaceRequestor)
                      .getInterface(Ci.nsIDOMWindow);
-      if (mainWindow.wrappedJSObject && mainWindow.wrappedJSObject !== this.panel.ownerDocument.defaultView) {
-        dump("is not me! win: "+mainWindow+" "+mainWindow.wrappedJSObject+" != "+this.panel.ownerDocument.defaultView+"\n");
-        return;
-      } else
+      mainWindow = mainWindow.wrappedJSObject ? mainWindow.wrappedJSObject : mainWindow;
       if (mainWindow !== this.panel.ownerDocument.defaultView) {
-        dump("Still is not me!\n");
         return;
       }
 
@@ -876,6 +875,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     createShareFrame: function (options) {
       options = this.getOptions(options);
+      options['ui'] = 'panel';
 
       var browser = gBrowser.getBrowserForTab(this.tab), url,
           notificationBox = gBrowser.getNotificationBox(browser),
@@ -1014,38 +1014,59 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // hide the browser
       toggleSidebar('viewShareSidebar');
     },
+    
+    get browser() {
+      var sidebarWindow = document.getElementById('sidebar');
+      return sidebarWindow.contentWindow.document.getElementById('sharepanel');
+    },
 
     close: function () {
       this.hide();
       this.unregisterListener();
       //this.tab.ffshareTabFrame = null;
-      var sidebarWindow = document.getElementById('sidebar');
-      sidebarWindow.contentWindow.location.href = 'about:blank';
+      //var sidebarWindow = document.getElementById('sidebar');
+      //sidebarWindow.contentWindow.location.href = 'about:blank';
     },
 
     createShareFrame: function (options) {
       options = this.getOptions(options);
+      options['ui'] = 'sidebar';
 
       var browser = gBrowser.getBrowserForTab(this.tab), url,
-          sidebarWindow = document.getElementById('sidebar');
+          panel = document.getElementById('sidebar');
+          browserNode = this.browser;
+      this.panel = panel;
+      if (!browserNode) {
+        // we have to wait for the sidebar to load, then we have to load
+        // our content browser
+        this.panelShownListener = fn.bind(this, function (evt) {
+          this.panel.removeEventListener('load', this.panelShownListener, true);
+          var self = this;
+          window.setTimeout(function () {
+            self.createShareFrame();
+          }, 0);
+        });
+        this.panel.addEventListener("load", this.panelShownListener, true);
+        return;
+      }
 
       url = ffshare.prefs.share_url +
                 '#options=' + encodeURIComponent(JSON.stringify(options));
 
-      setAttrs(sidebarWindow, {
+
+      this.panel = panel;
+      this.shareFrame = browserNode;
+      this.registerListener();
+
+      setAttrs(browserNode, {
         type: 'content',
         flex: '1',
-        src: 'about:blank',
+        src: url,
         autocompletepopup: 'PopupAutoCompleteRichResult',
         contextmenu: 'contentAreaContextMenu',
         'disablehistory': true,
         'class' : 'ffshare-browser ffshare-tabbed'
       });
-
-      this.panel = this.shareFrame = sidebarWindow;
-
-      this.registerListener();
-      sidebarWindow.contentWindow.location.href = url;
     },
 
     sizeToContent: function () {
@@ -1055,21 +1076,22 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     show: function (options) {
       var tabURI = gBrowser.getBrowserForTab(this.tab).currentURI,
           tabUrl = tabURI.spec;
-
       if (!ffshare.isValidURI(tabURI)) {
         return;
       }
 
-      this.createShareFrame(options);
+      // make certain the browser is visible
+      if (!this.visible) {
+        toggleSidebar('viewShareSidebar');
+      }
+
+      this.createShareFrame();
 
       var button = getButton();
 
       // Always ensure we aren't glowing if the person clicks on the button
       button.removeAttribute("firstRun");
 
-      // make certain the browser is visible
-      if (!this.visible)
-        toggleSidebar('viewShareSidebar');
     }
     
   }; // TabbedUI
@@ -1453,7 +1475,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
             return;
           }
         } else
-        if (this.currentTabFrame.visible && !tabFrame) {
+        if (!tabFrame) {
           tabFrame = this.createTab();
         }
       }
