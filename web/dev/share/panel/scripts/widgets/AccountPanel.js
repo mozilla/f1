@@ -252,6 +252,9 @@ function (object,         Widget,         $,        template,
         root.find('[name="to"]').val(opts.to);
         root.find('[name="subject"]').val(opts.subject);
         root.find('[name="message"]').val(opts.message);
+
+        //Kick the placeholder logic to recompute, to avoid gray text issues.
+        placeholder(this.bodyNode);
       },
 
       getFormData: function () {
