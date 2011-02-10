@@ -26,7 +26,7 @@
 "use strict";
 
 define([ 'blade/object', 'blade/Widget', 'blade/fn', 'jquery', 'dispatch',
-         './jigFuncs', 'text!./PageInfo.html'],
+         './jigFuncs', 'text!./PageInfo.html', 'jquery.textOverflow'],
 function (object,         Widget,         fn,      $,        dispatch,
           jigFuncs,     template) {
 
@@ -48,10 +48,13 @@ function (object,         Widget,         fn,      $,        dispatch,
             opts = this.options;
 
         root.find('.thumb').attr('src', jigFuncs.thumb(opts));
-        root.find('.title').text(opts.title);
+        root.find('.title').html(opts.title);
         root.find('.description').text(opts.description);
-        root.find('.url').text(jigFuncs.cleanLink(opts.url));
-        root.find('.shorturl').text(jigFuncs.cleanLink(opts.shortUrl));
+        root.find('.url').html(jigFuncs.cleanLink(opts.url));
+        root.find('.shorturl').html(jigFuncs.cleanLink(opts.shortUrl));
+
+        //Update text overflow.
+        $(".overflow", this.node).textOverflow();
       },
 
       onCreate: function () {
@@ -59,6 +62,11 @@ function (object,         Widget,         fn,      $,        dispatch,
           this.options = options;
           this.optionsChanged();
         }));
+      },
+
+      onRender: function () {
+        //Create ellipsis for anything wanting ... overflow
+        $(".overflow", this.node).textOverflow();
       },
 
       destroy: function () {

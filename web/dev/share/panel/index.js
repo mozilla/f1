@@ -249,9 +249,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       delete store.accountAdded;
     }
 
-    //Create ellipsis for anything wanting ... overflow
-    $(".overflow").textOverflow(null, true);
-
     //Inform extension the content size has changed.
     dispatch.pub('sizeToContent');
   }

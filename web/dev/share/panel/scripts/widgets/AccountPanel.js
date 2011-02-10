@@ -27,7 +27,7 @@
 
 define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./AccountPanel.html',
          'TextCounter', 'storage', 'module', 'placeholder', 'dispatch',
-         'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs'],
+         'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs', 'jquery.textOverflow'],
 function (object,         Widget,         $,        template,
           TextCounter,   storage,   module,   placeholder,   dispatch,
           AutoComplete,   rdapi,   fn,         jigFuncs) {
@@ -146,6 +146,9 @@ function (object,         Widget,         $,        template,
         placeholder(this.bodyNode);
 
         this.storeContacts();
+
+        //Create ellipsis for anything wanting ... overflow
+        $(".overflow", this.node).textOverflow();
       },
 
       clearSavedData: function () {
