@@ -279,7 +279,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     onLocationChange: function (aWebProgress, aRequest, aLocation) {
       ffshare.canShareURI(aLocation);
-      ffshare.switchTab();
+      //dump("onlocationchange causing switchtab\n");
+      window.setTimeout(function () {
+        ffshare.switchTab(true);
+      }, 0);
     },
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
@@ -383,7 +386,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         return null;
       }
       var xulWindow = this.getXULWindowForWin(win);
-      if (xulWindow !== this.frame.panel.ownerDocument.defaultView) {
+      if (xulWindow !== this.frame.shareFrame.ownerDocument.defaultView) {
         return null;
       }
       return this.frame.shareFrame;
@@ -418,8 +421,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           // If we don't have response headers then we did not recieve a response,
           // but skip the case where the page is the about:blank filler used
           // by the browser when first loading a browser.
+          //dump("ACTIVITY_SUBTYPE_TRANSACTION_CLOSE for "+httpChannel.name+" \n");
           if (!browser.__response_headers_received && browser.currentURI.spec !== 'about:blank') {
-            //dump("ACTIVITY_SUBTYPE_TRANSACTION_CLOSE for "+httpChannel.name+" \n");
+            //dump("loading error page for "+browser.currentURI.spec+"\n");
             browser.loadURI(ffshare.errorPage);
           }
         } else
@@ -542,7 +546,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getOptions: function(options) {
-      options = options || this.options || {};
+      options = options || {};
       mixin(options, {
         version: ffshare.version,
         title: this.getPageTitle(),
@@ -745,7 +749,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ctx.scale(scale, scale);
       ctx.drawWindow(win, 0, 0, w, h, "rgb(255,255,255)");
       ctx.restore();
-      return canvas.toDataURL("image/png", "");
+      var img = canvas.toDataURL("image/png", "");
+      return img;
     },
 
     /**
@@ -1468,19 +1473,31 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       return tabFrame;
     },
 
-    switchTab: function () {
+    switchTab: function (waitForLoad) {
+      if (waitForLoad) {
+        // this double-loads the share panel since image data may not be
+        // available yet
+        let self = this;
+        gBrowser.contentWindow.addEventListener('DOMContentLoaded', function() {
+          self.switchTab(false);
+        }, true);
+      }
       var selectedTab = gBrowser.selectedTab,
           tabFrame = selectedTab.ffshareTabFrame;
       var sidebarWindow = document.getElementById("sidebar").contentWindow;
       var visible = sidebarWindow.location.href == "chrome://ffshare/content/sidebar.xul";
-      if (this.currentTabFrame && this.currentTabFrame.autohide) {
-        if (this.currentTabFrame !== tabFrame) {
-          this.currentTabFrame.hide();
-          this.currentTabFrame = null;
-        } else if (gBrowser.currentURI.spec !== tabFrame.options.url) {
-          this.currentTabFrame.close();
-          this.currentTabFrame = null;
-          return;
+      if (this.currentTabFrame) {
+        if (this.currentTabFrame.autohide) {
+          if (this.currentTabFrame !== tabFrame) {
+            this.currentTabFrame.hide();
+            this.currentTabFrame = null;
+          } else if (gBrowser.currentURI.spec !== tabFrame.options.url) {
+            this.currentTabFrame.close();
+            this.currentTabFrame = null;
+            return;
+          }
+        } else {
+          this.currentTabFrame.unregisterListener();
         }
       }
       if (visible && !tabFrame) {

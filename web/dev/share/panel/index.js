@@ -313,6 +313,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (options.prefs.system) {
       $(document.documentElement).addClass(options.prefs.system);
     }
+    if (options.ui == 'sidebar') {
+      $("#panelHeader").text('');
+      $("#closeLink").addClass('hidden');
+    }
 
     //Show the new link if appropriate.
     if (showNew) {
