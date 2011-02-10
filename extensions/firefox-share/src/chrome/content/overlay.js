@@ -1217,6 +1217,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       
       // fx3, if our sidebar is loaded, be sure to initialize
       if (majorVer < 4) {
+        // always set the width to what we want, perhaps a bit rude, but
+        // necessary
+        document.getElementById("sidebar-box").width = defaultWidth;
         var sidebarWindow = document.getElementById("sidebar").contentWindow;
         var visible = sidebarWindow.location.href == "chrome://ffshare/content/sidebar.xul";
         document.getElementById('viewShareSidebar').setAttribute('checked', visible);
