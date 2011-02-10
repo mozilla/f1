@@ -853,15 +853,59 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
+  // handle some events on the panel
+  var panelSingleton = function() {
+    this.panel = document.getElementById('share-popup');
+    if (!this.panel) return;
+    this.registerListeners()
+  }
+  panelSingleton.prototype = {
+    registerListeners: function() {
+      //Add cleanup listener
+      this.panelHideListener = fn.bind(this, function (evt) {
+        this.frame.visible = false;
+      });
+      this.panel.addEventListener('popuphidden', this.panelHideListener, false);
+
+      //Add cleanup listener
+      this.panelShownListener = fn.bind(this, function (evt) {
+        this.frame.visible = true;
+      });
+      this.panel.addEventListener('popupshown', this.panelShownListener, false);
+
+      // hookup esc to also close the panel
+      // XXX not working, maybe need to listen on window
+      this.panel.addEventListener('keypress', fn.bind(this, function (e) {
+        if (e.keyCode === 27 /*"VK_ESC"*/) {
+          this.frame.close();
+        }
+      }), false);
+
+      this.loadListener = fn.bind(this, function (evt) {
+        var self = this;
+        window.setTimeout(function () {
+          self.frame.sizeToContent();
+        }, 0);
+      });
+      this.frame.shareFrame.addEventListener("load", this.loadListener, true);
+    },
+    get frame() {
+      // get the current shareframe
+      return gBrowser.selectedTab.ffshareTabFrame;
+    }
+  }
+  var thePanel = new panelSingleton();
+  
   var PanelUI = function (tab) {
     uiBase.apply(this, [tab]);
-    this.autohide = true;
+    this.autohide = false;
+    this.shareFrame = document.getElementById('share-browser');
+    this.panel = document.getElementById('share-popup');
   };
   PanelUI.prototype = {
     __proto__: uiBase.prototype,
 
     hide: function () {
-      if (!this.panel) return;
       this.panel.hidePopup();
       this.visible = false;
       // Always ensure the button is unchecked when the panel is hidden
@@ -872,9 +916,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (!this.panel) return;
       this.hide();
       this.unregisterListener();
-      this.panel.removeEventListener('popuphidden', this.panelHideListener, false);
-      this.panel.parentNode.removeChild(this.panel);
-      this.panel = null;
       this.tab.ffshareTabFrame = null;
     },
 
@@ -882,76 +923,18 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       options = this.getOptions(options);
       options['ui'] = 'panel';
 
-      var browser = gBrowser.getBrowserForTab(this.tab), url,
-          notificationBox = gBrowser.getNotificationBox(browser),
-          panel = document.createElement('panel'),
-          browserNode = document.createElement('browser');
-
-      this.panel = panel;
-
-      //Add cleanup listener
-      this.panelHideListener = fn.bind(this, function (evt) {
-        this.visible = false;
-      });
-
-      panel.addEventListener('popuphidden', this.panelHideListener, false);
-
-      //Add cleanup listener
-      this.panelShownListener = fn.bind(this, function (evt) {
-        this.panel.removeEventListener('popupshown', this.panelHideListener, false);
-        this.visible = true;
-      });
-
-      panel.addEventListener('popupshown', this.panelShownListener, false);
-
-      url = ffshare.prefs.share_url +
+      var url = ffshare.prefs.share_url +
                 '#options=' + encodeURIComponent(JSON.stringify(options));
 
-      setAttrs(panel, {
-        type: 'arrow',
-        level: 'parent',
-        noautohide: 'true',
-        'class' : 'ffshare-panel'
-      });
-
-      setAttrs(browserNode, {
-        type: 'content',
-        flex: '1',
-        src: 'about:blank',
-        autocompletepopup: 'PopupAutoCompleteRichResult',
-        contextmenu: 'contentAreaContextMenu',
-        'disablehistory': true,
-        'class' : 'ffshare-browser'
-      });
-
-      panel.appendChild(browserNode);
-      document.getElementById('mainPopupSet').appendChild(panel);
-
-      // hookup esc to also close the panel
-      panel.addEventListener('keypress', fn.bind(this, function (e) {
-        if (e.keyCode === 27 /*"VK_ESC"*/) {
-          this.close();
-        }
-      }), false);
-
-      this.shareFrame = browserNode;
-      browserNode.style.width = lastWidth + 'px';
-      browserNode.style.height = lastHeight + 'px';
-
-      this.shareFrame.addEventListener("load", fn.bind(this, function (evt) {
-        var self = this;
-        window.setTimeout(function () {
-          self.sizeToContent();
-        }, 0);
-      }), true);
-
+      // adjust the size
+      this.shareFrame.style.width = lastWidth + 'px';
+      this.shareFrame.style.height = lastHeight + 'px';
       //Make sure it can go all the way to zero.
-      browserNode.style.minHeight = 0;
+      this.shareFrame.style.minHeight = 0;
 
       this.registerListener();
 
-      browserNode.setAttribute('src', url);
-      //browserNode.loadURI(url);
+      this.shareFrame.setAttribute('src', url);
     },
 
     sizeToContent: function () {
@@ -979,9 +962,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         return;
       }
 
-      if (!this.panel) {
-        this.createShareFrame(options);
-      }
+      this.createShareFrame(options);
 
       var button = getButton();
       // Always ensure the button is checked if the panel is open
@@ -1004,6 +985,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     uiBase.apply(this, [tab]);
     this.autohide = false;
     this.visible = false;
+    this.panel = document.getElementById('sidebar');
   };
   TabbedUI.prototype = {
     __proto__: uiBase.prototype,
@@ -1022,9 +1004,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     close: function () {
       this.hide();
       this.unregisterListener();
-      //this.tab.ffshareTabFrame = null;
-      //var sidebarWindow = document.getElementById('sidebar');
-      //sidebarWindow.contentWindow.location.href = 'about:blank';
     },
 
     createShareFrame: function (options) {
@@ -1032,9 +1011,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       options['ui'] = 'sidebar';
 
       var browser = gBrowser.getBrowserForTab(this.tab), url,
-          panel = document.getElementById('sidebar');
           browserNode = this.browser;
-      this.panel = panel;
+
       if (!browserNode) {
         // we have to wait for the sidebar to load, then we have to load
         // our content browser
@@ -1053,7 +1031,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                 '#options=' + encodeURIComponent(JSON.stringify(options));
 
 
-      this.panel = panel;
       this.shareFrame = browserNode;
       this.registerListener();
 
@@ -1496,6 +1473,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
             this.currentTabFrame = null;
             return;
           }
+        } else if (!tabFrame && !visible) {
+          this.currentTabFrame.hide();
+          this.currentTabFrame = null;
         } else {
           this.currentTabFrame.unregisterListener();
         }

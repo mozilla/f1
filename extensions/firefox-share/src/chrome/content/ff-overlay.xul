@@ -78,6 +78,21 @@
                 command="cmd_openSharePage"/>
     </popup>
 
+    <panel id="share-popup"
+           type="arrow"
+           noautohide="true"
+           class="ffshare-panel"
+           level="parent">
+      <browser id="share-browser"
+              type="content"
+              flex="1"
+              src="about:blank"
+              disablehistory="true"
+              autocompletepopup="PopupAutoCompleteRichResult"
+              contextmenu="contentAreaContextMenu"
+              class="ffshare-browser"/>
+    </panel>
+
   </popupset>
 
 
