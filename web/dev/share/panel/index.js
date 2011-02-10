@@ -313,7 +313,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (options.prefs.system) {
       $(document.documentElement).addClass(options.prefs.system);
     }
-    if (options.ui == 'sidebar') {
+    if (options.ui === 'sidebar') {
       $("#panelHeader").text('');
       $("#closeLink").addClass('hidden');
     }
@@ -390,11 +390,26 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     );
 
     // watch for hash changes, update options and trigger
-    // update event.
+    // update event. However, if it has been more than a day,
+    // refresh the UI.
+    var refreshStamp = (new Date()).getTime(),
+        //1 day.
+        refreshInterval = 1 * 24 * 60 * 60 * 1000;
+
     window.addEventListener("hashchange", function () {
-      options = shareOptions();
-      dispatch.pub('optionsChanged', options);
-      checkBase64Preview();
+      var now = (new Date()).getTime();
+      if (now - refreshStamp > refreshInterval) {
+        //Force contact with the server via the true argument.
+        location.reload(true);
+      } else {
+        options = shareOptions();
+        dispatch.pub('optionsChanged', options);
+        checkBase64Preview();
+
+        //Check that accounts are still available, but do it in the
+        //background.
+        accounts();
+      }
     }, false);
 
     //Get the most recent feed item, not important to do it last.
