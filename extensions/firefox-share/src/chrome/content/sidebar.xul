@@ -5,5 +5,10 @@
 
 <page id="shareSidebar" title="&sharesidebar.title;"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
-  <browser type="content" id="sharepanel" flex="1"/>
+  <browser type="content"
+           id="sharepanel"
+           flex="1"
+           disablehistory="true"
+           autocompletepopup="PopupAutoCompleteRichResult"
+           contextmenu="contentAreaContextMenu"/>
 </page>
