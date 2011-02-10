@@ -81,15 +81,18 @@ function (object,         Widget,         $,        template,
         this.svcAccount = this.account.accounts[0];
         this.storeId = 'AccountPanel-' + this.svcAccount.domain;
 
+        //Set up memory store for when user switches tabs, their messages for
+        //old URLs is retained in case they are doing a composition.
+        //This needs to be in onCreate and not
+        //on the prototype since each instance should get its own object.
+        this.memStore = {};
+
         //Check for saved data. Only use if the URL
         //and the account match
         savedOptions = store[this.storeId];
         if (savedOptions) {
           savedOptions = JSON.parse(savedOptions);
-          if (savedOptions.link !== this.options.url ||
-              savedOptions.userid !== this.svcAccount.userid ||
-              savedOptions.domain !== this.svcAccount.domain ||
-              savedOptions.username !== this.svcAccount.username) {
+          if (this.theGameHasChanged(savedOptions)) {
             this.clearSavedData();
             savedOptions = null;
           } else {
@@ -151,7 +154,22 @@ function (object,         Widget,         $,        template,
         $(".overflow", this.node).textOverflow();
       },
 
+      //Tron Legacy soundtrack anyone?
+      theGameHasChanged: function (data) {
+        //If the account/url has changed the data should no
+        //longer be tracked.
+        //Convert svcAccount fields to strings because the
+        //form data will be in strings, even though the
+        //account data can have things like integers, and want
+        //string equality operators to stay for linting.
+        return data.link !== this.options.url ||
+              data.userid !== String(this.svcAccount.userid) ||
+              data.domain !== String(this.svcAccount.domain) ||
+              data.username !== String(this.svcAccount.username);
+      },
+
       clearSavedData: function () {
+        this.memStore = {};
         delete store[this.storeId];
       },
 
@@ -184,14 +202,52 @@ function (object,         Widget,         $,        template,
       //The page options have changed, update the relevant HTML bits.
       optionsChanged: function () {
         var root = $(this.bodyNode),
-            opts = this.options;
+            opts = this.options,
+            formLink = jigFuncs.link(opts),
+            restoredData = this.memStore[formLink],
+            oldData, shareTypeDom;
 
+        //Save off previous form data for old URL.
+        oldData = this.getFormData();
+        if (oldData.to || oldData.message || oldData.subject) {
+          this.memStore[oldData.link] = oldData;
+        }
+
+        //Delete memory data for current URL if the account changed.
+        if (restoredData && this.theGameHasChanged(restoredData)) {
+          restoredData = null;
+          delete this.memStore[formLink];
+        }
+
+        //Mix in any saved data for the new URL if it was in storage.
+        if (restoredData) {
+          //Create a temp object so we do not mess with pristine options.
+          opts = object.create(opts, [{
+            to: restoredData.to,
+            subject: restoredData.subject,
+            message: restoredData.message,
+            shareType: restoredData.shareType
+          }]);
+        }
+
+        //Update the DOM.
         root.find('[name="picture"]').val(jigFuncs.preview(opts));
         root.find('[name="picture_base64"]').val(jigFuncs.preview_base64(opts));
-        root.find('[name="link"]').val(jigFuncs.link(opts));
+        root.find('[name="link"]').val(formLink);
         root.find('[name="title"]').val(opts.title);
         root.find('[name="caption"]').val(opts.caption);
         root.find('[name="description"]').val(opts.description);
+
+        //Only set share types if they are available for this type of account.
+        shareTypeDom = root.find('[name="shareType"]');
+        if (shareTypeDom.length) {
+          if (opts.shareType) {
+            shareTypeDom.val(opts.shareType);
+            this.changeShareType(this.getShareType(opts.shareType));
+          } else {
+            this.selectFirstShareType();
+          }
+        }
 
         root.find('[name="to"]').val(opts.to);
         root.find('[name="subject"]').val(opts.subject);
@@ -227,6 +283,11 @@ function (object,         Widget,         $,        template,
           }
         }
         return null;
+      },
+
+      selectFirstShareType: function () {
+        $('.shareType', this.bodyNode)[0].options[0].selected = true;
+        this.changeShareType(this.svc.shareTypes[0]);
       },
 
       selectSecondShareType: function () {
