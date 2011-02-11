@@ -352,6 +352,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getBrowserForRequest: function (channel) {
+      if (!this.browser.contentDocument)
+        return null;
       var win = this.getWindowForRequest(channel);
       if (!win) {
         return null;
@@ -422,18 +424,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     init: function() {
       this.browser = document.getElementById('share-browser');
       this.panel = document.getElementById('share-popup');
-
-      //Add cleanup listener
-      this.panelHideListener = fn.bind(this, function (evt) {
-        gBrowser.selectedTab.shareState.visible = false;
-      });
-      this.panel.addEventListener('popuphidden', this.panelHideListener, false);
-
-      //Add cleanup listener
-      this.panelShownListener = fn.bind(this, function (evt) {
-        gBrowser.selectedTab.shareState.visible = true;
-      });
-      this.panel.addEventListener('popupshown', this.panelShownListener, false);
 
       // hookup esc to also close the panel
       // XXX not working, maybe need to listen on window
@@ -875,7 +865,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       
       gBrowser.selectedTab.shareState = {
         options: options, // currently not used for anything
-        visible: false,
         forceReload: false
       };
 
@@ -1222,7 +1211,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     canShareURI: function (aURI) {
-      var command = document.getElementById("cmd_openSharePage");
+      var command = document.getElementById("cmd_toggleSharePage");
       try {
         if (this.isValidURI(aURI)) {
           command.removeAttribute("disabled");
@@ -1263,15 +1252,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         }, true);
       }
       var selectedTab = gBrowser.selectedTab;
-      var sidebarWindow = document.getElementById("sidebar").contentWindow;
-      var visible = sidebarWindow.location.href == "chrome://ffshare/content/sidebar.xul";
-      if (!selectedTab.shareState && !visible) {
+      var visible = document.getElementById('share-popup').state == 'open';
+      if (visible && !selectedTab.shareState) {
         sharePanel.hide();
       }
-      if (visible && !selectedTab.shareState) {
-        tabselectedTab.shareStateFrame = new PanelUI(gBrowser.selectedTab);
-      }
-      if (visible || selectedTab.shareState) {
+      if (selectedTab.shareState) {
         window.setTimeout(function () {
           sharePanel.show({});
         }, 0);
@@ -1280,9 +1265,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     onTabViewShow: function (e) {
       // Triggered by TabView (panorama). Always hide it if being shown.
-      var sidebarWindow = document.getElementById("sidebar").contentWindow;
-      var visible = sidebarWindow.location.href == "chrome://ffshare/content/sidebar.xul";
-      if (visible) {
+      if (document.getElementById('share-popup').state == 'open') {
         sharePanel.hide();
       }
     },
@@ -1295,13 +1278,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.switchTab();
     },
 
-    onOpenShareCommand: function (e) {
-      this.toggle();
-    },
-
-    toggle: function (options) {
-      var selectedTab = gBrowser.selectedTab;
-      if (selectedTab.shareState && selectedTab.shareState.visible) {
+    togglePanel: function (options) {
+      if (document.getElementById('share-popup').state == 'open') {
         sharePanel.close();
       } else {
         sharePanel.show(options);

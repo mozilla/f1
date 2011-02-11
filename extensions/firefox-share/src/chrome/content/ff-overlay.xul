@@ -34,11 +34,11 @@
   </stringbundleset>
 
   <commandset id="mainCommandSet">
-    <command id="cmd_openSharePage" oncommand="ffshare.onOpenShareCommand();"/>
+    <command id="cmd_toggleSharePage" oncommand="ffshare.togglePanel();"/>
   </commandset>
 
   <keyset id="mainKeyset">
-    <key id="key_ffshare" keycode="" command="cmd_openSharePage"/>
+    <key id="key_ffshare" keycode="" command="cmd_toggleSharePage"/>
   </keyset>
 
   <popupset id="mainPopupSet">
@@ -56,7 +56,7 @@
                 insertafter="context-sendpage"
                 label="&ffshareContext.label;"
                 accesskey="&ffshareContext.accesskey;"
-                command="cmd_openSharePage"/>
+                command="cmd_toggleSharePage"/>
       <menuseparator id="context-ffshare-separator"
                      insertafter="context-sendpage"/>
       <!--
@@ -75,7 +75,7 @@
                 insertafter="context-sep-selectall"
                 label="&ffshareContext.label;"
                 accesskey="&ffshareContext.accesskey;"
-                command="cmd_openSharePage"/>
+                command="cmd_toggleSharePage"/>
     </popup>
 
     <panel id="share-popup"
@@ -110,7 +110,7 @@
               insertafter="menu_sendLink"
               label="&ffshareMenu.label;"
               accesskey="&ffshareMenu.accesskey;"
-              command="cmd_openSharePage"/>
+              command="cmd_toggleSharePage"/>
     <menuseparator id="menu_ffshare_separator"
                    insertafter="menu_sendLink"/>
   </menupopup>
@@ -135,7 +135,7 @@
                  label="&ffshareToolbarButton.label;"
                  tooltiptext="&ffshareToolbarButton.tooltip;"
                  type="checkbox"
-                 command="cmd_openSharePage"/>
+                 command="cmd_toggleSharePage"/>
 
   <tabbrowser id="content"/>
 
