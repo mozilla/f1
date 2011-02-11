@@ -412,7 +412,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.browser = document.getElementById('share-browser');
       this.panel = document.getElementById('share-popup');
 
-      dump("registering listeners on panel\n");
       //Add cleanup listener
       this.panelHideListener = fn.bind(this, function (evt) {
         gBrowser.selectedTab.shareState.visible = false;
