@@ -9,9 +9,8 @@ skin      ffshare   classic/1.0   chrome/skin/ os=Darwin appversion<=3.7
 skin      ffshare   classic/1.0   chrome/skin/minefield-win/ os=WINNT appversion>=3.7
 locale    ffshare   en-US         chrome/locale/en-US/
 
-overlay   chrome://browser/content/browser.xul   chrome://ffshare/content/ff-overlay.xul appversion>=4.0b1
+overlay   chrome://browser/content/browser.xul   chrome://ffshare/content/ff-overlay.xul
 style chrome://global/content/customizeToolbar.xul chrome://ffshare/skin/overlay.css
-overlay	chrome://browser/content/browser.xul	chrome://ffshare/content/sidebarOverlay.xul appversion<4.0b1
 
 component {372610e5-5979-3b49-b69f-781ebac2e9d1} components/nsFormFillOverride.js
 contract @labs.mozilla.com/f1/form-autocomplete;1 {372610e5-5979-3b49-b69f-781ebac2e9d1}
