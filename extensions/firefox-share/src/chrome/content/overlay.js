@@ -43,6 +43,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       empty = {}, fn,
       buttonId = 'ffshare-toolbar-button';
 
+  // width/height tracking for the panel, initial values are defaults to
+  // show the configure status panel
+  // with fx3, we have to set the dimensions of the panel, with fx4, we have to
+  // set the dimensions of the browser in the panel.
+  var defaultWidth = 400, lastWidth = 400;
+  var defaultHeight = 180, lastHeight = 180;
+  var panelWidthMargin = 41;
+  var panelHeightMargin = 45;
+
   Cu.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
   Cu.import("resource://ffshare/modules/injector.js");
   Cu.import("resource://gre/modules/XPCOMUtils.jsm");
@@ -836,14 +845,6 @@ dump("got message "+message.topic+"\n");
 
   };
 
-  // width/height tracking for the panel, initial values are defaults to
-  // show the configure status panel
-  // with fx3, we have to set the dimensions of the panel, with fx4, we have to
-  // set the dimensions of the browser in the panel.
-  var defaultWidth = 400, lastWidth = 400;
-  var defaultHeight = 180, lastHeight = 180;
-  var panelWidthMargin = 41;
-  var panelHeightMargin = 45;
 
   var PanelUI = function (tab) {
     tab.ffshareTabFrame = this;
@@ -1284,20 +1285,9 @@ dump("got message "+message.topic+"\n");
       var sidebarWindow = document.getElementById("sidebar").contentWindow;
       var visible = sidebarWindow.location.href == "chrome://ffshare/content/sidebar.xul";
       if (this.currentTabFrame) {
-        if (this.currentTabFrame.autohide) {
-          if (this.currentTabFrame !== tabFrame) {
-            this.currentTabFrame.hide();
-            this.currentTabFrame = null;
-          } else if (gBrowser.currentURI.spec !== tabFrame.options.url) {
-            this.currentTabFrame.close();
-            this.currentTabFrame = null;
-            return;
-          }
-        } else if (!tabFrame && !visible) {
+        if (!tabFrame && !visible) {
           this.currentTabFrame.hide();
           this.currentTabFrame = null;
-        } else {
-          this.currentTabFrame.unregisterListener();
         }
       }
       if (visible && !tabFrame) {
