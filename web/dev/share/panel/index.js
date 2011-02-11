@@ -47,6 +47,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     options = shareOptions(),
     bodyDom, timer, pageInfo, sendData, showNew,
     accountPanels = [],
+    hashReload = false,
     store = storage();
 
   function close() {
@@ -71,6 +72,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }, 2000);
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
+      hashReload = true;
     }
 
     //Tell the extension that the size of the content may have changed.
@@ -398,9 +400,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     window.addEventListener("hashchange", function () {
       var now = (new Date()).getTime();
-      if (now - refreshStamp > refreshInterval) {
+      if (hashReload || now - refreshStamp > refreshInterval) {
         //Force contact with the server via the true argument.
         location.reload(true);
+        hashReload = false;
       } else {
         options = shareOptions();
         dispatch.pub('optionsChanged', options);

@@ -99,7 +99,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   }
 
   function log(msg) {
-    Application.console.log('.' + msg); // avoid clearing on empty log
+    Cu.reportError('.' + msg); // avoid clearing on empty log
   }
 
   function error(msg) {
@@ -319,26 +319,35 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     getWindowForRequest: function (channel) {
-      if (channel && channel.loadGroup && channel.loadGroup.notificationCallbacks) {
-        var lctx = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext);
-        var win = lctx.associatedWindow;
-        //dump("got a window "+win+ " isContent? "+lctx.isContent+"\n");
-        return win;
-      }
+      var lctx;
+      try {
+        if (channel && channel.notificationCallbacks) {
+          lctx = channel.notificationCallbacks.getInterface(Ci.nsILoadContext);
+          return lctx.associatedWindow;
+        }
+      } catch(e) {}
+      try {
+        if (channel && channel.loadGroup && channel.loadGroup.notificationCallbacks) {
+          lctx = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext);
+          return lctx.associatedWindow;
+        }
+      } catch(e) {}
       return null;
     },
 
-    getXULWindowForWin: function (win) {
-      var xulWindow = win.QueryInterface(Ci.nsIInterfaceRequestor)
-        .getInterface(Ci.nsIWebNavigation)
-                        .QueryInterface(Ci.nsIDocShell)
-                        .chromeEventHandler.ownerDocument.defaultView;
-      //dump("got a XUL window "+xulWindow+"\n");
+    getDocumentForWin: function (win) {
       try {
-        return XPCNativeWrapper.unwrap(xulWindow);
-      } catch (e) {
-        return xulWindow.wrappedJSObject;
-      }
+        var theDoc = win.QueryInterface(Ci.nsIInterfaceRequestor)
+                          .getInterface(Ci.nsIWebNavigation)
+                          .QueryInterface(Ci.nsIDocShell)
+                          .chromeEventHandler.contentDocument;
+        //dump("got a document "+theDoc+"\n");
+        try {
+          return XPCNativeWrapper.unwrap(theDoc);
+        } catch (e) {
+          return theDoc.wrappedJSObject;
+        }
+      } catch(e) {}
       return null;
     },
 
@@ -347,8 +356,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (!win) {
         return null;
       }
-      var xulWindow = this.getXULWindowForWin(win);
-      if (xulWindow !== this.browser.ownerDocument.defaultView) {
+      var theDoc = this.getDocumentForWin(win);
+      if (theDoc !== this.browser.contentDocument.wrappedJSObject) {
+        //dump("they dont match "+theDoc+" !== "+this.browser.contentDocument.wrappedJSObject+"\n");
         return null;
       }
       return this.browser;
@@ -385,8 +395,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           // by the browser when first loading a browser.
           //dump("ACTIVITY_SUBTYPE_TRANSACTION_CLOSE for "+httpChannel.name+" \n");
           if (!browser.__response_headers_received && browser.currentURI.spec !== 'about:blank') {
-            //dump("loading error page for "+browser.currentURI.spec+"\n");
+            //dump("loading error page for "+httpChannel.name+"\n");
             browser.loadURI(ffshare.errorPage);
+            gBrowser.selectedTab.shareState.forceReload = true;
           }
         } else
         if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_HEADER) {
@@ -859,11 +870,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (!ffshare.isValidURI(tabURI)) {
         return;
       }
+      var currentState = gBrowser.selectedTab.shareState;
       options = this.getOptions(options);
       
       gBrowser.selectedTab.shareState = {
         options: options, // currently not used for anything
-        visible: false
+        visible: false,
+        forceReload: false
       };
 
       var url = ffshare.prefs.share_url +
@@ -875,7 +888,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       //Make sure it can go all the way to zero.
       this.browser.style.minHeight = 0;
 
-      this.browser.setAttribute('src', url);
+      if (currentState && currentState.forceReload)
+        this.browser.loadURI(url);
+      else
+        this.browser.setAttribute('src', url);
 
       var button = getButton();
       // Always ensure the button is checked if the panel is open
