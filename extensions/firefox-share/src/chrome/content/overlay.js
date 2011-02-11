@@ -1313,7 +1313,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     script: null, // null == use injected default script
     getapi: function () {
       return function (options) {
-        ffshare.toggle(options);
+        ffshare.togglePanel(options);
       };
     }
   };
