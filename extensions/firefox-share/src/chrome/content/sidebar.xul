@@ -6,9 +6,10 @@
 <page id="shareSidebar" title="&sharesidebar.title;"
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
   <browser type="content"
-           id="sharepanel"
+           id="share-browser"
            flex="1"
            disablehistory="true"
            autocompletepopup="PopupAutoCompleteRichResult"
-           contextmenu="contentAreaContextMenu"/>
+           contextmenu="contentAreaContextMenu"
+           class="ffshare-browser"/>
 </page>

@@ -505,7 +505,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (mainWindow !== this.panel.ownerDocument.defaultView) {
         return;
       }
-
       // listen for messages now
       var contentWindow = this.shareFrame.contentWindow;
       contentWindow = contentWindow.wrappedJSObject ? contentWindow.wrappedJSObject : contentWindow;
@@ -998,7 +997,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     
     get browser() {
       var sidebarWindow = document.getElementById('sidebar');
-      return sidebarWindow.contentWindow.document.getElementById('sharepanel');
+      return sidebarWindow.contentWindow.document.getElementById('share-browser');
     },
 
     close: function () {
