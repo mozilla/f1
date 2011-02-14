@@ -80,6 +80,12 @@ def twitter_to_poco(user):
         poco['photos'] = [ { 'type': u'profile', "value" : user['profile_image_url'] }]
     if user.get('created_at', None):
         poco['published'] = user['created_at']
+
+    account = {'domain': 'twitter.com',
+               'userid': user['id'],
+               'username': user['screen_name'] }
+    poco['accounts'] = [account]
+
     return poco
 
 class responder(OAuth1):
@@ -157,7 +163,11 @@ class api():
                 # some reason we dont have a short url, add the long url
                 message += " %s" % longurl
 
-            result = self.api().statuses.update(status=message)
+            direct = options.get('to', None)
+            if direct:
+                result = self.api().direct_messages.new(text=message, user_id=direct)
+            else:
+                result = self.api().statuses.update(status=message)
             result[domain] = result['id']
         except TwitterHTTPError, exc:
             try:
@@ -195,4 +205,35 @@ class api():
                      'status': exc.e.code
             }
         return result, error
-    
+
+    def getcontacts(self, start=0, page=25, group=None):
+        # for twitter we get only those people who we follow and who follow us
+        # since this data is used for direct messaging
+        contacts = []
+        result = error = None
+        try:
+            followers = self.api().statuses.followers()
+            for follower in followers:
+                contacts.append(twitter_to_poco(follower))
+
+            connectedto = {
+                'entry': contacts,
+                'itemsPerPage': len(contacts),
+                'startIndex':   0,
+                'totalResults': len(contacts),
+            }
+
+            return connectedto, None
+        except TwitterHTTPError, exc:
+            details = "TwitterHTTPError %d" % (exc.e.code)
+            if exc.e.code != 404:
+                details = json.load(exc.e)
+            if 'error' in details:
+                msg = details['error']
+            else:
+                msg = str(details)
+            error = {'provider': domain,
+                     'message': msg,
+                     'status': exc.e.code
+            }
+        return result, error

@@ -35,7 +35,6 @@ function _() {
 _("?loaded");
 
 __defineGetter__("acDataStorage", function() {
-  delete this.ffshareAutoCompleteData;
   Cu.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
   return ffshareAutoCompleteData;
 });
@@ -64,12 +63,15 @@ FFShareAutoComplete.prototype = {
     return false;
   },
 
-  findEmails: function findEmails(query) {
+  findEmails: function findEmails(query, field) {
     _("findEmails", Array.slice(arguments));
-
     let result = Cc["@mozilla.org/autocomplete/simple-result;1"].
                    createInstance(Ci.nsIAutoCompleteSimpleResult);
     result.setSearchString(query);
+
+    let datadomain = field.getAttribute('autocompletestore');
+    if (!datadomain)
+      return result;
 
     //convert the query to only be for things after the comma.
     var parts = query.split(','), previousMatch = '';
@@ -83,18 +85,19 @@ FFShareAutoComplete.prototype = {
 
 _("query is now: [" + query + "]");
 _("previousMatch is now: " + previousMatch);
-
-    let data = acDataStorage.get();
-
-    data.forEach(function (item) {
-      var displayNameLower = item.displayName.toLowerCase(),
-          emailLower = item.email.toLowerCase();
-
+_("data domain is: "+datadomain);
+    let data = acDataStorage.get(datadomain) || {};
+    for (let name in data) {
+      var displayNameLower = name.toLowerCase(),
+          emailLower = data[name].email.toLowerCase();
       if (displayNameLower.indexOf(query) !== -1 || emailLower.indexOf(query) !== -1) {
-        result.appendMatch(previousMatch + item.email + ', ',
-                           (displayNameLower === emailLower ? item.email : item.displayName + '<' + item.email + '>'), null, 'ffshare');
+        if (emailLower)
+          addr =  (displayNameLower === emailLower ? data[name].email : name + '<' + data[name].email + '>');
+        else
+          addr =  name;
+        result.appendMatch(previousMatch + addr + ', ', addr , null, 'ffshare');
       }
-    });
+    }
 
     let resultCode = result.matchCount ? "RESULT_SUCCESS" : "RESULT_NOMATCH";
     _("returning autocomplete " +resultCode+ " result with " + result.matchCount + " items");
@@ -106,7 +109,7 @@ _("previousMatch is now: " + previousMatch);
     _("FFShareAutoComplete search", Array.slice(arguments));
 
     if (this.isShareType(name, field))
-      return this.findEmails(query);
+      return this.findEmails(query, field);
     return null;
   }
 };

@@ -1,16 +1,18 @@
 /**
- * @license RequireJS text Copyright (c) 2004-2010, The Dojo Foundation All Rights Reserved.
- * Available via the MIT, GPL or new BSD license.
+ * @license RequireJS text Copyright (c) 2010, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
  * see: http://github.com/jrburke/requirejs for details
  */
 /*jslint regexp: false, nomen: false, plusplus: false */
-/*global require: false, XMLHttpRequest: false, ActiveXObject: false */
+/*global require: false, XMLHttpRequest: false, ActiveXObject: false,
+  define: false */
 "use strict";
 
 (function () {
     var progIds = ['Msxml2.XMLHTTP', 'Microsoft.XMLHTTP', 'Msxml2.XMLHTTP.4.0'],
         xmlRegExp = /^\s*<\?xml(\s)+version=[\'\"](\d)*.(\d)*[\'\"](\s)*\?>/im,
-        bodyRegExp = /<body[^>]*>\s*([\s\S]+)\s*<\/body>/im;
+        bodyRegExp = /<body[^>]*>\s*([\s\S]+)\s*<\/body>/im,
+        buildMap = [];
 
     if (!require.textStrip) {
         require.textStrip = function (text) {
@@ -27,6 +29,17 @@
                 text = "";
             }
             return text;
+        };
+    }
+
+    if (!require.jsEscape) {
+        require.jsEscape = function (text) {
+            return text.replace(/(['\\])/g, '\\$1')
+                .replace(/[\f]/g, "\\f")
+                .replace(/[\b]/g, "\\b")
+                .replace(/[\n]/g, "\\n")
+                .replace(/[\t]/g, "\\t")
+                .replace(/[\r]/g, "\\r");
         };
     }
 
@@ -50,7 +63,7 @@
                         progIds = [progId];  // so faster next time
                         break;
                     }
-                }   
+                }
             }
 
             if (!xhr) {
@@ -60,7 +73,7 @@
             return xhr;
         };
     }
-    
+
     if (!require.fetchText) {
         require.fetchText = function (url, callback) {
             var xhr = require.getXhr();
@@ -76,120 +89,43 @@
         };
     }
 
-    require.plugin({
-        prefix: "text",
-
-        /**
-         * This callback is prefix-specific, only gets called for this prefix
-         */
-        require: function (name, deps, callback, context) {
-            //No-op, require never gets these text items, they are always
-            //a dependency, see load for the action.
-        },
-
-        /**
-         * Called when a new context is defined. Use this to store
-         * context-specific info on it.
-         */
-        newContext: function (context) {
-            require.mixin(context, {
-                text: {},
-                textWaiting: []
-            });
-        },
-
-        /**
-         * Called when a dependency needs to be loaded.
-         */
-        load: function (name, contextName) {
-            //Name has format: some.module!filext!strip!text
-            //The strip and text parts are optional.
+    define({
+        load: function (name, req, onLoad, config) {
+            //Name has format: some.module.filext!strip
+            //The strip part is optional.
             //if strip is present, then that means only get the string contents
             //inside a body tag in an HTML string. For XML/SVG content it means
             //removing the <?xml ...?> declarations so the content can be inserted
             //into the current doc without problems.
-            //If text is present, it is the actual text of the file.
-            var strip = false, text = null, key, url, index = name.indexOf("."),
-                modName = name.substring(0, index), fullKey,
-                ext = name.substring(index + 1, name.length),
-                context = require.s.contexts[contextName],
-                tWaitAry = context.textWaiting;
+
+            var strip = false, url, index = name.indexOf("."),
+                modName = name.substring(0, index),
+                ext = name.substring(index + 1, name.length);
 
             index = ext.indexOf("!");
             if (index !== -1) {
                 //Pull off the strip arg.
                 strip = ext.substring(index + 1, ext.length);
+                strip = strip === "strip";
                 ext = ext.substring(0, index);
-                index = strip.indexOf("!");
-                if (index !== -1 && strip.substring(0, index) === "strip") {
-                    //Pull off the text.
-                    text = strip.substring(index + 1, strip.length);
-                    strip = "strip";
-                } else if (strip !== "strip") {
-                    //strip is actually the inlined text.
-                    text = strip;
-                    strip = null;
+            }
+
+            //Load the text.
+            url = req.nameToUrl(modName, "." + ext);
+            require.fetchText(url, function (text) {
+                text = strip ? require.textStrip(text) : text;
+                if (config.isBuild && config.inlineText) {
+                    buildMap[name] = text;
                 }
-            }
-            key = modName + "!" + ext;
-            fullKey = strip ? key + "!" + strip : key;
-
-            //Store off text if it is available for the given key and be done.
-            if (text !== null && !context.text[key]) {
-                context.defined[name] = context.text[key] = text;
-                return;
-            }
-
-            //If text is not available, load it.
-            if (!context.text[key] && !context.textWaiting[key] && !context.textWaiting[fullKey]) {
-                //Keep track that the fullKey needs to be resolved, during the
-                //orderDeps stage.
-                if (!tWaitAry[fullKey]) {
-                    tWaitAry[fullKey] = tWaitAry[(tWaitAry.push({
-                        name: name,
-                        key: key,
-                        fullKey: fullKey,
-                        strip: !!strip
-                    }) - 1)];
-                }
-
-                //Load the text.
-                url = require.nameToUrl(modName, "." + ext, contextName);
-                context.loaded[name] = false;
-                require.fetchText(url, function (text) {
-                    context.text[key] = text;
-                    context.loaded[name] = true;
-                    require.checkLoaded(contextName);                    
-                });
-            }
+                onLoad(text);
+            });
         },
 
-        /**
-         * Called when the dependencies of a module are checked.
-         */
-        checkDeps: function (name, deps, context) {
-            //No-op, checkDeps never gets these text items, they are always
-            //a dependency, see load for the action.
-        },
-
-        /**
-         * Called to determine if a module is waiting to load.
-         */
-        isWaiting: function (context) {
-            return !!context.textWaiting.length;
-        },
-
-        /**
-         * Called when all modules have been loaded.
-         */
-        orderDeps: function (context) {
-            //Clear up state since further processing could
-            //add more things to fetch.
-            var i, dep, text, tWaitAry = context.textWaiting;
-            context.textWaiting = [];
-            for (i = 0; (dep = tWaitAry[i]); i++) {
-                text = context.text[dep.key];
-                context.defined[dep.name] = dep.strip ? require.textStrip(text) : text;
+        write: function (pluginName, moduleName, write) {
+            if (moduleName in buildMap) {
+                var text = require.jsEscape(buildMap[moduleName]);
+                write("define('" + pluginName + "!" + moduleName  +
+                      "', function () { return '" + text + "';});\n");
             }
         }
     });

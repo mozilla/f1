@@ -100,6 +100,9 @@ Subject line for emails, not supported by all services.
             api_arg('picture', 'string', False, None, None, """
 URL to publicly available thumbnail, not supported by all services.
 """),
+            api_arg('picture_base64', 'string', False, None, None, """
+Base 64 encoded PNG version of the picture used for attaching to emails.
+"""),
             api_arg('description', 'string', False, None, None, """
 Site provided description of the shared item, not supported by all services.
 """),

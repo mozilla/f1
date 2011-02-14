@@ -20,16 +20,26 @@
  *
  * Contributor(s):
  * */
+const Cu = Components.utils;
 
 let EXPORTED_SYMBOLS = ["ffshareAutoCompleteData"];
 
-let data = [];
+let data = {};
+
+function _() {
+  return; // comment out for verbose debugging
+  let msg = Array.join(arguments, " ");
+  dump(msg + "\n");
+  Cu.reportError(msg);
+}
 
 let ffshareAutoCompleteData = {
-  get: function () {
-    return data;
+  get: function (domain) {
+    _("XXX getting data for "+domain);
+    return data[domain];
   },
-  set: function (newData) {
-    data = (newData || []);
+  set: function (acdata) {
+    _("XXX setting "+ (acdata.contacts ? acdata.contacts.length : "none") +" contacts for "+acdata.domain);
+    data[acdata.domain] = (acdata.contacts || []);
   }
 };

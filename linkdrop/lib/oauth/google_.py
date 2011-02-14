@@ -45,6 +45,7 @@ import gdata.contacts
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 from email.header import Header
 
 from pylons import config, request, response, session, tmpl_context as c, url
@@ -193,7 +194,6 @@ class responder(OpenIDResponder):
         
         profile = result_data['profile']
         provider = domain
-        import sys; print >> sys.stderr, "credential provider is ", profile.get('providerName')
         if profile.get('providerName').lower() == 'openid':
             provider = 'googleapps.com'
         userid = profile.get('verifiedEmail','')
@@ -285,8 +285,25 @@ class api():
         c.description = description
         c.message = message
 
-        part2 = MIMEText(render('/html_email.mako').encode('utf-8'), 'html')
-        part2.set_charset('utf-8')
+        c.thumbnail = (options.get('picture_base64', "") != "")
+
+        if c.thumbnail:
+            part2 = MIMEMultipart('related')
+
+            html = MIMEText(render('/html_email.mako').encode('utf-8'), 'html')
+            html.set_charset('utf-8')
+
+            # FIXME: we decode the base64 data just so MIMEImage can re-encode it as base64
+            image = MIMEImage(base64.b64decode(options.get('picture_base64')), 'png')
+            image.add_header('Content-Id', '<thumbnail>')
+            image.add_header('Content-Disposition', 'inline; filename=thumbnail.png')
+
+            part2.attach(html)
+            part2.attach(image)
+        else:
+            part2 = MIMEText(render('/html_email.mako').encode('utf-8'), 'html')
+            part2.set_charset('utf-8')
+
 
         # get the title, or the long url or the short url or nothing
         # wrap these in literal for text email
@@ -333,7 +350,7 @@ class api():
         return result, error
 
     def getgroup_id(self, group):
-        url = 'http://www.google.com/m8/feeds/groups/default/full?v=2'
+        url = 'https://www.google.com/m8/feeds/groups/default/full?v=2'
         method = 'GET'
         client = oauth.Client(self.consumer, self.oauth_token)
         resp, content = client.request(url, method)
@@ -347,7 +364,13 @@ class api():
         
     def getcontacts(self, start=0, page=25, group=None):
         contacts = []
-        url = 'http://www.google.com/m8/feeds/contacts/default/full?v=1&max-results=%d' % (page,)
+        profile = self.account.get('profile', {})
+        accounts = profile.get('accounts', [{}])
+        userdomain = 'default'
+        if accounts[0].get('domain') == 'googleapps.com':
+            userdomain = accounts[0].get('userid').split('@')[-1]
+        url = 'http://www.google.com/m8/feeds/contacts/%s/full?v=1&max-results=%d' % (userdomain, page,)
+
         method = 'GET'
         if start > 0:
             url = url + "&start-index=%d" % (start,)
@@ -363,6 +386,7 @@ class api():
         # itemsPerPage, startIndex, totalResults
         client = oauth.Client(self.consumer, self.oauth_token)
         resp, content = client.request(url, method)
+
         if int(resp.status) != 200:
             error={"provider": domain,
                    "message": content,
@@ -371,7 +395,6 @@ class api():
             return None, error
             
         feed = gdata.contacts.ContactsFeedFromString(content)
-        from pprint import pprint
         for entry in feed.entry:
             #print entry.group_membership_info
             p = {

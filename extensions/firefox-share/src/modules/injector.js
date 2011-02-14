@@ -21,6 +21,7 @@
  *   Shane Caraveo <shane@caraveo.com>
  *   Myk Melez <myk@mozilla.org>
  *   Justin Dolske <dolske@mozilla.com>
+ *   Erik Vold <erikvvold@gmail.com>
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
@@ -39,9 +40,7 @@
 /* Inject the People content API into window.navigator objects. */
 /* Partly based on code in the Geode extension. */
 
-const Cc = Components.classes;
-const Ci = Components.interfaces;
-const Cu = Components.utils;
+const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 let EXPORTED_SYMBOLS = ["InjectorInit"];
@@ -127,20 +126,20 @@ let Injector = {
 
 };
 
-// hook up a seperate listener for each xul window
+// hook up a separate listener for each xul window
 function InjectorInit(window) {
   if (window.injector) return;
   window.injector = {
     providers: [],
     onLoad: function() {
-      var obs = Components.classes["@mozilla.org/observer-service;1"].
-                            getService(Components.interfaces.nsIObserverService);
+      var obs = Cc["@mozilla.org/observer-service;1"].
+                            getService(Ci.nsIObserverService);
       obs.addObserver(this, 'content-document-global-created', false);
     },
   
     onUnload: function() {
-      var obs = Components.classes["@mozilla.org/observer-service;1"].
-                            getService(Components.interfaces.nsIObserverService);
+      var obs = Cc["@mozilla.org/observer-service;1"].
+                            getService(Ci.nsIObserverService);
       obs.removeObserver(this, 'content-document-global-created');
     },
 
@@ -152,12 +151,12 @@ function InjectorInit(window) {
     observe: function(aSubject, aTopic, aData) {
       if (!aSubject.location.href) return;
       // is this window a child of OUR XUL window?
-      var mainWindow = aSubject.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                     .getInterface(Components.interfaces.nsIWebNavigation)
-                     .QueryInterface(Components.interfaces.nsIDocShellTreeItem)
+      var mainWindow = aSubject.QueryInterface(Ci.nsIInterfaceRequestor)
+                     .getInterface(Ci.nsIWebNavigation)
+                     .QueryInterface(Ci.nsIDocShellTreeItem)
                      .rootTreeItem
-                     .QueryInterface(Components.interfaces.nsIInterfaceRequestor)
-                     .getInterface(Components.interfaces.nsIDOMWindow); 
+                     .QueryInterface(Ci.nsIInterfaceRequestor)
+                     .getInterface(Ci.nsIDOMWindow); 
       if (mainWindow != window) {
         return;
       }

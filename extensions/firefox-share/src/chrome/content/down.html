@@ -27,6 +27,7 @@
 <html lang="en">
 <head>
     <title>F1 not available</title>
+
     <style type="text/css">
     * {
       margin: 0;
@@ -40,59 +41,57 @@
       font-style: inherit;
       font-size: 100%;
       vertical-align: top;
-      -moz-box-sizing: border-box;
-      -webkit-box-sizing: border-box;
       list-style-type: none;
+
+      -webkit-box-sizing: border-box;
+         -moz-box-sizing: border-box;
+              box-sizing: border-box;
     }
 
     body {
       font-size: 11px;
       font-family: "Lucida Grande", Verdana, sans-serif;
-      max-height: 113px;
-      overflow: hidden;
-      background-color: #fff;
-      background-position: bottom center;
-      background-repeat: no-repeat;
-      background-color: #fff;
     }
 
     div.status {
-      min-height: 113px;
-      padding: 0 10px;
-      overflow: hidden;
-      border-bottom: 1px solid #777;
-    }
-
-    div.status {
-      position: absolute;
-      width: 100%;
-      height: 113px;
-      line-height: 113px;
-      top: 0;
-      left: 0;
+      width: 400px;
+      height: 180px;
       color: #0a0a0a;
       font-size: 14px;
       text-align: center;
+      position: relative;
     }
 
     div.status.intermediate.error {
       background-color: rgba(255,115,0,0.75);
       color: #FFFFFF;
+
+      -webkit-box-shadow: 0 0 200px rgba(0, 0, 0, 0.25) inset;
+         -moz-box-shadow: 0 0 200px rgba(0, 0, 0, 0.25) inset;
+              box-shadow: 0 0 200px rgba(0, 0, 0, 0.25) inset;
     }
 
-    #statusErrorMessage {
-        display: inline-block;
-        margin-top: 3px;
+    table {
+      width: 100%;
+      height: 100%;
+      padding: 10px;
     }
 
-    #statusServerError {
-        line-height: 20px;
+    table td {
+      vertical-align: middle;
     }
+
     </style>
 </head>
 <body>
   <div class="status intermediate error">
-    Sorry, the F1 service is not available at the moment. Please try later.
+    <table>
+        <tr>
+            <td>
+                Sorry, the F1 service is not available at the moment.<br>Please try later.
+            </td>
+        </tr>
+    </table>
   </div>
 </body>
 </html>
