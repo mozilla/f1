@@ -31,14 +31,21 @@ function (require,   $,        hashDispatch) {
     $(function () {
         //Goofy test, but just need to weed out big non-Gecko browsers, not
         //a critical check if it goes wrong.
-        var isGecko = !!navigator.buildID;
+        var supported = !!navigator.buildID,
+            version = supported && navigator.userAgent.match(/Firefox\/([^\s]+)/);
 
+        //Do not allow pre-4.0 Firefox browsers. This test is goofy and prone
+        //to error, but err on the side of showing the button vs. hiding it,
+        //and allow add-on system to kick it out if it will not work.
+        if (supported && version) {
+            //Convert version to a number
+            version = parseFloat(version[1]);
 
+            supported = version > 3.99;
+        }
 
-        //Do not show install button for non-Gecko browsers. Even for Gecko
-        //browsers, the install may not work for all browser, but let AMO
-        //handle that notification.
-        if (!isGecko) {
+        //Do not show install button for unsupported browsers.
+        if (!supported) {
             $('#download').hide();
             $('#firefox').show();
         }
@@ -55,7 +62,7 @@ function (require,   $,        hashDispatch) {
 
         $('body')
             .delegate('#firefox', 'click', function (evt) {
-                location = 'http://getfirefox.com';
+                location = 'http://www.mozilla.com/en-US/firefox/beta/';
             })
             .delegate('.downloadXpi', 'click', function (evt) {
                 //For dev and staging, use local XPI
