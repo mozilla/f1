@@ -47,60 +47,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     options = shareOptions(),
     bodyDom, timer, pageInfo, sendData, showNew,
     accountPanels = [],
+    hashReload = false,
     store = storage();
-
-  function escapeHtml(text) {
-    return text ? text.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') : text;
-  }
-
-  function rawBase64(dataUrl) {
-    return dataUrl && dataUrl.replace("data:image/png;base64,", "");
-  }
-
-  jig.addFn({
-    thumb: function (options) {
-      var preview = options.previews && options.previews[0];
-      if (!preview) {
-        return "";
-      }
-      if (preview.http_url) {
-        return escapeHtml(preview.http_url);
-      }
-      // Return our data url, this is the thumbnail
-      return preview.base64;
-    },
-    preview: function (options) {
-      var preview = options.previews && options.previews[0];
-      return preview && preview.http_url;
-    },
-    preview_base64: function (options) {
-      // Strip the URL down to just the base64 content
-      var preview = options.previews && options.previews[0];
-      return preview && rawBase64(preview.base64);
-    },
-    link: function (options) {
-      return options.canonicalUrl || options.url;
-    },
-    cleanLink: function (url) {
-      return url ? url.replace(/^https?:\/\//, '').replace(/^www\./, '') : url;
-    },
-    profilePic: function (photos) {
-      //TODO: check for a thumbnail picture, hopefully one that is square.
-      return photos && photos[0] && photos[0].value || '/share/i/face2.png';
-    },
-    serviceName: function (domain) {
-      return actions[domain].name;
-    },
-    lastToShareType: function (shareTypes) {
-      var i, shareType;
-      for (i = shareTypes.length - 1; (shareType = shareTypes[i]); i--) {
-        if (shareType.showTo) {
-          return shareType;
-        }
-      }
-      return null;
-    }
-  });
 
   function close() {
     dispatch.pub('close');
@@ -124,6 +72,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }, 2000);
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
+      hashReload = true;
     }
 
     //Tell the extension that the size of the content may have changed.
@@ -174,6 +123,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       panel.saveData();
     });
     showStatus('statusAuth');
+  }
+
+  function checkBase64Preview() {
+    //Ask extension to generate base64 data if none available.
+    //Useful for sending previews in email.
+    var preview = options.previews && options.previews[0];
+    if (accounts.length && preview && preview.http_url && !preview.base64) {
+      dispatch.pub('generateBase64Preview', preview.http_url);
+    }
   }
 
   function sendMessage(data) {
@@ -237,7 +195,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var lastSelectionMatch = 0,
         accountsDom = $('#accounts'),
         fragment = document.createDocumentFragment(),
-        debugPanel, preview,
+        debugPanel,
         i = 0;
 
     $('#shareui').removeClass('hidden');
@@ -277,15 +235,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       debugPanel = new DebugPanel({}, accountsDom[0]);
     }
 
-    //Ask extension to generate base64 data if none available.
-    //Useful for sending previews in email.
-    preview = options.previews && options.previews[0];
-    if (accounts.length && preview && preview.http_url && !preview.base64) {
-      dispatch.sub('base64Preview', function (dataUrl) {
-        $('[name="picture_base64"]').val(rawBase64(dataUrl));
-      });
-      dispatch.pub('generateBase64Preview', preview.http_url);
-    }
+    checkBase64Preview();
 
     //If no matching accounts match the last selection clear it.
     if (lastSelectionMatch < 0 && !store.accountAdded && store.lastSelection) {
@@ -300,9 +250,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (store.accountAdded) {
       delete store.accountAdded;
     }
-
-    //Create ellipsis for anything wanting ... overflow
-    $(".overflow").textOverflow(null, true);
 
     //Inform extension the content size has changed.
     dispatch.pub('sizeToContent');
@@ -368,6 +315,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (options.prefs.system) {
       $(document.documentElement).addClass(options.prefs.system);
     }
+    if (options.ui === 'sidebar') {
+      $("#panelHeader").text('');
+      $("#closeLink").addClass('hidden');
+    }
 
     //Show the new link if appropriate.
     if (showNew) {
@@ -379,7 +330,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       sendMessage(data);
     });
 
-    //Hook up button for share history
     bodyDom = $('body');
     bodyDom
       .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
@@ -441,10 +391,28 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
     );
 
-    // watch for hash changes, reload if we do, this should be fixed up to be
-    // better than doing a reload
+    // watch for hash changes, update options and trigger
+    // update event. However, if it has been more than a day,
+    // refresh the UI.
+    var refreshStamp = (new Date()).getTime(),
+        //1 day.
+        refreshInterval = 1 * 24 * 60 * 60 * 1000;
+
     window.addEventListener("hashchange", function () {
-      location.reload();
+      var now = (new Date()).getTime();
+      if (hashReload || now - refreshStamp > refreshInterval) {
+        //Force contact with the server via the true argument.
+        location.reload(true);
+        hashReload = false;
+      } else {
+        options = shareOptions();
+        dispatch.pub('optionsChanged', options);
+        checkBase64Preview();
+
+        //Check that accounts are still available, but do it in the
+        //background.
+        accounts();
+      }
     }, false);
 
     //Get the most recent feed item, not important to do it last.

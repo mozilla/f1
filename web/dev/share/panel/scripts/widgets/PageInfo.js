@@ -25,8 +25,10 @@
 /*global define: false */
 "use strict";
 
-define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./PageInfo.html'],
-function (object,         Widget,         $,        template) {
+define([ 'blade/object', 'blade/Widget', 'blade/fn', 'jquery', 'dispatch',
+         './jigFuncs', 'text!./PageInfo.html', 'jquery.textOverflow'],
+function (object,         Widget,         fn,      $,        dispatch,
+          jigFuncs,     template) {
 
   //Define any global handlers
   $(function () {
@@ -40,10 +42,36 @@ function (object,         Widget,         $,        template) {
     return {
       template: template,
 
+      optionsChanged: function () {
+        //options have updated, update the UI.
+        var root = $(this.node),
+            opts = this.options;
+
+        root.find('.thumb').attr('src', jigFuncs.thumb(opts));
+        root.find('.title').html(opts.title);
+        root.find('.description').text(opts.description);
+        root.find('.url').html(jigFuncs.cleanLink(opts.url));
+        root.find('.shorturl').html(jigFuncs.cleanLink(opts.shortUrl));
+
+        //Update text overflow.
+        $(".overflow", this.node).textOverflow();
+      },
+
+      onCreate: function () {
+        this.optionsChangedSub = dispatch.sub('optionsChanged', fn.bind(this, function (options) {
+          this.options = options;
+          this.optionsChanged();
+        }));
+      },
+
       onRender: function () {
+        //Create ellipsis for anything wanting ... overflow
+        $(".overflow", this.node).textOverflow();
+      },
 
-
-
+      destroy: function () {
+        dispatch.unsub(this.optionsChangedSub);
+        parent(this, 'destroy');
       }
     };
   });

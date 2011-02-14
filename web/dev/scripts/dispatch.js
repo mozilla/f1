@@ -46,10 +46,15 @@ define(['jquery'], function ($) {
         if (evt.origin === targetOrigin || evt.origin === 'chrome://browser') {
           //Assume pub/sub has JSON data with properties named
           //'topic' and 'data'.
-          var message = JSON.parse(evt.data),
-            pubTopic = message.topic;
-          if (pubTopic && pubTopic === topic) {
-            callback(message.data);
+          try {
+            var message = JSON.parse(evt.data),
+              pubTopic = message.topic;
+            if (pubTopic && pubTopic === topic) {
+              callback(message.data);
+            }
+          } catch (e) {
+            //Just ignore messages that are not JSON. There are some, like
+            //the oauth_success messages
           }
         }
       };
