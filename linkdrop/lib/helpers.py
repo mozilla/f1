@@ -38,6 +38,7 @@ import logging
 
 
 from linkdrop.model.meta import Session
+from linkdrop.lib.metrics import metrics
 
 log = logging.getLogger(__name__)
 
@@ -123,6 +124,8 @@ def json_exception_response(func, *args, **kwargs):
         log.exception("%s(%s, %s) failed", func, args, kwargs)
         #pylons = get_pylons(args)
         #pylons.response.status_int = 500
+        metrics.track(get_pylons(args).request, 'unhandled-exception',
+                      function=func.__name__, error=e.__class__.__name__)
         return {
             'result': None,
             'error': {

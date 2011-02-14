@@ -31,6 +31,7 @@ from pylons.decorators.util import get_pylons
 
 from linkdrop.lib.base import BaseController, render
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
+from linkdrop.lib.metrics import metrics
 from linkdrop.lib.oauth import get_provider
 from linkdrop.lib.oauth.base import AccessException
 from linkdrop.model.types import UTCDateTime
@@ -78,6 +79,7 @@ OAuth authorization api.
                 for a in accts:
                     session[a.key] = a.to_dict()
             except:
+                log.exception('failed to signout from domain %s', domain)
                 session.clear()
         else:
             session.clear()
@@ -94,6 +96,10 @@ OAuth authorization api.
             acct.userid = userid
             acct.username = username
             Session.add(acct)
+            metrics.track(request, 'account-create', domain=domain)
+        else:
+            metrics.track(request, 'account-auth', domain=domain)
+
         if acct.key not in keys:
             keys.append(acct.key)
             session['account_keys'] = ','.join(keys)
@@ -136,8 +142,7 @@ OAuth authorization api.
         except AccessException, e:
             self._redirectException(e)
         except Exception, e:
-            import traceback
-            traceback.print_exc()
+            log.exception('failed to verify the account')
             self._redirectException(e)
         return redirect(session.get('end_point_success', config.get('oauth_success')))
 
