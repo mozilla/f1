@@ -171,6 +171,13 @@ function (object,         Widget,         $,        template,
       clearSavedData: function () {
         this.memStore = {};
         delete store[this.storeId];
+
+        //Also clear up the form data.
+        var root = $(this.bodyNode);
+        root.find('[name="to"]').val('');
+        root.find('[name="subject"]').val('');
+        root.find('[name="message"]').val('');
+        placeholder(this.bodyNode);
       },
 
       saveData: function () {
