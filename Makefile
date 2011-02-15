@@ -72,6 +72,7 @@ $(static_dir):
 
 	cd $(static_dir)/share/panel && node appcache.js
 	rm $(static_dir)/share/panel/appcache.js
+	rm $(static_dir)/share/panel/appcache.template
 
 	cd $(static_dir)/.. && ln -n -f -s $(version) current
 clean:
