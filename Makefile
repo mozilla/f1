@@ -70,6 +70,9 @@ $(static_dir):
 	cd $(static_dir)/share && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/share/panel && $(requirejs_dir)/build/build.sh build.js
 
+	cd $(static_dir)/share/panel && node appcache.js
+	rm $(static_dir)/share/panel/appcache.js
+
 	cd $(static_dir)/.. && ln -n -f -s $(version) current
 clean:
 	rm -rf $(objdir)
