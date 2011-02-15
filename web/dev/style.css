@@ -132,11 +132,11 @@ hr {
   cursor: pointer;
   position: absolute;
   top: 50%;
-  
+
   -webkit-border-radius: 2px;
      -moz-border-radius: 2px;
           border-radius: 2px;
-  
+
   background-image: -moz-linear-gradient(center top , #84c63c 0%, #5ea330 100%);
   background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #84c63c), color-stop(100%, #5ea330));
 }
@@ -170,6 +170,14 @@ hr {
     padding: 10px 0;
 }
 
+#header.row #no36 {
+  display: none;
+  position: absolute;
+  top: 50px;
+  left: 25px;
+  font-size: 11px;
+}
+
 #header.row #noButton {
   display: none;
 }
@@ -188,10 +196,10 @@ hr {
   margin: 20px 0 0;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 14px;
-  
+
   background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
   background-image:  -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
-  
+
   border: 1px solid #888888;
   padding: 5px 0;
   -moz-border-radius: 2px;
@@ -317,6 +325,13 @@ hr {
 #footer .c3 {
   border-top: 1px solid #e6e6e6;
   padding: 10px 0 0 0;
+}
+
+#info36 {
+  display: none;
+  color: #888;
+  font-size: 11px;
+  line-height: 11px;
 }
 
 #installFrame {
