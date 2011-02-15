@@ -21,7 +21,7 @@
  * Contributor(s):
  * */
 
-/*jslint */
+/*jslint regexp: false */
 /*global define: false, window: false, location: true, navigator: false */
 'use strict';
 
@@ -47,6 +47,8 @@ function (require,   $,        hashDispatch) {
         //Do not show install button for unsupported browsers.
         if (!supported) {
             $('#download').hide();
+            $('#no36').show();
+            $('#info36').show();
             $('#firefox').show();
         }
 
