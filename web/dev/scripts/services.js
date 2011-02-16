@@ -44,7 +44,7 @@ function (rdapi,   object,         TextCounter) {
     this.autoCompleteWidget = null;
 
     // set features
-    this.features = {
+    this.features = options.features || {
       counter: false,
       direct: false,
       subject: false

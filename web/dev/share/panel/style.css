@@ -416,6 +416,10 @@ button:focus {
   color: #535F6D;
 }
 
+.ui-accordion-content div.counter.TextCountOver {
+  color: #880000
+}
+
 .ui-accordion-content label {
   display: block;
   margin: 0 0 5px 0;
