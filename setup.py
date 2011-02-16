@@ -28,9 +28,11 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
+VERSION='0.1.9'
+
 setup(
     name='linkdrop',
-    version='0.1.9',
+    version=VERSION,
     description='',
     author='',
     author_email='',
@@ -74,3 +76,13 @@ setup(
     main = pylons.util:PylonsInstaller
     """,
 )
+
+import os
+basedir = os.path.join(os.getcwd(), "web")
+realdir = os.path.join(basedir, VERSION)
+linkdir = os.path.join(basedir, "current")
+if os.path.exists(linkdir):
+    os.unlink(linkdir)
+os.symlink(realdir, linkdir)
+
+
