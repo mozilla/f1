@@ -52,22 +52,22 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       return true;
     },
     startCounter: function (data) {
-      if (this.textlimit < 1) {
+      if (this.textLimit < 1) {
         return;
       }
       //Set up text counter
       if (!this.counter) {
         this.counter = new TextCounter($('#' + this.type + ' textarea.message'),
                                        $('#' + this.type + ' .counter'),
-                                       this.textlimit - this.urlsize);
+                                       this.textLimit - this.urlsize);
       }
       // Update counter. If using a short url from the web page itself, it could
       // potentially be a different length than a bit.ly url so account for
       // that. The + 1 is to account for a space before adding the URL to the
       // tweet.
       this.counter.updateLimit(data.shortUrl ?
-                               (this.textlimit - (data.shortUrl.length + 1)) :
-                               this.textlimit - this.urlsize);
+                               (this.textLimit - (data.shortUrl.length + 1)) :
+                               this.textLimit - this.urlsize);
     },
     getFormData: function () {
       var dom = $('#' + this.type);
@@ -536,8 +536,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     services.domainList.forEach(function (domain) {
       var data = services.domains[domain];
       data.domain = domain;
-      tabhtml += jig('#tabsTemplate', services.domains[domain]);
-      panelhtml += jig('#panelsTemplate', services.domains[domain]);
+
+      //Workaround to not show direct messaging for LinkedIn
+      if (domain === "linkedin.com") {
+        data.features.subject = false;
+      }
+
+      tabhtml += jig('#tabsTemplate', data);
+      panelhtml += jig('#panelsTemplate', data);
     });
     $('.nav .debugTab').before(tabhtml);
     $('#tabs #debug').before(panelhtml);
