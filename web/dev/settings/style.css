@@ -117,6 +117,30 @@ a:hover {
   text-decoration: underline;
 }
 
+/* From the uservoice feedback button */
+#feedback {
+    position: fixed;
+    top: 40%;
+    left: 0;
+    width: 25px;
+    height: 98px;
+    padding: 0;
+    margin: -45px 0 0;
+    text-indent: -1000px;
+    background-image: url("http://cdn.uservoice.com/images/widgets/en/feedback_tab_white.png");
+    background-position: 2px 50%;
+    background-color: red;
+    border-color: #FF0000 #FF0000 #FF0000 -moz-use-text-color;
+    border-style: outset outset outset none;
+    border-width: 1px 1px 1px medium;
+    z-index: 500;
+}
+#feedback:hover {
+    text-decoration: none;
+    background-color: #0066CC;
+    border-color: #0066CC #0066CC #0066CC -moz-use-text-color;
+}
+
 strong {
   font-weight: bold;
 }
