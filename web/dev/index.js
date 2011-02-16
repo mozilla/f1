@@ -78,11 +78,6 @@ function (require,   $,        hashDispatch) {
                 evt.preventDefault();
             });
 
-        $(window)
-            .bind('load resize', function () {
-                var h = $('button.download').height();
-                $('button.download').css({ 'margin-top' : (-h / 2) });
-            });
     });
 
 });

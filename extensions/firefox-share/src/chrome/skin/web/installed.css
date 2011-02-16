@@ -25,13 +25,13 @@
   display: none;
 }
 
-#header.row #noButton {
+#header.row #noButtonFF4 {
   display: block;
   text-align: right;
   color: #888;
 }
 
-#header.row #noButton img {
+#header.row #noButtonFF4 img {
   vertical-align:text-bottom;
 }
 /* XXX we could replace the download with something else */
