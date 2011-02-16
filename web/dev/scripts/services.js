@@ -40,17 +40,16 @@ function (rdapi,   object,         TextCounter) {
     this.type = name.replace(/\s/g, '').toLowerCase();
     this.tabName = this.type + 'Tab';
     this.icon = 'i/' + this.type + 'Icon.png';
-    this.shorten = false;
     this.autoCompleteWidget = null;
 
     // set features
-    this.features = options.features || {
+    this.features = {
       counter: false,
       direct: false,
       subject: false
     };
 
-    object.mixin(this, options);
+    object.mixin(this, options, true);
   }
   SvcBase.constructor = SvcBase;
   SvcBase.prototype = {
