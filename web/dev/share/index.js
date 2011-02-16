@@ -34,6 +34,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           placeholder,   TextCounter,   AutoComplete,   dispatch,   accounts,
           storage,   services,   object) {
 
+  //Tell the services module that this is FF 3.6 and so autocomplete data
+  //needs to be different than what is supported in FF4.
+  services.isFF36 = true;
+
   var showStatus,
     actions = services.domains,
     hash = location.href.split('#')[1],
@@ -76,7 +80,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         subject: dom.find('[name="subject"]').val().trim() || '',
         message: dom.find('textarea.message').val().trim() || '',
         picture: dom.find('[name="picture"]').val().trim() || '',
-        picture_base64: dom.find('[name="picture_base64"]').val().trim() || '',
         canonicalUrl: dom.find('[name="link"]').val().trim() || '',
         title: dom.find('[name="title"]').val().trim() || '',
         description: dom.find('[name="description"]').val().trim() || '',
@@ -98,7 +101,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
       if (data.previews && data.previews.length) {
         dom.find('[name="picture"]').val(data.previews[0]);
-        dom.find('[name="picture_base64"]').val(options.previews[0]);
       }
       if (data.canonicalUrl || data.url) {
         dom.find('[name="link"]').val(data.canonicalUrl || data.url);
@@ -269,17 +271,17 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         contacts = svc.getContacts(store),
         acdata;
     if (!contacts) {
-      contacts = {};
+      contacts = [];
     }
 
     if (!svc.autoCompleteWidget) {
       svc.autoCompleteWidget = new AutoComplete(toNode);
     }
-    acdata = {
-      domain: serviceName,
-      contacts: contacts
-    };
-    dispatch.pub('autoCompleteData', acdata);
+
+    //Autocomplete data for old extension is just an array. So it can only
+    //have one list, not a list per service. Too bad, but will just have
+    //to live with it until this UI is retired.
+    dispatch.pub('autoCompleteData', contacts);
   }
 
   /**
@@ -305,8 +307,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             var entries = json.result.entry,
                 data = [];
 
-            data = svc.getFormattedContacts(entries);
-
+            data = svc.get36FormattedContacts(entries);
             svc.setContacts(store, data);
             updateAutoComplete(svcAccount.domain);
           }

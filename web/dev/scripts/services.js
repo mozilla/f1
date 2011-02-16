@@ -27,8 +27,8 @@
 
 'use strict';
 
-define([ 'rdapi', "blade/object", "TextCounter"],
-function (rdapi,   object,         TextCounter) {
+define([ 'rdapi', "blade/object", "blade/array", "TextCounter"],
+function (rdapi,   object,         array,         TextCounter) {
 
   var svcs, prop;
 
@@ -58,7 +58,14 @@ function (rdapi,   object,         TextCounter) {
     },
     getContacts: function (store) {
       if (store[this.type + 'Contacts']) {
-        return JSON.parse(store[this.type + 'Contacts']);
+        var contacts = JSON.parse(store[this.type + 'Contacts']);
+        // If the contacts data is an array, wipe it out, and start fresh
+        // since the format has changed.
+        if (!svcs.isFF36 && contacts && array.is(contacts)) {
+          contacts = null;
+          delete store[this.type + 'Contacts'];
+        }
+        return contacts;
       }
       return null;
     },
@@ -79,6 +86,11 @@ function (rdapi,   object,         TextCounter) {
         }
       });
       return data;
+    },
+    // stub function that should not return data for non-mail services
+    // for the FF 3.6 extension.
+    get36FormattedContacts: function () {
+      return null;
     }
   };
 
@@ -108,6 +120,24 @@ function (rdapi,   object,         TextCounter) {
               userid: null,
               username: null
             };
+        });
+      }
+    });
+    return data;
+  };
+
+  // The old top browser UI in the 3.6 extension expects the contacts data
+  // as an array.
+  EmailSvcBase.prototype.get36FormattedContacts = function (entries) {
+    var data = [];
+    entries.forEach(function (entry) {
+      if (entry.emails && entry.emails.length) {
+        entry.emails.forEach(function (email) {
+          var displayName = entry.displayName ? entry.displayName : email.value;
+          data.push({
+            displayName: displayName,
+            email: email.value
+          });
         });
       }
     });
