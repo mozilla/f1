@@ -280,8 +280,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
 
     //Autocomplete data for old extension is just an array. So it can only
     //have one list, not a list per service. Too bad, but will just have
-    //to live with it until this UI is retired.
-    dispatch.pub('autoCompleteData', contacts);
+    //to live with it until this UI is retired. So only do this if the
+    //domain is gmail, just trying to pick a common default one.
+    if (serviceName === 'google.com') {
+      dispatch.pub('autoCompleteData', contacts);
+    }
   }
 
   /**
