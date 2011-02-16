@@ -19,6 +19,8 @@ import random
 # the profiler ready
 #import linkdrop.debug
 
+from linkdrop.lib.metrics import metrics
+
 _ERROR_MSG = 'Cross Site Request Forgery detected. Request aborted.'
 
 _POST_FORM_RE = \
@@ -59,6 +61,7 @@ class CsrfMiddleware(object):
                 request_csrf_token = environ.get('HTTP_X_CSRF', request.POST.get('csrftoken'))
                 if request_csrf_token != csrf_token:
                     resp = HTTPForbidden(_ERROR_MSG)
+                    metrics.track(request, 'invalid-session')
                     resp.headers['X-Error'] = 'CSRF'
                 else:
                     resp = request.get_response(self.app)

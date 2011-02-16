@@ -22,31 +22,50 @@
  * */
 
 'use strict';
-/*jslint indent: 2, es5: true, plusplus: false, onevar: false */
-/*global document: false, setInterval: false, clearInterval: false,
+/*jslint indent: 2, es5: true, plusplus: false, onevar: false,
+  bitwise: false, nomen: false */
+/*global document: false, setInterval: false, clearInterval: false, Services: false,
   Application: false, gBrowser: false, window: false, Components: false,
   Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false,
   XPCOMUtils: false, ffshareAutoCompleteData: false, AddonManager: false,
-  BrowserToolboxCustomizeDone: false, InjectorInit: false, injector: false */
+  BrowserToolboxCustomizeDone: false, InjectorInit: false, injector: false,
+  getComputedStyle: false, gNavToolbox: false, XPCNativeWrapper: false,
+  Image: false */
 
 var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 (function () {
-
-  Components.utils.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
-  Components.utils.import("resource://ffshare/modules/injector.js");
-  Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
-
-  // This add-on manager is only available in Firefox 4+
-  try {
-    Components.utils.import("resource://gre/modules/AddonManager.jsm");
-  } catch (e) {
-  }
-
-  var slice = Array.prototype.slice,
+  var Cc = Components.classes,
+      Ci = Components.interfaces,
+      Cu = Components.utils,
+      slice = Array.prototype.slice,
       ostring = Object.prototype.toString,
       empty = {}, fn,
       buttonId = 'ffshare-toolbar-button';
+
+  // width/height tracking for the panel, initial values are defaults to
+  // show the configure status panel
+  // with fx3, we have to set the dimensions of the panel, with fx4, we have to
+  // set the dimensions of the browser in the panel.
+  var defaultWidth = 400, lastWidth = 400;
+  var defaultHeight = 180, lastHeight = 180;
+  var panelWidthMargin = 41;
+  var panelHeightMargin = 45;
+
+  Cu.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
+  Cu.import("resource://ffshare/modules/injector.js");
+  Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
+  // Firefox 4 has the nice Services module
+  Cu.import("resource://gre/modules/Services.jsm");
+
+  //////  Extensions to the Services object //////
+
+  XPCOMUtils.defineLazyServiceGetter(Services, "bookmarks",
+                                     "@mozilla.org/browser/nav-bookmarks-service;1",
+                                     "nsINavBookmarksService");
+
+  Cu.import("resource://gre/modules/AddonManager.jsm");
 
   function getButton() {
     return document.getElementById(buttonId);
@@ -61,6 +80,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   }
 
+  //Allows setting multiple attributes, but using a simple JS
+  //object construction.
+  function setAttrs(node, obj) {
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        node.setAttribute(prop, obj[prop]);
+      }
+    }
+  }
+
   function unescapeXml(text) {
     return text.replace(/&lt;|&#60;/g, '<')
                .replace(/&gt;|&#62;/g, '>')
@@ -70,11 +99,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   }
 
   function log(msg) {
-    Application.console.log('.' + msg); // avoid clearing on empty log
+    Cu.reportError('.' + msg); // avoid clearing on empty log
   }
 
   function error(msg) {
-    Components.utils.reportError('.' + msg); // avoid clearing on empty log
+    Cu.reportError('.' + msg); // avoid clearing on empty log
   }
 
   fn = {
@@ -120,15 +149,27 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
-  function StateProgressListener(tabFrame) {
-    this.tabFrame = tabFrame;
+  /**
+   * This progress listener looks for HTTP codes that are errors/not
+   * successses and puts up the "server down" page bundled in the extension.
+   * This listener is related to the HttpActivityObserver, but that one handles
+   * cases when the server is just not reachable via the network. This one
+   * handles the cases where the server is reachable but is freaking out.
+   */
+  function StateProgressListener(browser) {
+    this.browser = browser;
   }
 
   StateProgressListener.prototype = {
     // detect communication from the iframe via location setting
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
-                                           Components.interfaces.nsISupportsWeakReference,
-                                           Components.interfaces.nsISupports]),
+    QueryInterface: function (aIID) {
+      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
+          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
+          aIID.equals(Components.interfaces.nsISupports)) {
+        return this;
+      }
+      throw Components.results.NS_NOINTERFACE;
+    },
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       var flags = Components.interfaces.nsIWebProgressListener;
@@ -141,7 +182,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         } catch (e) {
           //Could be just an invalid URL or not an http thing. Need to be sure to not endlessly
           //load error page if it is already loaded.
-          if (this.tabFrame.shareFrame.contentWindow.location.href !== ffshare.errorPage) {
+          //Also ignore this state for about:blank which is apparently used as
+          //a placeholder by FF while first creating the panel/browser element.
+          var href = this.browser.contentWindow.location.href;
+          if (href !== ffshare.errorPage && href !== 'about:blank') {
             status = 1000;
           } else {
             status = 200;
@@ -149,33 +193,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         }
 
         if (status < 200 || status > 399) {
-          this.tabFrame.shareFrame.contentWindow.location = ffshare.errorPage;
-        } else {
-          this.tabFrame.shareFrame.contentWindow.wrappedJSObject.addEventListener("message", fn.bind(this, function (evt) {
-            //Make sure we only act on messages from the page we expect.
-            if (ffshare.prefs.share_url.indexOf(evt.origin) === 0) {
-              //Mesages have the following properties:
-              //name: the string name of the messsage
-              //data: the JSON structure of data for the message.
-              var message = evt.data, skip = false, topic, data;
-              try {
-                //Only some messages are valid JSON, only care about the ones
-                //that are.
-                message = JSON.parse(message);
-              } catch (e) {
-                skip = true;
-              }
-
-              if (!skip) {
-                topic = message.topic;
-                data = message.data;
-
-                if (topic && this.tabFrame[topic]) {
-                  this.tabFrame[topic](data);
-                }
-              }
-            }
-          }), false);
+          this.browser.contentWindow.location = ffshare.errorPage;
         }
       }
     },
@@ -189,13 +207,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   };
 
   var firstRunProgressListener = {
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
-                                           Components.interfaces.nsISupportsWeakReference,
-                                           Components.interfaces.nsISupports]),
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
+                                           Ci.nsISupportsWeakReference,
+                                           Ci.nsISupports]),
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       // maybe can just use onLocationChange, but I don't think so?
-      var flags = Components.interfaces.nsIWebProgressListener;
+      var flags = Ci.nsIWebProgressListener;
 
       // This seems like an excessive check but works very well
       if (aStateFlags & flags.STATE_IS_WINDOW &&
@@ -217,12 +235,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   };
 
   var canShareProgressListener = {
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
-                                           Components.interfaces.nsISupportsWeakReference,
-                                           Components.interfaces.nsISupports]),
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
+                                           Ci.nsISupportsWeakReference,
+                                           Ci.nsISupports]),
 
     onLocationChange: function (aWebProgress, aRequest, aLocation) {
       ffshare.canShareURI(aLocation);
+      //dump("onlocationchange causing switchtab\n");
+      window.setTimeout(function () {
+        ffshare.switchTab(true);
+      }, 0);
     },
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
@@ -231,53 +253,259 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
   };
 
-  function NavProgressListener(tabFrame) {
-    this.tabFrame = tabFrame;
+
+  /**
+   * This observer looks for conditions where the server is not reachable
+   * by the network, and puts up the "server down" page. This observer is
+   * related to the StateProgressListener, but that one handles the cases
+   * where the server is reachable by the network but causes an error.
+   */
+  var nsIHttpActivityObserver = Ci.nsIHttpActivityObserver;
+  function HttpActivityObserver(browser) {
+    this.browser = browser;
   }
+  HttpActivityObserver.prototype = {
+    // copied largely from firebug net.js
+    registered: false,
 
-  NavProgressListener.prototype = {
-    // detect navigational events for the tab, so we can close
+    registerObserver: function () {
+      if (!Ci.nsIHttpActivityDistributor) {
+        return;
+      }
 
-    QueryInterface: XPCOMUtils.generateQI([Components.interfaces.nsIWebProgressListener,
-                                           Components.interfaces.nsISupportsWeakReference,
-                                           Components.interfaces.nsISupports]),
+      if (this.registered) {
+        return;
+      }
 
-    onLocationChange: function (/*in nsIWebProgress*/ aWebProgress,
-                          /*in nsIRequest*/ aRequest,
-                          /*in nsIURI*/ aLocation) {
-      this.tabFrame.hide();
+      var distributor = this.getActivityDistributor();
+      if (!distributor) {
+        return;
+      }
+
+      distributor.addObserver(this);
+      this.registered = true;
     },
 
-    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
-    onSecurityChange: function (aWebProgress, aRequest, aState) {},
-    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
-    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
-  };
+    unregisterObserver: function () {
+      if (!Ci.nsIHttpActivityDistributor) {
+        return;
+      }
 
-  var TabFrame = function (tab) {
-    this.tab = tab;
-    this.visible = false;
-  };
+      if (!this.registered) {
+        return;
+      }
 
-  TabFrame.prototype = {
+      var distributor = this.getActivityDistributor();
+      if (!distributor) {
+        return;
+      }
 
-    registerListener: function () {
-      var shareFrameProgress = this.shareFrame.webProgress;
-
-      this.stateProgressListener = new StateProgressListener(this);
-      shareFrameProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
-
-      this.navProgressListener = new NavProgressListener(this);
-      gBrowser.getBrowserForTab(this.tab).webProgress.addProgressListener(this.navProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_LOCATION);
+      distributor.removeObserver(this);
+      this.registered = false;
     },
 
-    unregisterListener: function (listener) {
-      var shareFrameProgress = this.shareFrame.webProgress;
-      shareFrameProgress.removeProgressListener(this.stateProgressListener);
+    getActivityDistributor: function () {
+      var activityDistributor = null;
+      try {
+        var dist = Cc["@mozilla.org/network/http-activity-distributor;1"];
+        if (dist) {
+          activityDistributor = dist.getService(Ci.nsIHttpActivityDistributor);
+        }
+      } catch (e) {
+        log("nsIHttpActivityDistributor no available " + e + "\n");
+      }
+      delete this.activityDistributor;
+      return (this.activityDistributor = activityDistributor);
+    },
+
+    getWindowForRequest: function (channel) {
+      var lctx;
+      try {
+        if (channel && channel.notificationCallbacks) {
+          lctx = channel.notificationCallbacks.getInterface(Ci.nsILoadContext);
+          return lctx.associatedWindow;
+        }
+      } catch(e) {}
+      try {
+        if (channel && channel.loadGroup && channel.loadGroup.notificationCallbacks) {
+          lctx = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext);
+          return lctx.associatedWindow;
+        }
+      } catch(e) {}
+      return null;
+    },
+
+    getDocumentForWin: function (win) {
+      try {
+        var theDoc = win.QueryInterface(Ci.nsIInterfaceRequestor)
+                          .getInterface(Ci.nsIWebNavigation)
+                          .QueryInterface(Ci.nsIDocShell)
+                          .chromeEventHandler.contentDocument;
+        //dump("got a document "+theDoc+"\n");
+        try {
+          return XPCNativeWrapper.unwrap(theDoc);
+        } catch (e) {
+          return theDoc.wrappedJSObject;
+        }
+      } catch(e) {}
+      return null;
+    },
+
+    getBrowserForRequest: function (channel) {
+      if (!this.browser.contentDocument)
+        return null;
+      var win = this.getWindowForRequest(channel);
+      if (!win) {
+        return null;
+      }
+      var theDoc = this.getDocumentForWin(win);
+      if (theDoc !== this.browser.contentDocument.wrappedJSObject) {
+        //dump("they dont match "+theDoc+" !== "+this.browser.contentDocument.wrappedJSObject+"\n");
+        return null;
+      }
+      return this.browser;
+    },
+
+    /* nsIActivityObserver */
+    observeActivity: function (httpChannel, activityType, activitySubtype,
+                              timestamp, extraSizeData, extraStringData) {
+      try {
+        if (httpChannel instanceof Ci.nsIHttpChannel) {
+          this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
+                extraSizeData, extraStringData);
+        }
+      } catch (e) {
+        log("observeActivity: EXCEPTION " + e + "\n");
+      }
+    },
+
+    observeRequest: function (httpChannel, activityType, activitySubtype,
+                             timestamp, extraSizeData, extraStringData) {
+      var browser = this.getBrowserForRequest(httpChannel);
+      if (!browser) {
+        return;
+      }
+
+      if (activityType === nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION) {
+        if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER) {
+          //dump("ACTIVITY_SUBTYPE_REQUEST_HEADER for "+httpChannel.name+" \n");
+          browser.__response_headers_received = false;
+        } else
+        if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE) {
+          // If we don't have response headers then we did not recieve a response,
+          // but skip the case where the page is the about:blank filler used
+          // by the browser when first loading a browser.
+          //dump("ACTIVITY_SUBTYPE_TRANSACTION_CLOSE for "+httpChannel.name+" \n");
+          if (!browser.__response_headers_received && browser.currentURI.spec !== 'about:blank') {
+            //dump("loading error page for "+httpChannel.name+"\n");
+            browser.loadURI(ffshare.errorPage);
+            gBrowser.selectedTab.shareState.forceReload = true;
+          }
+        } else
+        if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_HEADER) {
+          //dump("ACTIVITY_SUBTYPE_RESPONSE_HEADER for "+httpChannel.name+" \n");
+          browser.__response_headers_received = true;
+        }
+      }
+    },
+
+    /* nsISupports */
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports,
+                                           Ci.nsIActivityObserver])
+
+  };
+
+
+  // singleton controller for the share panel
+  // A state object is attached to each browser tab when the share panel
+  // is opened for that tab.  The state object is removed from the current
+  // tab when the panel is closed.
+  var sharePanel = {
+    init: function() {
+      this.browser = document.getElementById('share-browser');
+      this.panel = document.getElementById('share-popup');
+
+      // hookup esc to also close the panel
+      // XXX not working, maybe need to listen on window
+      this.panel.addEventListener('keypress', fn.bind(this, function (e) {
+        if (e.keyCode === 27 /*"VK_ESC"*/) {
+          this.close();
+        }
+      }), false);
+
+      this.loadListener = fn.bind(this, function (evt) {
+        var self = this;
+        window.setTimeout(function () {
+          self.sizeToContent();
+        }, 0);
+      });
+      this.browser.addEventListener("load", this.loadListener, true);
+
+      Services.obs.addObserver(this, 'content-document-global-created', false);
+
+      this.httpObserver = new HttpActivityObserver(this.browser);
+      this.httpObserver.registerObserver();
+
+      var webProgress = this.browser.webProgress;
+      this.stateProgressListener = new StateProgressListener(this.browser);
+      webProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
+
+    },
+    
+    shutdown: function() {
+      Services.obs.removeObserver(this, 'content-document-global-created');
+      
+      this.httpObserver.unregisterObserver();
+
+      var webProgress = this.browser.webProgress;
+      webProgress.removeProgressListener(this.stateProgressListener);
       this.stateProgressListener = null;
+    },
 
-      gBrowser.getBrowserForTab(this.tab).webProgress.removeProgressListener(this.navProgressListener);
-      this.navProgressListener = null;
+    observe: function (aSubject, aTopic, aData) {
+      if (!aSubject.location.href) {
+        return;
+      }
+
+      // is this window a child of OUR XUL window?
+      var mainWindow = aSubject.QueryInterface(Ci.nsIInterfaceRequestor)
+                     .getInterface(Ci.nsIWebNavigation)
+                     .QueryInterface(Ci.nsIDocShellTreeItem)
+                     .rootTreeItem
+                     .QueryInterface(Ci.nsIInterfaceRequestor)
+                     .getInterface(Ci.nsIDOMWindow);
+      mainWindow = mainWindow.wrappedJSObject ? mainWindow.wrappedJSObject : mainWindow;
+      if (mainWindow !== this.panel.ownerDocument.defaultView) {
+        return;
+      }
+      // listen for messages now
+      var contentWindow = this.browser.contentWindow;
+      contentWindow = contentWindow.wrappedJSObject ? contentWindow.wrappedJSObject : contentWindow;
+      contentWindow.addEventListener("message", fn.bind(this, function (evt) {
+        //Make sure we only act on messages from the page we expect.
+        if (ffshare.prefs.share_url.indexOf(evt.origin) === 0) {
+          //Mesages have the following properties:
+          //name: the string name of the messsage
+          //data: the JSON structure of data for the message.
+          var message = evt.data, skip = false, topic, data;
+
+          try {
+            //Only some messages are valid JSON, only care about the ones
+            //that are.
+            message = JSON.parse(message);
+          } catch (e) {
+            skip = true;
+          }
+          if (!skip) {
+            topic = message.topic;
+            data = message.data;
+
+            if (topic && this[topic]) {
+              this[topic](data);
+            }
+          }
+        }
+      }), false);
     },
 
     //Fired when a pref changes from content space. the pref object has
@@ -286,111 +514,34 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + "." + pref.name, pref.value);
     },
 
-    hide: function () {
-      this.unregisterListener();
-      this.changeHeight(0, fn.bind(this, function () {
-        this.shareFrame.parentNode.removeChild(this.shareFrame);
-        this.shareFrame = null;
-      }));
-      this.visible = false;
-    },
-
-    createShareFrame: function (options) {
+    getOptions: function(options) {
       options = options || {};
-
-      var browser = gBrowser.getBrowserForTab(this.tab),
-          iframeNode = null, url;
-      var notificationBox = gBrowser.getNotificationBox(browser);
-
-      if (iframeNode === null) {
-        //Create the iframe.
-        iframeNode = document.createElement("browser");
-
-        //Allow the rich autocomplete, something built into gecko.
-        iframeNode.setAttribute('autocompletepopup', 'PopupAutoCompleteRichResult');
-        //Use the Firefox global context menu so we get spellcheck and such
-        iframeNode.setAttribute("contextmenu", "contentAreaContextMenu");
-
-        iframeNode.className = 'ffshare-frame';
-        iframeNode.style.width = '100%';
-        iframeNode.style.height = '114px';
-        //Make sure it can go all the way to zero.
-        iframeNode.style.minHeight = 0;
-
-        mixin(options, {
-          version: ffshare.version,
-          title: this.getPageTitle(),
-          description: this.getPageDescription(),
-          medium: this.getPageMedium(),
-          url: gBrowser.currentURI.spec,
-          canonicalUrl: this.getCanonicalURL(),
-          shortUrl: this.getShortURL(),
-          previews: this.previews(),
-          siteName: this.getSiteName(),
-          prefs: {
-            system: ffshare.prefs.system,
-            bookmarking: ffshare.prefs.bookmarking,
-            use_accel_key: ffshare.prefs.use_accel_key
-          }
-        });
-
-        if (!options.previews.length && !options.thumbnail) {
-          // then we need to make our own thumbnail
-          options.thumbnail = this.getThumbnailData();
+      mixin(options, {
+        version: ffshare.version,
+        title: this.getPageTitle(),
+        description: this.getPageDescription(),
+        medium: this.getPageMedium(),
+        url: gBrowser.currentURI.spec,
+        canonicalUrl: this.getCanonicalURL(),
+        shortUrl: this.getShortURL(),
+        previews: this.previews(),
+        siteName: this.getSiteName(),
+        prefs: {
+          system: ffshare.prefs.system,
+          bookmarking: ffshare.prefs.bookmarking,
+          use_accel_key: ffshare.prefs.use_accel_key
         }
-        url = ffshare.prefs.share_url +
-                  '#options=' + encodeURIComponent(JSON.stringify(options));
-
-        iframeNode.setAttribute("type", "content");
-        iframeNode.setAttribute("src", url);
-        notificationBox.insertBefore(iframeNode, notificationBox.firstChild);
-      }
-      return (this.shareFrame = iframeNode);
-    },
-
-    show: function (options) {
-      var tabURI = gBrowser.getBrowserForTab(this.tab).currentURI,
-          tabUrl = tabURI.spec,
-          iframeNode;
-
-      if (!ffshare.isValidURI(tabURI)) {
-        return;
-      }
-
-      iframeNode = this.shareFrame || this.createShareFrame(options);
-
-      if (ffshare.prefs.frontpage_url === tabUrl) {
-        var browser = gBrowser.getBrowserForTab(this.tab);
-        // If we're looking at the front page we should clear the first run helper
-        var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
-        evt.initEvent("hideInstalled", true, false);
-        browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
-      }
-
-      /*
-      //Figure out if CSS transitions can be used. Right now, trying to
-      //transition the height as the page loads is too choppy, and waiting
-      //for the iframe to load before doing the animation is too long to wait.
-      if ('MozTransition' in iframeNode.style) {
-        this.useCssTransition = true;
-        iframeNode.addEventListener("transitionend", fn.bind(this, 'onTransitionEnd'), true);
-      } else {
-        this.useCssTransition = false;
-      }
-      iframeNode.addEventListener('DOMContentLoaded', fn.bind(this, 'matchIframeContentHeight'), true);
-      */
-
-      this.visible = true;
-
-      this.registerListener();
+      });
+      return options;
     },
 
     /**
+     * PostMessage APIs
      * Called by content page when share is successful.
      * @param {Object} data info about the share.
      */
     success: function (data) {
-      this.hide();
+      this.close();
 
       if (ffshare.prefs.bookmarking) {
         var tags = ['shared', 'f1'];
@@ -401,38 +552,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           tags.push("facebook");
         }
 
-        var ios = Cc["@mozilla.org/network/io-service;1"].
-               getService(Ci.nsIIOService);
-        var nsiuri = ios.newURI(gBrowser.currentURI.spec, null, null);
-        var bmsvc = Components.classes["@mozilla.org/browser/nav-bookmarks-service;1"]
-                    .getService(Components.interfaces.nsINavBookmarksService);
-        bmsvc.insertBookmark(bmsvc.unfiledBookmarksFolder, nsiuri, bmsvc.DEFAULT_INDEX, this.getPageTitle().trim());
+        var nsiuri = Services.io.newURI(gBrowser.currentURI.spec, null, null);
+        Services.bookmarks.insertBookmark(Services.bookmarks.unfiledBookmarksFolder,
+                                          nsiuri, Services.bookmarks.DEFAULT_INDEX,
+                                          this.getPageTitle().trim());
 
         PlacesUtils.tagging.tagURI(nsiuri, tags);
-      }
-    },
-
-    changeHeight: function (height, onEnd) {
-
-      if (this.useCssTransition) {
-        this.onHeightEnd = onEnd;
-      }
-
-      this.shareFrame.style.height = height + 'px';
-
-      if (!this.useCssTransition && onEnd) {
-        onEnd();
-      }
-    },
-
-    matchIframeContentHeight: function () {
-      var height = this.shareFrame.contentDocument.documentElement.getBoundingClientRect().height;
-      this.changeHeight(height);
-    },
-
-    onTransitionEnd: function (evt) {
-      if (this.onHeightEnd) {
-        this.onHeightEnd();
       }
     },
 
@@ -496,9 +621,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // According to Facebook - (only the first 3 are interesting)
     // Valid values for medium_type are audio, image, video, news, blog, and mult.
     getPageMedium: function () {
-      var metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']");
-      for (var i = 0; i < metas.length; i++) {
-        var content = metas[i].getAttribute("content");
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:type']"),
+          i, content;
+      for (i = 0; i < metas.length; i++) {
+        content = metas[i].getAttribute("content");
+        if (content) {
+          return unescapeXml(content);
+        }
+      }
+      metas = gBrowser.contentDocument.querySelectorAll("meta[name='medium']");
+      for (i = 0; i < metas.length; i++) {
+        content = metas[i].getAttribute("content");
         if (content) {
           return unescapeXml(content);
         }
@@ -545,12 +678,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       // Finally try some hacks for certain sites
-      return this.getURLHacks();
+      return this.getCanonicalURLHacks();
     },
 
     // This will likely be a collection of hacks for certain sites we want to
     // work but currently don't provide the right kind of meta data
-    getURLHacks: function () {
+    getCanonicalURLHacks: function () {
       // Google Maps Hack :( obviously this regex isn't robust
       if (/^maps\.google\.[a-zA-Z]{2,5}/.test(gBrowser.currentURI.host)) {
         return gBrowser.contentDocument.getElementById("link").getAttribute("href");
@@ -563,7 +696,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var canvas = gBrowser.contentDocument.createElement("canvas"); // where?
       canvas.setAttribute('width', '90');
       canvas.setAttribute('height', '70');
-      var tab = this.tab;
+      var tab = gBrowser.selectedTab;
       var win = gBrowser.getBrowserForTab(tab).contentWindow;
       var aspectRatio = canvas.width / canvas.height;
       var w = win.innerWidth + win.scrollMaxX;
@@ -586,7 +719,55 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ctx.scale(scale, scale);
       ctx.drawWindow(win, 0, 0, w, h, "rgb(255,255,255)");
       ctx.restore();
-      return canvas.toDataURL("image/png", "");
+      var img = canvas.toDataURL("image/png", "");
+      return img;
+    },
+
+    /**
+     * Method used to generate thumbnail data from a postMessage
+     * originating from the share UI in content-space
+     */
+    generateBase64Preview: function (imgUrl) {
+      var img = new Image();
+      img.onload = fn.bind(this, function () {
+
+        var canvas = gBrowser.contentDocument.createElement("canvas"),
+            win = this.browser.contentWindow.wrappedJSObject,
+            w = img.width,
+            h = img.height,
+            dataUrl, canvasW, canvasH, ctx, scale;
+
+        //Put upper constraints on the image size.
+        if (w > 10000) {
+          w = 10000;
+        }
+        if (h > 10000) {
+          h = 10000;
+        }
+
+        canvas.setAttribute('width', '90');
+        canvas.setAttribute('height', '70');
+
+        canvasW = canvas.width;
+        canvasH = canvas.height;
+        ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvasW, canvasH);
+        ctx.save();
+
+        scale = canvasH / h;
+        ctx.scale(scale, scale);
+        ctx.drawImage(img, 0, 0, w, h);
+        ctx.restore();
+        dataUrl = canvas.toDataURL("image/png", "");
+
+        win.postMessage(JSON.stringify({
+          topic: 'base64Preview',
+          data: dataUrl
+        }), win.location.protocol + "//" + win.location.host);
+
+      });
+      img.src = imgUrl;
+
     },
 
     previews: function () {
@@ -600,16 +781,30 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       for (i = 0; i < metas.length; i++) {
         content = metas[i].getAttribute("content");
         if (content) {
-          previews.push(content);
+          previews.push({
+            http_url : content,
+            base64 : ""
+          });
         }
       }
 
       for (i = 0; i < links.length; i++) {
         content = links[i].getAttribute("href");
         if (content) {
-          previews.push(content);
+          previews.push({
+            http_url : content,
+            base64 : ""
+          });
         }
       }
+
+      // Push in the page thumbnail last in case there aren't others
+      previews.push(
+        {
+          http_url : "",
+          base64 : this.getThumbnailData()
+        }
+      );
       return previews;
     },
 
@@ -625,26 +820,114 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     autoCompleteData: function (data) {
       ffshareAutoCompleteData.set(data);
-    }
+    },
+    
+    sizeToContent: function () {
+      var doc = this.browser.contentDocument.wrappedJSObject;
+      var wrapper = doc && doc.getElementById('wrapper');
+      if (!wrapper) {
+        return;
+      }
+      // XXX argh, we really should look at the panel and see what margins/padding
+      // sizes are and calculate that way, however this is pretty complex due
+      // to how the background image of the panel is used,
+      //dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
+      var h = lastWidth > defaultHeight ? lastWidth: defaultHeight;
+      lastWidth = wrapper.scrollWidth;
+      lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight : h;
+      this.browser.style.width = lastWidth + "px";
+      this.browser.style.height = lastHeight + "px";
+    },
+
+
+    // panelUI operations
+    close: function () {
+      this.panel.hidePopup();
+      gBrowser.selectedTab.shareState = null;
+      // Always ensure the button is unchecked when the panel is hidden
+      getButton().removeAttribute("checked");
+    },
+
+    hide: function () {
+      this.close();
+    },
+    
+
+    show: function (options) {
+      var tabURI = gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI,
+          tabUrl = tabURI.spec;
+
+      if (!ffshare.isValidURI(tabURI)) {
+        return;
+      }
+      var currentState = gBrowser.selectedTab.shareState;
+      options = this.getOptions(options);
+      
+      gBrowser.selectedTab.shareState = {
+        options: options, // currently not used for anything
+        forceReload: false
+      };
+
+      var url = ffshare.prefs.share_url +
+                '#options=' + encodeURIComponent(JSON.stringify(options));
+
+      // adjust the size
+      this.browser.style.width = lastWidth + 'px';
+      this.browser.style.height = lastHeight + 'px';
+      //Make sure it can go all the way to zero.
+      this.browser.style.minHeight = 0;
+
+      if (currentState && currentState.forceReload)
+        this.browser.loadURI(url);
+      else
+        this.browser.setAttribute('src', url);
+
+      var button = getButton();
+      // Always ensure the button is checked if the panel is open
+      button.setAttribute("checked", true);
+
+      // Always ensure we aren't glowing if the person clicks on the button
+      button.removeAttribute("firstRun");
+
+      // fx 4
+      var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
+      this.panel.openPopup(button, position, 0, 0, false, false);
+    }    
   };
 
-  function sendJustInstalledEvent(browser, rect) {
-    browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
-    var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
-    evt.initEvent("buttonX", true, false);
-    browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
+
+  function sendJustInstalledEvent(win, url) {
+    var buttonNode = win.document.getElementById(buttonId);
+    //Button may not be there if customized and removed from toolbar.
+    if (buttonNode) {
+      var tab = win.gBrowser.loadOneTab(url, { referrerURI: null,
+                                               charset: null,
+                                               postData: null,
+                                               inBackground: false,
+                                               allowThirdPartyFixup: null });
+      // select here and there in case the load was quick
+      win.gBrowser.selectedTab = tab;
+      tab.addEventListener("load", function tabevent() {
+                                      tab.removeEventListener("load", tabevent, true);
+                                      win.gBrowser.selectedTab  = tab;
+                                    }, true);
+      buttonNode.setAttribute("firstRun", "true");
+    }
   }
 
-  function makeInstalledLoadHandler(browser, rect) {
-    return function () {
-      sendJustInstalledEvent(browser, rect);
+  function makeInstalledLoadHandler(win, url) {
+    var handler = function () {
+      win.removeEventListener("load", handler, true);
+      sendJustInstalledEvent(win, url);
     };
+    return handler;
   }
 
   ffshare = {
 
     version: '',
     prefs: {
+      // We only use Application.prefs for the nice getValue/setValue methods
       system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
       share_url: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
       frontpage_url: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
@@ -676,19 +959,29 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ffshare.prefs.previous_version = version;
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".previous_version", version);
 
-      // Place the button in the toolbar.
+      // Place the button in the toolbar, before the URL bar.
       try {
-        //Not needed since we add to the end.
-        //var afterId = "urlbar-container";   // ID of element to insert after
+        var beforeId = "urlbar-container";   // ID of element to insert before
+
         var navBar  = document.getElementById("nav-bar"),
-            curSet  = navBar.currentSet.split(","), set;
+            curSet  = navBar.currentSet.split(","),
+            set, pos;
+
+        //TODO: REMOVE this at some point. 0.7.x versions of the extension
+        //added the button to the end of the list, and this list is not updated
+        //on uninstall. So for now remove the buttonId from the end of the list.
+        //This could be frustrating for users how explicitly move it to the end
+        //for for at least the first 0.8.x release, do this so that most people
+        //get the new position, then remove this line in the next release.
+        if (curSet[curSet.length - 1] === buttonId) {
+          curSet.pop();
+        }
 
         if (curSet.indexOf(buttonId) === -1) {
-          //The next two lines place it between url and search bars.
-          //pos = curSet.indexOf(afterId) + 1 || curSet.length;
-          //var set = curSet.slice(0, pos).concat(buttonId).concat(curSet.slice(pos));
-          //Add it to the end of the toolbar.
-          set = curSet.concat(buttonId).join(",");
+          //Insert our ID before the URL bar ID.
+          pos = curSet.indexOf(beforeId) || curSet.length;
+          curSet.splice(pos, 0, buttonId);
+          set = curSet.join(",");
 
           navBar.setAttribute("currentset", set);
           navBar.currentSet = set;
@@ -699,7 +992,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           catch (e) {}
         }
       }
-      catch (e) {}
+      catch (ex) {}
 
       if (ffshare.prefs.firstRun) {
         //Make sure to set the pref first to avoid bad things if later code
@@ -708,45 +1001,35 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
 
         //Register first run listener.
-        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
+        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Ci.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
         this.addedFirstRunProgressListener = true;
       }
     },
 
     onLoad: function () {
-      //Figure out if this is a first install/upgrade case.
-      if (typeof AddonManager !== 'undefined') {
-        //Firefox 4
-        AddonManager.getAddonByID(FFSHARE_EXT_ID, function (addon) {
-          ffshare.onInstallUpgrade(addon.version);
-        });
-      } else {
-        //Firefox before version 4.
-        try {
-          var em = Components.classes["@mozilla.org/extensions/manager;1"]
-                   .getService(Components.interfaces.nsIExtensionManager),
-              addon = em.getItemForID(FFSHARE_EXT_ID);
-          ffshare.onInstallUpgrade(addon.version);
-        } catch (e) {}
-      }
+      sharePanel.init();
+
+      AddonManager.getAddonByID(FFSHARE_EXT_ID, function (addon) {
+        ffshare.onInstallUpgrade(addon.version);
+      });
 
       try {
         gBrowser.addProgressListener(canShareProgressListener);
-      } catch (e) {
-        error(e);
+      } catch (ex) {
+        error(ex);
       }
 
       document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
 
       this.initKeyCode();
 
-      this.prefService = Components.classes["@mozilla.org/preferences-service;1"]
-                             .getService(Components.interfaces.nsIPrefService)
-                             .getBranch("extensions." + FFSHARE_EXT_ID + ".")
-                             .QueryInterface(Components.interfaces.nsIPrefBranch2);
+      Services.prefs.addObserver("extensions." + FFSHARE_EXT_ID + ".", this, false);
 
-      this.prefService.addObserver("", this, false);
-
+      //Events triggered by TabView (panorama)
+      this.tabViewShowListener = fn.bind(this, ffshare.onTabViewShow);
+      this.tabViewHideListener = fn.bind(this, ffshare.onTabViewHide);
+      window.addEventListener('tabviewshow', this.tabViewShowListener, false);
+      window.addEventListener('tabviewhide', this.tabViewHideListener, false);
     },
 
     onUnload: function () {
@@ -763,9 +1046,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
 
-      this.prefService.removeObserver("", this);
-      this.prefService = null;
+      Services.prefs.removeObserver("extensions." + FFSHARE_EXT_ID + ".", this);
 
+      //Events triggered by TabView (panorama)
+      window.removeEventListener('tabviewshow', this.tabViewShowListener, false);
+      window.removeEventListener('tabviewhide', this.tabViewHideListener, false);
+      this.tabViewShowListener = null;
+      this.tabViewHideListener = null;
     },
 
     onFirstRun: function () {
@@ -782,73 +1069,56 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       //Taken from https://developer.mozilla.org/en/Code_snippets/Tabbed_browser
       function openAndReuseOneTabPerURL(url) {
-        var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
-                           .getService(Components.interfaces.nsIWindowMediator);
-        var browserEnumerator = wm.getEnumerator("navigator:browser"),
+        var browserEnumerator = Services.wm.getEnumerator("navigator:browser"),
             rect, browser, buttonNode;
-
         // Check each browser instance for our URL
         var found = false;
-        while (!found && browserEnumerator.hasMoreElements()) {
-          var browserWin = browserEnumerator.getNext();
-          var tabbrowser = browserWin.gBrowser;
+        try {
+          while (!found && browserEnumerator.hasMoreElements()) {
+            var browserWin = browserEnumerator.getNext();
+            var tabbrowser = browserWin.gBrowser;
 
-          // Check each tab of this browser instance
-          var numTabs = tabbrowser.browsers.length;
-          for (var index = 0; index < numTabs; index++) {
-            var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-            if (url === currentBrowser.currentURI.spec) {
+            // Sometimes we don't get a tabbrowser element
+            if (tabbrowser) {
+              // Check each tab of this browser instance
+              var numTabs = tabbrowser.browsers.length;
+              for (var index = 0; index < numTabs; index++) {
+                var currentBrowser = tabbrowser.getBrowserAtIndex(index);
+                if (currentBrowser.currentURI &&
+                    url === currentBrowser.currentURI.spec) {
 
-              // The URL is already opened. Select this tab.
-              tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
+                  // The URL is already opened. Select this tab.
+                  tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
 
-              // Focus *this* browser-window
-              browserWin.focus();
+                  // Focus *this* browser-window
+                  browserWin.focus();
 
-              buttonNode = browserWin.document.getElementById(buttonId);
-              //Button may not be there if customized and removed from toolbar.
-              if (buttonNode) {
-                rect = buttonNode.getBoundingClientRect();
-                browser = gBrowser.getBrowserForTab(tabbrowser.selectedTab);
+                  buttonNode = browserWin.document.getElementById(buttonId);
+                  //Button may not be there if customized and removed from toolbar.
+                  if (buttonNode) {
+                    buttonNode.setAttribute("firstRun", "true");
+                  }
 
-                // try setting the button location as the window may have already loaded
-                try {
-                  sendJustInstalledEvent(browser, rect);
-                } catch (ignore) { }
-
-                // Add the load handler in case the window hasn't finished loaded (unlikely)
-                browser.addEventListener("load", makeInstalledLoadHandler(browser, rect), true);
+                  found = true;
+                  break;
+                }
               }
-
-              found = true;
-              break;
             }
           }
-        }
+        // Minefield likes to error out in this loop sometimes
+        } catch (ignore) { }
 
         // Our URL isn't open. Open it now.
         if (!found) {
-          var recentWindow = wm.getMostRecentWindow("navigator:browser");
+          var recentWindow = Services.wm.getMostRecentWindow("navigator:browser");
           if (recentWindow) {
-            buttonNode = recentWindow.document.getElementById(buttonId);
-            //Button may not be there if customized and removed from toolbar.
-            if (buttonNode) {
-              rect = buttonNode.getBoundingClientRect();
-              // Use the existing browser (recent) Window
-              var tab = recentWindow.gBrowser.loadOneTab(url, { referrerURI: null,
-                                                               charset: null,
-                                                               postData: null,
-                                                               inBackground: false,
-                                                               allowThirdPartyFixup: null });
-              browser = gBrowser.getBrowserForTab(tab);
-              browser.addEventListener("load",
-                                      function buttonX() {
-                                        browser.removeEventListener("load", buttonX, true);
-                                        browser.contentWindow.wrappedJSObject.buttonX = rect.left + rect.width / 2;
-                                        var evt = browser.contentWindow.wrappedJSObject.document.createEvent("Event");
-                                        evt.initEvent("buttonX", true, false);
-                                        browser.contentWindow.wrappedJSObject.dispatchEvent(evt);
-                                      }, true);
+            // If our window is opened and ready just open the tab
+            //   possible values: (loading, complete, or uninitialized)
+            if (recentWindow.document.readyState === "complete") {
+              sendJustInstalledEvent(recentWindow, url);
+            } else {
+              // Otherwise the window, while existing, might not be ready yet so we wait to open our tab
+              recentWindow.addEventListener("load", makeInstalledLoadHandler(recentWindow, url), true);
             }
           }
           else {
@@ -885,25 +1155,28 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     observe: function (subject, topic, data) {
+      var pref;
+
       if (topic !== "nsPref:changed") {
         return;
       }
 
-      if ("use_accel_key" === data) {
+      if ("extensions." + FFSHARE_EXT_ID + ".use_accel_key" === data) {
         try {
-          var pref = subject.QueryInterface(Components.interfaces.nsIPrefBranch);
-          ffshare.setAccelKey(pref.getBoolPref("use_accel_key"));
+          pref = subject.QueryInterface(Ci.nsIPrefBranch);
+          //dump("topic: " + topic + " -- data: " + data + " == pref: " + pref.getBoolPref(data) + "\n");
+          ffshare.setAccelKey(pref.getBoolPref(data));
         } catch (e) {
           error(e);
         }
       }
-
     },
 
     setAccelKey: function (keyOn) {
       var oldKey = document.getElementById(this.oldKeycodeId),
           f1Key = document.getElementById(this.keycodeId),
-          keyset = document.getElementById("mainKeyset");
+          keyset = document.getElementById("mainKeyset"),
+          p;
 
       if (keyOn) {
         try {
@@ -920,24 +1193,25 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           if (oldKey) {
             oldKey.setAttribute("keycode", this.keycode);
           }
-        } catch (e) {
-          error(e);
+        } catch (ex) {
+          error(ex);
         }
       }
 
       // now we invalidate the keyset cache so our changes take effect
-      var p = keyset.parentNode;
+      p = keyset.parentNode;
       p.appendChild(p.removeChild(keyset));
 
     },
 
     isValidURI: function (aURI) {
-      //Only open the share frame for http/https urls, file urls for testing.
-      return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') || aURI.schemeIs('file')));
+      //Only open the share frame for http/https/ftp urls, file urls for testing.
+      return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') ||
+                       aURI.schemeIs('file') || aURI.schemeIs('ftp')));
     },
 
     canShareURI: function (aURI) {
-      var command = document.getElementById("cmd_openSharePage");
+      var command = document.getElementById("cmd_toggleSharePage");
       try {
         if (this.isValidURI(aURI)) {
           command.removeAttribute("disabled");
@@ -968,33 +1242,58 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       } catch (ignore) { }
     },
 
-    onOpenShareCommand: function (e) {
-      this.toggle();
+    switchTab: function (waitForLoad) {
+      if (waitForLoad) {
+        // this double-loads the share panel since image data may not be
+        // available yet
+        let self = this;
+        gBrowser.contentWindow.addEventListener('DOMContentLoaded', function() {
+          self.switchTab(false);
+        }, true);
+      }
+      var selectedTab = gBrowser.selectedTab;
+      var visible = document.getElementById('share-popup').state == 'open';
+      if (visible && !selectedTab.shareState) {
+        sharePanel.hide();
+      }
+      if (selectedTab.shareState) {
+        window.setTimeout(function () {
+          sharePanel.show({});
+        }, 0);
+      }
     },
 
-    toggle: function (options) {
-      var selectedTab = gBrowser.selectedTab,
-          tabFrame = selectedTab.ffshareTabFrame;
-      if (!tabFrame) {
-        tabFrame = new TabFrame(selectedTab);
-        selectedTab.ffshareTabFrame = tabFrame;
+    onTabViewShow: function (e) {
+      // Triggered by TabView (panorama). Always hide it if being shown.
+      if (document.getElementById('share-popup').state == 'open') {
+        sharePanel.hide();
       }
+    },
 
-      if (tabFrame.visible) {
-        tabFrame.hide();
+    onTabViewHide: function (e) {
+      // Triggered by TabView (panorama). Restore share panel if needed.
+      // Hmm this never seems to be called? browser-tabview.js shows
+      // creation of a 'tabviewhide' event, but this function does
+      // not seem to be called.
+      this.switchTab();
+    },
+
+    togglePanel: function (options) {
+      if (document.getElementById('share-popup').state == 'open') {
+        sharePanel.close();
       } else {
-        tabFrame.show(options);
+        sharePanel.show(options);
       }
     }
   };
 
   if (!ffshare.prefs.share_url) {
     if (ffshare.prefs.system === 'dev') {
-      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/share/';
+      ffshare.prefs.share_url = 'http://linkdrop.caraveo.com:5000/share/panel/';
     } else if (ffshare.prefs.system === 'staging') {
-      ffshare.prefs.share_url = 'https://f1-staging.mozillamessaging.com/share/';
+      ffshare.prefs.share_url = 'https://f1-staging.mozillamessaging.com/share/panel/';
     } else {
-      ffshare.prefs.share_url = 'https://f1.mozillamessaging.com/share/';
+      ffshare.prefs.share_url = 'https://f1.mozillamessaging.com/share/panel/';
     }
   }
 
@@ -1014,7 +1313,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     script: null, // null == use injected default script
     getapi: function () {
       return function (options) {
-        ffshare.toggle(options);
+        ffshare.togglePanel(options);
       };
     }
   };

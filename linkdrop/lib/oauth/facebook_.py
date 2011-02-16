@@ -33,13 +33,14 @@ import httplib2
 import urllib
 import random
 import copy
+import logging
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from linkdrop.lib.oauth.base import OAuth2
 
 domain = 'facebook.com'
-
+log = logging.getLogger(domain)
 
 # this function is a derivative of:
 # http://code.activestate.com/recipes/146306-http-client-to-post-using-multipartform-data/
@@ -210,36 +211,76 @@ class api():
                         'status': status})
           return error
 
-     def rawcall(self, url, body):
+     def rawcall(self, url, body=None, method="GET"):
           url = url +"?"+urllib.urlencode(dict(access_token=self.access_token))
-
-          content_type, body = encode_multipart_formdata(body)
-          headers = {
-               'Content-type': content_type,
-               'Content-Length': str(len(body))
-          }
-          resp, content = httplib2.Http().request(url, 'POST', headers=headers, body=body)
+          headers = None
+          if body:
+               content_type, body = encode_multipart_formdata(body)
+               headers = {
+                    'Content-type': content_type,
+                    'Content-Length': str(len(body))
+               }
+          resp, content = httplib2.Http().request(url, method=method, headers=headers, body=body)
 
           data = json.loads(content)
           result = error = None
           if 'id' in data:
                result = data
                result[domain] = data['id']
+          elif 'data' in data:
+               result = data
+               result[domain] = None
           else:
                error = self._make_error(data, resp)
 
           return result, error
 
+     # feed supports message, picture, link, name, caption, description, source
+     # map our stuff to theirs
+     post_map = {
+          'link': 'link',
+          'title': 'name',
+          'description': 'description',
+          'picture': 'picture',
+          'caption': 'caption',
+          'source': 'source'
+     }
      def sendmessage(self, message, options={}):
-          url = config.get("oauth.facebook.com.feed", "https://graph.facebook.com/me/feed")
+          direct = options.get('to', None)
+          if direct:
+               url = "https://graph.facebook.com/%s/feed" % (direct,)
+          else:
+               url = config.get("oauth.facebook.com.feed", "https://graph.facebook.com/me/feed")
           body = {
                "message": message
           }
+          for ours, yours in self.post_map.items():
+               if ours in options:
+                    body[yours] = options[ours]
 
-          for arg in ['link', 'name', 'description', 'picture']:
-               if arg in options:
-                    body[arg] = options[arg]
-
-          return self.rawcall(url, body)
+          return self.rawcall(url, body, "POST")
 
 
+     def getcontacts(self, start=0, page=25, group=None):
+          # for twitter we get only those people who we follow and who follow us
+          # since this data is used for direct messaging
+          url = "https://graph.facebook.com/me/groups"
+          result, error = self.rawcall(url)
+          if error:
+               return result, error
+          
+          groups = []
+          for group in result['data']:
+               groups.append({
+                    'displayName': group.get('name'),
+                    'accounts': [{'userid': group.get('id'), 'username': None, 'domain': domain}]
+               })
+
+          connectedto = {
+              'entry': groups,
+              'itemsPerPage': len(groups),
+              'startIndex':   0,
+              'totalResults': len(groups),
+          }
+
+          return connectedto, None

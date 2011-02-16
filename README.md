@@ -47,14 +47,14 @@ Run the web server. 'reload' is useful for development, the webserver restarts o
 
     paster serve --reload development.ini
 
-Then visit: http://127.0.0.1:5000/ for an index of api examples
+Then visit: [http://127.0.0.1:5000/](http://127.0.0.1:5000/) for an index of api examples
 
 
 ## Setting up a valid Google domain for OpenID+OAuth
 
 You have to have access to a valid domain that google can get to and where you can install an html file.
 
-Visit: https://www.google.com/accounts/ManageDomains
+Visit: [https://www.google.com/accounts/ManageDomains](https://www.google.com/accounts/ManageDomains)
 
 Add your domain, follow the rest of their instructions.
 

@@ -27,6 +27,7 @@ from linkdrop.lib.oauth import google_
 #from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
 from linkdrop.lib.oauth import twitter_
 from linkdrop.lib.oauth import yahoo_
+from linkdrop.lib.oauth import linkedin_
 
 __all__ = ['get_provider']
 
@@ -36,7 +37,8 @@ _providers = {
     facebook_.domain: facebook_,
     google_.domain: google_,
     "googleapps.com": google_,
-    yahoo_.domain: yahoo_
+    yahoo_.domain: yahoo_,
+    linkedin_.domain: linkedin_
 }
 
 def get_provider(provider):

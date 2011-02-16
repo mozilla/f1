@@ -30,7 +30,7 @@ except ImportError:
 
 setup(
     name='linkdrop',
-    version='0.1.5',
+    version='0.1.9',
     description='',
     author='',
     author_email='',
@@ -45,9 +45,9 @@ setup(
         "python-dateutil",
         "python-openid",
         "python-memcached",
-        "twitter",
         "gdata", # google api support
         "sqlalchemy-migrate>=0.5.4",
+        "twitter>=1.4.2"
     ],
     setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),
@@ -63,6 +63,7 @@ setup(
     entry_points="""
     [paste.app_factory]
     main = linkdrop.config.middleware:make_app
+    static = linkdrop.static:make_static
 
     [paste.filter_app_factory]
     csrf = linkdrop.csrf:make_csrf_filter_app

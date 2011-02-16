@@ -39,6 +39,7 @@ from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
 from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
+from linkdrop.lib.metrics import metrics
 
 from linkdrop.model.meta import Session
 from linkdrop.model import History, Link
@@ -99,6 +100,9 @@ Subject line for emails, not supported by all services.
             api_arg('picture', 'string', False, None, None, """
 URL to publicly available thumbnail, not supported by all services.
 """),
+            api_arg('picture_base64', 'string', False, None, None, """
+Base 64 encoded PNG version of the picture used for attaching to emails.
+"""),
             api_arg('description', 'string', False, None, None, """
 Site provided description of the shared item, not supported by all services.
 """),
@@ -132,6 +136,7 @@ Site provided description of the shared item, not supported by all services.
                      'message': "no user session exists, auth required",
                      'status': 401
             }
+            metrics.track(request, 'send-unauthed', domain=domain)
             return {'result': result, 'error': error}
 
         provider = get_provider(domain)
@@ -152,29 +157,35 @@ Site provided description of the shared item, not supported by all services.
 
         args = copy.copy(request.POST)
         if shorten and not shorturl and longurl:
+            link_timer = metrics.start_timer(request, long_url=longurl)
             u = urlparse(longurl)
             if not u.scheme:
                 longurl = 'http://' + longurl
             shorturl = Link.get_or_create(longurl).short_url
+            link_timer.track('link-shorten', short_url=shorturl)
             args['shorturl'] = shorturl
 
+        timer = metrics.start_timer(request, domain=domain, message_len=len(message),
+                                    long_url=longurl, short_url=shorturl)
         # send the item.
         try:
             result, error = provider.api(acct).sendmessage(message, args)
         except ValueError, e:
-            import traceback
-            traceback.print_exc()
+            # XXX - I doubt we really want a full exception logged here?
+            log.exception('error providing item to %s: %s', domain, e)
             # XXX we need to handle this better, but if for some reason the
             # oauth values are bad we will get a ValueError raised
             error = {'provider': domain,
                      'message': "not logged in or no user account for that domain",
                      'status': 401
             }
+            timer.track('send-error', error=error)
             return {'result': result, 'error': error}
 
         if error:
+            timer.track('send-error', error=error)
             assert not result
-            log.info("send failure: %r", error)
+            log.error("send failure: %r %r %r", username, userid, error)
         else:
             # create a new record in the history table.
             assert result
@@ -198,5 +209,6 @@ Site provided description of the shared item, not supported by all services.
             result['shorturl'] = shorturl
             result['from'] = userid
             result['to'] = to
+            timer.track('send-success')
         # no redirects requests, just return the response.
         return {'result': result, 'error': error}

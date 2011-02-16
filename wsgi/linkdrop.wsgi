@@ -1,6 +1,13 @@
 # Find ourselves
-import os.path
+import os, sys
 basedir = os.path.abspath(os.path.dirname(__file__))
+__here__ = os.path.dirname(__file__)
+__parent__ = os.path.dirname(__here__)
+
+sys.path.append(__parent__)
+
+from paste.script.util.logging_config import fileConfig
+fileConfig('%s/development.ini' % __parent__) 
 
 from paste.deploy import loadapp
 
