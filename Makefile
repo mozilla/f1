@@ -62,7 +62,7 @@ web: $(static_dir)
 $(static_dir):
 	rsync -av $(web_dir)/ $(static_dir)/
 
-	perl -i -pe "s:version='[^']+':version='$(version)':" $(TOPSRCDIR)/setup.py
+	perl -i -pe "s:VERSION='[^']+':VERSION='$(version)':" $(TOPSRCDIR)/setup.py
 	find $(static_dir) -name \*.html | xargs perl -i -pe 's:/dev/:/$(version)/:go'
 
 	cd $(static_dir) && $(requirejs_dir)/build/build.sh build.js
