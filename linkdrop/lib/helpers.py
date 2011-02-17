@@ -37,7 +37,6 @@ from webhelpers.html import literal
 import logging
 
 
-from linkdrop.model.meta import Session
 from linkdrop.lib.metrics import metrics
 
 log = logging.getLogger(__name__)
@@ -105,14 +104,6 @@ def safeHTML(s):
     return parser.result
 ## end of http://code.activestate.com/recipes/52281/ }}}
 
-
-@decorator
-def exception_rollback(func, *args, **kwargs):
-    try:
-        return func(*args, **kwargs)
-    except Exception, e:
-        Session.rollback()
-        raise
 
 @decorator
 def json_exception_response(func, *args, **kwargs):

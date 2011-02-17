@@ -35,11 +35,6 @@ from linkdrop.lib.helpers import json_exception_response, api_response, api_entr
 from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
 
-from linkdrop.model.meta import Session
-from linkdrop.model.links import Link
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import and_
-
 log = logging.getLogger(__name__)
 
 class ContactsController(BaseController):
