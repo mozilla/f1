@@ -46,7 +46,7 @@ function (require,   $,        hashDispatch) {
 
         //Do not show install button for unsupported browsers.
         if (!supported) {
-            $('#download').hide();
+            $('#downloadFF4').hide();
             $('#no36').show();
             $('#info36').show();
             $('#firefox').show();
