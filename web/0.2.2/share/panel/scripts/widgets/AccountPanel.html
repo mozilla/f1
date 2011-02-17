@@ -1,0 +1,63 @@
+<div class="hbox {svc.type} user">
+    <span class="arrow"></span>
+    <span class="icon {svc.type}"></span>
+    <h3 class="boxFlex overflow">{svc.name}</h3>
+    <span class="username">{displayName}</span>
+</div>
+
+<div id="{svc.type}" class="{svc.type} {className}">
+  <div class="padding">
+    <form name="{svc.type}Send" class="hbox messageForm" action="#">
+      <div class="user inactive col">
+        <input type="hidden" name="domain" value="{svcAccount.domain}" />
+        <input type="hidden" name="userid" value="{svcAccount.userid}" />
+        <input type="hidden" name="username" value="{svcAccount.username}" />
+        <input type="hidden" name="picture" value="{preview(options)}" />
+        <input type="hidden" name="picture_base64" value="{preview_base64(options)}" />
+        <input type="hidden" name="link" value="{link(options)}" />
+        <input type="hidden" name="title" value="{options.title}" />
+        <input type="hidden" name="caption" value="{options.caption}" />
+        <input type="hidden" name="description" value="{options.description}" />
+        <span class="avatar"><img class="avatar" src="{profilePic(account.photos)}"></span>
+      </div>
+      <div class="message boxFlex addressing">
+        {gt(svc.shareTypes.length, 1) [}
+          <div class="shareTypeSection hbox">
+            <div class="shareTypeSelectSection">
+              <label for="shareType" class="shareTypeLabel">{strings.shareTypeLabel}:</label>
+              <select name="shareType" class="shareType">
+                {svc.shareTypes [}
+                  <option value="{type}">{name}</option>
+                {]}
+              </select>
+            </div>
+            {eq(svc.shareTypes.length, 2) [}
+              <a class="shareType2 boxFlex" href="#shareType2">send to {svc.shareTypes[1].name} instead?</a>
+            {]}
+            <div class="toSection hiddenImportant boxFlex">
+              {. lastType lastToShareType(svc.shareTypes)}
+              <label for="to" class="toLabel">{lastType.toLabel}:</label>
+              <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}"/>
+            </div>
+          </div>
+        {] [}
+          {svc.features.direct [}
+            <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}"/>
+            {svc.features.subject [}
+              <input name="subject" placeholder="subject" type="text" value="{options.subject}"/>
+            {]}
+          {]}
+        {]}
+        <textarea class="message compose" placeholder="Type your message here, and we'll attach the link when you send." name="message">{options.message}</textarea>
+        <div class="accountActions hbox">
+          <div class="boxFlex">
+            {svc.features.counter [}
+              <div class="counter"></div>
+            {]}
+          </div>
+          <button class="share" type="submit">share</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
