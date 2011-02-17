@@ -40,6 +40,7 @@ from linkdrop.lib.helpers import json_exception_response, api_response, api_entr
 from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
+from linkdrop.lib.shortener import shorten_link
 
 log = logging.getLogger(__name__)
 
@@ -156,7 +157,7 @@ Site provided description of the shared item, not supported by all services.
             u = urlparse(longurl)
             if not u.scheme:
                 longurl = 'http://' + longurl
-            shorturl = Link.get_or_create(longurl).short_url
+            shorturl = shorten_link(longurl)
             link_timer.track('link-shorten', short_url=shorturl)
             args['shorturl'] = shorturl
 
