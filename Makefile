@@ -1,4 +1,4 @@
-version := 0.2.1
+version := 0.2.2
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
