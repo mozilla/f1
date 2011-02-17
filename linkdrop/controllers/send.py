@@ -40,11 +40,7 @@ from linkdrop.lib.helpers import json_exception_response, api_response, api_entr
 from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
-
-from linkdrop.model.meta import Session
-from linkdrop.model import History, Link
-from linkdrop.model.types import UTCDateTime
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from linkdrop.lib.shortener import shorten_link
 
 log = logging.getLogger(__name__)
 
@@ -161,7 +157,7 @@ Site provided description of the shared item, not supported by all services.
             u = urlparse(longurl)
             if not u.scheme:
                 longurl = 'http://' + longurl
-            shorturl = Link.get_or_create(longurl).short_url
+            shorturl = shorten_link(longurl)
             link_timer.track('link-shorten', short_url=shorturl)
             args['shorturl'] = shorturl
 
@@ -189,23 +185,6 @@ Site provided description of the shared item, not supported by all services.
         else:
             # create a new record in the history table.
             assert result
-            if asbool(config.get('history_enabled', True)):
-                # this is faster, but still want to look further into SA perf
-                #data = {
-                #    'json_attributes': json.dumps(dict(request.POST)),
-                #    'account_id': acct.get('id'),
-                #    'published': UTCDateTime.now()
-                #}
-                #Session.execute("INSERT DELAYED INTO history (json_attributes, account_id, published) VALUES (:json_attributes, :account_id, :published)",
-                #                data)
-
-                history = History()
-                history.account_id = acct.get('id')
-                history.published = UTCDateTime.now()
-                for key, val in request.POST.items():
-                    setattr(history, key, val)
-                Session.add(history)
-                Session.commit()
             result['shorturl'] = shorturl
             result['from'] = userid
             result['to'] = to

@@ -21,13 +21,15 @@
 # Contributor(s):
 #
 
-"""The application's model objects"""
-from linkdrop.model.meta import Session, Base
-from linkdrop.model.account import Account
-from linkdrop.model.history import History
-from linkdrop.model.links import Link
+import cgi
+import json
+import urllib
+from pylons import config, url
 
-def init_model(engine):
-    """Call me before using any of the tables or classes in the model"""
-    Session.configure(bind=engine)
-    Base.metadata.create_all(bind=Session.bind)
+def shorten_link(long_url):
+    longUrl = cgi.escape(long_url)
+    bitly_userid= config.get('bitly.userid')
+    bitly_key = config.get('bitly.key')
+    bitly_result = urllib.urlopen("http://api.bit.ly/v3/shorten?login=%(bitly_userid)s&apiKey=%(bitly_key)s&longUrl=%(longUrl)s&format=json" % locals()).read()
+    bitly_data = json.loads(bitly_result)['data']
+    return bitly_data["url"]

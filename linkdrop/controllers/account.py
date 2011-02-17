@@ -23,6 +23,8 @@
 
 import logging
 import urllib, cgi, json
+from datetime import datetime
+from uuid import uuid1
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -34,12 +36,6 @@ from linkdrop.lib.helpers import json_exception_response, api_response, api_entr
 from linkdrop.lib.metrics import metrics
 from linkdrop.lib.oauth import get_provider
 from linkdrop.lib.oauth.base import AccessException
-from linkdrop.model.types import UTCDateTime
-
-from linkdrop.model.meta import Session
-from linkdrop.model.account import Account
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import and_, not_
 
 log = logging.getLogger(__name__)
 
@@ -67,17 +63,15 @@ OAuth authorization api.
         if domain and username or userid:
             try:
                 keys = [k for k in session.get('account_keys', '').split(',') if k]
+                rem_keys = keys[:]
                 for k in keys:
-                    session.pop(k)
-                _and = [Account.domain==domain]
-                if username:
-                    _and.append(Account.username==username)
-                if userid:
-                    _and.append(Account.userid==userid)
-                accts = Session.query(Account).filter(Account.key.in_(keys)).filter(not_(and_(*_and))).all()
-                session['account_keys'] = ','.join([a.key for a in accts])
-                for a in accts:
-                    session[a.key] = a.to_dict()
+                    acct = session[k]
+                    if acct['domain']==domain and \
+                       (not username or acct['username']==username) and \
+                       (not userid or acct['userid']==userid):
+                        session.pop(k)
+                        rem_keys.remove(k)
+                session['account_keys'] = ','.join(rem_keys)
             except:
                 log.exception('failed to signout from domain %s', domain)
                 session.clear()
@@ -88,34 +82,30 @@ OAuth authorization api.
     def _get_or_create_account(self, domain, userid, username):
         keys = [k for k in session.get('account_keys', '').split(',') if k]
         # Find or create an account
-        try:
-            acct = Session.query(Account).filter(and_(Account.domain==domain, Account.userid==userid)).one()
-        except NoResultFound:
-            acct = Account()
-            acct.domain = domain
-            acct.userid = userid
-            acct.username = username
-            Session.add(acct)
-            metrics.track(request, 'account-create', domain=domain)
+        for k in keys:
+            acct = session[k]
+            if acct['domain']==domain and acct['userid']==userid:
+                metrics.track(request, 'account-auth', domain=domain)
+                break
         else:
-            metrics.track(request, 'account-auth', domain=domain)
-
-        if acct.key not in keys:
-            keys.append(acct.key)
+            acct = dict(key=str(uuid1()), domain=domain, userid=userid,
+                        username=username)
+            metrics.track(request, 'account-create', domain=domain)
+            keys.append(acct['key'])
             session['account_keys'] = ','.join(keys)
-            session[acct.key] = acct.to_dict()
-            session.save()
         return acct
 
     # this is not a rest api
     def authorize(self, *args, **kw):
         provider = request.POST['domain']
+        log.info("authorize request for %r", provider)
         service = get_provider(provider)
         return service.responder().request_access()
 
     # this is not a rest api
     def verify(self, *args, **kw):
         provider = request.params.get('provider')
+        log.info("verify request for %r", provider)
         service = get_provider(provider)
 
         auth = service.responder()
@@ -124,20 +114,14 @@ OAuth authorization api.
             account = user['profile']['accounts'][0]
             if not user.get('oauth_token') and not user.get('oauth_token_secret'):
                 raise Exception('Unable to get OAUTH access')
-            acct = self._get_or_create_account(provider, account['userid'], account['username'])
-            acct.profile = user['profile']
-            acct.oauth_token = user.get('oauth_token', None)
+            
+            acct = self._get_or_create_account(provider, str(account['userid']), account['username'])
+            acct['profile'] = user['profile']
+            acct['oauth_token'] = user.get('oauth_token', None)
             if 'oauth_token_secret' in user:
-                acct.oauth_token_secret = user['oauth_token_secret']
-            acct.updated = UTCDateTime.now()
-            try:
-                Session.commit()
-            except UnicodeEncodeError, e:
-                log.exception("***** UnicodeEncodeError! %r: %r: %r %r" % (acct.domain, acct.userid, acct.username,acct.json_attributes,))
-                raise e
-            # XXX argh, this is also done in get_or_create above, but we have to
-            # ensure we have the updated data
-            session[acct.key] = acct.to_dict()
+                acct['oauth_token_secret'] = user['oauth_token_secret']
+            acct['updated'] = datetime.now()
+            session[acct['key']] = acct
             session.save()
         except AccessException, e:
             self._redirectException(e)
