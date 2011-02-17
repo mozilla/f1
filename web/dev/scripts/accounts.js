@@ -64,6 +64,12 @@ function (storage,   dispatch,   rdapi) {
           }
         },
 
+        update: function (account_data) {
+          // XXX TODO
+          // get the account and push it into localstore, don't overwrite, we
+          // get one account at a time here
+        },
+
         fetch: function (ok, error) {
           rdapi('account/get', {
             success: function (json) {
@@ -171,6 +177,14 @@ function (storage,   dispatch,   rdapi) {
   function accounts(ok, error) {
     return impl.accounts(ok, error);
   }
+
+  /**
+   * Updates the accounts from a json account object. 
+   * @param {Object} cookie object to update from
+   */
+  accounts.update = function (account_data) {
+    impl.update(account_data);
+  };
 
   /**
    * Gets the accounts. Forces a call to the server.

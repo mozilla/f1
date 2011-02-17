@@ -30,7 +30,7 @@ from pylons.decorators import jsonify
 from pylons.decorators.util import get_pylons
 
 from linkdrop.lib.base import BaseController, render
-from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
+from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg, get_redirect_response
 from linkdrop.lib.metrics import metrics
 from linkdrop.lib.oauth import get_provider
 from linkdrop.lib.oauth.base import AccessException
@@ -144,7 +144,9 @@ OAuth authorization api.
         except Exception, e:
             log.exception('failed to verify the account')
             self._redirectException(e)
-        return redirect(session.get('end_point_success', config.get('oauth_success')))
+        resp = get_redirect_response(session.get('end_point_success', config.get('oauth_success')))
+        resp.set_cookie('account_tokens', urllib.quote(json.dumps(acct.to_dict())))
+        raise resp.exception
 
     def _redirectException(self, e):
         err = urllib.urlencode([('error',str(e))])

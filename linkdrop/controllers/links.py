@@ -31,7 +31,7 @@ from pylons.decorators import jsonify
 from pylons.decorators.util import get_pylons
 
 from linkdrop.lib.base import BaseController, render
-from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
+from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg, get_redirect_response
 from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
 
@@ -43,25 +43,6 @@ from sqlalchemy import and_
 
 log = logging.getLogger(__name__)
 
-
-from webob.exc import status_map
-
-def get_redirect_response(url, code=302, additional_headers=[]):
-    """Raises a redirect exception to the specified URL
-
-    Optionally, a code variable may be passed with the status code of
-    the redirect, ie::
-
-        redirect(url(controller='home', action='index'), code=303)
-
-    XXX explain additional_headers
-
-    """
-    exc = status_map[code]
-    resp = exc(location=url)
-    for k,v in additional_headers:
-        resp.headers.add(k, v)
-    return resp
 
 class LinksController(BaseController):
     """

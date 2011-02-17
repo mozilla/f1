@@ -241,7 +241,7 @@
 
   </style>
   <script>
-    require(["require", "jquery", "blade/url"],
+    require(["require", "jquery", "blade/url", "jquery.cookie"],
     function (require,   $,        url) {
       var target = window.location.href.split('#')[1];
       if (target && (target === 'oauth_success' || target === 'oauth_failure')) {
@@ -251,11 +251,14 @@
         // XXX hacky way to handle fennec, since we didn't open a window,
         // catch the exception when using window.opener and redirect
         try {
-          window.opener.postMessage(target, '*');
-          window.close();
+        var data = {
+          target: target,
+          account: JSON.parse($.cookie("account_tokens"))
+        };
+        window.opener.postMessage(JSON.stringify(data), '*');
+        window.close();
         } catch(e) {
-          var url = location.protocol + "//" + location.host + "/settings/?target="+target;
-          window.location = url;
+          alert(e);
         }
       }
       var search = window.location.href.split('?')[1];
