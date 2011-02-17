@@ -43,6 +43,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     hash = location.href.split('#')[1],
     urlArgs, sendData, prop,
     options = {},
+    urlSize = 26,
     tabDom, bodyDom, clickBlockDom, timer,
     updateTab = true, tabSelection, accountCache, showNew,
     store = storage();
@@ -63,7 +64,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       if (!this.counter) {
         this.counter = new TextCounter($('#' + this.type + ' textarea.message'),
                                        $('#' + this.type + ' .counter'),
-                                       this.textLimit - this.urlsize);
+                                       this.textLimit - urlSize);
       }
       // Update counter. If using a short url from the web page itself, it could
       // potentially be a different length than a bit.ly url so account for
@@ -71,7 +72,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       // tweet.
       this.counter.updateLimit(data.shortUrl ?
                                (this.textLimit - (data.shortUrl.length + 1)) :
-                               this.textLimit - this.urlsize);
+                               this.textLimit - urlSize);
     },
     getFormData: function () {
       var dom = $('#' + this.type);
