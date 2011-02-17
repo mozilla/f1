@@ -37,14 +37,11 @@ function (storage,   dispatch,   rdapi) {
       'localStorage': {
 
         accounts: function (ok, error) {
+          // accounts now simply provides existing accounts retreived during
+          // the oauth dances
           var accountCache = store.accountCache,
               lastCheck = store.lastAccountCheck || 0,
-              currentTime = (new Date()).getTime(),
-              fetch = false;
-
-          if (!accountCache || (currentTime - lastCheck) > 3000) {
-            fetch = true;
-          }
+              currentTime = (new Date()).getTime();
 
           //Set up accountCache as a real object.
           if (accountCache) {
@@ -58,50 +55,111 @@ function (storage,   dispatch,   rdapi) {
           if (ok) {
             ok(accountCache);
           }
-
-          if (fetch) {
-            impl.fetch(null, error);
-          }
         },
 
         update: function (account_data) {
           // XXX TODO
           // get the account and push it into localstore, don't overwrite, we
           // get one account at a time here
+          // We write into accountCache to have account.fetch continue to work.
+          // We also write into serviceCache which will be used by api calls
+          // to send the auth keys
+          var accountCache = store.accountCache,
+              serviceCache = store.serviceCache,
+              existing = false;
+          
+          if (accountCache) {
+            accountCache = JSON.parse(accountCache);
+          } else {
+            accountCache = [];
+          }
+          
+          // move the profile into accountCache
+          var profile = account_data.profile;
+          for (var p in accountCache) {
+            if (accountCache[p].providerName === profile.providerName) {
+              accountCache[p] = profile;
+              existing = true;
+              break;
+            }
+          }
+          if (!existing) {
+            accountCache.push(profile);
+          }
+          store.accountCache = JSON.stringify(accountCache);
+          
+          // we store the entire object in serviceCache, at some point in the
+          // future we will remove accountCache
+          if (serviceCache) {
+            existing = false;
+            serviceCache = JSON.parse(serviceCache);
+            for (var a in serviceCache) {
+
+              if (serviceCache[a].domain === account_data.domain &&
+                  (serviceCache[a].userid === account_data.userid) ||
+                  (serviceCache[a].username === account_data.username)) {
+                serviceCache[a] = account_data;
+                existing = true;
+                break;
+              }
+            }
+          } else {
+            serviceCache = [];
+          }
+          if (!existing)
+            serviceCache.push(account_data);
+          store.serviceCache = JSON.stringify(serviceCache);
+          impl.changed();
+        },
+        
+        remove: function(domain, userid, username) {
+          var accountCache = store.accountCache,
+              serviceCache = store.serviceCache;
+          if (serviceCache) {
+            serviceCache = JSON.parse(serviceCache);
+            for (var a in serviceCache) {
+              if (serviceCache[a].domain === domain &&
+                  (userid && serviceCache[a].userid == userid) ||
+                  (username && serviceCache[a].username == username)) {
+                serviceCache.splice(a, 1);
+                break;
+              }
+            }
+            store.serviceCache = JSON.stringify(serviceCache);
+          }
+          
+          // eventually we will deprecate accountCache
+          if (accountCache) {
+            accountCache = JSON.parse(accountCache);
+            for (var p in accountCache) {
+              var s = accountCache[p].accounts;
+              for (var a in s) {
+                if (s[a].domain === domain &&
+                    (userid && s[a].userid == userid) ||
+                    (username && s[a].username == username)) {
+                  accountCache.splice(p, 1);
+                  break;
+                }
+              }
+            }
+            store.accountCache = JSON.stringify(accountCache);
+          }
+          impl.changed();
         },
 
-        fetch: function (ok, error) {
-          rdapi('account/get', {
-            success: function (json) {
-              if (json.error) {
-                json = [];
+        getService: function(domain, userid, username) {
+          var serviceCache = store.serviceCache;
+          if (serviceCache) {
+            serviceCache = JSON.parse(serviceCache);
+            for (var a in serviceCache) {
+              if (serviceCache[a].domain === domain &&
+                  (userid && serviceCache[a].userid == userid) ||
+                  (username && serviceCache[a].username == username)) {
+                return serviceCache[a];
               }
-
-              store.lastAccountCheck = (new Date()).getTime();
-
-              if (ok) {
-                ok(json);
-              }
-
-              //Check for changes, and if so, then trigger accounts changed.
-              var accountCache = store.accountCache, same;
-
-              accountCache = accountCache ? JSON.parse(accountCache) : [];
-              same = json.length === accountCache.length;
-
-              if (same) {
-                same = !json.some(function (account, i) {
-                  return account.identifier !== accountCache[i].identifier;
-                });
-              }
-
-              if (!same) {
-                store.accountCache = JSON.stringify(json);
-                impl.changed();
-              }
-            },
-            error: error || function () {}
-          });
+            }
+          }
+          return null;
         },
 
         changed: function () {
@@ -133,21 +191,6 @@ function (storage,   dispatch,   rdapi) {
       'memory': {
 
         accounts: function (ok, error) {
-          impl.fetch(ok, error);
-        },
-
-        fetch: function (ok, error) {
-          rdapi('account/get', {
-            success: function (json) {
-              if (json.error) {
-                json = [];
-              }
-              if (ok) {
-                ok(json);
-              }
-            },
-            error: error || function () {}
-          });
         },
 
         changed: function () {
@@ -187,12 +230,23 @@ function (storage,   dispatch,   rdapi) {
   };
 
   /**
-   * Gets the accounts. Forces a call to the server.
-   * @param {Function} ok function to receive the account info.
-   * @param {Function} error function to call if an error.
+   * Remove an accounts from storage. 
+   * @param {string} account domain
+   * @param {string} account userid
+   * @param {string} account username
    */
-  accounts.fetch = function (ok, error) {
-    impl.fetch(ok, error);
+  accounts.remove = function (account, userid, username) {
+    impl.remove(account, userid, username);
+  };
+
+  /**
+   * Get a full service account record 
+   * @param {string} account domain
+   * @param {string} account userid
+   * @param {string} account username
+   */
+  accounts.getService = function (account, userid, username) {
+    impl.remove(account, userid, username);
   };
 
   /**
@@ -201,6 +255,7 @@ function (storage,   dispatch,   rdapi) {
    */
   accounts.clear = function () {
     delete store.accountCache;
+    delete store.serviceCache;
   };
 
   /**

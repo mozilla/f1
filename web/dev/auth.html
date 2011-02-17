@@ -250,16 +250,14 @@
         //a problem for 127 addresses?
         // XXX hacky way to handle fennec, since we didn't open a window,
         // catch the exception when using window.opener and redirect
-        try {
         var data = {
           target: target,
           account: JSON.parse($.cookie("account_tokens"))
         };
         window.opener.postMessage(JSON.stringify(data), '*');
+        // clear the cookie, we no longer want it around
+        $.cookie("account_tokens", null);
         window.close();
-        } catch(e) {
-          alert(e);
-        }
       }
       var search = window.location.href.split('?')[1];
       if (search) {
