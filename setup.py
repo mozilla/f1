@@ -28,7 +28,7 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-VERSION='0.2.1'
+VERSION='0.2.3'
 
 setup(
     name='linkdrop',
@@ -79,13 +79,31 @@ setup(
 
 import os, stat
 basedir = os.path.join(os.getcwd(), "web")
-realdir = os.path.join(basedir, VERSION)
+realdir = VERSION
 linkdir = os.path.join(basedir, "current")
+
+# Sanity check, nuke what isn't a symlink
 try:
     s = os.lstat(linkdir)
-    if stat.S_ISLNK(s.st_mode):
-        os.unlink(linkdir)
+    if not stat.S_ISLNK(s.st_mode):
+        if stat.S_ISDIR:
+            os.rmdir(linkdir)
+        else:
+            os.unlink(linkdir)
 except OSError, e:
     if e.errno != 2: # file does not exist
         raise
-os.symlink(realdir, linkdir)
+
+# Check what the symlink might already point to
+# and update if needed
+try:
+    lver = os.readlink(linkdir)
+except OSError, e:
+    lver = None
+    if e.errno != 2: # file does not exist
+        raise
+
+if lver != VERSION:
+    if lver:
+        os.unlink(linkdir)
+    os.symlink(realdir, linkdir)
