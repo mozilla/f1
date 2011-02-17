@@ -1,0 +1,625 @@
+* {
+    padding: 0;
+    margin: 0;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+/*
+    general
+*/
+
+body {
+    font-family: "Lucida Grande", Verdana, Sans-serif;
+    font-size: 11px;
+    line-height: 110%;
+}
+
+#wrapper {
+    max-width: 400px;
+    min-width: 200px;
+    position: relative;
+    border-right: 1px solid #404040;
+    -webkit-perspective: 1500;
+}
+
+button::-moz-focus-inner {
+    border: 0;
+}
+
+button {
+    height: 24px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #aaa;
+    cursor: pointer;
+    padding: 0 10px;
+    
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border-radius: 2px;
+    
+    background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
+}
+
+button:active {
+    -moz-box-shadow: 0 0 1px #666666 inset;
+    -webkit-box-shadow: 0 0 1px #666666 inset;
+    box-shadow: 0 0 1px #666666 inset;
+    
+    background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
+}
+
+h2 {
+    font-size: 13px;
+    color: #535f6d;
+    text-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
+}
+
+h3 {
+    font-weight: bold;
+    font-size: 11px;
+    line-height: 14px;
+    color: #535f6d;
+}
+
+/*
+    panel settings
+*/
+
+#panel1,
+#panel2 {
+    width: 100%;
+    color: #535f6d;
+    overflow: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#panel1 {
+    background-color: #d4dde5;
+    z-index: 2;
+}
+
+#panel1 a,
+#panel2 a {
+    color: #535f6d;
+}
+
+#panel2 {
+    background-color: #E9EEF2;
+    z-index: 1;
+    -webkit-transform: rotateY(180deg);
+}
+
+/*
+    header section
+*/
+
+header {
+    width: 100%;
+    padding: 8px 5px 10px 10px;
+    background-color: #d4dde5;
+}
+
+header h1 {
+    font-size: 11px;
+}
+
+header a {
+    text-decoration: none;
+    outline: none;
+}
+
+header a:hover {
+    text-decoration: underline;
+}
+
+header nav ul {
+    list-style-type: none;
+}
+
+header nav ul li {
+    display: inline-block;
+    padding: 0 5px;
+    float: left;
+}
+
+header nav ul li.settings {
+    border-width: 0 1px 0 0;
+    border-style: solid;
+    border-color: #535f6d;
+}
+
+header span.close {
+    width: 12px;
+    height: 13px;
+    background-image: url("i/sprite.png");
+    background-position: center 0;
+    display: block;
+}
+
+header span.close:active {
+    background-position: center -13px;
+}
+
+/*
+    page info
+*/
+section#pageInfo {
+    width: 100%;
+    padding: 10px;
+}
+
+section#pageInfo .thumbnail {
+    border: 1px solid #a6afb6;
+    -moz-box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
+    -webkit-box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
+    box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
+}
+
+section#pageInfo .thumbnail img {
+    float: left;
+}
+
+section#pageInfo h2 {
+    line-height: 60px;
+    margin: 0 0 0 20px;
+}
+
+/* 
+    generic styles for account panels
+*/
+section {
+    display: block;
+}
+
+section.account {
+    color: #535F6D;
+    display: block;
+    border-width: 1px 0;
+    border-color: #a6afb6;
+    border-style: solid;
+    margin-top: -1px;
+    background-image: -moz-linear-gradient(top, #d4dde5 0%, #c6d1da 100%);
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #d4dde5), color-stop(100%, #c6d1da));
+}
+
+section.account:hover,
+section.account.selected {
+    background-image: none;
+}
+
+section.account.selected {
+    background-color: #e9eef2;
+}
+
+section.account .username {
+    display: none;
+}
+
+section.account.selected .username {
+    display: block;
+}
+
+section.account .accountToggle {
+    padding: 10px;
+    cursor: pointer;
+    width: 100%;
+}
+
+span.arrow,
+span.icon {
+    display: inline-block;
+    background-image: url("i/sprite.png");
+    background-repeat: no-repeat;
+    vertical-align: middle;
+}
+
+
+span.arrow {
+    width: 12px;
+    height: 14px;
+}
+
+span.icon {
+    width: 16px;
+    height: 14px;
+    margin: 0 5px;
+}
+
+section.account .accountToggle span.arrow {
+    background-position: center -102px;
+}
+
+section.account.selected .accountToggle span.arrow {
+    background-position: center -120px;
+}
+
+section.account .accountPanel {
+    display: block;
+}
+
+section.account .accountPanel .padding {
+    padding: 0 10px 10px 10px;
+}
+
+section.account textarea,
+section.account input[type="text"] {
+    width: 100%;
+    font-family: "Lucida Grande", Verdana, Sans-serif;
+    font-size: 11px;
+    padding: 5px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: #A6AFB6;
+    -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;
+    -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;
+}
+
+section.account textarea:focus,
+section.account input[type="text"]:focus {
+    -moz-box-shadow: 0 0 0 2px #C2ECFF inset;
+    -webkit-box-shadow: 0 0 0 2px #C2ECFF inset;
+    box-shadow: 0 0 0 2px #C2ECFF inset;
+    outline: none;
+}
+
+button:focus {
+    outline: none;
+    z-index: 1;
+    position: relative;
+}
+
+section.account textarea {
+    width: 100%;
+    height: 80px;
+}
+
+section.account input[type="text"] {
+    height: 24px;
+}
+
+section.account .accountActions {
+    width: 100%;
+    margin: 10px 0 0 0;
+}
+
+section.account span.count {
+    line-height: 24px;
+    color: #535F6D;
+}
+
+section.account label {
+    display: block;
+    margin: 0 0 5px 0;
+}
+
+/*
+    twitter styles
+*/
+span.icon.twitter {
+    background-position: center -35px;
+}
+
+/*
+    facebook styles
+*/
+section#facebook.account .facebookActions {
+    margin: 0 0 10px 0;
+    width: 100%;
+}
+
+section#facebook.account .facebookActions .to {
+    width: 100px;
+    margin-right: 10px;
+}
+
+section#facebook.account .facebookActions .to .dropdownContainer {
+    height: 24px;
+    line-height: 24px;
+    display: block;
+}
+
+section#facebook.account .facebookActions .to select {
+    width: 100%;
+}
+
+section#facebook.account .facebookActions .list label {
+    visibility: hidden;
+}
+
+section#facebook.account .facebookActions .list button {
+    border-left: none;
+    width: 24px;
+    background-image: url("i/sprite.png"), -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+    background-image: url("i/sprite.png"), -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
+    background-position: center -157px, center top;
+    background-repeat: no-repeat;
+    -moz-border-radius: 0 2px 2px 0;
+    -webkit-border-radius: 0 2px 2px 0;
+    border-radius: 0 2px 2px 0;
+}
+
+section#facebook.account .facebookActions .list button:active {
+    background-image: url("i/sprite.png"), -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
+    background-image: url("i/sprite.png"), -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
+}
+
+span.icon.facebook {
+    background-position: center -59px;
+}
+
+/*
+    google styles
+*/
+section#google.account .subject {
+    margin: 5px 0;
+}
+
+span.icon.google {
+    background-position: center -82px;
+}
+
+/*
+    account configuration
+*/
+
+ul#tabs {
+    width: 100%;
+    padding: 10px 10px 0 10px;
+    list-style-type: none;
+    background-color: #D4DDE5;
+}
+
+ul#tabs li {
+    padding: 7px 20px;
+    margin: 0 3px 0 0;
+    display: inline-block;
+    font-weight: bold;
+    text-align: center;
+    background-color: #E9EEF2;
+    border-width: 1px 1px 0 1px;
+    border-style: solid;
+    border-color: #A6AFB6;
+    -moz-border-radius: 3px 3px 0 0;
+    -webkit-border-radius: 3px 3px 0 0;
+    border-radius: 3px 3px 0 0;
+    float: left;
+    cursor: pointer;
+}
+
+ul#tabs li.selected {
+    position: relative;
+    z-index: 100;
+}
+
+#accountPanels {
+    padding: 10px 0 0;
+    border-top: 1px solid #a6afb6;
+    position: relative;
+    z-index: 90;
+    margin-top: -1px;
+}
+
+section.configuration {
+    padding: 10px;
+    display: block;
+}
+
+section.configuration h2 {
+    margin: 0 0 10px 0;
+}
+
+section.configuration  ul {
+    background-color: #fff;
+    border: 1px solid #A6AFB6;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+    list-style-type: none;
+}
+
+section.configuration ul li {
+    padding: 10px;
+    border-bottom: 1px solid #A6AFB6;
+    width: 100%;
+}
+
+section.configuration ul li:last-child {
+    border: none;
+}
+
+section.configuration h3 {
+    line-height: 24px;
+}
+
+section.configuration h3 .username {
+    font-weight: normal;
+}
+
+section.configuration input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+section.configuration .done {
+    width: 100%;
+}
+
+section#news {
+    padding: 10px;
+    width: 100%;
+} 
+
+section#news span.icon.rss {
+    background-position: center -183px;
+    margin: 0 5px 0 0;
+}
+
+section#news .story {
+    padding: 5px 0;
+}
+
+/*
+    hbox & vbox
+*/
+ 
+.hbox {
+	display: -webkit-box;
+	-webkit-box-orient: horizontal;
+	-webkit-box-align: stretch;
+ 
+	display: -moz-box;
+	-moz-box-orient: horizontal;
+	-moz-box-align: stretch;
+ 
+	display: box;
+	box-orient: horizontal;
+	box-align: stretch;
+}
+ 
+.hbox > * {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+	display: block;
+}
+ 
+.vbox {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-box-align: stretch;
+ 
+	display: -moz-box;
+	-moz-box-orient: vertical;
+	-moz-box-align: stretch;
+ 
+	display: box;
+	box-orient: vertical;
+	box-align: stretch;
+}
+ 
+.vbox > * {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+	display: block;
+}
+ 
+.spacer {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+ 
+.reverse {
+	-webkit-box-direction: reverse;
+	-moz-box-direction: reverse;
+	box-direction: reverse;
+}
+ 
+.boxFlex0 {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+}
+ 
+.boxFlex1, .boxFlex {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+ 
+.boxFlex2 {
+	-webkit-box-flex: 2;
+	-moz-box-flex: 2;
+	box-flex: 2;
+}
+ 
+.boxGroup1 {
+	-webkit-box-flex-group: 1;
+	-moz-box-flex-group: 1;
+	box-flex-group: 1;
+}
+ 
+.boxGroup2 {
+	-webkit-box-flex-group: 2;
+	-moz-box-flex-group: 2;
+	box-flex-group: 2;
+}
+ 
+.start {
+	-webkit-box-pack: start;
+	-moz-box-pack: start;
+	box-pack: start;
+}
+ 
+.end {
+	-webkit-box-pack: end;
+	-moz-box-pack: end;
+	box-pack: end;
+}
+ 
+.center {
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	box-pack: center;
+}
+
+/* 
+    clearfix 
+*/
+
+.clearfix:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+}
+ 
+html[xmlns] .clearfix {
+	display: block;
+}
+ 
+* html .clearfix {
+	height: 1%;
+}
+
+/* 
+    webkit specific styles
+*/
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+
+#wrapper {
+    background-color: #404040;
+}
+
+.overflow {
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    white-space: nowrap;
+}
+
+.flip {
+    -webkit-transform-style: preserve-3d;
+    -webkit-backface-visibility: hidden;
+    -webkit-transition: -webkit-transform 0.7s ease-in-out;
+}
+
+.front_flip { 
+    -webkit-transform: rotateY(-180deg); 
+    z-index: 900; 
+}
+
+.back_flip { 
+    -webkit-transform: rotateY(0deg) !important; 
+    z-index: 1000; 
+}
+}
