@@ -273,7 +273,8 @@ class OpenIDResponder():
                 
         try:
             authrequest = oidconsumer.begin(openid_url)
-        except consumer.DiscoveryFailure:
+        except consumer.DiscoveryFailure, exc:
+            log.error("openid discovery failure: %s", exc)
             return redirect(fail_uri)
         
         if authrequest is None:
