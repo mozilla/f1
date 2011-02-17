@@ -120,7 +120,7 @@ OAuth authorization api.
             acct['oauth_token'] = user.get('oauth_token', None)
             if 'oauth_token_secret' in user:
                 acct['oauth_token_secret'] = user['oauth_token_secret']
-            acct['updated'] = datetime.now()
+            acct['updated'] = datetime.now().isoformat()
             session[acct['key']] = acct
             session.save()
         except AccessException, e:
@@ -129,7 +129,7 @@ OAuth authorization api.
             log.exception('failed to verify the account')
             self._redirectException(e)
         resp = get_redirect_response(session.get('end_point_success', config.get('oauth_success')))
-        resp.set_cookie('account_tokens', urllib.quote(json.dumps(acct.to_dict())))
+        resp.set_cookie('account_tokens', urllib.quote(json.dumps(acct)))
         raise resp.exception
 
     def _redirectException(self, e):
