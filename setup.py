@@ -77,12 +77,15 @@ setup(
     """,
 )
 
-import os
+import os, stat
 basedir = os.path.join(os.getcwd(), "web")
 realdir = os.path.join(basedir, VERSION)
 linkdir = os.path.join(basedir, "current")
-if os.path.exists(linkdir):
-    os.unlink(linkdir)
+try:
+    s = os.lstat(linkdir)
+    if stat.S_ISLNK(s.st_mode):
+        os.unlink(linkdir)
+except OSError, e:
+    if e.errno != 2: # file does not exist
+        raise
 os.symlink(realdir, linkdir)
-
-
