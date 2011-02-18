@@ -347,8 +347,6 @@ function (object,         Widget,         $,        template,
 
         if (this.options.shortUrl) {
           sendData.shorturl = this.options.shortUrl;
-        } else if (this.svc.shorten) {
-          sendData.shorten = true;
         }
 
         // fixup to addressing if necessary
