@@ -331,6 +331,18 @@ function (object,         Widget,         $,        template,
         var shareType = this.getShareType($('.shareType', this.bodyNode).val());
         this.changeShareType(shareType);
       },
+      
+      _findContact: function(to, contacts) {
+        var acct = contacts[to.trim()];
+        if (acct) return acct;
+        
+        for (var un in contacts) {
+          var c = contacts[un];
+          if (c.userid === to) return c;
+          if (c.username === to) return c;
+        }
+        return null;
+      },
 
       onSubmit: function (evt) {
         //Do not submit the form as-is.
@@ -357,8 +369,9 @@ function (object,         Widget,         $,        template,
           newrecip = [];
           if (contacts) {
             recip = sendData.to.split(',');
+            var self = this;
             recip.forEach(function (to) {
-              acct = contacts[to.trim()];
+              acct = self._findContact(to.trim(), contacts);
               if (acct && !acct.email) {
                 newrecip.push(acct.userid ? acct.userid : acct.username);
               }
