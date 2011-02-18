@@ -152,8 +152,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             //Make sure to bring the user back to this service if
             //the auth is successful.
             store.lastSelection = selectionName;
-
-            accounts.fetch(null, onError);
           } else {
             showStatus('statusOAuthFailed');
           }
@@ -166,27 +164,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             userName = buttonNode.getAttribute('data-username'),
             userId = buttonNode.getAttribute('data-userid'),
             svc = services.domains[domain];
-
-        rdapi('account/signout', {
-          data: {
-            domain: domain,
-            userid: userId,
-            username: userName
-          },
-          success: function () {
-            accounts.fetch(null, onError);
-          },
-          error: function (xhr, textStatus, err) {
-            showStatus('statusError', err);
-          }
-        });
-
-        //Remove any cached data
-        svc.clearCache(store);
-        if (svc.type === store.lastSelection) {
-          delete store.lastSelection;
+        try {
+          accounts.remove(domain, userId, userName);
+        } catch(e) {
+          // clear out account storage
+          accounts.clear();
         }
-
         evt.preventDefault();
       }).
       delegate('#settings [type="checkbox"]', 'click', function (evt) {

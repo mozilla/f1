@@ -120,6 +120,7 @@ Site provided description of the shared item, not supported by all services.
         shorturl = request.POST.get('shorturl')
         userid = request.POST.get('userid')
         to = request.POST.get('to')
+        account_data = request.POST.get('account', None)
         if not domain:
             error = {
                 'message': "'domain' is not optional",
@@ -138,12 +139,17 @@ Site provided description of the shared item, not supported by all services.
         provider = get_provider(domain)
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
-        acct = None
-        for k in keys:
-            a = session.get(k)
-            if a and a.get('domain') == domain and (a.get('username')==username or a.get('userid')==userid):
-                acct = a
-                break
+        if account_data:
+            acct = json.loads(account_data)
+        else:
+            raise Exception('foobar')
+            # support for old account data in session store
+            acct = None
+            for k in keys:
+                a = session.get(k)
+                if a and a.get('domain') == domain and (a.get('username')==username or a.get('userid')==userid):
+                    acct = a
+                    break
         if not acct:
             error = {'provider': domain,
                      'message': "not logged in or no user account for that domain",

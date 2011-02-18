@@ -26,10 +26,10 @@
 "use strict";
 
 define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./AccountPanel.html',
-         'TextCounter', 'storage', 'module', 'placeholder', 'dispatch',
+         'TextCounter', 'storage', 'module', 'placeholder', 'dispatch', 'accounts',
          'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs', 'jquery.textOverflow'],
 function (object,         Widget,         $,        template,
-          TextCounter,   storage,   module,   placeholder,   dispatch,
+          TextCounter,   storage,   module,   placeholder,   dispatch,   accounts,
           AutoComplete,   rdapi,   fn,         jigFuncs) {
 
   var store = storage(),
@@ -405,13 +405,15 @@ function (object,         Widget,         $,        template,
       storeContacts: function () {
         var contacts = this.svc.getContacts(store);
         if (!contacts) {
+          var svcData = accounts.getService(this.svcAccount.domain, this.svcAccount.userid, this.svcAccount.username);
           rdapi('contacts/' + this.svcAccount.domain, {
             type: 'POST',
             data: {
               username: this.svcAccount.username,
               userid: this.svcAccount.userid,
               startindex: 0,
-              maxresults: 500
+              maxresults: 500,
+              account: JSON.stringify(svcData)
             },
             success: fn.bind(this, function (json) {
               //Transform data to a form usable by autocomplete.
@@ -420,7 +422,6 @@ function (object,         Widget,         $,        template,
                     data = [];
 
                 data = this.svc.getFormattedContacts(entries);
-
                 this.svc.setContacts(store, data);
                 this.updateAutoComplete(this.svcAccount.domain);
               }

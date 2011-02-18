@@ -33,6 +33,7 @@ import pprint
 from xml.sax.saxutils import escape
 import json
 from webhelpers.html import literal
+from webob.exc import status_map
 
 import logging
 
@@ -41,6 +42,22 @@ from linkdrop.lib.metrics import metrics
 
 log = logging.getLogger(__name__)
 
+def get_redirect_response(url, code=302, additional_headers=[]):
+    """Raises a redirect exception to the specified URL
+
+    Optionally, a code variable may be passed with the status code of
+    the redirect, ie::
+
+        redirect(url(controller='home', action='index'), code=303)
+
+    XXX explain additional_headers
+
+    """
+    exc = status_map[code]
+    resp = exc(location=url)
+    for k,v in additional_headers:
+        resp.headers.add(k, v)
+    return resp
 
 ## {{{ http://code.activestate.com/recipes/52281/ (r1) PSF License
 import sgmllib, string
