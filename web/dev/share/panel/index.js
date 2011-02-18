@@ -193,28 +193,27 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
     var svcData = accounts.getService(data.domain, data.userid, data.username),
         svcConfig = services.domains[data.domain],
-        shortenData, shortenPrefs;
+        shortenPrefs = store.shortenPrefs,
+        shortenData;
 
     sendData.account = JSON.stringify(svcData);
 
     //First see if a bitly URL is needed.
-    if (svcConfig.shorten && !sendData.shorturl) {
+    if (svcConfig.shorten && shortenPrefs) {
       shortenData = {
         format: 'json',
-        longUrl: sendData.link,
-        login: 'linkdrop',
-        apiKey: 'R_9d8dc7f30887c45eb7b3719d71251006'
+        longUrl: sendData.link
       };
 
-      //Allow for user prefs that contain their API key, preferred domain.
-      shortenPrefs = store.shortenPrefs;
-      if (shortenPrefs) {
-        shortenPrefs = JSON.parse(shortenPrefs);
-      }
+      // Unpack the user prefs
+      shortenPrefs = JSON.parse(shortenPrefs);
 
       if (shortenPrefs) {
         object.mixin(shortenData, shortenPrefs, true);
       }
+
+      // Make sure the server does not try to shorten.
+      delete sendData.shorten;
 
       $.ajax({
         url: 'http://api.bitly.com/v3/shorten',

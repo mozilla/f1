@@ -118,6 +118,9 @@ a:hover {
   text-decoration: underline;
 }
 
+.error {
+  color: #FF0000;
+}
 /* From the uservoice feedback button */
 #feedback {
     position: fixed;
@@ -153,8 +156,9 @@ strong {
   position: relative;
 }
 
-#shortenForm .saveButton {
-  margin-left: 43px;
+#shortenForm input {
+  width: 250px;
+  text-align: right;
 }
 
 /*

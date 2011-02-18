@@ -35,6 +35,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   var store = storage(),
   shortenPrefs = store.shortenPrefs,
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
+  isGreaterThan073 = dotCompare(store.extensionVersion, "0.7.4") > -1,
   options = url.queryToObject(location.href.split('#')[1] || '') || {},
   showNew = options.show === 'new';
 
@@ -128,16 +129,16 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       location.replace(location.href.split('#')[0] + '#' + url.objectToQuery(options));
     }
 
-    var manageDom = $("#manage"),
-        settingsDom = $("#settings"),
-        shortenLinkDom = $('#shortenFormLink'),
-        shortenDom = $('#shortenForm'),
+    var shortenDom = $('#shortenForm'),
         pref, node;
 
 
     //Function placed inside this function to get access to DOM variables.
     function getShortenData() {
-      var data = {}, hasData = false;
+      var data = {};
+
+      // Clear any error messages from the form.
+      shortenDom.find('.error').addClass('hidden');
 
       $.each(shortenDom[0].elements, function (i, node) {
         var trimmed = $(node).val().trim();
@@ -149,12 +150,25 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         node.value = trimmed;
 
         if (node.value) {
-          hasData = true;
           data[node.name] = node.value;
         }
       });
 
-      return hasData ? data : null;
+      // Check for error conditions. Must have both API key and login to work.
+      if (data.login && data.apiKey) {
+        return data;
+      } else {
+        if (data.login && !data.apiKey) {
+          $('#bitlyApiKeyMissing').removeClass('hidden');
+        } else if (data.apiKey && !data.login) {
+          $('#bitlyLoginMissing').removeClass('hidden');
+        }
+
+        // For any error or just a data clearing, be sure to clear local storage.
+        delete store.shortenPrefs;
+      }
+
+      return null;
     }
 
     //Function placed inside this function to get access to DOM variables.
@@ -189,13 +203,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         } else {
           delete store.shortenPrefs;
         }
-        shortenLinkDom.removeClass('hidden');
-        shortenDom.addClass('hidden');
-        evt.preventDefault();
-      })
-      .delegate('#shortenFormLink', 'click', function (evt) {
-        shortenLinkDom.addClass('hidden');
-        shortenDom.removeClass('hidden');
         evt.preventDefault();
       })
       //Wire up the close button
@@ -263,28 +270,30 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
 
     // tabs
     // Only show settings if extension can actually handle setting of them.
+    // Same for advanced.
     if (isGreaterThan072) {
-      $('li.settings').removeClass('hidden');
+      $('li[data-tab="settings"]').removeClass('hidden');
+    }
+    if (isGreaterThan073) {
+      $('li[data-tab="advanced"]').removeClass('hidden');
     }
 
-    $("ul#tabs li").click(function () {
-      $(this).addClass("selected");
-      $(this).siblings().removeClass("selected");
-    });
+    $('body')
+      // Set up tab switching behavior.
+      .delegate("ul#tabs li", 'click', function (evt) {
+        var target = $(this),
+            tabDom = $('#' + target.attr('data-tab'));
 
-    $("ul#tabs li.manage").click(function () {
-      if (manageDom.is(":hidden")) {
-        manageDom.fadeIn(200);
-        manageDom.siblings().fadeOut(0);
-      }
-    });
+        // Show tab selected.
+        target.addClass("selected");
+        target.siblings().removeClass("selected");
 
-    $("ul#tabs li.settings").click(function () {
-      if (settingsDom.is(":hidden")) {
-        settingsDom.fadeIn(200);
-        settingsDom.siblings().fadeOut(0);
-      }
-    });
+        // Show tab contents.
+        if (tabDom.is(':hidden')) {
+          tabDom.fadeIn(200);
+          tabDom.siblings().fadeOut(0);
+        }
+      });
 
     //Callback handler for JSONP feed response from Google.
     window.onFeedLoad = function (x, data) {

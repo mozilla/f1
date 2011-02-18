@@ -33,8 +33,9 @@
   <!-- End status messages -->
 
   <ul id="tabs" class="clearfix">
-    <li class="manage selected">accounts</li>
-    <li class="settings hidden">settings</li>
+    <li class="manage selected" data-tab="manage">accounts</li>
+    <li class="hidden" data-tab="settings">settings</li>
+    <li class="hidden" data-tab="advanced">advanced</li>
   </ul>
 
   <div id="config">
@@ -61,22 +62,38 @@
             <label class="option boxFlex" for="bookmarking">Bookmark the links I share</label>
             <input type="checkbox" id="bookmarking">
           </li>
-          <li class="hbox">
-            <a id="shortenFormLink" href="#shorten">use my shortner settings</a>
-            <form id="shortenForm" class="hidden">
-              <label>bit.ly shortener settings (<a href="http://bit.ly/a/your_api_key">?</a>)</label>
-              <input name="login" placeholder="login">
-              <input name="apiKey" placeholder="api key">
-              <select name="domain">
-                <option value="bit.ly">use bit.ly</option>
-                <option value="j.mp">use j.mp</option>
-              </select>
-              <button class="saveButton" name="save">save</button>
-            </form>
-          </li>
         </ul>
       </div>
 
+      <div id="advanced" class="panel hidden">
+        <h1>Bitly shortener</h1>
+          <form id="shortenForm">
+            <ul>
+              <li class="hbox">
+                <label class="option boxFlex" for="login">login</label>
+                <input name="login" placeholder="login">
+              </li>
+              <li class="hbox">
+                <label class="option boxFlex" for="apiKey">api key</label>
+                <input name="apiKey" placeholder="api key">
+              </li>
+              <li class="hbox">
+                <label class="option boxFlex" for="domain">domain</label>
+                <select name="domain">
+                  <option value="bit.ly">bit.ly</option>
+                  <option value="j.mp">j.mp</option>
+                </select>
+              </li>
+              <li class="hbox">
+                <label class="option boxFlex" for="save">
+                  <span id="bitlyApiKeyMissing" class="error hidden">Please provide an API key.</span>
+                  <span id="bitlyLoginMissing" class="error hidden">Please provide an login name.</span>
+                </label>
+                <button class="saveButton" name="save">save</button>
+              </li>
+            </ul>
+          </form>
+      </div>
   </div>
 
   <div id="done" class="panel hbox">
