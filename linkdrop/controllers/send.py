@@ -142,7 +142,6 @@ Site provided description of the shared item, not supported by all services.
         if account_data:
             acct = json.loads(account_data)
         else:
-            raise Exception('foobar')
             # support for old account data in session store
             acct = None
             for k in keys:
