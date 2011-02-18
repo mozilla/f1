@@ -66,19 +66,21 @@
       </div>
 
       <div id="advanced" class="panel hidden">
-        <h1>Bitly shortener</h1>
+        <h1>Bit.ly configuration</h1>
+        <span class="micro"><input id="bitly" type="checkbox"> <label for="bitly">Use personal bit.ly account</label></span>
           <form id="shortenForm">
             <ul>
               <li class="hbox">
-                <label class="option boxFlex" for="login">login</label>
-                <input name="login" placeholder="login">
+                <label class="option text boxFlex" for="login">Bit.ly Username</label>
+                <input name="login" placeholder="username">
               </li>
               <li class="hbox">
-                <label class="option boxFlex" for="apiKey">api key</label>
+                <label class="option text boxFlex" for="apiKey">Bit.ly API key</label>
+                <a href="http://bit.ly/a/your_api_key/" tabindex="-1" target="_blank" class="micro">what's this?</a>
                 <input name="apiKey" placeholder="api key">
               </li>
               <li class="hbox">
-                <label class="option boxFlex" for="domain">domain</label>
+                <label class="option boxFlex" for="domain">Domain name</label>
                 <select name="domain">
                   <option value="bit.ly">bit.ly</option>
                   <option value="j.mp">j.mp</option>
