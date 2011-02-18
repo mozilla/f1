@@ -26,8 +26,8 @@
  localStorage: false, opener: false, setTimeout: false */
 'use strict';
 
-define([ 'storage', 'dispatch', 'rdapi'],
-function (storage,   dispatch,   rdapi) {
+define([ 'storage', 'dispatch', 'rdapi', 'services'],
+function (storage,   dispatch,   rdapi,   services) {
 
   var store = storage(), impl,
     changeTypes = {
@@ -144,6 +144,11 @@ function (storage,   dispatch,   rdapi) {
             }
             store.accountCache = JSON.stringify(accountCache);
           }
+          
+          // clear the contacts cache
+          var svc = services.domains[domain];
+          svc.clearCache(store);
+          
           impl.changed();
         },
 
@@ -161,7 +166,7 @@ function (storage,   dispatch,   rdapi) {
           }
           return null;
         },
-
+        
         changed: function () {
           store.accountChanged = (new Date()).getTime();
           //Force the onchange events to occur. Sometimes the storage
@@ -246,7 +251,7 @@ function (storage,   dispatch,   rdapi) {
    * @param {string} account username
    */
   accounts.getService = function (account, userid, username) {
-    impl.remove(account, userid, username);
+    return impl.getService(account, userid, username);
   };
 
   /**

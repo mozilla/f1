@@ -85,12 +85,13 @@ Name of the group to return.
         response={'type': 'object', 'doc': 'Portable Contacts Collection'}
     )
     def get(self, domain):
-        username = request.params.get('username')
-        userid = request.params.get('userid')
-        group = request.params.get('group', None)
-        startIndex = int(request.params.get('startindex','0'))
-        maxResults = int(request.params.get('maxresults','25'))
+        username = request.POST.get('username')
+        userid = request.POST.get('userid')
+        group = request.POST.get('group', None)
+        startIndex = int(request.POST.get('startindex','0'))
+        maxResults = int(request.POST.get('maxresults','25'))
         keys = session.get('account_keys', '').split(',')
+        account_data = request.POST.get('account', None)
         if not keys:
             error = {'provider': domain,
                      'message': "no user session exists, auth required",
@@ -101,12 +102,16 @@ Name of the group to return.
 
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
-        acct = None
-        for k in keys:
-            a = session.get(k)
-            if a and a.get('domain') == domain and (not username or a.get('username')==username and not userid or a.get('userid')==userid):
-                acct = a
-                break
+        if account_data:
+            acct = json.loads(account_data)
+        else:
+            # support for old accounts in the session store
+            acct = None
+            for k in keys:
+                a = session.get(k)
+                if a and a.get('domain') == domain and (not username or a.get('username')==username and not userid or a.get('userid')==userid):
+                    acct = a
+                    break
         if not acct:
             error = {'provider': domain,
                      'message': "not logged in or no user account for that domain",

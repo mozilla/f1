@@ -138,6 +138,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     showStatus('statusSharing');
 
     sendData = data;
+    var svcData = accounts.getService(data.domain, data.userid, data.username);
+    sendData.account = JSON.stringify(svcData);
 
     rdapi('send', {
       type: 'POST',

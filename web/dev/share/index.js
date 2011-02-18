@@ -215,6 +215,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       return;
     }
 
+    var svcData = accounts.getService(data.domain, data.userid, data.username);
+    sendData.account = JSON.stringify(svcData);
+
     rdapi('send', {
       type: 'POST',
       data: sendData,
@@ -297,13 +300,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         svc = services.domains[svcAccount.domain],
         contacts = svc.getContacts(store);
     if (!contacts) {
+      var svcData = accounts.getService(svcAccount.domain, svcAccount.userid, svcAccount.username);
       rdapi('contacts/' + svcAccount.domain, {
         type: 'POST',
         data: {
           username: svcAccount.username,
           userid: svcAccount.userid,
           startindex: 0,
-          maxresults: 500
+          maxresults: 500,
+          account: JSON.stringify(svcData)
         },
         success: function (json) {
           //Transform data to a form usable by autocomplete.
