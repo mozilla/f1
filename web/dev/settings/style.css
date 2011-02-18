@@ -38,7 +38,8 @@ body {
 }
 
 .hidden,
-#tabs li.hidden {
+#tabs li.hidden,
+.hbox > *.hidden {
   display: none;
 }
 
@@ -150,6 +151,10 @@ strong {
   margin: 0 auto;
   overflow: hidden;
   position: relative;
+}
+
+#shortenForm .saveButton {
+  margin-left: 43px;
 }
 
 /*

@@ -61,6 +61,19 @@
             <label class="option boxFlex" for="bookmarking">Bookmark the links I share</label>
             <input type="checkbox" id="bookmarking">
           </li>
+          <li class="hbox">
+            <a id="shortenFormLink" href="#shorten">use my shortner settings</a>
+            <form id="shortenForm" class="hidden">
+              <label>bit.ly shortener settings (<a href="http://bit.ly/a/your_api_key">?</a>)</label>
+              <input name="login" placeholder="login">
+              <input name="apiKey" placeholder="api key">
+              <select name="domain">
+                <option value="bit.ly">use bit.ly</option>
+                <option value="j.mp">use j.mp</option>
+              </select>
+              <button class="saveButton" name="save">save</button>
+            </form>
+          </li>
         </ul>
       </div>
 
