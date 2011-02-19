@@ -199,6 +199,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       });
     }
 
+    function resetShortenData() {
+      clearShortenData();
+      delete store.shortenPrefs;
+      hideShortenForm();
+    }
+
     // resize wrapper
     $(window).bind("load resize", function () {
       var h = $(window).height();
@@ -218,19 +224,40 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         if (bitlyCheckboxDom[0].checked) {
           showShortenForm();
         } else {
-          delete store.shortenPrefs;
-          clearShortenData();
-          hideShortenForm();
+          resetShortenData();
         }
       })
       .delegate('#shortenForm', 'submit', function (evt) {
         var data = getShortenData();
         if (data) {
-          store.shortenPrefs = JSON.stringify(data);
+          // Confirm that the API key + login name is valid.
+          $.ajax({
+            url: 'http://api.bitly.com/v3/validate',
+            type: 'GET',
+            data: {
+              format: 'json',
+              login: data.login,
+              x_login: data.login,
+              x_apiKey: data.apiKey,
+              apiKey: data.apiKey
+            },
+            dataType: 'json',
+            success: function (json) {
+              if (json.status_code === 200 && json.data.valid) {
+                store.shortenPrefs = JSON.stringify(data);
+              } else {
+                $('#bitlyNotValid').removeClass('hidden');
+                delete store.shortenPrefs;
+              }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+              $('#bitlyNotValid').removeClass('hidden');
+              delete store.shortenPrefs;
+            }
+          });
+
         } else {
-          clearShortenData();
-          delete store.shortenPrefs;
-          hideShortenForm();
+          resetShortenData();
         }
         evt.preventDefault();
       })
