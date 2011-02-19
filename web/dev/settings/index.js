@@ -130,6 +130,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     }
 
     var shortenDom = $('#shortenForm'),
+        bitlyCheckboxDom = $('#bitlyCheckbox'),
         pref, node;
 
 
@@ -163,12 +164,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         } else if (data.apiKey && !data.login) {
           $('#bitlyLoginMissing').removeClass('hidden');
         }
-
-        // For any error or just a data clearing, be sure to clear local storage.
-        delete store.shortenPrefs;
       }
 
       return null;
+    }
+
+    function clearShortenData() {
+      shortenDom.find('[name="login"]').val('');
+      shortenDom.find('[name="apiKey"]').val('');
+      shortenDom.find('[name="domain"]').val('');
     }
 
     //Function placed inside this function to get access to DOM variables.
@@ -183,25 +187,50 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       placeholder(shortenDom[0]);
     }
 
+    function showShortenForm() {
+      bitlyCheckboxDom[0].checked = true;
+      shortenDom.slideDown('100');
+    }
+
+    function hideShortenForm() {
+      bitlyCheckboxDom[0].checked = false;
+      shortenDom.slideUp('100', function () {
+        shortenDom.css({display: 'none'});
+      });
+    }
+
     // resize wrapper
     $(window).bind("load resize", function () {
       var h = $(window).height();
       $("#wrapper").css({ "min-height" : (h) });
     });
 
-
     if (shortenPrefs) {
       shortenPrefs = JSON.parse(shortenPrefs);
       setShortenData(shortenPrefs);
+      showShortenForm();
+    } else {
+      hideShortenForm();
     }
 
     $('body')
+      .delegate('#bitlyCheckbox', 'click', function (evt) {
+        if (bitlyCheckboxDom[0].checked) {
+          showShortenForm();
+        } else {
+          delete store.shortenPrefs;
+          clearShortenData();
+          hideShortenForm();
+        }
+      })
       .delegate('#shortenForm', 'submit', function (evt) {
         var data = getShortenData();
         if (data) {
           store.shortenPrefs = JSON.stringify(data);
         } else {
+          clearShortenData();
           delete store.shortenPrefs;
+          hideShortenForm();
         }
         evt.preventDefault();
       })
