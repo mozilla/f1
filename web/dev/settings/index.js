@@ -286,6 +286,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         for (var s in services.domains) {
           services.domains[s].clearCache(store);
         }
+        accounts.changed();
       })
       //Hook up remove buttons to remove an account
       .delegate('.remove', 'click', function (evt) {
