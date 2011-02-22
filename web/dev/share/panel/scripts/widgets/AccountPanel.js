@@ -205,6 +205,10 @@ function (object,         Widget,         $,        template,
         root.find('[name="to"]').val('');
         root.find('[name="subject"]').val('');
         root.find('[name="message"]').val('');
+        if (this.svc.textLimit) {
+          root.find('.counter').html('');
+        }
+
         placeholder(this.bodyNode);
       },
 
