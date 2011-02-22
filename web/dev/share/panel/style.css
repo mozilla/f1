@@ -453,7 +453,7 @@ body .toSection input[type="text"] {
 }
 
 .shareType2 {
-    line-height: 52px;
+    line-height: 64px;
     padding: 0 0 0 10px;
     text-decoration: none;
     font-style: italic;
@@ -736,6 +736,7 @@ div.status {
   font-size: 14px;
   text-align: center;
   line-height: 18px;
+  z-index: 500;
 }
 
 div.status table {

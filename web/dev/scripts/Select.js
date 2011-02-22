@@ -85,8 +85,22 @@ function (object,         Widget,         array,         $,        module,
       template: template,
 
       onCreate: function () {
-        this.selectedIndex = this.selectedIndex || 0;
-        this.value = this.options[this.selectedIndex].value;
+        if (this.value) {
+          var index, value = this.value;
+          // Find the matching index for the value.
+          this.options.some(function (item, i) {
+            if (item.value === value) {
+              index = i;
+              return true;
+            }
+            return false;
+          });
+          this.selectedIndex = index;
+        } else {
+          // No default value, work it out via selectedIndex if available.
+          this.selectedIndex = this.selectedIndex || 0;
+          this.value = this.options[this.selectedIndex].value;
+        }
       },
 
       onRender: function () {

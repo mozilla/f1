@@ -90,6 +90,7 @@ function (object,         Widget,         $,        template,
         savedOptions = store[this.storeId];
         if (savedOptions) {
           savedOptions = JSON.parse(savedOptions);
+
           if (this.theGameHasChanged(savedOptions)) {
             this.clearSavedData();
             savedOptions = null;
@@ -149,6 +150,7 @@ function (object,         Widget,         $,        template,
           //Insert a Select widget if it is desired.
           this.select = new Select({
             name: 'shareType',
+            value: this.options.shareType,
             options: this.svc.shareTypes.map(function (item) {
                       return {
                         name: item.name,
@@ -162,6 +164,11 @@ function (object,         Widget,         $,        template,
             this.onShareTypeChange(evt);
           });
           this.select.dom.bind('change', this.selectChangeFunc);
+
+          // Update the display that is linked to the select.
+          if (this.options.shareType) {
+            this.changeShareType(this.getShareType(this.options.shareType));
+          }
         }
 
         if (this.svc.textLimit) {
@@ -268,6 +275,7 @@ function (object,         Widget,         $,        template,
 
         //Only set share types if they are available for this type of account.
         if (this.select) {
+
           if (opts.shareType) {
             this.select.val(opts.shareType);
             this.changeShareType(this.getShareType(opts.shareType));
