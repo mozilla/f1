@@ -101,6 +101,16 @@ function (object,         Widget,         array,         $,        module,
         parent(this, "destroy", arguments);
       },
 
+      /**
+       * Selects an item based on its index.
+       */
+      selectIndex: function (index) {
+        return this.val(this.options[index].value);
+      },
+
+      /**
+       * Get or set the value for the select. Uses the value for the option.
+       */
       val: function (newValue) {
         if (newValue === undefined) {
           // Get
@@ -110,7 +120,7 @@ function (object,         Widget,         array,         $,        module,
           var liNode, ulNode, index;
 
           // Find the li node that corresponds with the value.
-          array.to.apply(null, $('li', ulNode)).some(function (node, i) {
+          array.to.apply(null, $('li', this.dom)).some(function (node, i) {
             if (node.getAttribute('data-value') === newValue) {
               liNode = node;
               index = i;
@@ -146,17 +156,19 @@ function (object,         Widget,         array,         $,        module,
         // Remove the open class.
         this.dom.removeClass('open');
 
-        // Update the list to be positioned correctly to show the selection.
-        this.node.scrollTop = this.selectedIndex * liNode.getBoundingClientRect().height;
-
-        //Position the triangle correctly.
-        $('.triangle', this.node)[0].style.top = this.node.scrollTop + 'px';
+        // Remove the artificial width
+        this.node.style.width = '';
       },
 
       open: function () {
         if (openSelect) {
           openSelect.close();
         }
+
+        // Since the options will position absolute, give the Select
+        // width so that surrounding content does not collapse around it.
+        this.node.style.width = this.node.getBoundingClientRect().width + 'px';
+
         this.dom.addClass('open');
         openSelect = this;
       },

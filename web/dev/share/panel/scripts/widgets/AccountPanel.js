@@ -317,12 +317,12 @@ function (object,         Widget,         $,        template,
       },
 
       selectFirstShareType: function () {
-        $('.shareType', this.bodyNode)[0].options[0].selected = true;
+        this.select.selectIndex(0);
         this.changeShareType(this.svc.shareTypes[0]);
       },
 
       selectSecondShareType: function () {
-        $('.shareType', this.bodyNode)[0].options[1].selected = true;
+        this.select.selectIndex(1);
         this.changeShareType(this.svc.shareTypes[1]);
       },
 
@@ -349,7 +349,7 @@ function (object,         Widget,         $,        template,
       },
 
       onShareTypeChange: function (evt) {
-        var shareType = this.getShareType($('.shareType', this.bodyNode).val());
+        var shareType = this.getShareType(this.select.val());
         this.changeShareType(shareType);
       },
 

@@ -4,15 +4,19 @@
   need to be set in the app that includes a Select widget. */
 .Select {
   position:relative;
+  display: inline-block;
   overflow: hidden;
+  padding-right: 15px;
   z-index: 100;
   border: 1px solid #A6AFB6;
-  height: 20px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15) inset;
+  height: 24px;
   cursor: pointer;
 }
 
 .Select.open {
   overflow: visible;
+  padding-right: 0;
   border: 0;
 }
 
@@ -23,14 +27,28 @@
 }
 
 .Select.open ul {
+  position: absolute;
   border: 1px solid gray;
 }
 
 .Select li {
-  height: 20px;
-  line-height: 20px;
+  display: none;
+  height: 0;
   padding: 0 5px;
   white-space: nowrap;
+}
+
+.Select li.selected {
+  display: block;
+  height: 24px;
+  line-height: 24px;
+}
+
+.Select.open li {
+  display: block;
+  height: 24px;
+  line-height: 24px;
+  padding-right: 20px;
 }
 
 .Select.open li.selected {
@@ -47,8 +65,8 @@
   position: absolute;
   right: 0;
   top: 0;
-  height: 20px;
-  line-height: 20px;
+  height: 24px;
+  line-height: 24px;
   padding: 0 2px;
   z-index: 101;
   color: #A6AFB6;
