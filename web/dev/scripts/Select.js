@@ -47,9 +47,6 @@ function (object,         Widget,         array,         $,        module,
   //Set up event handlers.
   $(function () {
     $('body')
-      .delegate('.' + className, 'change', function (evt) {
-        Widget.closest(module.id, evt, 'onChange');
-      })
       .delegate('.' + className + ' .triangle', 'click', function (evt) {
         Widget.closest(module.id, evt, 'onTriangleClick');
         evt.preventDefault();
@@ -104,6 +101,42 @@ function (object,         Widget,         array,         $,        module,
         parent(this, "destroy", arguments);
       },
 
+      val: function (newValue) {
+        if (newValue === undefined) {
+          // Get
+          return $('li.selected', this.node)[0].getAttribute('data-value');
+        } else {
+          // Set the value.
+          var liNode, ulNode, index;
+
+          // Find the li node that corresponds with the value.
+          array.to.apply(null, $('li', ulNode)).some(function (node, i) {
+            if (node.getAttribute('data-value') === newValue) {
+              liNode = node;
+              index = i;
+            }
+            return false;
+          });
+
+          this.selectedIndex = index;
+
+          ulNode = liNode.parentNode;
+
+          // Find the index.
+          this.selectedIndex = array.to.apply(null, $('li', ulNode)).indexOf(liNode);
+
+          // Make sure the right node has the selected class
+          $('li', ulNode).removeClass('selected');
+          $(liNode).addClass('selected');
+
+          this.close();
+
+          this.dom.trigger('change');
+
+          return newValue;
+        }
+      },
+
       close: function () {
         var liNode = $('li.selected', this.node)[0];
 
@@ -139,17 +172,7 @@ function (object,         Widget,         array,         $,        module,
           return;
         }
 
-        var liNode = evt.target,
-            ulNode = liNode.parentNode;
-
-        // Find the index.
-        this.selectedIndex = array.to.apply(null, $('li', ulNode)).indexOf(liNode);
-
-        // Make sure the right node has the selected class
-        $('li', ulNode).removeClass('selected');
-        $(liNode).addClass('selected');
-
-        this.close();
+        this.val(evt.target.getAttribute('data-value'));
       }
     };
   });

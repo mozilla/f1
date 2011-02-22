@@ -42,9 +42,6 @@ function (object,         Widget,         $,        template,
       .delegate('.' + className + ' form.messageForm', 'submit', function (evt) {
         Widget.closest(module.id, evt, 'onSubmit');
       })
-      .delegate('.' + className + ' .shareType', 'change', function (evt) {
-        Widget.closest(module.id, evt, 'onShareTypeChange');
-      })
       .delegate('.' + className + ' .shareType2', 'click', function (evt) {
         Widget.closest(module.id, evt, 'selectSecondShareType');
         evt.preventDefault();
@@ -130,8 +127,10 @@ function (object,         Widget,         $,        template,
       destroy: function () {
         dispatch.unsub(this.optionsChangedSub);
         dispatch.unsub(this.base64PreviewSub);
-        this.Select.destroy();
-        this.Select = null;
+        this.select.dom.unbind('change', this.selectChangeFunc);
+        delete this.selectChangeFunc;
+        this.select.destroy();
+        this.select = null;
         parent(this, 'destroy');
       },
 
@@ -157,6 +156,12 @@ function (object,         Widget,         $,        template,
                       };
                     })
           }, $('.shareTypeSelectSection', this.bodyNode)[0]);
+
+          // Listen to changes in the Select
+          this.selectChangeFunc = fn.bind(this, function (evt) {
+            this.onShareTypeChange(evt);
+          });
+          this.select.dom.bind('change', this.selectChangeFunc);
         }
 
         if (this.svc.textLimit) {
