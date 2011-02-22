@@ -40,8 +40,7 @@ function (storage,   dispatch,   rdapi,   services) {
           // accounts now simply provides existing accounts retreived during
           // the oauth dances
           var accountCache = store.accountCache,
-              lastCheck = store.lastAccountCheck || 0,
-              currentTime = (new Date()).getTime();
+              serviceCache = store.serviceCache;
 
           //Set up accountCache as a real object.
           if (accountCache) {
@@ -49,11 +48,23 @@ function (storage,   dispatch,   rdapi,   services) {
           } else {
             accountCache = [];
           }
+          if (!serviceCache) {
+            // fetch now, let the response call ok
+            // Set up serviceCache.  This should only ever happen
+            // if the local store is cleared (e.g. first run, cleared cookies)
+            impl.fetch(ok, error);
+            return;
+          }
+          if (serviceCache) {
+            serviceCache = JSON.parse(serviceCache);
+          } else {
+            serviceCache = [];
+          }
 
           //Call ok callback with current knowledge. If there is a change in the
           //account info, then the fetch will trigger changed event later.
           if (ok) {
-            ok(accountCache);
+            ok(accountCache, serviceCache);
           }
         },
 
@@ -111,7 +122,38 @@ function (storage,   dispatch,   rdapi,   services) {
           store.serviceCache = JSON.stringify(serviceCache);
           impl.changed();
         },
-        
+
+        fetch: function (ok, error) {
+          dump("account.fetch called\n");
+          rdapi('account/get/full', {
+            success: function (json) {
+              if (json.error) {
+                json = [];
+              }
+              if (json.length < 1) {
+                dump("no accounts to add\n");
+                return;
+              }
+              
+              store.serviceCache = JSON.stringify(json)
+              var accountCache = [], svc;
+              for (var p in json) {
+                accountCache.push(json[p].profile);
+
+                // clear the contacts cache
+                svc = services.domains[json[p].domain];
+                svc.clearCache(store);
+              }
+              store.accountCache = JSON.stringify(accountCache);
+              dump("account.get added services\n");
+              if (ok) {
+                ok(accountCache, json);
+              }
+            },
+            error: error || function () {}
+          });
+        },
+
         remove: function(domain, userid, username) {
           var accountCache = store.accountCache,
               serviceCache = store.serviceCache;
@@ -242,6 +284,19 @@ function (storage,   dispatch,   rdapi,   services) {
    */
   accounts.remove = function (account, userid, username) {
     impl.remove(account, userid, username);
+  };
+
+  /**
+   * Fetch accounts stored on server.
+   * DEPRECATED, interim use for auto-adding accounts that
+   * users have already configured
+   * 
+   * @param {string} account domain
+   * @param {string} account userid
+   * @param {string} account username
+   */
+  accounts.fetch = function (ok, error) {
+    impl.fetch(ok, error);
   };
 
   /**

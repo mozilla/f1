@@ -54,6 +54,8 @@ OAuth authorization api.
     @json_exception_response
     def get(self, domain=None):
         keys = [k for k in session.get('account_keys', '').split(',') if k]
+        if domain == 'full':
+            return [p for p in [session[k] for k in keys] if p]
         return [p for p in [session[k].get('profile') for k in keys] if p]
         
     def signout(self):

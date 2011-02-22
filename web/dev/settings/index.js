@@ -281,6 +281,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           }
         });
       })
+      .delegate('.refresh', 'click', function (evt) {
+        // clear all service caches
+        for (var s in services.domains) {
+          services.domains[s].clearCache(store);
+        }
+        accounts.changed();
+      })
       //Hook up remove buttons to remove an account
       .delegate('.remove', 'click', function (evt) {
         var buttonNode = evt.target,
