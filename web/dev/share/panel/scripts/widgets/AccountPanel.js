@@ -21,16 +21,17 @@
  * Contributor(s):
  * */
 
-/*jslint indent: 2, plusplus: false */
+/*jslint indent: 2, plusplus: false, nomen: false */
 /*global define: false, document: false */
 "use strict";
 
 define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./AccountPanel.html',
          'TextCounter', 'storage', 'module', 'placeholder', 'dispatch', 'accounts',
-         'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs', 'jquery.textOverflow'],
+         'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs', 'Select',
+         'jquery.textOverflow'],
 function (object,         Widget,         $,        template,
           TextCounter,   storage,   module,   placeholder,   dispatch,   accounts,
-          AutoComplete,   rdapi,   fn,         jigFuncs) {
+          AutoComplete,   rdapi,   fn,         jigFuncs,     Select) {
 
   var store = storage(),
       className = module.id.replace(/\//g, '-');
@@ -129,6 +130,8 @@ function (object,         Widget,         $,        template,
       destroy: function () {
         dispatch.unsub(this.optionsChangedSub);
         dispatch.unsub(this.base64PreviewSub);
+        this.Select.destroy();
+        this.Select = null;
         parent(this, 'destroy');
       },
 
@@ -141,6 +144,19 @@ function (object,         Widget,         $,        template,
             this.bodyNode = tempNode;
             break;
           }
+        }
+
+        if (this.svc.shareTypes.length > 1) {
+          //Insert a Select widget if it is desired.
+          this.select = new Select({
+            name: 'shareType',
+            options: this.svc.shareTypes.map(function (item) {
+                      return {
+                        name: item.name,
+                        value: item.type
+                      };
+                    })
+          }, $('.shareTypeSelectSection', this.bodyNode)[0]);
         }
 
         if (this.svc.textLimit) {
@@ -331,15 +347,23 @@ function (object,         Widget,         $,        template,
         var shareType = this.getShareType($('.shareType', this.bodyNode).val());
         this.changeShareType(shareType);
       },
-      
-      _findContact: function(to, contacts) {
-        var acct = contacts[to.trim()];
-        if (acct) return acct;
-        
-        for (var un in contacts) {
-          var c = contacts[un];
-          if (c.userid === to) return c;
-          if (c.username === to) return c;
+
+      _findContact: function (to, contacts) {
+        var acct = contacts[to.trim()], un, c;
+        if (acct) {
+          return acct;
+        }
+
+        for (un in contacts) {
+          if (contacts.hasOwnProperty(un)) {
+            c = contacts[un];
+            if (c.userid === to) {
+              return c;
+            }
+            if (c.username === to) {
+              return c;
+            }
+          }
         }
         return null;
       },
@@ -351,7 +375,7 @@ function (object,         Widget,         $,        template,
         //Make sure all form elements are trimmed and username exists.
         //Then collect the form values into the data object.
         var sendData = this.getFormData(),
-            contacts, newrecip, recip, acct;
+            contacts, newrecip, recip, acct, self;
 
         if (!this.validate(sendData)) {
           return;
@@ -369,7 +393,7 @@ function (object,         Widget,         $,        template,
           newrecip = [];
           if (contacts) {
             recip = sendData.to.split(',');
-            var self = this;
+            self = this;
             recip.forEach(function (to) {
               acct = self._findContact(to.trim(), contacts);
               if (acct && !acct.email) {
@@ -416,9 +440,10 @@ function (object,         Widget,         $,        template,
        * server if there is no store copy.
        */
       storeContacts: function () {
-        var contacts = this.svc.getContacts(store);
+        var contacts = this.svc.getContacts(store),
+            svcData;
         if (!contacts) {
-          var svcData = accounts.getService(this.svcAccount.domain, this.svcAccount.userid, this.svcAccount.username);
+          svcData = accounts.getService(this.svcAccount.domain, this.svcAccount.userid, this.svcAccount.username);
           rdapi('contacts/' + this.svcAccount.domain, {
             type: 'POST',
             data: {

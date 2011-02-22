@@ -25,11 +25,6 @@
           <div class="shareTypeSection hbox">
             <div class="shareTypeSelectSection">
               <label for="shareType" class="shareTypeLabel">{strings.shareTypeLabel}:</label>
-              <select name="shareType" class="shareType">
-                {svc.shareTypes [}
-                  <option value="{type}">{name}</option>
-                {]}
-              </select>
             </div>
             {eq(svc.shareTypes.length, 2) [}
               <a class="shareType2 boxFlex" href="#shareType2">send to {svc.shareTypes[1].name} instead?</a>
