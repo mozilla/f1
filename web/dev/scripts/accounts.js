@@ -87,7 +87,7 @@ function (storage,   dispatch,   rdapi,   services) {
 
           // move the profile into accountCache
           var profile = account_data.profile;
-          for (var p in accountCache) {
+          for (var p=0; p < accountCache.length; p++) {
             if (accountCache[p].providerName === profile.providerName) {
               accountCache[p] = profile;
               existing = true;
@@ -104,7 +104,7 @@ function (storage,   dispatch,   rdapi,   services) {
           if (serviceCache) {
             existing = false;
             serviceCache = JSON.parse(serviceCache);
-            for (var a in serviceCache) {
+            for (var a=0; a < serviceCache.length; a++) {
 
               if (serviceCache[a].domain === account_data.domain &&
                   (serviceCache[a].userid === account_data.userid) ||
@@ -124,20 +124,15 @@ function (storage,   dispatch,   rdapi,   services) {
         },
 
         fetch: function (ok, error) {
-          dump("account.fetch called\n");
           rdapi('account/get/full', {
             success: function (json) {
               if (json.error) {
                 json = [];
               }
-              if (json.length < 1) {
-                dump("no accounts to add\n");
-                return;
-              }
-
+              
               store.serviceCache = JSON.stringify(json)
               var accountCache = [], svc;
-              for (var p in json) {
+              for (var p = 0; p < json.length; p++) {
                 accountCache.push(json[p].profile);
 
                 // clear the contacts cache
@@ -145,7 +140,6 @@ function (storage,   dispatch,   rdapi,   services) {
                 svc.clearCache(store);
               }
               store.accountCache = JSON.stringify(accountCache);
-              dump("account.get added services\n");
               if (ok) {
                 ok(accountCache, json);
               }
