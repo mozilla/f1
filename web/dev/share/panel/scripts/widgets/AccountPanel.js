@@ -233,7 +233,7 @@ function (object,         Widget,         $,        template,
             opts = this.options,
             formLink = jigFuncs.link(opts),
             restoredData = this.memStore[formLink],
-            oldData, shareTypeDom;
+            oldData;
 
         //Save off previous form data for old URL.
         oldData = this.getFormData();
@@ -267,10 +267,9 @@ function (object,         Widget,         $,        template,
         root.find('[name="description"]').val(opts.description);
 
         //Only set share types if they are available for this type of account.
-        shareTypeDom = root.find('[name="shareType"]');
-        if (shareTypeDom.length) {
+        if (this.select) {
           if (opts.shareType) {
-            shareTypeDom.val(opts.shareType);
+            this.select.val(opts.shareType);
             this.changeShareType(this.getShareType(opts.shareType));
           } else {
             this.selectFirstShareType();
@@ -478,8 +477,6 @@ function (object,         Widget,         $,        template,
           //$(window).bind('load', updateAutoComplete);
         }
       }
-
-
     };
   });
 });
