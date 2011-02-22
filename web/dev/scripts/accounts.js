@@ -78,13 +78,13 @@ function (storage,   dispatch,   rdapi,   services) {
           var accountCache = store.accountCache,
               serviceCache = store.serviceCache,
               existing = false;
-          
+
           if (accountCache) {
             accountCache = JSON.parse(accountCache);
           } else {
             accountCache = [];
           }
-          
+
           // move the profile into accountCache
           var profile = account_data.profile;
           for (var p in accountCache) {
@@ -98,7 +98,7 @@ function (storage,   dispatch,   rdapi,   services) {
             accountCache.push(profile);
           }
           store.accountCache = JSON.stringify(accountCache);
-          
+
           // we store the entire object in serviceCache, at some point in the
           // future we will remove accountCache
           if (serviceCache) {
@@ -134,7 +134,7 @@ function (storage,   dispatch,   rdapi,   services) {
                 dump("no accounts to add\n");
                 return;
               }
-              
+
               store.serviceCache = JSON.stringify(json)
               var accountCache = [], svc;
               for (var p in json) {
@@ -169,7 +169,7 @@ function (storage,   dispatch,   rdapi,   services) {
             }
             store.serviceCache = JSON.stringify(serviceCache);
           }
-          
+
           // eventually we will deprecate accountCache
           if (accountCache) {
             accountCache = JSON.parse(accountCache);
@@ -186,11 +186,11 @@ function (storage,   dispatch,   rdapi,   services) {
             }
             store.accountCache = JSON.stringify(accountCache);
           }
-          
+
           // clear the contacts cache
           var svc = services.domains[domain];
           svc.clearCache(store);
-          
+
           impl.changed();
         },
 
@@ -208,7 +208,7 @@ function (storage,   dispatch,   rdapi,   services) {
           }
           return null;
         },
-        
+
         changed: function () {
           store.accountChanged = (new Date()).getTime();
           //Force the onchange events to occur. Sometimes the storage
@@ -269,7 +269,7 @@ function (storage,   dispatch,   rdapi,   services) {
   }
 
   /**
-   * Updates the accounts from a json account object. 
+   * Updates the accounts from a json account object.
    * @param {Object} cookie object to update from
    */
   accounts.update = function (account_data) {
@@ -277,10 +277,10 @@ function (storage,   dispatch,   rdapi,   services) {
   };
 
   /**
-   * Remove an accounts from storage. 
-   * @param {string} account domain
-   * @param {string} account userid
-   * @param {string} account username
+   * Remove an accounts from storage.
+   * @param {string} domain
+   * @param {string} userid
+   * @param {string} username
    */
   accounts.remove = function (account, userid, username) {
     impl.remove(account, userid, username);
@@ -290,20 +290,16 @@ function (storage,   dispatch,   rdapi,   services) {
    * Fetch accounts stored on server.
    * DEPRECATED, interim use for auto-adding accounts that
    * users have already configured
-   * 
-   * @param {string} account domain
-   * @param {string} account userid
-   * @param {string} account username
    */
   accounts.fetch = function (ok, error) {
     impl.fetch(ok, error);
   };
 
   /**
-   * Get a full service account record 
-   * @param {string} account domain
-   * @param {string} account userid
-   * @param {string} account username
+   * Get a full service account record
+   * @param {string} domain
+   * @param {string} userid
+   * @param {string} username
    */
   accounts.getService = function (account, userid, username) {
     return impl.getService(account, userid, username);
