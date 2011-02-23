@@ -761,5 +761,4 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         placeholder(node);
       });
   });
-
 });
