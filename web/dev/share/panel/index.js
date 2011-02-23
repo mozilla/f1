@@ -464,6 +464,5 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     rssFeed(function (title, link) {
       $('#rssLink').attr('href', link).text(title);
     });
-
   });
 });
