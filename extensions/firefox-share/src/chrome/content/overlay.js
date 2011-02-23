@@ -194,6 +194,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
         if (status < 200 || status > 399) {
           this.browser.contentWindow.location = ffshare.errorPage;
+          gBrowser.selectedTab.shareState.forceReload = true;
         }
       }
     },
