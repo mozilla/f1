@@ -451,6 +451,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         hashReload = false;
       } else {
         options = shareOptions();
+
+        //Be sure to clear any status messages
+        cancelStatus();
+
         dispatch.pub('optionsChanged', options);
         checkBase64Preview();
 
