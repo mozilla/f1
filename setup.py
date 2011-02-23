@@ -28,7 +28,7 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-VERSION='0.2.3'
+VERSION='0.2.4'
 
 setup(
     name='linkdrop',
@@ -39,7 +39,6 @@ setup(
     url='',
     install_requires=[
         "Pylons>=1.0",
-        "SQLAlchemy>=0.5",
         "docutils",
         "nose",
         "httplib2",
@@ -48,7 +47,6 @@ setup(
         "python-openid",
         "python-memcached",
         "gdata", # google api support
-        "sqlalchemy-migrate>=0.5.4",
         "twitter>=1.4.2"
     ],
     setup_requires=["PasteScript>=1.6.3"],

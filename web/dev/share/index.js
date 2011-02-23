@@ -84,7 +84,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         canonicalUrl: dom.find('[name="link"]').val().trim() || '',
         title: dom.find('[name="title"]').val().trim() || '',
         description: dom.find('[name="description"]').val().trim() || '',
-        shortUrl: dom.find('[name="surl"]').val().trim() || ''
+        shortUrl: (dom.find('[name="surl"]').val() || "").trim()
       };
     },
     setFormData: function (data) {
@@ -215,6 +215,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       return;
     }
 
+    var svcData = accounts.getService(sendData.domain, sendData.userid, sendData.username);
+    sendData.account = JSON.stringify(svcData);
+
     rdapi('send', {
       type: 'POST',
       data: sendData,
@@ -295,15 +298,18 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   function storeContacts(serviceName, account) {
     var svcAccount = account.accounts[0],
         svc = services.domains[svcAccount.domain],
-        contacts = svc.getContacts(store);
+        contacts = svc.getContacts(store),
+        svcData;
     if (!contacts) {
+      svcData = accounts.getService(svcAccount.domain, svcAccount.userid, svcAccount.username);
       rdapi('contacts/' + svcAccount.domain, {
         type: 'POST',
         data: {
           username: svcAccount.username,
           userid: svcAccount.userid,
           startindex: 0,
-          maxresults: 500
+          maxresults: 500,
+          account: JSON.stringify(svcData)
         },
         success: function (json) {
           //Transform data to a form usable by autocomplete.
@@ -535,7 +541,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var thumbImgDom,
       sessionRestore = store.sessionRestore,
       tabSelectionDom, tabhtml = '', panelhtml = '',
-      svc;
+      svc, url;
 
     // first thing, fill in the supported services
     services.domainList.forEach(function (domain) {
@@ -688,7 +694,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (options.previews && options.previews.length) {
       //TODO: set up all the image previews.
       // XXX: we might not want to default to the base64 as that won't be sent/used by Facebook
-      var url = escapeHtml(options.previews[0]);
+      url = escapeHtml(options.previews[0]);
       thumbImgDom.attr('src', url);
     } else if (options.thumbnail) {
       thumbImgDom.attr('src', escapeHtml(options.thumbnail));

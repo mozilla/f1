@@ -451,10 +451,10 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       webProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
 
     },
-    
+
     shutdown: function() {
       Services.obs.removeObserver(this, 'content-document-global-created');
-      
+
       this.httpObserver.unregisterObserver();
 
       var webProgress = this.browser.webProgress;
@@ -821,7 +821,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     autoCompleteData: function (data) {
       ffshareAutoCompleteData.set(data);
     },
-    
+
     sizeToContent: function () {
       var doc = this.browser.contentDocument.wrappedJSObject;
       var wrapper = doc && doc.getElementById('wrapper');
@@ -851,7 +851,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     hide: function () {
       this.close();
     },
-    
+
 
     show: function (options) {
       var tabURI = gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI,
@@ -862,7 +862,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
       var currentState = gBrowser.selectedTab.shareState;
       options = this.getOptions(options);
-      
+
       gBrowser.selectedTab.shareState = {
         options: options, // currently not used for anything
         forceReload: false
@@ -892,7 +892,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // fx 4
       var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
       this.panel.openPopup(button, position, 0, 0, false, false);
-    }    
+    }
   };
 
 
@@ -1166,6 +1166,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           pref = subject.QueryInterface(Ci.nsIPrefBranch);
           //dump("topic: " + topic + " -- data: " + data + " == pref: " + pref.getBoolPref(data) + "\n");
           ffshare.setAccelKey(pref.getBoolPref(data));
+        } catch (e) {
+          error(e);
+        }
+      } else if ("extensions." + FFSHARE_EXT_ID + ".bookmarking" === data) {
+        try {
+          pref = subject.QueryInterface(Ci.nsIPrefBranch);
+          ffshare.prefs.bookmarking = pref.getBoolPref(data);
         } catch (e) {
           error(e);
         }

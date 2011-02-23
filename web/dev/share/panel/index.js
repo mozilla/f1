@@ -32,13 +32,13 @@ require({
   }
 });
 
-define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
-         "placeholder", "AutoComplete", "dispatch", "accounts",
+define([ "require", "jquery", "blade/object", "blade/fn", "rdapi", "oauth",
+        "blade/jig", "blade/url", "placeholder", "AutoComplete", "dispatch", "accounts",
          "storage", "services", "shareOptions", "widgets/PageInfo", "rssFeed",
          "widgets/DebugPanel", "widgets/AccountPanel",
          "jquery-ui-1.8.7.min", "jquery.textOverflow"],
-function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
-          placeholder,   AutoComplete,   dispatch,   accounts,
+function (require,   $,        object,         fn,         rdapi,   oauth,
+          jig,         url,        placeholder,   AutoComplete,   dispatch,   accounts,
           storage,   services,   shareOptions,   PageInfo,           rssFeed,
           DebugPanel,           AccountPanel) {
 
@@ -134,11 +134,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     }
   }
 
-  function sendMessage(data) {
-    showStatus('statusSharing');
-
-    sendData = data;
-
+  // This method assumes the sendData object has already been set up.
+  // You probably want sendMessage, not this call.
+  function callSendApi() {
     rdapi('send', {
       type: 'POST',
       data: sendData,
@@ -186,6 +184,53 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         }
       }
     });
+  }
+
+  function sendMessage(data) {
+    showStatus('statusSharing');
+
+    sendData = data;
+
+    var svcData = accounts.getService(data.domain, data.userid, data.username),
+        svcConfig = services.domains[data.domain],
+        shortenPrefs = store.shortenPrefs,
+        shortenData;
+
+    sendData.account = JSON.stringify(svcData);
+
+    //First see if a bitly URL is needed.
+    if (svcConfig.shorten && shortenPrefs) {
+      shortenData = {
+        format: 'json',
+        longUrl: sendData.link
+      };
+
+      // Unpack the user prefs
+      shortenPrefs = JSON.parse(shortenPrefs);
+
+      if (shortenPrefs) {
+        object.mixin(shortenData, shortenPrefs, true);
+      }
+
+      // Make sure the server does not try to shorten.
+      delete sendData.shorten;
+
+      $.ajax({
+        url: 'http://api.bitly.com/v3/shorten',
+        type: 'GET',
+        data: shortenData,
+        dataType: 'json',
+        success: function (json) {
+          sendData.shorturl = json.data.url;
+          callSendApi();
+        },
+        error: function (xhr, textStatus, errorThrown) {
+          showStatus('statusShortenerError', errorThrown);
+        }
+      });
+    } else {
+      callSendApi();
+    }
   }
 
   /**
@@ -419,6 +464,5 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     rssFeed(function (title, link) {
       $('#rssLink').attr('href', link).text(title);
     });
-
   });
 });

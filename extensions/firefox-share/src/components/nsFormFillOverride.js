@@ -72,6 +72,7 @@ FFShareAutoComplete.prototype = {
     let datadomain = field.getAttribute('autocompletestore');
     if (!datadomain)
       return result;
+    let format = field.getAttribute('autocompleteformat') || '{name}';
 
     //convert the query to only be for things after the comma.
     var parts = query.split(','), previousMatch = '';
@@ -81,20 +82,38 @@ FFShareAutoComplete.prototype = {
       previousMatch = parts.slice(0, parts.length - 1).join(',') + ', ';
     }
 
+    let sw = false;
+    if (query[0] === '@') {
+      sw = true;
+      query = query.substring(1);
+    }
     query = query.toLowerCase();
 
-_("query is now: [" + query + "]");
+_("query is now: [" + query + "]"); 
+_("format is: [" + format + "]"); 
 _("previousMatch is now: " + previousMatch);
 _("data domain is: "+datadomain);
     let data = acDataStorage.get(datadomain) || {};
     for (let name in data) {
       var displayNameLower = name.toLowerCase(),
-          emailLower = data[name].email.toLowerCase();
-      if (displayNameLower.indexOf(query) !== -1 || emailLower.indexOf(query) !== -1) {
-        if (emailLower)
-          addr =  (displayNameLower === emailLower ? data[name].email : name + '<' + data[name].email + '>');
-        else
-          addr =  name;
+          emailLower = data[name].email ? data[name].email.toLowerCase() : "",
+          unLower = data[name].username ? data[name].username.toLowerCase() : "";
+      
+      let match = (sw && (unLower.indexOf(query) === 0)) ||
+                  (!sw && (displayNameLower.indexOf(query) !== -1
+                        || emailLower.indexOf(query) !== -1
+                        || unLower.indexOf(query) !== -1))
+      if (match) {
+        let addr = format;
+        try {
+          addr = addr.replace('{name}', name === data[name].email ? data[name].email : name);
+          addr = addr.replace('{email}', name !== data[name].email ? "<"+data[name].email+">" : "");
+          addr = addr.replace('{username}', data[name].username);
+          addr = addr.replace('{userid}', data[name].userid);
+        } catch(e) {
+          _("unable to format record ", JSON.stringify(data), " to ", format);
+          continue;
+        }
         result.appendMatch(previousMatch + addr + ', ', addr , null, 'ffshare');
       }
     }
