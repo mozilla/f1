@@ -30,6 +30,7 @@ import httplib2
 import copy
 from urlparse import urlparse
 from paste.deploy.converters import asbool
+import hashlib
 
 from pylons import config, request, response, session
 from pylons.controllers.util import abort, redirect
@@ -166,8 +167,9 @@ Site provided description of the shared item, not supported by all services.
             link_timer.track('link-shorten', short_url=shorturl)
             args['shorturl'] = shorturl
 
+        acct_hash = hashlib.sha1("%s#%s" % (username or '', userid or '')).hexdigest()
         timer = metrics.start_timer(request, domain=domain, message_len=len(message),
-                                    long_url=longurl, short_url=shorturl)
+                                    long_url=longurl, short_url=shorturl, acct_id=acct_hash)
         # send the item.
         try:
             result, error = provider.api(acct).sendmessage(message, args)
