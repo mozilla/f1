@@ -88,7 +88,10 @@ function (storage,   dispatch,   rdapi,   services) {
           // move the profile into accountCache
           var profile = account_data.profile;
           for (var p=0; p < accountCache.length; p++) {
-            if (accountCache[p].providerName === profile.providerName) {
+              var acct = accountCache[p].accounts[0];
+              if (acct.domain === account_data.domain &&
+                  (acct.userid === account_data.userid) ||
+                  (acct.username === account_data.username)) {
               accountCache[p] = profile;
               existing = true;
               break;
