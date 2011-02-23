@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>F1: Popup</title>
+    <link rel="stylesheet" type="text/css" href="/0.2.4/share/panel/style.css">
+    <script data-main="/0.2.4/share/panel/index.js" src="/0.2.4/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+</head>
+<body>
+
+<noscript>
+    Please enable JavaScript to use F1. If you are using NoScript or another script
+    blocking add-on, please allow "mozillamessaging.com" and try again.
+</noscript>
+
+<div id="wrapper">
+  <div id="shareui" class="hidden">
+    <header class="hbox">
+        <h1 id="panelHeader" class="boxFlex">Mozilla F1</h1>
+        <nav>
+            <ul>
+                <li id="newLink" class="hidden"><a href="/0.2.4/settings/#show=new" class="settingsLink new" target="_blank">new accounts!</a></li>
+                <li><a href="/settings/" class="configureToggle" target="f1.settings">settings</a></li>
+                <li id="closeLink"><span class="close"></span></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="sharebox">
+
+      <div id="accounts">
+      </div>
+
+      <div id="newsBox">
+          <section id="news" class="hbox boxFlex headline">
+              <div>
+                  <span class="icon rss"></span>
+              </div>
+              <div class="boxFlex">
+                  <h3>Latest from the F1 team</h3>
+                  <div class="story">&ldquo;<a id="rssLink" href="#" target="_blank">Updating...</a>&rdquo;</div>
+
+              </div>
+          </section>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Click blocker for status messages. Should be before status messages but
+       after main content for z-order purposes -->
+  <div id="clickBlock" class="hidden"></div>
+
+  <!-- Start status messages -->
+
+  <div id="statusSettings" class="status hidden noConfig">
+    <table>
+      <tr>
+        <td>
+          <img src="/0.2.4/share/i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="/settings/">click here to setup F1</a>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusSharing" class="status hidden">
+    <table>
+      <tr>
+        <td>
+          <img src="/0.2.4/share/i/loader.gif"> sharing...
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusOAuthFailed" class="status hidden error">
+    <table>
+      <tr>
+        <td>
+          Sorry, we couldn't connect to your account. Please try again.
+          <button class="statusButton statusErrorButton">ok</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusEnableLocalStorage" class="status hidden">
+    <table>
+      <tr>
+        <td>
+          Please enable DOM Storage to use Mozilla F1.
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusError" class="status hidden error">
+    <table>
+      <tr>
+        <td>
+          We're really sorry, F1 done goofed up. <span id="statusErrorMessage"></span>
+          <button class="statusButton statusErrorButton">ok</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusShortenerError" class="status hidden error">
+    <table>
+      <tr>
+        <td>
+          We're really sorry, the link could not be shortened.<br>
+          Please try again later.</br>
+          <span id="statusShortenerErrorMessage"></span>
+          <button class="statusButton statusErrorButton">ok</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusCaptcha" class="status hidden intermediate captcha">
+    <div class="captcha-wrap vbox boxFlex center">
+      <div>
+      <form name="captchaForm" onsubmit="document.getElementById('captchaButton').click();return false;" class="hbox boxFlex">
+        <div><img id="captchaImage" class="captchaImage"/></div>
+        <div>
+          <div class="text">Please enter the text you see:</div>
+          <div class="controls hbox boxFlex">
+            <input class="boxFlex" id="captcha" name="captcha" placeholder="captcha" type="text"/>
+            <button id="captchaButton" class="statusButton">submit</button>
+          </div>
+          <div class="subtext">(sorry, sometimes email providers require this)</div>
+        </div>
+      </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="statusToError" class="status hidden error">
+    <table>
+      <tr>
+        <td>
+          The 'to' field is required to send email.
+          <button class="statusButton statusErrorButton">ok</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusServerError" class="status hidden error">
+    <table>
+      <tr>
+        <td>
+          We're really sorry, the F1 server is having problems. Please try again later. <span id="statusServerErrorMessage"></span>
+          <button id="statusServerErrorButton" class="statusButton statusErrorCloseButton">ok</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusAuth" class="status hidden intermediate error">
+    <table>
+      <tr>
+        <td>
+          Sorry, you've been signed out. Sign in again to finish sharing.
+          <button id="authOkButton" class="statusButton">sign in</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusServerBusy" class="status hidden warning">
+    <table>
+      <tr>
+        <td>
+          Sorry, F1 is under heavy load right now, please try again later.
+          <button class="statusButton statusErrorButton">ok</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusServerBusyClose" class="status hidden warning">
+    <table>
+      <tr>
+        <td>
+          Sorry, F1 is under heavy load right now, please try again later.
+          <button class="statusButton statusErrorCloseButton">ok</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusShared" class="status hidden">
+    <table>
+      <tr>
+        <td>
+          Message Shared!
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- End status messages -->
+
+</div>
+
+<!-- Start templates -->
+<script id="sharedTemplate" type="text/template">
+      <table>
+        <tr>
+          <td>
+            Link shared from <span class="shareDomain">{domain}</span> to <a href="{href}" target="_blank">{service}</a>
+          </td>
+        </tr>
+      </table>
+</script>
+<!-- End templates -->
+
+
+</body>
+</html>
