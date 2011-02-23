@@ -165,11 +165,13 @@ class api():
 
             direct = options.get('to', None)
             if direct:
-                result = self.api().direct_messages.new(text=message, user_id=direct)
+                result = self.api().direct_messages.new(text=message, user=direct)
             else:
                 result = self.api().statuses.update(status=message)
             result[domain] = result['id']
         except TwitterHTTPError, exc:
+            import traceback
+            traceback.print_exc()
             try:
                 details = json.load(exc.e)
                 if 'error' in details:
