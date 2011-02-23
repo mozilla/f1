@@ -76,13 +76,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       $(function () {
         var html = '';
 
-        //Weed out existing accounts for domains from available domainList,
-        //and generate account UI
         json.forEach(function (item) {
-          var index = services.domainList.indexOf(item.accounts[0].domain);
-          if (index !== -1) {
-            services.domainList.splice(index, 1);
-          }
           html += jig('#accountTemplate', item);
         });
 
