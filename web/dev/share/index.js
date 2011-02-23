@@ -84,7 +84,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         canonicalUrl: dom.find('[name="link"]').val().trim() || '',
         title: dom.find('[name="title"]').val().trim() || '',
         description: dom.find('[name="description"]').val().trim() || '',
-        shortUrl: dom.find('[name="surl"]').val().trim() || ''
+        shortUrl: (dom.find('[name="surl"]').val() || "").trim()
       };
     },
     setFormData: function (data) {

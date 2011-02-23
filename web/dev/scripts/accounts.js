@@ -21,13 +21,19 @@
  * Contributor(s):
  * */
 
-/*jslint indent: 2 */
+/*jslint indent: 2, plusplus: false */
 /*global require: false, define: false, window: false, location: true,
  localStorage: false, opener: false, setTimeout: false */
 'use strict';
 
 define([ 'storage', 'dispatch', 'rdapi', 'services'],
 function (storage,   dispatch,   rdapi,   services) {
+
+  function isCacheMatch(cache, domain, userid, username) {
+    return cache.domain === domain &&
+           ((userid && cache.userid === userid) ||
+           (username && cache.username === username));
+  }
 
   var store = storage(), impl,
     changeTypes = {
@@ -77,7 +83,8 @@ function (storage,   dispatch,   rdapi,   services) {
           // to send the auth keys
           var accountCache = store.accountCache,
               serviceCache = store.serviceCache,
-              existing = false;
+              existing = false,
+              profile, p, a;
 
           if (accountCache) {
             accountCache = JSON.parse(accountCache);
@@ -86,8 +93,8 @@ function (storage,   dispatch,   rdapi,   services) {
           }
 
           // move the profile into accountCache
-          var profile = account_data.profile;
-          for (var p=0; p < accountCache.length; p++) {
+          profile = account_data.profile;
+          for (p = 0; p < accountCache.length; p++) {
             if (accountCache[p].providerName === profile.providerName) {
               accountCache[p] = profile;
               existing = true;
@@ -104,11 +111,9 @@ function (storage,   dispatch,   rdapi,   services) {
           if (serviceCache) {
             existing = false;
             serviceCache = JSON.parse(serviceCache);
-            for (var a=0; a < serviceCache.length; a++) {
-
-              if (serviceCache[a].domain === account_data.domain &&
-                  (serviceCache[a].userid === account_data.userid) ||
-                  (serviceCache[a].username === account_data.username)) {
+            for (a = 0; a < serviceCache.length; a++) {
+              if (isCacheMatch(serviceCache[a], account_data.domain,
+                               account_data.userid, account_data.username)) {
                 serviceCache[a] = account_data;
                 existing = true;
                 break;
@@ -117,8 +122,9 @@ function (storage,   dispatch,   rdapi,   services) {
           } else {
             serviceCache = [];
           }
-          if (!existing)
+          if (!existing) {
             serviceCache.push(account_data);
+          }
           store.serviceCache = JSON.stringify(serviceCache);
           impl.changed();
         },
@@ -129,10 +135,10 @@ function (storage,   dispatch,   rdapi,   services) {
               if (json.error) {
                 json = [];
               }
-              
-              store.serviceCache = JSON.stringify(json)
-              var accountCache = [], svc;
-              for (var p = 0; p < json.length; p++) {
+
+              store.serviceCache = JSON.stringify(json);
+              var accountCache = [], svc, p;
+              for (p = 0; p < json.length; p++) {
                 accountCache.push(json[p].profile);
 
                 // clear the contacts cache
@@ -148,16 +154,16 @@ function (storage,   dispatch,   rdapi,   services) {
           });
         },
 
-        remove: function(domain, userid, username) {
+        remove: function (domain, userid, username) {
           var accountCache = store.accountCache,
-              serviceCache = store.serviceCache;
+              serviceCache = store.serviceCache,
+              i, cache, a, p, s, svc;
+
           if (serviceCache) {
             serviceCache = JSON.parse(serviceCache);
-            for (var a in serviceCache) {
-              if (serviceCache[a].domain === domain &&
-                  (userid && serviceCache[a].userid == userid) ||
-                  (username && serviceCache[a].username == username)) {
-                serviceCache.splice(a, 1);
+            for (i = 0; (cache = serviceCache[i]); i++) {
+              if (isCacheMatch(cache, domain, userid, username)) {
+                serviceCache.splice(i, 1);
                 break;
               }
             }
@@ -167,12 +173,10 @@ function (storage,   dispatch,   rdapi,   services) {
           // eventually we will deprecate accountCache
           if (accountCache) {
             accountCache = JSON.parse(accountCache);
-            for (var p in accountCache) {
-              var s = accountCache[p].accounts;
-              for (var a in s) {
-                if (s[a].domain === domain &&
-                    (userid && s[a].userid == userid) ||
-                    (username && s[a].username == username)) {
+            for (p = 0; p < accountCache.length; p++) {
+              s = accountCache[p].accounts;
+              for (a = 0; a < s.length; a++) {
+                if (isCacheMatch(s[a], domain, userid, username)) {
                   accountCache.splice(p, 1);
                   break;
                 }
@@ -182,21 +186,21 @@ function (storage,   dispatch,   rdapi,   services) {
           }
 
           // clear the contacts cache
-          var svc = services.domains[domain];
+          svc = services.domains[domain];
           svc.clearCache(store);
 
           impl.changed();
         },
 
-        getService: function(domain, userid, username) {
-          var serviceCache = store.serviceCache;
+        getService: function (domain, userid, username) {
+          var serviceCache = store.serviceCache,
+              i, cache;
+
           if (serviceCache) {
             serviceCache = JSON.parse(serviceCache);
-            for (var a in serviceCache) {
-              if (serviceCache[a].domain === domain &&
-                  (userid && serviceCache[a].userid == userid) ||
-                  (username && serviceCache[a].username == username)) {
-                return serviceCache[a];
+            for (i = 0; (cache = serviceCache[i]); i++) {
+              if (isCacheMatch(cache, domain, userid, username)) {
+                return cache;
               }
             }
           }
