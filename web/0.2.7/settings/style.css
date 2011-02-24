@@ -38,7 +38,8 @@ body {
 }
 
 .hidden,
-#tabs li.hidden {
+#tabs li.hidden,
+.hbox > *.hidden {
   display: none;
 }
 
@@ -117,6 +118,9 @@ a:hover {
   text-decoration: underline;
 }
 
+.error {
+  color: #FF0000;
+}
 /* From the uservoice feedback button */
 #feedback {
     position: fixed;
@@ -150,6 +154,26 @@ strong {
   margin: 0 auto;
   overflow: hidden;
   position: relative;
+}
+
+#shortenForm label.text {
+    line-height: 24px;
+}
+
+#shortenForm input {
+  width: 220px;
+  height: 24px;
+  border-color: #aaa;
+  border-style: solid;
+  border-width: 1px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15) inset;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  padding: 2px 5px;
+}
+
+#shortenForm select {
+    width: 220px;
 }
 
 /*
@@ -189,6 +213,17 @@ h1 {
   font-size: 18px;
   font-weight: normal;
   color: #00A0FF;
+}
+
+span.micro {
+    font-size: 12px;
+    margin: 5px 0 10px 0;
+    display: block;
+    color: #666;
+}
+
+a.micro {
+    margin: 0 10px;
 }
 
 /*

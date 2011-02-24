@@ -2,8 +2,8 @@
 <html>
 <head>
     <title>F1: Popup</title>
-    <link rel="stylesheet" type="text/css" href="/0.2.2/share/panel/style.css">
-    <script data-main="/0.2.2/share/panel/index.js" src="/0.2.2/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+    <link rel="stylesheet" type="text/css" href="/0.2.7/share/panel/style.css">
+    <script data-main="/0.2.7/share/panel/index.js" src="/0.2.7/scripts/requireplugins-jquery.js" charset="utf-8"></script>
 </head>
 <body>
 
@@ -18,8 +18,8 @@
         <h1 id="panelHeader" class="boxFlex">Mozilla F1</h1>
         <nav>
             <ul>
-                <li id="newLink" class="hidden"><a href="/0.2.2/settings/#show=new" class="settingsLink new" target="_blank">new accounts!</a></li>
-                <li><a href="/settings/" class="configureToggle" target="f1.settings">settings</a></li>
+                <li id="newLink" class="hidden"><a href="/0.2.7/settings/#show=new" class="settingsLink new" target="_blank">new accounts!</a></li>
+                <li><a href="/0.2.7/settings/" class="configureToggle" target="f1.settings">settings</a></li>
                 <li id="closeLink"><span class="close"></span></li>
             </ul>
         </nav>
@@ -57,7 +57,7 @@
     <table>
       <tr>
         <td>
-          <img src="/0.2.2/share/i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="/settings/">click here to setup F1</a>
+          <img src="/0.2.7/share/i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="/0.2.7/settings/">click here to setup F1</a>
         </td>
       </tr>
     </table>
@@ -67,7 +67,7 @@
     <table>
       <tr>
         <td>
-          <img src="/0.2.2/share/i/loader.gif"> sharing...
+          <img src="/0.2.7/share/i/loader.gif"> sharing...
         </td>
       </tr>
     </table>
@@ -99,6 +99,19 @@
       <tr>
         <td>
           We're really sorry, F1 done goofed up. <span id="statusErrorMessage"></span>
+          <button class="statusButton statusErrorButton">ok</button>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div id="statusShortenerError" class="status hidden error">
+    <table>
+      <tr>
+        <td>
+          We're really sorry, the link could not be shortened.<br>
+          Please try again later.</br>
+          <span id="statusShortenerErrorMessage"></span>
           <button class="statusButton statusErrorButton">ok</button>
         </td>
       </tr>

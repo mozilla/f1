@@ -451,6 +451,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         hashReload = false;
       } else {
         options = shareOptions();
+
+        //Be sure to clear any status messages
+        cancelStatus();
+
         dispatch.pub('optionsChanged', options);
         checkBase64Preview();
 
@@ -464,6 +468,5 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     rssFeed(function (title, link) {
       $('#rssLink').attr('href', link).text(title);
     });
-
   });
 });

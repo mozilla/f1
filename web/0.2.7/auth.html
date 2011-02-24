@@ -27,7 +27,7 @@
   <title>Firefox Share OAuthorization</title>
   <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 
-  <script src="/0.2.2/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+  <script src="/0.2.7/scripts/requireplugins-jquery.js" charset="utf-8"></script>
   <style>
     html, body {
       background-color: #fff;
@@ -65,7 +65,7 @@
       margin-left: -150px;
       margin-top: -95px;
       width: 300px;
-      background-image: url("/0.2.2/i/f1Logo.png");
+      background-image: url("/0.2.7/i/f1Logo.png");
       background-position: center top;
       background-repeat: no-repeat;
       padding: 100px 0 0 0;
@@ -131,7 +131,7 @@
     }
 
     input.google {
-      background-image: url("/0.2.2/i/sprite.png");
+      background-image: url("/0.2.7/i/sprite.png");
       background-position: 5px -159px;
       background-repeat: no-repeat;
       padding: 0 0 0 26px;
@@ -241,7 +241,7 @@
 
   </style>
   <script>
-    require(["require", "jquery", "blade/url"],
+    require(["require", "jquery", "blade/url", "jquery.cookie"],
     function (require,   $,        url) {
       var target = window.location.href.split('#')[1];
       if (target && (target === 'oauth_success' || target === 'oauth_failure')) {
@@ -250,13 +250,14 @@
         //a problem for 127 addresses?
         // XXX hacky way to handle fennec, since we didn't open a window,
         // catch the exception when using window.opener and redirect
-        try {
-          window.opener.postMessage(target, '*');
-          window.close();
-        } catch(e) {
-          var url = location.protocol + "//" + location.host + "/settings/?target="+target;
-          window.location = url;
-        }
+        var data = {
+          target: target,
+          account: JSON.parse($.cookie("account_tokens"))
+        };
+        window.opener.postMessage(JSON.stringify(data), '*');
+        // clear the cookie, we no longer want it around
+        $.cookie("account_tokens", null);
+        window.close();
       }
       var search = window.location.href.split('?')[1];
       if (search) {
@@ -288,8 +289,8 @@
       <span class="text">Enter your Google Apps domain</span>
       <div class="controls hbox">
         <input class="boxFlex google" name="openid_identifier" id="openid_identifier" value="">
-        <input class="boxFlex google" type="hidden" name="end_point_success" value="/auth.html#oauth_success">
-        <input class="boxFlex google" type="hidden" name="end_point_auth_failure" value="/auth.html#oauth_failure">
+        <input class="boxFlex google" type="hidden" name="end_point_success" value="/0.2.7/auth.html#oauth_success">
+        <input class="boxFlex google" type="hidden" name="end_point_auth_failure" value="/0.2.7/auth.html#oauth_failure">
         <button id='submitbtn' type="submit">submit</button>
       </div>
       <span class="subtext">ex: yourappdomain.com</span>

@@ -26,16 +26,24 @@
 /*global define: false, window: false, location: false */
 "use strict";
 
-define([], function () {
+define([ 'accounts'],
+function (accounts) {
+
   var authDone, win, lastTime = 0;
 
   //Handle communication from the auth window, when it completes.
   window.addEventListener("message", function (evt) {
     //TODO: ideally lock down the domain check on evt.origin.
-    var status = evt.data;
-    if (status) {
-      if (status === 'oauth_success') {
+    var data, status;
+    try {
+      data = JSON.parse(evt.data);
+    } catch(e) {
+      return;
+    }
+    if (data.target) {
+      if (data.target === 'oauth_success' && data.account) {
         status = true;
+        accounts.update(data.account);
       } else {
         status = false;
       }
@@ -54,7 +62,7 @@ define([], function () {
     if (callback) {
       authDone = callback;
     }
-    var url = location.protocol + "//" + location.host + "/auth.html",
+    var url = location.protocol + "//" + location.host + "/0.2.7/auth.html",
         currentTime = (new Date()).getTime();
 
     //Could have a window handle, but could be closed, so account for it.

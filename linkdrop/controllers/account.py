@@ -25,6 +25,7 @@ import logging
 import urllib, cgi, json
 from datetime import datetime
 from uuid import uuid1
+import hashlib
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -82,17 +83,19 @@ OAuth authorization api.
         session.save()
 
     def _get_or_create_account(self, domain, userid, username):
+        acct_hash = hashlib.sha1("%s#%s" % (username or '', userid or '')).hexdigest()
         keys = [k for k in session.get('account_keys', '').split(',') if k]
         # Find or create an account
         for k in keys:
             acct = session[k]
             if acct['domain']==domain and acct['userid']==userid:
-                metrics.track(request, 'account-auth', domain=domain)
+                metrics.track(request, 'account-auth', domain=domain,
+                              acct_id=acct_hash)
                 break
         else:
             acct = dict(key=str(uuid1()), domain=domain, userid=userid,
                         username=username)
-            metrics.track(request, 'account-create', domain=domain)
+            metrics.track(request, 'account-create', domain=domain, acct_id=acct_hash)
             keys.append(acct['key'])
             session['account_keys'] = ','.join(keys)
         return acct

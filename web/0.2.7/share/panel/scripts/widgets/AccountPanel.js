@@ -21,16 +21,17 @@
  * Contributor(s):
  * */
 
-/*jslint indent: 2, plusplus: false */
+/*jslint indent: 2, plusplus: false, nomen: false */
 /*global define: false, document: false */
 "use strict";
 
 define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./AccountPanel.html',
-         'TextCounter', 'storage', 'module', 'placeholder', 'dispatch',
-         'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs', 'jquery.textOverflow'],
+         'TextCounter', 'storage', 'module', 'placeholder', 'dispatch', 'accounts',
+         'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs', 'Select',
+         'jquery.textOverflow'],
 function (object,         Widget,         $,        template,
-          TextCounter,   storage,   module,   placeholder,   dispatch,
-          AutoComplete,   rdapi,   fn,         jigFuncs) {
+          TextCounter,   storage,   module,   placeholder,   dispatch,   accounts,
+          AutoComplete,   rdapi,   fn,         jigFuncs,     Select) {
 
   var store = storage(),
       className = module.id.replace(/\//g, '-');
@@ -40,9 +41,6 @@ function (object,         Widget,         $,        template,
     $('body')
       .delegate('.' + className + ' form.messageForm', 'submit', function (evt) {
         Widget.closest(module.id, evt, 'onSubmit');
-      })
-      .delegate('.' + className + ' .shareType', 'change', function (evt) {
-        Widget.closest(module.id, evt, 'onShareTypeChange');
       })
       .delegate('.' + className + ' .shareType2', 'click', function (evt) {
         Widget.closest(module.id, evt, 'selectSecondShareType');
@@ -92,6 +90,7 @@ function (object,         Widget,         $,        template,
         savedOptions = store[this.storeId];
         if (savedOptions) {
           savedOptions = JSON.parse(savedOptions);
+
           if (this.theGameHasChanged(savedOptions)) {
             this.clearSavedData();
             savedOptions = null;
@@ -129,6 +128,10 @@ function (object,         Widget,         $,        template,
       destroy: function () {
         dispatch.unsub(this.optionsChangedSub);
         dispatch.unsub(this.base64PreviewSub);
+        this.select.dom.unbind('change', this.selectChangeFunc);
+        delete this.selectChangeFunc;
+        this.select.destroy();
+        this.select = null;
         parent(this, 'destroy');
       },
 
@@ -140,6 +143,31 @@ function (object,         Widget,         $,        template,
               tempNode.className.indexOf(this.className) !== -1) {
             this.bodyNode = tempNode;
             break;
+          }
+        }
+
+        if (this.svc.shareTypes.length > 1) {
+          //Insert a Select widget if it is desired.
+          this.select = new Select({
+            name: 'shareType',
+            value: this.options.shareType,
+            options: this.svc.shareTypes.map(function (item) {
+                      return {
+                        name: item.name,
+                        value: item.type
+                      };
+                    })
+          }, $('.shareTypeSelectSection', this.bodyNode)[0]);
+
+          // Listen to changes in the Select
+          this.selectChangeFunc = fn.bind(this, function (evt) {
+            this.onShareTypeChange(evt);
+          });
+          this.select.dom.bind('change', this.selectChangeFunc);
+
+          // Update the display that is linked to the select.
+          if (this.options.shareType) {
+            this.changeShareType(this.getShareType(this.options.shareType));
           }
         }
 
@@ -177,6 +205,10 @@ function (object,         Widget,         $,        template,
         root.find('[name="to"]').val('');
         root.find('[name="subject"]').val('');
         root.find('[name="message"]').val('');
+        if (this.svc.textLimit) {
+          root.find('.counter').html('');
+        }
+
         placeholder(this.bodyNode);
       },
 
@@ -212,7 +244,7 @@ function (object,         Widget,         $,        template,
             opts = this.options,
             formLink = jigFuncs.link(opts),
             restoredData = this.memStore[formLink],
-            oldData, shareTypeDom;
+            oldData;
 
         //Save off previous form data for old URL.
         oldData = this.getFormData();
@@ -246,10 +278,10 @@ function (object,         Widget,         $,        template,
         root.find('[name="description"]').val(opts.description);
 
         //Only set share types if they are available for this type of account.
-        shareTypeDom = root.find('[name="shareType"]');
-        if (shareTypeDom.length) {
+        if (this.select) {
+
           if (opts.shareType) {
-            shareTypeDom.val(opts.shareType);
+            this.select.val(opts.shareType);
             this.changeShareType(this.getShareType(opts.shareType));
           } else {
             this.selectFirstShareType();
@@ -296,12 +328,12 @@ function (object,         Widget,         $,        template,
       },
 
       selectFirstShareType: function () {
-        $('.shareType', this.bodyNode)[0].options[0].selected = true;
+        this.select.selectIndex(0);
         this.changeShareType(this.svc.shareTypes[0]);
       },
 
       selectSecondShareType: function () {
-        $('.shareType', this.bodyNode)[0].options[1].selected = true;
+        this.select.selectIndex(1);
         this.changeShareType(this.svc.shareTypes[1]);
       },
 
@@ -328,8 +360,28 @@ function (object,         Widget,         $,        template,
       },
 
       onShareTypeChange: function (evt) {
-        var shareType = this.getShareType($('.shareType', this.bodyNode).val());
+        var shareType = this.getShareType(this.select.val());
         this.changeShareType(shareType);
+      },
+
+      _findContact: function (to, contacts) {
+        var acct = contacts[to.trim()], un, c;
+        if (acct) {
+          return acct;
+        }
+
+        for (un in contacts) {
+          if (contacts.hasOwnProperty(un)) {
+            c = contacts[un];
+            if (c.userid === to) {
+              return c;
+            }
+            if (c.username === to) {
+              return c;
+            }
+          }
+        }
+        return null;
       },
 
       onSubmit: function (evt) {
@@ -339,7 +391,7 @@ function (object,         Widget,         $,        template,
         //Make sure all form elements are trimmed and username exists.
         //Then collect the form values into the data object.
         var sendData = this.getFormData(),
-            contacts, newrecip, recip, acct;
+            contacts, newrecip, recip, acct, self;
 
         if (!this.validate(sendData)) {
           return;
@@ -357,8 +409,9 @@ function (object,         Widget,         $,        template,
           newrecip = [];
           if (contacts) {
             recip = sendData.to.split(',');
+            self = this;
             recip.forEach(function (to) {
-              acct = contacts[to.trim()];
+              acct = self._findContact(to.trim(), contacts);
               if (acct && !acct.email) {
                 newrecip.push(acct.userid ? acct.userid : acct.username);
               }
@@ -403,15 +456,18 @@ function (object,         Widget,         $,        template,
        * server if there is no store copy.
        */
       storeContacts: function () {
-        var contacts = this.svc.getContacts(store);
+        var contacts = this.svc.getContacts(store),
+            svcData;
         if (!contacts) {
+          svcData = accounts.getService(this.svcAccount.domain, this.svcAccount.userid, this.svcAccount.username);
           rdapi('contacts/' + this.svcAccount.domain, {
             type: 'POST',
             data: {
               username: this.svcAccount.username,
               userid: this.svcAccount.userid,
               startindex: 0,
-              maxresults: 500
+              maxresults: 500,
+              account: JSON.stringify(svcData)
             },
             success: fn.bind(this, function (json) {
               //Transform data to a form usable by autocomplete.
@@ -420,7 +476,6 @@ function (object,         Widget,         $,        template,
                     data = [];
 
                 data = this.svc.getFormattedContacts(entries);
-
                 this.svc.setContacts(store, data);
                 this.updateAutoComplete(this.svcAccount.domain);
               }
@@ -434,8 +489,6 @@ function (object,         Widget,         $,        template,
           //$(window).bind('load', updateAutoComplete);
         }
       }
-
-
     };
   });
 });

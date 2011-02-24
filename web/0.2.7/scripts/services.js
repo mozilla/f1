@@ -41,6 +41,7 @@ function (rdapi,   object,         array,         TextCounter) {
     this.tabName = this.type + 'Tab';
     this.icon = 'i/' + this.type + 'Icon.png';
     this.autoCompleteWidget = null;
+    this.acformat = "{name}";
 
     // set features
     this.features = {
@@ -99,6 +100,7 @@ function (rdapi,   object,         array,         TextCounter) {
     SvcBase.constructor.apply(this, arguments);
     this.features.direct = true;
     this.features.subject = true;
+    this.acformat = "{name} {email}";
   }
 
   EmailSvcBase.prototype = new SvcBase();
@@ -163,6 +165,7 @@ function (rdapi,   object,         array,         TextCounter) {
           showTo: true,
           toLabel: 'type in name of recipient'
         }],
+        acformat: "{username}",
         textLimit: 140,
         shorten: true,
         serviceUrl: 'http://twitter.com',

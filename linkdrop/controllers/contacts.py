@@ -102,7 +102,7 @@ Name of the group to return.
 
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
-        if account_data:
+        if account_data is not None:
             acct = json.loads(account_data)
         else:
             # support for old accounts in the session store
@@ -121,4 +121,3 @@ Name of the group to return.
 
         result, error = provider.api(acct).getcontacts(startIndex, maxResults, group)
         return {'result': result, 'error': error}
-

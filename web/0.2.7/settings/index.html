@@ -2,14 +2,14 @@
 <html>
 <head>
   <title>F1: Config</title>
-  <link rel="stylesheet" type="text/css" href="/0.2.2/settings/style.css">
+  <link rel="stylesheet" type="text/css" href="/0.2.7/settings/style.css">
 
   <!-- DNS prefetching for common services -->
   <link rel="dns-prefetch" href="https://graph.facebook.com">
   <link rel="dns-prefetch" href="https://www.google.com">
   <link rel="dns-prefetch" href="https://twitter.com">
 
-  <script data-main="/0.2.2/settings/index.js" src="/0.2.2/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+  <script data-main="/0.2.7/settings/index.js" src="/0.2.7/scripts/requireplugins-jquery.js" charset="utf-8"></script>
 </head>
 <body>
 
@@ -33,8 +33,9 @@
   <!-- End status messages -->
 
   <ul id="tabs" class="clearfix">
-    <li class="manage selected">accounts</li>
-    <li class="settings hidden">settings</li>
+    <li class="manage selected" data-tab="manage">accounts</li>
+    <li class="hidden" data-tab="settings">settings</li>
+    <li class="hidden" data-tab="advanced">advanced</li>
   </ul>
 
   <div id="config">
@@ -64,6 +65,50 @@
         </ul>
       </div>
 
+      <div id="advanced" class="panel hidden">
+        <h1>Bit.ly configuration</h1>
+        <span class="micro"><input id="bitlyCheckbox" type="checkbox"> <label for="bitly">Use personal bit.ly account</label></span>
+          <form id="shortenForm">
+            <ul>
+              <li class="hbox">
+                <label class="option text boxFlex" for="login">Bit.ly Username</label>
+                <input name="login" placeholder="username">
+              </li>
+              <li class="hbox">
+                <label class="option text boxFlex" for="apiKey">Bit.ly API key</label>
+                <a href="http://bit.ly/a/your_api_key/" tabindex="-1" target="_blank" class="micro">what's this?</a>
+                <input name="apiKey" placeholder="api key">
+              </li>
+              <li class="hbox">
+                <label class="option boxFlex" for="domain">Domain name</label>
+                <select name="domain">
+                  <option value="bit.ly">bit.ly</option>
+                  <option value="j.mp">j.mp</option>
+                </select>
+              </li>
+              <li class="hbox">
+                <label class="option boxFlex" for="save">
+                  <span id="bitlyApiKeyMissing" class="error hidden">Please provide an API key.</span>
+                  <span id="bitlyLoginMissing" class="error hidden">Please provide an login name.</span>
+                  <span id="bitlyNotValid" class="error hidden">The login name+API key combination is not valid. Please check it and try again.</span>
+                </label>
+                <button class="saveButton" name="save">save</button>
+              </li>
+            </ul>
+          </form>
+          </li>
+
+        <h1>Other options</h1>
+        <ul>
+          <li class="hbox">
+            <div class="overflow boxFlex">
+            <span class="key">Refresh account data (e.g. contacts for autocompletion).</span>
+            </div>
+            <button class="refresh" name="refresh">refresh</button>
+          </li>
+        </ul>
+
+      </div>
   </div>
 
   <div id="done" class="panel hbox">
@@ -81,7 +126,7 @@
     <div class="hbox">
       <div class="boxFlex headline invisible"><span class="icon rss"></span> <a id="rssLink" href="#" target="_blank"></a></div>
       <div class="privacy">
-        We care about your <a href="/0.2.2/service/privacy.html" target="_blank">privacy</a>, seriously.
+        We care about your <a href="/0.2.7/service/privacy.html" target="_blank">privacy</a>, seriously.
       </div>
     </div>
   </div>
