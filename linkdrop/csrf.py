@@ -25,14 +25,14 @@ _ERROR_MSG = 'Cross Site Request Forgery detected. Request aborted.'
 
 _POST_FORM_RE = \
     re.compile(r'(<form\W[^>]*\bmethod=(\'|"|)POST(\'|"|)\b[^>]*>)', re.IGNORECASE)
-    
-_HTML_TYPES = ('text/html', 'application/xhtml+xml')    
+
+_HTML_TYPES = ('text/html', 'application/xhtml+xml')
 
 class CsrfMiddleware(object):
     """Middleware that adds protection against Cross Site
-    Request Forgeries by adding hidden form fields to POST forms and 
+    Request Forgeries by adding hidden form fields to POST forms and
     checking requests for the correct value. It expects beaker to be upstream
-    to insert the session into the environ 
+    to insert the session into the environ
     """
 
     def __init__(self, app, config):
@@ -58,8 +58,9 @@ class CsrfMiddleware(object):
 
             # check incoming token
             try:
+                account_data = request.POST.get('account', None)
                 request_csrf_token = environ.get('HTTP_X_CSRF', request.POST.get('csrftoken'))
-                if request_csrf_token != csrf_token:
+                if account_data is None and request_csrf_token != csrf_token:
                     resp = HTTPForbidden(_ERROR_MSG)
                     metrics.track(request, 'invalid-session')
                     resp.headers['X-Error'] = 'CSRF'
@@ -80,7 +81,7 @@ class CsrfMiddleware(object):
 
         if resp.content_type.split(';')[0] in _HTML_TYPES:
             # ensure we don't add the 'id' attribute twice (HTML validity)
-            idattributes = itertools.chain(('id="csrfmiddlewaretoken"',), 
+            idattributes = itertools.chain(('id="csrfmiddlewaretoken"',),
                                             itertools.repeat(''))
             def add_csrf_field(match):
                 """Returns the matched <form> tag plus the added <input> element"""
