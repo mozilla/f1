@@ -140,7 +140,7 @@ Site provided description of the shared item, not supported by all services.
         provider = get_provider(domain)
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
-        if account_data:
+        if account_data is not None:
             acct = json.loads(account_data)
         else:
             # support for old account data in session store
