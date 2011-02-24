@@ -300,11 +300,13 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     dispatch.pub('sizeToContent');
   }
 
-  function updateAccounts(accounts) {
+  function configureDisplay(accounts) {
     var panelOverlays = [],
-        panelOverlayMap = {};
-
+        panelOverlayMap = {},
+        accountsDom = $('#accounts'),
+        haveSettings = false;
     if ((accounts && accounts.length)) {
+      haveSettings = true;
       //Collect any UI overrides used for AccountPanel based on the services
       //the user has configured.
       accounts.forEach(function (account) {
@@ -324,7 +326,31 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       } else {
         displayAccounts(accounts, panelOverlayMap);
       }
-    } else {
+    }
+    // check for oexchange support
+    var svcs = store.oexchange || {};
+    try {
+      svcs = JSON.parse(svcs);
+      $('#shareui').removeClass('hidden');
+      var div = $('<div id="oexchangeHandlers"/>');
+      var s;
+      for (var s in svcs) {
+        div.append('<a href="'+svcs[s].endpoint+'?url='+encodeURIComponent(options.url)+'" target="_blank" data-url="'+svcs[s].endpoint+'"><img src="'+svcs[s].icon+'"/></a>');
+      }
+      if (s) {
+        haveSettings = true;
+        accountsDom.append(div);
+      }
+
+    } catch(e) {
+      dump("error generating panel "+e+"\n");
+    }
+  
+    return haveSettings;
+  }
+  
+  function updateAccounts(accounts) {
+    if (!configureDisplay(accounts)) {
       showStatus('statusSettings');
 
       //Clean up storage
@@ -455,6 +481,11 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         //Be sure to clear any status messages
         cancelStatus();
 
+        // update the oexchange links
+        $('#oexchangeHandlers a').each(function(index, a) {
+          $(a).attr('href', $(a).attr('data-url')+"?url="+encodeURIComponent(options.url));
+        });
+        
         dispatch.pub('optionsChanged', options);
         checkBase64Preview();
 

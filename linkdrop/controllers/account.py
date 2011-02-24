@@ -141,3 +141,11 @@ OAuth authorization api.
         err = urllib.urlencode([('error',str(e))])
         url = session.get('end_point_auth_failure',config.get('oauth_failure')).split('#')
         return redirect('%s?%s#%s' % (url[0], err, url[1]))
+
+    @api_response
+    @json_exception_response
+    def discovery(self):
+        # XXX this is primarily for oexchange discovery
+        from linkdrop.lib.xrd import oexchange_service
+        return oexchange_service(request.params.get('domain'))
+        

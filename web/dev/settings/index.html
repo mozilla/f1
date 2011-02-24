@@ -45,8 +45,17 @@
       <ul id="existing" class="hidden">
       </ul>
 
+      <h1 id="oexchangeHeader" class="hidden">OExchange services</h1>
+      <ul id="oexchange" class="hidden">
+      </ul>
+
       <h1 id="availableHeader" class="hidden">Add accounts</h1>
       <ul id="available" class="add hidden">
+  <li class="hbox">
+    <div class="accountType overflow boxFlex"><span class="icon oexchange"></span> OExchange</div>
+    <label for="oexchange_domain">Try any domain:</label><input type="text" id="oexchange_domain"/>
+    <button class="config discover">add <span class="add"></span></button>
+  </li>
       </ul>
     </div>
 
@@ -147,6 +156,13 @@
   <li class="hbox">
     <div class="accountType overflow boxFlex"><span class="icon {domainType(_)}"></span> {domainName(_)} <span class="username">({accountName(displayName, acct)})</span></div>
     <button class="config remove" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}">remove <span class="remove"></span></button>
+  </li>
+</script>
+
+<script id="serviceTemplate" type="text/template">
+  <li class="hbox">
+    <div class="accountType overflow boxFlex"><img src="{icon}"></img> {name} </div>
+    <button class="config remove-service" data-service="{domain}">remove <span class="remove"></span></button>
   </li>
 </script>
 

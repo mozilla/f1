@@ -106,6 +106,25 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     Cu.reportError('.' + msg); // avoid clearing on empty log
   }
 
+
+  function xpath(xmlDoc, xpathString) {
+      var root = xmlDoc.ownerDocument == null ?
+        xmlDoc.documentElement : xmlDoc.ownerDocument.documentElement;
+      var nsResolver = xmlDoc.createNSResolver(root);
+  
+      return xmlDoc.evaluate(xpathString, xmlDoc, nsResolver,
+                             XPathResult.ANY_TYPE, null);
+  }
+
+  function getURLFromResource(dom, type, rel) {
+      var iter = xpath(dom, "//*[rel='"+rel+"']");
+      var elem = iter.iterateNext();
+      if (elem == null) {
+          throw {error:"XRD missing OExchange",  message:"XRD does not contain an OExchange endpoint"};
+      }
+      return elem.getAttribute("href");
+  }
+
   fn = {
 
     /**
@@ -893,6 +912,32 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       // fx 4
       var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
       this.panel.openPopup(button, position, 0, 0, false, false);
+    },
+    
+    discover: function(domain) {
+      dump("got discover call for "+domain+"\n");
+      var xrds = "http://"+domain+"/.well-known/host-meta";
+      dump("requesting XRD from "+xrds+"\n");
+      var req = new XMLHttpRequest();
+      //req.setRequestHeader("Content-Length", 741);
+      req.open('GET', xrds);
+      req.onreadystatechange = function(evt) {
+          dump("request readyState "+req.readyState+"\n");
+          if (req.readyState == 4) {
+              dump("request status "+req.status+"\n");
+              if(req.status == 200) {
+                  // finish discovery
+                  var url = getURLFromResource(req.responseXML,
+                                               "application/xrd+xml",
+                                               "http://oexchange.org/spec/0.8/rel/resident-target");
+                  alert(url);
+              } else {
+                  dump("request error "+req.statusText+" -- "+req.responseText+"\n");
+                  // failure
+              }
+          }
+      }
+      req.send(null);
     }
   };
 

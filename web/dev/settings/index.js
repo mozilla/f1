@@ -28,10 +28,11 @@
 
 define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
          "dispatch", "storage", "accounts", "dotCompare", "blade/url",
-         "services", "placeholder", "jquery.colorFade", "jquery.textOverflow"],
+         "services", "placeholder", "discovery",
+         "jquery.colorFade", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,
           dispatch,   storage,   accounts,   dotCompare,   url,
-          services,   placeholder) {
+          services,   placeholder,   discovery) {
   var store = storage(),
   shortenPrefs = store.shortenPrefs,
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
@@ -69,6 +70,28 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       showStatus('statusServerError', err);
     }
   }
+  
+  function updateServices() {
+    var svcs = store.oexchange;
+    if (svcs) {
+      try {
+        svcs = JSON.parse(svcs);
+      } catch(e) {
+        return;
+      }
+    }
+    $('#oexchange').empty().addClass('hidden');
+    $('#oexchangeHeader').addClass('hidden');
+
+    var s;
+    for (s in svcs) {
+      $('#oexchange').append(jig('#serviceTemplate', svcs[s]));
+    }
+    if (s) {
+      $('#oexchange').removeClass('hidden');
+      $('#oexchangeHeader').removeClass('hidden');
+    }
+  }
 
   //Set up knowledge of accounts and changes.
   accounts.onChange();
@@ -103,9 +126,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         if (html) {
           $('#availableHeader').removeClass('hidden');
           $('#available')
-            .append(html)
+            .prepend(html)
             .removeClass('hidden');
         }
+        
+        updateServices();
 
         //Flash the new items.
         if (showNew) {
@@ -280,6 +305,36 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             showStatus('statusOAuthFailed');
           }
         });
+      })
+      .delegate('.discover', 'click', function (evt) {
+        // run discovery and add the account
+        var domain = $("#oexchange_domain").val();
+        if (domain) {
+          discovery.discover(domain, function(resp) {
+            // add the oexchange service into localstorage and refresh
+            var svcs = store.oexchange || {};
+            try {
+              svcs = JSON.parse(svcs);
+            } catch(e) {
+              svcs = {};
+            }
+            svcs[resp.domain] = resp;
+            store.oexchange = JSON.stringify(svcs);
+            updateServices();
+          });
+        }
+      })
+      .delegate('.remove-service', 'click', function (evt) {
+        dump("remove-service clicked\n");
+        var buttonNode = evt.target,
+            domain = buttonNode.getAttribute('data-service');
+        var svcs = store.oexchange;
+        if (svcs) {
+          svcs = JSON.parse(svcs);
+          delete svcs[domain];
+          store.oexchange = JSON.stringify(svcs);
+        }
+        updateServices();
       })
       .delegate('.refresh', 'click', function (evt) {
         // clear all service caches
