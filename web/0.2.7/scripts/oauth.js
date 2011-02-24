@@ -62,7 +62,7 @@ function (accounts) {
     if (callback) {
       authDone = callback;
     }
-    var url = location.protocol + "//" + location.host + "/auth.html",
+    var url = location.protocol + "//" + location.host + "/0.2.7/auth.html",
         currentTime = (new Date()).getTime();
 
     //Could have a window handle, but could be closed, so account for it.
