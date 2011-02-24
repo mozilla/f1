@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>F1: Config</title>
+  <link rel="stylesheet" type="text/css" href="/0.2.6/settings/style.css">
+
+  <!-- DNS prefetching for common services -->
+  <link rel="dns-prefetch" href="https://graph.facebook.com">
+  <link rel="dns-prefetch" href="https://www.google.com">
+  <link rel="dns-prefetch" href="https://twitter.com">
+
+  <script data-main="/0.2.6/settings/index.js" src="/0.2.6/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+</head>
+<body>
+
+<a id="feedback" href="http://feedback.mozillalabs.com/forums/68185-messaging-add-ons" target="_blank">Feedback</a>
+
+<div id="wrapper">
+
+  <div id="header" class="row">
+    <div class="c2 logo">
+    </div>
+    <div class="c1">
+      <h1>F1 Configuration</h1>
+    </div>
+  </div>
+
+  <!-- Start status messages -->
+  <div id="statusError" class="status hidden error">
+    We're really sorry, F1 done goofed up. <span class="message"></span>
+    <button class="statusButton statusErrorButton">ok</button>
+  </div>
+  <!-- End status messages -->
+
+  <ul id="tabs" class="clearfix">
+    <li class="manage selected" data-tab="manage">accounts</li>
+    <li class="hidden" data-tab="settings">settings</li>
+    <li class="hidden" data-tab="advanced">advanced</li>
+  </ul>
+
+  <div id="config">
+
+    <div id="manage" class="panel">
+      <h1 id="existingHeader" class="hidden">My accounts</h1>
+      <ul id="existing" class="hidden">
+      </ul>
+
+      <h1 id="availableHeader" class="hidden">Add accounts</h1>
+      <ul id="available" class="add hidden">
+      </ul>
+    </div>
+
+      <div id="settings" class="panel hidden">
+        <h1>Configure your sharing settings</h1>
+        <ul>
+          <li class="hbox">
+            <span class="key">F1</span>
+            <label class="option boxFlex" for="use_accel_key">keyboard shortcut enabled</label>
+            <input type="checkbox" id="use_accel_key">
+          </li>
+          <li class="hbox">
+            <label class="option boxFlex" for="bookmarking">Bookmark the links I share</label>
+            <input type="checkbox" id="bookmarking">
+          </li>
+        </ul>
+      </div>
+
+      <div id="advanced" class="panel hidden">
+        <h1>Bit.ly configuration</h1>
+        <span class="micro"><input id="bitlyCheckbox" type="checkbox"> <label for="bitly">Use personal bit.ly account</label></span>
+          <form id="shortenForm">
+            <ul>
+              <li class="hbox">
+                <label class="option text boxFlex" for="login">Bit.ly Username</label>
+                <input name="login" placeholder="username">
+              </li>
+              <li class="hbox">
+                <label class="option text boxFlex" for="apiKey">Bit.ly API key</label>
+                <a href="http://bit.ly/a/your_api_key/" tabindex="-1" target="_blank" class="micro">what's this?</a>
+                <input name="apiKey" placeholder="api key">
+              </li>
+              <li class="hbox">
+                <label class="option boxFlex" for="domain">Domain name</label>
+                <select name="domain">
+                  <option value="bit.ly">bit.ly</option>
+                  <option value="j.mp">j.mp</option>
+                </select>
+              </li>
+              <li class="hbox">
+                <label class="option boxFlex" for="save">
+                  <span id="bitlyApiKeyMissing" class="error hidden">Please provide an API key.</span>
+                  <span id="bitlyLoginMissing" class="error hidden">Please provide an login name.</span>
+                  <span id="bitlyNotValid" class="error hidden">The login name+API key combination is not valid. Please check it and try again.</span>
+                </label>
+                <button class="saveButton" name="save">save</button>
+              </li>
+            </ul>
+          </form>
+          </li>
+
+        <h1>Other options</h1>
+        <ul>
+          <li class="hbox">
+            <div class="overflow boxFlex">
+            <span class="key">Refresh account data (e.g. contacts for autocompletion).</span>
+            </div>
+            <button class="refresh" name="refresh">refresh</button>
+          </li>
+        </ul>
+
+      </div>
+  </div>
+
+  <div id="done" class="panel hbox">
+    <div class="boxFlex"></div>
+    <button class="close done">done</button>
+  </div>
+
+<!--
+  <div class="panel about" style="text-align: center; color: rgb(68, 68, 68);padding-bottom:20px;">
+    <strong>Feedback?</strong> We'd love to <a href="http://feedback.mozillalabs.com/forums/68185-messaging-add-ons">hear from you</a>
+  </div>
+-->
+
+  <div id="newsFooter" class="panel">
+    <div class="hbox">
+      <div class="boxFlex headline invisible"><span class="icon rss"></span> <a id="rssLink" href="#" target="_blank"></a></div>
+      <div class="privacy">
+        We care about your <a href="/0.2.6/service/privacy.html" target="_blank">privacy</a>, seriously.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Templates -->
+
+<script id="addTemplate" type="text/template">
+  <li class="hbox {isNew [}newItem{]}">
+    <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name} {isNew [}<span class="new">new!</span>{]}</div>
+    <button class="config auth" data-domain="{domain}">add <span class="add"></span></button>
+  </li>
+</script>
+
+<script id="accountTemplate" type="text/template">
+  {.acct accounts[0]}
+  <li class="hbox">
+    <div class="accountType overflow boxFlex"><span class="icon {domainType(_)}"></span> {domainName(_)} <span class="username">({accountName(displayName, acct)})</span></div>
+    <button class="config remove" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}">remove <span class="remove"></span></button>
+  </li>
+</script>
+
+</body>
+</html>
