@@ -50,6 +50,11 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     hashReload = false,
     store = storage();
 
+  function hide() {
+    dispatch.pub('hide');
+  }
+  window.hideShare = hide;
+
   function close() {
     dispatch.pub('close');
   }
@@ -160,12 +165,12 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         } else {
           store.lastSelection = actions[sendData.domain].type;
           showStatusShared();
+          //Be sure to delete sessionRestore data
+          accountPanels.forEach(function (panel) {
+            panel.clearSavedData();
+          });
         }
 
-        //Be sure to delete sessionRestore data
-        accountPanels.forEach(function (panel) {
-          panel.clearSavedData();
-        });
       },
       error: function (xhr, textStatus, err) {
         if (xhr.status === 403) {
@@ -184,6 +189,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         }
       }
     });
+    hideShare();
   }
 
   function sendMessage(data) {

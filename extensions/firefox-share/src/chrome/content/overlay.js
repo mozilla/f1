@@ -850,7 +850,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     hide: function () {
-      this.close();
+      this.panel.hidePopup();
     },
 
 
@@ -1262,7 +1262,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var selectedTab = gBrowser.selectedTab;
       var visible = document.getElementById('share-popup').state == 'open';
       if (visible && !selectedTab.shareState) {
-        sharePanel.hide();
+        sharePanel.close();
       }
       if (selectedTab.shareState) {
         window.setTimeout(function () {
