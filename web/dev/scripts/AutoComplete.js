@@ -103,13 +103,16 @@ function ($,        object,         fn,         rdapi,   storage,   accounts) {
      */
     attachAutoComplete: function () {
       var acOptions = [],
-          acFormat = this.svc.acformat;
+          acFormat = this.svc.acformat,
+          relatedWidth, widthNode;
 
       if (this.contacts) {
         this.contacts.forEach(function (contact) {
           var optionValue = '';
           acFormat.forEach(function (prop, i) {
-            optionValue += (i > 0 ? ' ' : '') + contact[prop];
+            if (contact[prop] !== optionValue) {
+              optionValue += (i > 0 ? ' ' : '') + contact[prop];
+            }
           });
           acOptions.push(optionValue);
         });
@@ -144,7 +147,20 @@ function ($,        object,         fn,         rdapi,   storage,   accounts) {
             terms.push("");
             this.value = terms.join(", ");
             return false;
-          }
+          },
+          open: fn.bind(this, function (event, ui) {
+            // Set the width of the autocomplete once shown.
+            if (!relatedWidth) {
+              // Make sure to set the size of the autocomplete to not be bigger
+              // than the input area it is bound to.
+              widthNode = this.dom[0];
+              while (widthNode && (relatedWidth = widthNode.getBoundingClientRect().width) <= 0) {
+                widthNode = widthNode.parentNode;
+              }
+            }
+
+            this.dom.autocomplete('widget').width(relatedWidth);
+          })
         });
     },
 
