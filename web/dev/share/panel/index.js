@@ -42,6 +42,9 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           storage,   services,   shareOptions,   PageInfo,           rssFeed,
           DebugPanel,           AccountPanel) {
 
+  const SHARE_DONE=0;
+  const SHARE_START=1;
+  const SHARE_ERROR=2;
   var showStatus,
     actions = services.domains,
     options = shareOptions(),
@@ -50,17 +53,34 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     hashReload = false,
     store = storage();
 
+  function hide() {
+    dispatch.pub('hide');
+  }
+  window.hideShare = hide;
+
   function close() {
     dispatch.pub('close');
   }
   //For debug tab purpose, make it global.
   window.closeShare = close;
 
+  function updateChromeStatus(status) {
+    dispatch.pub('updateStatus', status);
+  }
+  window.updateChromeStatus = updateChromeStatus;
+
   showStatus = function (statusId, shouldCloseOrMessage) {
     $('div.status').addClass('hidden');
     $('#clickBlock').removeClass('hidden');
     $('#' + statusId).removeClass('hidden');
 
+    if (statusId !== 'statusSharing' &&
+        statusId !== 'statusShared') {
+      updateChromeStatus(SHARE_ERROR);
+      options.status = [statusId, shouldCloseOrMessage]
+    } else {
+      options.status = null;
+    }
     if (shouldCloseOrMessage === true) {
       setTimeout(function () {
         dispatch.pub('success', {
@@ -72,7 +92,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       }, 2000);
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
-      hashReload = true;
+      //hashReload = true;
     }
 
     //Tell the extension that the size of the content may have changed.
@@ -82,13 +102,20 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   //Make it globally visible for debug purposes
   window.showStatus = showStatus;
 
-  function cancelStatus() {
+  function resetStatusDisplay() {
     $('#clickBlock').addClass('hidden');
     $('div.status').addClass('hidden');
     //Be sure form field placeholders are up to date.
     placeholder();
   }
 
+  function cancelStatus() {
+    // clear any existing status
+    options.status = null;
+    updateChromeStatus(SHARE_DONE);
+    resetStatusDisplay();
+  }
+  
   function showStatusShared() {
     // if no sendData, we're in debug mode, default to twitter to show the
     // panel for debugging
@@ -160,12 +187,11 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         } else {
           store.lastSelection = actions[sendData.domain].type;
           showStatusShared();
+          //Be sure to delete sessionRestore data
+          accountPanels.forEach(function (panel) {
+            panel.clearSavedData();
+          });
         }
-
-        //Be sure to delete sessionRestore data
-        accountPanels.forEach(function (panel) {
-          panel.clearSavedData();
-        });
       },
       error: function (xhr, textStatus, err) {
         if (xhr.status === 403) {
@@ -199,6 +225,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         shortenData;
 
     sendData.account = JSON.stringify(svcData);
+    
+    // hide the panel now...
+    updateChromeStatus(SHARE_START);
+    hideShare();
 
     //First see if a bitly URL is needed.
     if (svcConfig.shorten && shortenPrefs) {
@@ -384,7 +414,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       })
       .delegate('.statusErrorCloseButton', 'click', function (evt) {
         cancelStatus();
-        close();
       })
       .delegate('.statusResetErrorButton', 'click', function (evt) {
         location.reload();
@@ -448,15 +477,18 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
     window.addEventListener("hashchange", function () {
       var now = (new Date()).getTime();
-      if (hashReload || now - refreshStamp > refreshInterval) {
+      if (now - refreshStamp > refreshInterval) {
         //Force contact with the server via the true argument.
         location.reload(true);
-        hashReload = false;
       } else {
         options = shareOptions();
 
         //Be sure to clear any status messages
-        cancelStatus();
+        if (options.status) {
+          showStatus.apply(null, options.status);
+        } else {
+          cancelStatus();
+        }
 
         dispatch.pub('optionsChanged', options);
         checkBase64Preview();

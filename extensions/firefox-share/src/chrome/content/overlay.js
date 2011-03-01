@@ -42,6 +42,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ostring = Object.prototype.toString,
       empty = {}, fn,
       buttonId = 'ffshare-toolbar-button';
+  var SHARE_STATUS = ["", "start", "error"];
 
   // width/height tracking for the panel, initial values are defaults to
   // show the configure status panel
@@ -334,7 +335,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           if (!skip) {
             topic = message.topic;
             data = message.data;
-
             if (topic && this[topic]) {
               this[topic](data);
             }
@@ -376,6 +376,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @param {Object} data info about the share.
      */
     success: function (data) {
+      this.updateStatus(0);
       this.close();
 
       if (ffshare.prefs.bookmarking) {
@@ -678,20 +679,35 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // panelUI operations
     close: function () {
       this.panel.hidePopup();
-      gBrowser.selectedTab.shareState = null;
+      if (gBrowser.selectedTab.shareState) {
+        if (gBrowser.selectedTab.shareState.status === 0)
+          gBrowser.selectedTab.shareState = null;
+        else
+          gBrowser.selectedTab.shareState.open = false;
+      }
+
       // Always ensure the button is unchecked when the panel is hidden
       getButton().removeAttribute("checked");
     },
+    
+    updateStatus: function(status) {
+      if (typeof(status) == 'undefined')
+        status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : 0;
+      if (gBrowser.selectedTab.shareState)
+        gBrowser.selectedTab.shareState.status = status;
+      getButton().setAttribute("status", SHARE_STATUS[status]);
+    },
 
     hide: function () {
-      this.close();
+      this.panel.hidePopup();
+      getButton().removeAttribute("checked");
+      gBrowser.selectedTab.shareState.open = false;
     },
 
 
     show: function (options) {
       var tabURI = gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI,
           tabUrl = tabURI.spec;
-
       if (!ffshare.isValidURI(tabURI)) {
         return;
       }
@@ -699,7 +715,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       options = this.getOptions(options);
 
       gBrowser.selectedTab.shareState = {
-        options: options // currently not used for anything
+        options: options, // currently not used for anything
+        status: currentState ? currentState.status : 0,
+        open: true
       };
 
       var url = ffshare.prefs.share_url +
@@ -1094,14 +1112,21 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           self.switchTab(false);
         }, true);
       }
+
       var selectedTab = gBrowser.selectedTab;
       var visible = document.getElementById('share-popup').state == 'open';
-      if (visible && !selectedTab.shareState) {
-        sharePanel.hide();
+      var isopen = selectedTab.shareState && selectedTab.shareState.open;
+      if (visible && !isopen) {
+        sharePanel.close();
       }
-      if (selectedTab.shareState) {
+      if (isopen) {
         window.setTimeout(function () {
+          sharePanel.updateStatus();
           sharePanel.show({});
+        }, 0);
+      } else {
+        window.setTimeout(function () {
+          sharePanel.updateStatus();
         }, 0);
       }
     },
