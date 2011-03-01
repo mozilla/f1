@@ -32,14 +32,14 @@
             <div class="toSection hiddenImportant boxFlex">
               {. lastType lastToShareType(svc.shareTypes)}
               <label for="to" class="toLabel">{lastType.toLabel}:</label>
-              <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}" autocompleteformat="{svc.acformat}"/>
+              <input name="to" placeholder="to" type="text" value="{options.to}" autocomplete="off"/>
             </div>
           </div>
         {] [}
           {svc.features.direct [}
-            <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}" autocompleteformat="{svc.acformat}"/>
+            <input name="to" placeholder="to" type="text" value="{options.to}" autocomplete="off"/>
             {svc.features.subject [}
-              <input name="subject" placeholder="subject" type="text" value="{options.subject}"/>
+              <input name="subject" placeholder="subject" type="text" value="{options.subject}" autocomplete="off"/>
             {]}
           {]}
         {]}
