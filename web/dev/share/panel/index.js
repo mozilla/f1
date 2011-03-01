@@ -179,6 +179,8 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           reAuth();
         } else if (xhr.status === 503) {
           showStatus('statusServerBusy');
+        } else if (xhr.status === 0) {
+          showStatus('statusServerError');
         } else {
           showStatus('statusError', err);
         }
@@ -381,6 +383,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         cancelStatus();
       })
       .delegate('.statusErrorCloseButton', 'click', function (evt) {
+        cancelStatus();
         close();
       })
       .delegate('.statusResetErrorButton', 'click', function (evt) {
