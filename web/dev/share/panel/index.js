@@ -414,7 +414,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       })
       .delegate('.statusErrorCloseButton', 'click', function (evt) {
         cancelStatus();
-        close();
       })
       .delegate('.statusResetErrorButton', 'click', function (evt) {
         location.reload();
