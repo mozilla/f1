@@ -27,11 +27,11 @@
 
 define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./AccountPanel.html',
          'TextCounter', 'storage', 'module', 'placeholder', 'dispatch', 'accounts',
-         'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs', 'Select',
+         'require', 'rdapi', 'blade/fn', './jigFuncs', 'Select',
          'jquery.textOverflow'],
 function (object,         Widget,         $,        template,
           TextCounter,   storage,   module,   placeholder,   dispatch,   accounts,
-          AutoComplete,   rdapi,   fn,         jigFuncs,     Select) {
+          require,   rdapi,   fn,         jigFuncs,     Select) {
 
   var store = storage(),
       className = module.id.replace(/\//g, '-');
@@ -66,6 +66,9 @@ function (object,         Widget,         $,        template,
       urlSize: 26,
 
       template: template,
+
+      // The module name for the AutoComplete module
+      autoCompleteName: 'AutoComplete',
 
       strings: {
         shareTypeLabel: 'send to'
@@ -113,6 +116,11 @@ function (object,         Widget,         $,        template,
 
         this.displayName = name;
 
+        // Figure out what module will handle autocomplete.
+        this.autoCompleteName = (this.svc.overlays &&
+                                this.svc.overlays[this.autoCompleteName]) ||
+                                this.autoCompleteName;
+
         //Listen for options changes and update the account.
         this.optionsChangedSub = dispatch.sub('optionsChanged', fn.bind(this, function (options) {
           this.options = options;
@@ -136,7 +144,8 @@ function (object,         Widget,         $,        template,
       },
 
       onRender: function () {
-        var i, tempNode;
+        var i, tempNode, acNode;
+
         //Get a handle on the accordion body
         for (i = 0; (tempNode = this.node.childNodes[i]); i++) {
           if (tempNode.nodeType === 1 &&
@@ -176,7 +185,14 @@ function (object,         Widget,         $,        template,
         }
         placeholder(this.bodyNode);
 
-        this.storeContacts();
+        // Set up autocomplete. Since autocomplete can have a different
+        // format/display per service account, allow for service overrides.
+        acNode = $('[name="to"]', this.bodyNode)[0];
+        if (acNode) {
+          require([this.autoCompleteName], fn.bind(this, function (AutoComplete) {
+            this.autoComplete = new AutoComplete(acNode, this.svc, this.svcAccount);
+          }));
+        }
 
         //Create ellipsis for anything wanting ... overflow
         $(".overflow", this.node).textOverflow();
@@ -364,34 +380,13 @@ function (object,         Widget,         $,        template,
         this.changeShareType(shareType);
       },
 
-      _findContact: function (to, contacts) {
-        var acct = contacts[to.trim()], un, c;
-        if (acct) {
-          return acct;
-        }
-
-        for (un in contacts) {
-          if (contacts.hasOwnProperty(un)) {
-            c = contacts[un];
-            if (c.userid === to) {
-              return c;
-            }
-            if (c.username === to) {
-              return c;
-            }
-          }
-        }
-        return null;
-      },
-
       onSubmit: function (evt) {
         //Do not submit the form as-is.
         evt.preventDefault();
 
         //Make sure all form elements are trimmed and username exists.
         //Then collect the form values into the data object.
-        var sendData = this.getFormData(),
-            contacts, newrecip, recip, acct, self;
+        var sendData = this.getFormData();
 
         if (!this.validate(sendData)) {
           return;
@@ -405,89 +400,11 @@ function (object,         Widget,         $,        template,
 
         // fixup to addressing if necessary
         if (sendData.to) {
-          contacts = this.svc.getContacts(store);
-          newrecip = [];
-          if (contacts) {
-            recip = sendData.to.split(',');
-            self = this;
-            recip.forEach(function (to) {
-              acct = self._findContact(to.trim(), contacts);
-              if (acct && !acct.email) {
-                newrecip.push(acct.userid ? acct.userid : acct.username);
-              }
-            });
-          }
-          if (newrecip.length > 0) {
-            sendData.to = newrecip.join(', ');
-          }
+          sendData.to = this.autoComplete.convert(sendData.to);
         }
 
         //Notify the page of a send.
         $(document).trigger('sendMessage', [sendData]);
-      },
-
-      /**
-       * Makes sure there is an autocomplete set up with the latest
-       * store data.
-       */
-      updateAutoComplete: function () {
-        var toNode = $('[name="to"]', this.bodyNode)[0],
-            contacts = this.svc.getContacts(store),
-            acdata;
-
-        acdata = {
-          domain: this.svcAccount.domain,
-          contacts: contacts
-        };
-
-        if (!contacts) {
-          contacts = {};
-        }
-
-        if (!this.svc.autoCompleteWidget) {
-          this.svc.autoCompleteWidget = new AutoComplete(toNode);
-        }
-
-        dispatch.pub('autoCompleteData', acdata);
-      },
-
-      /**
-       * Use store to save contacts, but fetch from API
-       * server if there is no store copy.
-       */
-      storeContacts: function () {
-        var contacts = this.svc.getContacts(store),
-            svcData;
-        if (!contacts) {
-          svcData = accounts.getService(this.svcAccount.domain, this.svcAccount.userid, this.svcAccount.username);
-          rdapi('contacts/' + this.svcAccount.domain, {
-            type: 'POST',
-            data: {
-              username: this.svcAccount.username,
-              userid: this.svcAccount.userid,
-              startindex: 0,
-              maxresults: 500,
-              account: JSON.stringify(svcData)
-            },
-            success: fn.bind(this, function (json) {
-              //Transform data to a form usable by autocomplete.
-              if (json && !json.error) {
-                var entries = json.result.entry,
-                    data = [];
-
-                data = this.svc.getFormattedContacts(entries);
-                this.svc.setContacts(store, data);
-                this.updateAutoComplete(this.svcAccount.domain);
-              }
-            })
-          });
-        } else {
-          //This function could be called before window is loaded, or after. In
-          //either case, make sure to let the chrome know about it, since chrome
-          //listens after the page is loaded (not after just DOM ready)
-          this.updateAutoComplete(this.svcAccount.domain);
-          //$(window).bind('load', updateAutoComplete);
-        }
       }
     };
   });

@@ -23,14 +23,18 @@
 
 /*jslint indent: 2 */
 /*global define: false, window: false, location: true, localStorage: false,
-  opener: false, setTimeout: false */
+  opener: false, setTimeout: false, navigator: false */
 
 'use strict';
 
-define([ 'rdapi', "blade/object", "blade/array", "TextCounter"],
-function (rdapi,   object,         array,         TextCounter) {
+define([ 'blade/object', 'storage'],
+function (object,         storage) {
 
-  var svcs, prop;
+  var contactsModelVersion = '2',
+      // See TODO at end of page, remove this once 3.6 UI is no longer supported.
+      newHotness = parseFloat(navigator.userAgent.split('Firefox/')[1]) >= 4,
+      store = storage(),
+      svcs, prop;
 
   function SvcBase(name, options) {
     if (!name) {
@@ -40,8 +44,6 @@ function (rdapi,   object,         array,         TextCounter) {
     this.type = name.replace(/\s/g, '').toLowerCase();
     this.tabName = this.type + 'Tab';
     this.icon = 'i/' + this.type + 'Icon.png';
-    this.autoCompleteWidget = null;
-    this.acformat = "{name}";
 
     // set features
     this.features = {
@@ -60,12 +62,6 @@ function (rdapi,   object,         array,         TextCounter) {
     getContacts: function (store) {
       if (store[this.type + 'Contacts']) {
         var contacts = JSON.parse(store[this.type + 'Contacts']);
-        // If the contacts data is an array, wipe it out, and start fresh
-        // since the format has changed.
-        if (!svcs.isFF36 && contacts && array.is(contacts)) {
-          contacts = null;
-          delete store[this.type + 'Contacts'];
-        }
         return contacts;
       }
       return null;
@@ -74,20 +70,22 @@ function (rdapi,   object,         array,         TextCounter) {
       store[this.type + 'Contacts'] = JSON.stringify(contacts);
     },
     getFormattedContacts: function (entries) {
-      var data = {};
+      var data = [];
       entries.forEach(function (entry) {
         if (entry.accounts && entry.accounts.length) {
           entry.accounts.forEach(function (account) {
-            data[entry.displayName] = {
+            data.push({
+              displayName: entry.displayName,
               email: '',
               userid: account.userid,
               username: account.username
-            };
+            });
           });
         }
       });
       return data;
     },
+
     // stub function that should not return data for non-mail services
     // for the FF 3.6 extension.
     get36FormattedContacts: function () {
@@ -100,7 +98,6 @@ function (rdapi,   object,         array,         TextCounter) {
     SvcBase.constructor.apply(this, arguments);
     this.features.direct = true;
     this.features.subject = true;
-    this.acformat = "{name} {email}";
   }
 
   EmailSvcBase.prototype = new SvcBase();
@@ -111,17 +108,19 @@ function (rdapi,   object,         array,         TextCounter) {
     }
     return true;
   };
+
   EmailSvcBase.prototype.getFormattedContacts = function (entries) {
-    var data = {};
+    var data = [];
     entries.forEach(function (entry) {
       if (entry.emails && entry.emails.length) {
         entry.emails.forEach(function (email) {
           var displayName = entry.displayName ? entry.displayName : email.value;
-          data[displayName] = {
-              email: email.value,
-              userid: null,
-              username: null
-            };
+          data.push({
+            displayName: displayName,
+            email: email.value,
+            userid: null,
+            username: null
+          });
         });
       }
     });
@@ -130,6 +129,7 @@ function (rdapi,   object,         array,         TextCounter) {
 
   // The old top browser UI in the 3.6 extension expects the contacts data
   // as an array.
+  // TODO: remove when Firefox 3.6 is no longer supported.
   EmailSvcBase.prototype.get36FormattedContacts = function (entries) {
     var data = [];
     entries.forEach(function (entry) {
@@ -144,6 +144,10 @@ function (rdapi,   object,         array,         TextCounter) {
       }
     });
     return data;
+  };
+
+  EmailSvcBase.prototype.overlays = {
+    'AutoComplete': 'AutoCompleteEmail'
   };
 
   svcs = {
@@ -165,7 +169,6 @@ function (rdapi,   object,         array,         TextCounter) {
           showTo: true,
           toLabel: 'type in name of recipient'
         }],
-        acformat: "{username}",
         textLimit: 140,
         shorten: true,
         serviceUrl: 'http://twitter.com',
@@ -173,6 +176,9 @@ function (rdapi,   object,         array,         TextCounter) {
         signOutUrl: 'http://twitter.com/logout',
         accountLink: function (account) {
           return 'http://twitter.com/' + account.username;
+        },
+        overlays: {
+          'AutoComplete': 'AutoCompleteTwitter'
         }
       }),
       'facebook.com': new SvcBase('Facebook', {
@@ -281,10 +287,24 @@ function (rdapi,   object,         array,         TextCounter) {
     svcBaseProto: SvcBase.prototype
   };
 
+  // Build up an list of services
   for (prop in svcs.domains) {
     if (svcs.domains.hasOwnProperty(prop)) {
       svcs.domainList.push(prop);
+
+      // Make sure the contacts model is on the right version. If not,
+      // clear it and refetch.
+      // TODO: remove newHotness check once the 3.6 add-on/UI is finally
+      // shut off.
+      if (newHotness && store.contactsModelVersion !== contactsModelVersion) {
+        delete store[svcs.domains[prop].type + 'Contacts'];
+      }
     }
+  }
+
+  if (newHotness) {
+    // Set the contacts model to the right version.
+    store.contactsModelVersion = contactsModelVersion;
   }
 
   return svcs;

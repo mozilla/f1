@@ -27,7 +27,7 @@
 /*global document: false, setInterval: false, clearInterval: false, Services: false,
   Application: false, gBrowser: false, window: false, Components: false,
   Cc: false, Ci: false, PlacesUtils: false, gContextMenu: false,
-  XPCOMUtils: false, ffshareAutoCompleteData: false, AddonManager: false,
+  XPCOMUtils: false, AddonManager: false,
   BrowserToolboxCustomizeDone: false, InjectorInit: false, injector: false,
   getComputedStyle: false, gNavToolbox: false, XPCNativeWrapper: false,
   Image: false */
@@ -54,7 +54,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   var panelHeightMargin = 45;
   var forceReload = true;
 
-  Cu.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
   Cu.import("resource://ffshare/modules/injector.js");
   Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -644,18 +643,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       return previews;
     },
 
-    //Methods for handling autocomplete
-
     escapeHtml: function (text) {
       return text
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
-    },
-
-    autoCompleteData: function (data) {
-      ffshareAutoCompleteData.set(data);
     },
 
     sizeToContent: function () {
