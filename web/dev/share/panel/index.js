@@ -367,7 +367,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       var div = $('<div id="oexchangeHandlers"/>');
       var s;
       for (var s in svcs) {
-        div.append('<a href="'+svcs[s].endpoint+'?url='+encodeURIComponent(options.url)+'" target="_blank" data-url="'+svcs[s].endpoint+'"><img src="'+svcs[s].icon+'"/></a>');
+        div.append('<a href="'+svcs[s].endpoint+'?url='+encodeURIComponent(options.url)+'" target="_blank" data-url="'+svcs[s].endpoint+'" title="'+(svcs[s].prompt ? svcs[s].prompt : svcs[s].name)+'"><img src="'+svcs[s].icon+'"/></a>');
       }
       if (s) {
         haveSettings = true;

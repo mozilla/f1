@@ -316,7 +316,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         if (domain) {
           discovery.discover(domain, function(resp) {
             // add the oexchange service into localstorage and refresh
-            dump(JSON.stringify(resp)+"\n");
             if (resp.error) {
               // XXX some notification error
               showStatus('statusError', resp.error.message);
@@ -329,13 +328,12 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
               }
               svcs[resp.domain] = resp;
               store.oexchange = JSON.stringify(svcs);
-              updateServices();
+              accounts.changed();
             }
           });
         }
       })
       .delegate('.remove-service', 'click', function (evt) {
-        dump("remove-service clicked\n");
         var buttonNode = evt.target,
             domain = buttonNode.getAttribute('data-service');
         var svcs = store.oexchange;
@@ -344,7 +342,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           delete svcs[domain];
           store.oexchange = JSON.stringify(svcs);
         }
-        updateServices();
+        accounts.changed();
       })
       .delegate('.refresh', 'click', function (evt) {
         // clear all service caches
