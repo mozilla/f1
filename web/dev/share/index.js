@@ -34,11 +34,16 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
           placeholder,   TextCounter,   AutoComplete,   dispatch,   accounts,
           storage,   services,   object) {
 
+  //Tell the services module that this is FF 3.6 and so autocomplete data
+  //needs to be different than what is supported in FF4.
+  services.isFF36 = true;
+
   var showStatus,
     actions = services.domains,
     hash = location.href.split('#')[1],
     urlArgs, sendData, prop,
     options = {},
+    urlSize = 26,
     tabDom, bodyDom, clickBlockDom, timer,
     updateTab = true, tabSelection, accountCache, showNew,
     store = storage();
@@ -52,22 +57,22 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       return true;
     },
     startCounter: function (data) {
-      if (this.textlimit < 1) {
+      if (this.textLimit < 1) {
         return;
       }
       //Set up text counter
       if (!this.counter) {
         this.counter = new TextCounter($('#' + this.type + ' textarea.message'),
                                        $('#' + this.type + ' .counter'),
-                                       this.textlimit - this.urlsize);
+                                       this.textLimit - urlSize);
       }
       // Update counter. If using a short url from the web page itself, it could
       // potentially be a different length than a bit.ly url so account for
       // that. The + 1 is to account for a space before adding the URL to the
       // tweet.
       this.counter.updateLimit(data.shortUrl ?
-                               (this.textlimit - (data.shortUrl.length + 1)) :
-                               this.textlimit - this.urlsize);
+                               (this.textLimit - (data.shortUrl.length + 1)) :
+                               this.textLimit - urlSize);
     },
     getFormData: function () {
       var dom = $('#' + this.type);
@@ -76,11 +81,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         subject: dom.find('[name="subject"]').val().trim() || '',
         message: dom.find('textarea.message').val().trim() || '',
         picture: dom.find('[name="picture"]').val().trim() || '',
-        picture_base64: dom.find('[name="picture_base64"]').val().trim() || '',
         canonicalUrl: dom.find('[name="link"]').val().trim() || '',
         title: dom.find('[name="title"]').val().trim() || '',
         description: dom.find('[name="description"]').val().trim() || '',
-        shortUrl: dom.find('[name="surl"]').val().trim() || ''
+        shortUrl: (dom.find('[name="surl"]').val() || "").trim()
       };
     },
     setFormData: function (data) {
@@ -98,7 +102,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       }
       if (data.previews && data.previews.length) {
         dom.find('[name="picture"]').val(data.previews[0]);
-        dom.find('[name="picture_base64"]').val(options.previews[0]);
       }
       if (data.canonicalUrl || data.url) {
         dom.find('[name="link"]').val(data.canonicalUrl || data.url);
@@ -212,6 +215,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
       return;
     }
 
+    var svcData = accounts.getService(sendData.domain, sendData.userid, sendData.username);
+    sendData.account = JSON.stringify(svcData);
+
     rdapi('send', {
       type: 'POST',
       data: sendData,
@@ -269,17 +275,20 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         contacts = svc.getContacts(store),
         acdata;
     if (!contacts) {
-      contacts = {};
+      contacts = [];
     }
 
     if (!svc.autoCompleteWidget) {
       svc.autoCompleteWidget = new AutoComplete(toNode);
     }
-    acdata = {
-      domain: serviceName,
-      contacts: contacts
-    };
-    dispatch.pub('autoCompleteData', acdata);
+
+    //Autocomplete data for old extension is just an array. So it can only
+    //have one list, not a list per service. Too bad, but will just have
+    //to live with it until this UI is retired. So only do this if the
+    //domain is gmail, just trying to pick a common default one.
+    if (serviceName === 'google.com') {
+      dispatch.pub('autoCompleteData', contacts);
+    }
   }
 
   /**
@@ -289,15 +298,18 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
   function storeContacts(serviceName, account) {
     var svcAccount = account.accounts[0],
         svc = services.domains[svcAccount.domain],
-        contacts = svc.getContacts(store);
+        contacts = svc.getContacts(store),
+        svcData;
     if (!contacts) {
+      svcData = accounts.getService(svcAccount.domain, svcAccount.userid, svcAccount.username);
       rdapi('contacts/' + svcAccount.domain, {
         type: 'POST',
         data: {
           username: svcAccount.username,
           userid: svcAccount.userid,
           startindex: 0,
-          maxresults: 500
+          maxresults: 500,
+          account: JSON.stringify(svcData)
         },
         success: function (json) {
           //Transform data to a form usable by autocomplete.
@@ -305,8 +317,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
             var entries = json.result.entry,
                 data = [];
 
-            data = svc.getFormattedContacts(entries);
-
+            data = svc.get36FormattedContacts(entries);
             svc.setContacts(store, data);
             updateAutoComplete(svcAccount.domain);
           }
@@ -530,14 +541,20 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     var thumbImgDom,
       sessionRestore = store.sessionRestore,
       tabSelectionDom, tabhtml = '', panelhtml = '',
-      svc;
+      svc, url;
 
     // first thing, fill in the supported services
     services.domainList.forEach(function (domain) {
       var data = services.domains[domain];
       data.domain = domain;
-      tabhtml += jig('#tabsTemplate', services.domains[domain]);
-      panelhtml += jig('#panelsTemplate', services.domains[domain]);
+
+      //Workaround to not show direct messaging for LinkedIn
+      if (domain === "linkedin.com") {
+        data.features.subject = false;
+      }
+
+      tabhtml += jig('#tabsTemplate', data);
+      panelhtml += jig('#panelsTemplate', data);
     });
     $('.nav .debugTab').before(tabhtml);
     $('#tabs #debug').before(panelhtml);
@@ -677,7 +694,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
     if (options.previews && options.previews.length) {
       //TODO: set up all the image previews.
       // XXX: we might not want to default to the base64 as that won't be sent/used by Facebook
-      var url = escapeHtml(options.previews[0]);
+      url = escapeHtml(options.previews[0]);
       thumbImgDom.attr('src', url);
     } else if (options.thumbnail) {
       thumbImgDom.attr('src', escapeHtml(options.thumbnail));
@@ -744,5 +761,4 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         placeholder(node);
       });
   });
-
 });

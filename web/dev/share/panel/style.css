@@ -41,6 +41,13 @@ body {
   background-color: #D4DDE5;
 }
 
+noscript {
+    display: block;
+    padding: 20px;
+    font-size: 14px;
+    line-height: 16px;
+}
+
 #wrapper {
   width: 100%;
   height: 100%;
@@ -478,6 +485,10 @@ button:focus {
   color: #535F6D;
 }
 
+.ui-accordion-content div.counter.TextCountOver {
+  color: #880000
+}
+
 .ui-accordion-content label {
   display: block;
   margin: 0 0 5px 0;
@@ -493,7 +504,7 @@ button:focus {
     width: 100px;
 }
 
-select.shareType {
+.Select {
     margin: 2px 0 0 0;
 }
 
@@ -511,7 +522,7 @@ body .toSection input[type="text"] {
 }
 
 .shareType2 {
-    line-height: 52px;
+    line-height: 64px;
     padding: 0 0 0 10px;
     text-decoration: none;
     font-style: italic;
@@ -795,6 +806,7 @@ div.status {
   font-size: 14px;
   text-align: center;
   line-height: 18px;
+  z-index: 500;
 }
 
 div.status table {

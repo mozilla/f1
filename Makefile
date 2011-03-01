@@ -1,4 +1,4 @@
-version := 0.1.8
+version := 0.2.7
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
@@ -62,15 +62,18 @@ web: $(static_dir)
 $(static_dir):
 	rsync -av $(web_dir)/ $(static_dir)/
 
-	perl -i -pe "s:version='[^']+':version='$(version)':" $(TOPSRCDIR)/setup.py
+	perl -i -pe "s:VERSION='[^']+':VERSION='$(version)':" $(TOPSRCDIR)/setup.py
+	perl -i -pe 's:/dev/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/staging.ini
+	perl -i -pe 's:/dev/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/production.ini
+
 	find $(static_dir) -name \*.html | xargs perl -i -pe 's:/dev/:/$(version)/:go'
+	perl -i -pe 's:/dev/:/$(version)/:go' $(static_dir)/scripts/oauth.js
 
 	cd $(static_dir) && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/settings && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/share && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/share/panel && $(requirejs_dir)/build/build.sh build.js
 
-	cd $(static_dir)/.. && ln -n -f -s $(version) current
 clean:
 	rm -rf $(objdir)
 	rm -rf $(static_dir)

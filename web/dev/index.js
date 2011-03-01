@@ -21,7 +21,7 @@
  * Contributor(s):
  * */
 
-/*jslint */
+/*jslint regexp: false */
 /*global define: false, window: false, location: true, navigator: false */
 'use strict';
 
@@ -31,22 +31,31 @@ function (require,   $,        hashDispatch) {
     $(function () {
         //Goofy test, but just need to weed out big non-Gecko browsers, not
         //a critical check if it goes wrong.
-        var isGecko = !!navigator.buildID;
+        var supported = !!navigator.buildID,
+            version = supported && navigator.userAgent.match(/Firefox\/([^\s]+)/);
 
+        //Do not allow pre-4.0 Firefox browsers. This test is goofy and prone
+        //to error, but err on the side of showing the button vs. hiding it,
+        //and allow add-on system to kick it out if it will not work.
+        if (supported && version) {
+            //Convert version to a number
+            version = parseFloat(version[1]);
 
+            supported = version > 3.99;
+        }
 
-        //Do not show install button for non-Gecko browsers. Even for Gecko
-        //browsers, the install may not work for all browser, but let AMO
-        //handle that notification.
-        if (!isGecko) {
-            $('#download').hide();
+        //Do not show install button for unsupported browsers.
+        if (!supported) {
+            $('#downloadFF4').hide();
+            $('#no36').show();
+            $('#info36').show();
             $('#firefox').show();
         }
 
         //Initialize fancybox for the video
         $('.fancybox').fancybox({
             'type': 'iframe',
-            href: 'http://player.vimeo.com/video/17619444?title=0&amp;byline=0&amp;portrait=0&amp;autoplay=true',
+            href: 'http://player.vimeo.com/video/19715573?title=0&amp;byline=0&amp;portrait=0&amp;autoplay=true',
             width: 700,
             height: 468,
             autoScale: false,
@@ -55,7 +64,7 @@ function (require,   $,        hashDispatch) {
 
         $('body')
             .delegate('#firefox', 'click', function (evt) {
-                location = 'http://getfirefox.com';
+                location = 'http://www.mozilla.com/en-US/firefox/beta/';
             })
             .delegate('.downloadXpi', 'click', function (evt) {
                 //For dev and staging, use local XPI
@@ -69,11 +78,6 @@ function (require,   $,        hashDispatch) {
                 evt.preventDefault();
             });
 
-        $(window)
-            .bind('load resize', function () {
-                var h = $('button.download').height();
-                $('button.download').css({ 'margin-top' : (-h / 2) });
-            });
     });
 
 });

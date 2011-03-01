@@ -33,14 +33,31 @@ import pprint
 from xml.sax.saxutils import escape
 import json
 from webhelpers.html import literal
+from webob.exc import status_map
 
 import logging
 
 
-from linkdrop.model.meta import Session
+from linkdrop.lib.metrics import metrics
 
 log = logging.getLogger(__name__)
 
+def get_redirect_response(url, code=302, additional_headers=[]):
+    """Raises a redirect exception to the specified URL
+
+    Optionally, a code variable may be passed with the status code of
+    the redirect, ie::
+
+        redirect(url(controller='home', action='index'), code=303)
+
+    XXX explain additional_headers
+
+    """
+    exc = status_map[code]
+    resp = exc(location=url)
+    for k,v in additional_headers:
+        resp.headers.add(k, v)
+    return resp
 
 ## {{{ http://code.activestate.com/recipes/52281/ (r1) PSF License
 import sgmllib, string
@@ -106,14 +123,6 @@ def safeHTML(s):
 
 
 @decorator
-def exception_rollback(func, *args, **kwargs):
-    try:
-        return func(*args, **kwargs)
-    except Exception, e:
-        Session.rollback()
-        raise
-
-@decorator
 def json_exception_response(func, *args, **kwargs):
     try:
         return func(*args, **kwargs)
@@ -123,6 +132,8 @@ def json_exception_response(func, *args, **kwargs):
         log.exception("%s(%s, %s) failed", func, args, kwargs)
         #pylons = get_pylons(args)
         #pylons.response.status_int = 500
+        metrics.track(get_pylons(args).request, 'unhandled-exception',
+                      function=func.__name__, error=e.__class__.__name__)
         return {
             'result': None,
             'error': {

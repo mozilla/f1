@@ -25,11 +25,6 @@
           <div class="shareTypeSection hbox">
             <div class="shareTypeSelectSection">
               <label for="shareType" class="shareTypeLabel">{strings.shareTypeLabel}:</label>
-              <select name="shareType" class="shareType">
-                {svc.shareTypes [}
-                  <option value="{type}">{name}</option>
-                {]}
-              </select>
             </div>
             {eq(svc.shareTypes.length, 2) [}
               <a class="shareType2 boxFlex" href="#shareType2">send to {svc.shareTypes[1].name} instead?</a>
@@ -37,12 +32,12 @@
             <div class="toSection hiddenImportant boxFlex">
               {. lastType lastToShareType(svc.shareTypes)}
               <label for="to" class="toLabel">{lastType.toLabel}:</label>
-              <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}"/>
+              <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}" autocompleteformat="{svc.acformat}"/>
             </div>
           </div>
         {] [}
           {svc.features.direct [}
-            <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}"/>
+            <input name="to" placeholder="to" type="text" value="{options.to}" class="ffshareAutoComplete" autocompletestore="{svc.domain}" autocompleteformat="{svc.acformat}"/>
             {svc.features.subject [}
               <input name="subject" placeholder="subject" type="text" value="{options.subject}"/>
             {]}

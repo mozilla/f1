@@ -35,11 +35,6 @@ from linkdrop.lib.helpers import json_exception_response, api_response, api_entr
 from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
 
-from linkdrop.model.meta import Session
-from linkdrop.model.links import Link
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy import and_
-
 log = logging.getLogger(__name__)
 
 class ContactsController(BaseController):
@@ -90,12 +85,13 @@ Name of the group to return.
         response={'type': 'object', 'doc': 'Portable Contacts Collection'}
     )
     def get(self, domain):
-        username = request.params.get('username')
-        userid = request.params.get('userid')
-        group = request.params.get('group', None)
-        startIndex = int(request.params.get('startindex','0'))
-        maxResults = int(request.params.get('maxresults','25'))
+        username = request.POST.get('username')
+        userid = request.POST.get('userid')
+        group = request.POST.get('group', None)
+        startIndex = int(request.POST.get('startindex','0'))
+        maxResults = int(request.POST.get('maxresults','25'))
         keys = session.get('account_keys', '').split(',')
+        account_data = request.POST.get('account', None)
         if not keys:
             error = {'provider': domain,
                      'message': "no user session exists, auth required",
@@ -106,12 +102,16 @@ Name of the group to return.
 
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
-        acct = None
-        for k in keys:
-            a = session.get(k)
-            if a and a.get('domain') == domain and (not username or a.get('username')==username and not userid or a.get('userid')==userid):
-                acct = a
-                break
+        if account_data is not None:
+            acct = json.loads(account_data)
+        else:
+            # support for old accounts in the session store
+            acct = None
+            for k in keys:
+                a = session.get(k)
+                if a and a.get('domain') == domain and (not username or a.get('username')==username and not userid or a.get('userid')==userid):
+                    acct = a
+                    break
         if not acct:
             error = {'provider': domain,
                      'message': "not logged in or no user account for that domain",
@@ -121,4 +121,3 @@ Name of the group to return.
 
         result, error = provider.api(acct).getcontacts(startIndex, maxResults, group)
         return {'result': result, 'error': error}
-

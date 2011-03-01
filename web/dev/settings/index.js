@@ -28,11 +28,14 @@
 
 define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
          "dispatch", "storage", "accounts", "dotCompare", "blade/url",
-         "services", "jquery.colorFade", "jquery.textOverflow"],
+         "services", "placeholder", "jquery.colorFade", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,
-          dispatch,   storage,   accounts,   dotCompare,   url, services) {
+          dispatch,   storage,   accounts,   dotCompare,   url,
+          services,   placeholder) {
   var store = storage(),
+  shortenPrefs = store.shortenPrefs,
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
+  isGreaterThan073 = dotCompare(store.extensionVersion, "0.7.4") > -1,
   options = url.queryToObject(location.href.split('#')[1] || '') || {},
   showNew = options.show === 'new';
 
@@ -126,9 +129,81 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       location.replace(location.href.split('#')[0] + '#' + url.objectToQuery(options));
     }
 
-    var manageDom = $("#manage"),
-        settingsDom = $("#settings"),
+    var shortenDom = $('#shortenForm'),
+        bitlyCheckboxDom = $('#bitlyCheckbox'),
         pref, node;
+
+
+    //Function placed inside this function to get access to DOM variables.
+    function getShortenData() {
+      var data = {};
+
+      // Clear any error messages from the form.
+      shortenDom.find('.error').addClass('hidden');
+
+      $.each(shortenDom[0].elements, function (i, node) {
+        var trimmed = $(node).val().trim();
+
+        if (node.getAttribute("placeholder") === trimmed) {
+          trimmed = "";
+        }
+
+        node.value = trimmed;
+
+        if (node.value) {
+          data[node.name] = node.value;
+        }
+      });
+
+      // Check for error conditions. Must have both API key and login to work.
+      if (data.login && data.apiKey) {
+        return data;
+      } else {
+        if (data.login && !data.apiKey) {
+          $('#bitlyApiKeyMissing').removeClass('hidden');
+        } else if (data.apiKey && !data.login) {
+          $('#bitlyLoginMissing').removeClass('hidden');
+        }
+      }
+
+      return null;
+    }
+
+    function clearShortenData() {
+      shortenDom.find('[name="login"]').val('');
+      shortenDom.find('[name="apiKey"]').val('');
+      shortenDom.find('[name="domain"]').val('');
+    }
+
+    //Function placed inside this function to get access to DOM variables.
+    function setShortenData(data) {
+      $.each(shortenDom[0].elements, function (i, node) {
+        var value = data[node.getAttribute('name')];
+        if (value) {
+          $(node).val(value);
+        }
+      });
+
+      placeholder(shortenDom[0]);
+    }
+
+    function showShortenForm() {
+      bitlyCheckboxDom[0].checked = true;
+      shortenDom.slideDown('100');
+    }
+
+    function hideShortenForm() {
+      bitlyCheckboxDom[0].checked = false;
+      shortenDom.slideUp('100', function () {
+        shortenDom.css({display: 'none'});
+      });
+    }
+
+    function resetShortenData() {
+      clearShortenData();
+      delete store.shortenPrefs;
+      hideShortenForm();
+    }
 
     // resize wrapper
     $(window).bind("load resize", function () {
@@ -136,7 +211,56 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       $("#wrapper").css({ "min-height" : (h) });
     });
 
+    if (shortenPrefs) {
+      shortenPrefs = JSON.parse(shortenPrefs);
+      setShortenData(shortenPrefs);
+      showShortenForm();
+    } else {
+      hideShortenForm();
+    }
+
     $('body')
+      .delegate('#bitlyCheckbox', 'click', function (evt) {
+        if (bitlyCheckboxDom[0].checked) {
+          showShortenForm();
+        } else {
+          resetShortenData();
+        }
+      })
+      .delegate('#shortenForm', 'submit', function (evt) {
+        var data = getShortenData();
+        if (data) {
+          // Confirm that the API key + login name is valid.
+          $.ajax({
+            url: 'http://api.bitly.com/v3/validate',
+            type: 'GET',
+            data: {
+              format: 'json',
+              login: data.login,
+              x_login: data.login,
+              x_apiKey: data.apiKey,
+              apiKey: data.apiKey
+            },
+            dataType: 'json',
+            success: function (json) {
+              if (json.status_code === 200 && json.data.valid) {
+                store.shortenPrefs = JSON.stringify(data);
+              } else {
+                $('#bitlyNotValid').removeClass('hidden');
+                delete store.shortenPrefs;
+              }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+              $('#bitlyNotValid').removeClass('hidden');
+              delete store.shortenPrefs;
+            }
+          });
+
+        } else {
+          resetShortenData();
+        }
+        evt.preventDefault();
+      })
       //Wire up the close button
       .delegate('.close', 'click', function (evt) {
         window.close();
@@ -152,41 +276,30 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             //Make sure to bring the user back to this service if
             //the auth is successful.
             store.lastSelection = selectionName;
-
-            accounts.fetch(null, onError);
           } else {
             showStatus('statusOAuthFailed');
           }
         });
+      })
+      .delegate('.refresh', 'click', function (evt) {
+        // clear all service caches
+        for (var s in services.domains) {
+          services.domains[s].clearCache(store);
+        }
+        accounts.changed();
       })
       //Hook up remove buttons to remove an account
       .delegate('.remove', 'click', function (evt) {
         var buttonNode = evt.target,
             domain = buttonNode.getAttribute('data-domain'),
             userName = buttonNode.getAttribute('data-username'),
-            userId = buttonNode.getAttribute('data-userid'),
-            svc = services.domains[domain];
-
-        rdapi('account/signout', {
-          data: {
-            domain: domain,
-            userid: userId,
-            username: userName
-          },
-          success: function () {
-            accounts.fetch(null, onError);
-          },
-          error: function (xhr, textStatus, err) {
-            showStatus('statusError', err);
-          }
-        });
-
-        //Remove any cached data
-        svc.clearCache(store);
-        if (svc.type === store.lastSelection) {
-          delete store.lastSelection;
+            userId = buttonNode.getAttribute('data-userid');
+        try {
+          accounts.remove(domain, userId, userName);
+        } catch (e) {
+          // clear out account storage
+          accounts.clear();
         }
-
         evt.preventDefault();
       }).
       delegate('#settings [type="checkbox"]', 'click', function (evt) {
@@ -220,28 +333,30 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
 
     // tabs
     // Only show settings if extension can actually handle setting of them.
+    // Same for advanced.
     if (isGreaterThan072) {
-      $('li.settings').removeClass('hidden');
+      $('li[data-tab="settings"]').removeClass('hidden');
+    }
+    if (isGreaterThan073) {
+      $('li[data-tab="advanced"]').removeClass('hidden');
     }
 
-    $("ul#tabs li").click(function () {
-      $(this).addClass("selected");
-      $(this).siblings().removeClass("selected");
-    });
+    $('body')
+      // Set up tab switching behavior.
+      .delegate("ul#tabs li", 'click', function (evt) {
+        var target = $(this),
+            tabDom = $('#' + target.attr('data-tab'));
 
-    $("ul#tabs li.manage").click(function () {
-      if (manageDom.is(":hidden")) {
-        manageDom.fadeIn(200);
-        manageDom.siblings().fadeOut(0);
-      }
-    });
+        // Show tab selected.
+        target.addClass("selected");
+        target.siblings().removeClass("selected");
 
-    $("ul#tabs li.settings").click(function () {
-      if (settingsDom.is(":hidden")) {
-        settingsDom.fadeIn(200);
-        settingsDom.siblings().fadeOut(0);
-      }
-    });
+        // Show tab contents.
+        if (tabDom.is(':hidden')) {
+          tabDom.fadeIn(200);
+          tabDom.siblings().fadeOut(0);
+        }
+      });
 
     //Callback handler for JSONP feed response from Google.
     window.onFeedLoad = function (x, data) {

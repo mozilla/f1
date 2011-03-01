@@ -30,6 +30,7 @@ import httplib2
 import copy
 from urlparse import urlparse
 from paste.deploy.converters import asbool
+import hashlib
 
 from pylons import config, request, response, session
 from pylons.controllers.util import abort, redirect
@@ -39,11 +40,8 @@ from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
 from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
-
-from linkdrop.model.meta import Session
-from linkdrop.model import History, Link
-from linkdrop.model.types import UTCDateTime
-from sqlalchemy.orm.exc import NoResultFound, MultipleResultsFound
+from linkdrop.lib.metrics import metrics
+from linkdrop.lib.shortener import shorten_link
 
 log = logging.getLogger(__name__)
 
@@ -123,6 +121,7 @@ Site provided description of the shared item, not supported by all services.
         shorturl = request.POST.get('shorturl')
         userid = request.POST.get('userid')
         to = request.POST.get('to')
+        account_data = request.POST.get('account', None)
         if not domain:
             error = {
                 'message': "'domain' is not optional",
@@ -135,17 +134,22 @@ Site provided description of the shared item, not supported by all services.
                      'message': "no user session exists, auth required",
                      'status': 401
             }
+            metrics.track(request, 'send-unauthed', domain=domain)
             return {'result': result, 'error': error}
 
         provider = get_provider(domain)
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
-        acct = None
-        for k in keys:
-            a = session.get(k)
-            if a and a.get('domain') == domain and (a.get('username')==username or a.get('userid')==userid):
-                acct = a
-                break
+        if account_data is not None:
+            acct = json.loads(account_data)
+        else:
+            # support for old account data in session store
+            acct = None
+            for k in keys:
+                a = session.get(k)
+                if a and a.get('domain') == domain and (a.get('username')==username or a.get('userid')==userid):
+                    acct = a
+                    break
         if not acct:
             error = {'provider': domain,
                      'message': "not logged in or no user account for that domain",
@@ -155,51 +159,42 @@ Site provided description of the shared item, not supported by all services.
 
         args = copy.copy(request.POST)
         if shorten and not shorturl and longurl:
+            link_timer = metrics.start_timer(request, long_url=longurl)
             u = urlparse(longurl)
             if not u.scheme:
                 longurl = 'http://' + longurl
-            shorturl = Link.get_or_create(longurl).short_url
+            shorturl = shorten_link(longurl)
+            link_timer.track('link-shorten', short_url=shorturl)
             args['shorturl'] = shorturl
 
+        acct_hash = hashlib.sha1("%s#%s" % (username or '', userid or '')).hexdigest()
+        timer = metrics.start_timer(request, domain=domain, message_len=len(message),
+                                    long_url=longurl, short_url=shorturl, acct_id=acct_hash)
         # send the item.
         try:
             result, error = provider.api(acct).sendmessage(message, args)
         except ValueError, e:
-            import traceback
-            traceback.print_exc()
+            # XXX - I doubt we really want a full exception logged here?
+            log.exception('error providing item to %s: %s', domain, e)
             # XXX we need to handle this better, but if for some reason the
             # oauth values are bad we will get a ValueError raised
             error = {'provider': domain,
                      'message': "not logged in or no user account for that domain",
                      'status': 401
             }
+            timer.track('send-error', error=error)
             return {'result': result, 'error': error}
 
         if error:
+            timer.track('send-error', error=error)
             assert not result
             log.error("send failure: %r %r %r", username, userid, error)
         else:
             # create a new record in the history table.
             assert result
-            if asbool(config.get('history_enabled', True)):
-                # this is faster, but still want to look further into SA perf
-                #data = {
-                #    'json_attributes': json.dumps(dict(request.POST)),
-                #    'account_id': acct.get('id'),
-                #    'published': UTCDateTime.now()
-                #}
-                #Session.execute("INSERT DELAYED INTO history (json_attributes, account_id, published) VALUES (:json_attributes, :account_id, :published)",
-                #                data)
-
-                history = History()
-                history.account_id = acct.get('id')
-                history.published = UTCDateTime.now()
-                for key, val in request.POST.items():
-                    setattr(history, key, val)
-                Session.add(history)
-                Session.commit()
             result['shorturl'] = shorturl
             result['from'] = userid
             result['to'] = to
+            timer.track('send-success')
         # no redirects requests, just return the response.
         return {'result': result, 'error': error}

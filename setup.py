@@ -28,16 +28,17 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
+VERSION='0.2.7'
+
 setup(
     name='linkdrop',
-    version='0.1.8',
+    version=VERSION,
     description='',
     author='',
     author_email='',
     url='',
     install_requires=[
         "Pylons>=1.0",
-        "SQLAlchemy>=0.5",
         "docutils",
         "nose",
         "httplib2",
@@ -46,7 +47,6 @@ setup(
         "python-openid",
         "python-memcached",
         "gdata", # google api support
-        "sqlalchemy-migrate>=0.5.4",
         "twitter>=1.4.2"
     ],
     setup_requires=["PasteScript>=1.6.3"],
@@ -74,3 +74,34 @@ setup(
     main = pylons.util:PylonsInstaller
     """,
 )
+
+import os, stat
+basedir = os.path.join(os.getcwd(), "web")
+realdir = VERSION
+linkdir = os.path.join(basedir, "current")
+
+# Sanity check, nuke what isn't a symlink
+try:
+    s = os.lstat(linkdir)
+    if not stat.S_ISLNK(s.st_mode):
+        if stat.S_ISDIR:
+            os.rmdir(linkdir)
+        else:
+            os.unlink(linkdir)
+except OSError, e:
+    if e.errno != 2: # file does not exist
+        raise
+
+# Check what the symlink might already point to
+# and update if needed
+try:
+    lver = os.readlink(linkdir)
+except OSError, e:
+    lver = None
+    if e.errno != 2: # file does not exist
+        raise
+
+if lver != VERSION:
+    if lver:
+        os.unlink(linkdir)
+    os.symlink(realdir, linkdir)
