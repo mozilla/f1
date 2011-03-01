@@ -145,6 +145,27 @@ class api():
     def rawcall(self, url, body):
         raise Exception("NOT IMPLEMENTED")
 
+    def _twitter_exc_to_error(self, exc):
+        msg = "TwitterHTTPError %d" % (exc.e.code)
+        if exc.e.code != 404:
+            error_response = exc.e.read()
+            try:
+                details = json.loads(error_response)
+            except ValueError, ee:
+                # sometimes the error does not contain a json object, let's
+                # try to see what it is
+                msg = error_response
+                log.error("twitter returned non-json in an error response: %s", msg)
+            else:
+                if 'error' in details:
+                    msg = details['error']
+                else:
+                    msg = str(details)
+        return {'provider': domain,
+                'message': msg,
+                'status': exc.e.code
+        }
+
     def sendmessage(self, message, options={}):
         result = error = None
         try:
@@ -170,23 +191,7 @@ class api():
                 result = self.api().statuses.update(status=message)
             result[domain] = result['id']
         except TwitterHTTPError, exc:
-            import traceback
-            traceback.print_exc()
-            try:
-                details = json.load(exc.e)
-                if 'error' in details:
-                    msg = details['error']
-                else:
-                    msg = str(details)
-            except ValueError, ee:
-                # sometimes the error does not contain a json object, lets
-                # try to see what it is
-                msg = "%r" % (exc,)
-                log.exception(exc)
-            error = {'provider': domain,
-                     'message': msg,
-                     'status': exc.e.code
-            }
+            error = self._twitter_exc_to_error(exc)
         return result, error
     
     def profile(self):
@@ -195,17 +200,7 @@ class api():
             result = self.api().account.verify_credentials()
             result[domain] = result['id']
         except TwitterHTTPError, exc:
-            details = "TwitterHTTPError %d" % (exc.e.code)
-            if exc.e.code != 404:
-                details = json.load(exc.e)
-            if 'error' in details:
-                msg = details['error']
-            else:
-                msg = str(details)
-            error = {'provider': domain,
-                     'message': msg,
-                     'status': exc.e.code
-            }
+            error = self._twitter_exc_to_error(exc)
         return result, error
 
     def getcontacts(self, start=0, page=25, group=None):
@@ -227,15 +222,5 @@ class api():
 
             return connectedto, None
         except TwitterHTTPError, exc:
-            details = "TwitterHTTPError %d" % (exc.e.code)
-            if exc.e.code != 404:
-                details = json.load(exc.e)
-            if 'error' in details:
-                msg = details['error']
-            else:
-                msg = str(details)
-            error = {'provider': domain,
-                     'message': msg,
-                     'status': exc.e.code
-            }
+            error = self._twitter_exc_to_error(exc)
         return result, error
