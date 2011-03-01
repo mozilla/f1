@@ -141,7 +141,7 @@ class OAuth2():
         client = httplib2.Http()
         resp, content = client.request(access_url)
         if resp['status'] != '200':
-            raise Exception("Error status: %r", resp['status'])
+            raise Exception("Error status: %s" % (resp['status'],))
 
         access_token = parse_qs(content)['access_token'][0]
         return self._get_credentials(access_token)
