@@ -27,16 +27,12 @@
 "use strict";
 
 define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig", "blade/url",
-         "placeholder", "TextCounter", "AutoComplete", "dispatch", "accounts",
+         "placeholder", "TextCounter", "dispatch", "accounts",
          "storage", "services", "blade/object",
          "jquery-ui-1.8.6.custom.min", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
-          placeholder,   TextCounter,   AutoComplete,   dispatch,   accounts,
+          placeholder,   TextCounter,   dispatch,   accounts,
           storage,   services,   object) {
-
-  //Tell the services module that this is FF 3.6 and so autocomplete data
-  //needs to be different than what is supported in FF4.
-  services.isFF36 = true;
 
   var showStatus,
     actions = services.domains,
@@ -276,10 +272,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,         url,
         acdata;
     if (!contacts) {
       contacts = [];
-    }
-
-    if (!svc.autoCompleteWidget) {
-      svc.autoCompleteWidget = new AutoComplete(toNode);
     }
 
     //Autocomplete data for old extension is just an array. So it can only

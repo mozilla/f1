@@ -42,12 +42,6 @@
   list-style-image: url("chrome://ffshare/skin/status-error.png");
 }
 
-/* Styles to style the autocomplete results */
-.autocomplete-richlistitem[type="ffshare"] .ac-site-icon,
-.autocomplete-richlistitem[type="ffshare"] .ac-url-box {
-    display: none !important;
-}
-
 .ffshare-panel .panel-inner-arrowcontent {
     padding: 0;
 }

@@ -45,12 +45,6 @@
   list-style-image: url("chrome://ffshare/skin/status-sharing.png");
 }
 
-/* Styles to style the autocomplete results */
-.autocomplete-richlistitem[type="ffshare"] .ac-site-icon,
-.autocomplete-richlistitem[type="ffshare"] .ac-url-box {
-    display: none !important;
-}
-
 .ffshare-panel {
   width: 441px; /* note this value hard-coded in overlay.js */
   min-width: 441px !important;
