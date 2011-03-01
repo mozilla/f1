@@ -62,6 +62,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       $('#' + statusId + ' .message').text(message);
     }
   }
+  
+  function cancelStatus() {
+    $('div.status').addClass('hidden');
+  }
 
   function onError(xhr, textStatus, err) {
     if (xhr.status === 503) {
@@ -312,15 +316,21 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         if (domain) {
           discovery.discover(domain, function(resp) {
             // add the oexchange service into localstorage and refresh
-            var svcs = store.oexchange || {};
-            try {
-              svcs = JSON.parse(svcs);
-            } catch(e) {
-              svcs = {};
+            dump(JSON.stringify(resp)+"\n");
+            if (resp.error) {
+              // XXX some notification error
+              showStatus('statusError', resp.error.message);
+            } else {
+              var svcs = store.oexchange || {};
+              try {
+                svcs = JSON.parse(svcs);
+              } catch(e) {
+                svcs = {};
+              }
+              svcs[resp.domain] = resp;
+              store.oexchange = JSON.stringify(svcs);
+              updateServices();
             }
-            svcs[resp.domain] = resp;
-            store.oexchange = JSON.stringify(svcs);
-            updateServices();
           });
         }
       })
@@ -371,6 +381,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             value: value
           }, opener);
         }
+      })
+      .delegate('.config, .statusErrorButton', 'click', function (evt) {
+        cancelStatus();
       });
 
     //Set up state of the prefs.

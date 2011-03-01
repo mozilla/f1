@@ -25,13 +25,6 @@
     </div>
   </div>
 
-  <!-- Start status messages -->
-  <div id="statusError" class="status hidden error">
-    We're really sorry, F1 done goofed up. <span class="message"></span>
-    <button class="statusButton statusErrorButton">ok</button>
-  </div>
-  <!-- End status messages -->
-
   <ul id="tabs" class="clearfix">
     <li class="manage selected" data-tab="manage">accounts</li>
     <li class="hidden" data-tab="settings">settings</li>
@@ -39,6 +32,16 @@
   </ul>
 
   <div id="config">
+
+
+  <!-- Start status messages -->
+  <div id="statusError" class="status hidden error">
+    <div class="hbox">
+    <div class="boxFlex">Sorry, F1 was unable to handle that reqeust. <span class="message"></span></div>
+    <button class="statusButton statusErrorButton">ok</button>
+    </div>
+  </div>
+  <!-- End status messages -->
 
     <div id="manage" class="panel">
       <h1 id="existingHeader" class="hidden">My accounts</h1>
