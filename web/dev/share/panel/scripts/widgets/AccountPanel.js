@@ -190,7 +190,7 @@ function (object,         Widget,         $,        template,
         //form data will be in strings, even though the
         //account data can have things like integers, and want
         //string equality operators to stay for linting.
-        return data.link !== this.options.url ||
+        return data.link !== jigFuncs.link(this.options) ||
               data.userid !== String(this.svcAccount.userid) ||
               data.domain !== String(this.svcAccount.domain) ||
               data.username !== String(this.svcAccount.username);
