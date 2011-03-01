@@ -49,23 +49,17 @@ function ($,        object,         fn,         rdapi,   storage,   accounts) {
     },
 
     findContact: function (to, contacts) {
-      var acct = contacts[to.trim()], un, c;
-      if (acct) {
-        return acct;
-      }
+      var contactId;
 
-      for (un in contacts) {
-        if (contacts.hasOwnProperty(un)) {
-          c = contacts[un];
-          if (c.userid === to) {
-            return c;
-          }
-          if (c.username === to) {
-            return c;
-          }
+      contacts.some(function (contact) {
+        if (contact.displayName === to) {
+          contactId = contact.email || contact.userid || contact.username;
+          return true;
         }
-      }
-      return null;
+        return false;
+      });
+
+      return contactId;
     },
 
     /**
@@ -78,18 +72,18 @@ function ($,        object,         fn,         rdapi,   storage,   accounts) {
       var contacts = this.svc.getContacts(store),
           newrecip = [],
           result = '',
-          recip, self;
+          recip;
 
       if (contacts) {
         recip = toText.split(',');
-        self = this;
-        recip.forEach(function (to) {
-          var acct = self.findContact(to.trim(), contacts);
-          if (acct && !acct.email) {
-            newrecip.push(acct.userid ? acct.userid : acct.username);
+        recip.forEach(fn.bind(this, function (to) {
+          var contactId = this.findContact(to.trim(), contacts);
+          if (contactId) {
+            newrecip.push(contactId);
           }
-        });
+        }));
       }
+
       if (newrecip.length > 0) {
         result = newrecip.join(', ');
       }
@@ -98,24 +92,25 @@ function ($,        object,         fn,         rdapi,   storage,   accounts) {
     },
 
     /**
+     * Formats the contact for display as an autocomplete value.
+     * Overridden by AutoComplete service overlays.
+     */
+    formatContact: function (contact) {
+      return contact.displayName;
+    },
+
+    /**
      * Makes sure there is an autocomplete set up with the latest
      * store data.
      */
     attachAutoComplete: function () {
       var acOptions = [],
-          acFormat = this.svc.acformat,
           relatedWidth, widthNode;
 
       if (this.contacts) {
-        this.contacts.forEach(function (contact) {
-          var optionValue = '';
-          acFormat.forEach(function (prop, i) {
-            if (contact[prop] !== optionValue) {
-              optionValue += (i > 0 ? ' ' : '') + contact[prop];
-            }
-          });
-          acOptions.push(optionValue);
-        });
+        this.contacts.forEach(fn.bind(this, function (contact) {
+          acOptions.push(this.formatContact(contact));
+        }));
       }
 
       // jQuery UI autocomplete setup from the jQuery UI demo page

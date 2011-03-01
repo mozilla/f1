@@ -44,7 +44,6 @@ function (object,         storage) {
     this.type = name.replace(/\s/g, '').toLowerCase();
     this.tabName = this.type + 'Tab';
     this.icon = 'i/' + this.type + 'Icon.png';
-    this.acformat = ["displayName"];
 
     // set features
     this.features = {
@@ -99,7 +98,6 @@ function (object,         storage) {
     SvcBase.constructor.apply(this, arguments);
     this.features.direct = true;
     this.features.subject = true;
-    this.acformat = ["displayName", "email"];
   }
 
   EmailSvcBase.prototype = new SvcBase();
@@ -148,6 +146,10 @@ function (object,         storage) {
     return data;
   };
 
+  EmailSvcBase.prototype.overlays = {
+    'AutoComplete': 'AutoCompleteEmail'
+  };
+
   svcs = {
     domains: {
       'twitter.com': new SvcBase('Twitter', {
@@ -167,7 +169,6 @@ function (object,         storage) {
           showTo: true,
           toLabel: 'type in name of recipient'
         }],
-        acformat: ["username"],
         textLimit: 140,
         shorten: true,
         serviceUrl: 'http://twitter.com',
@@ -175,6 +176,9 @@ function (object,         storage) {
         signOutUrl: 'http://twitter.com/logout',
         accountLink: function (account) {
           return 'http://twitter.com/' + account.username;
+        },
+        overlays: {
+          'AutoComplete': 'AutoCompleteTwitter'
         }
       }),
       'facebook.com': new SvcBase('Facebook', {

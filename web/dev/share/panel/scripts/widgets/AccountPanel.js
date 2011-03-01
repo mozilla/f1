@@ -27,11 +27,11 @@
 
 define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./AccountPanel.html',
          'TextCounter', 'storage', 'module', 'placeholder', 'dispatch', 'accounts',
-         'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs', 'Select',
+         'require', 'rdapi', 'blade/fn', './jigFuncs', 'Select',
          'jquery.textOverflow'],
 function (object,         Widget,         $,        template,
           TextCounter,   storage,   module,   placeholder,   dispatch,   accounts,
-          AutoComplete,   rdapi,   fn,         jigFuncs,     Select) {
+          require,   rdapi,   fn,         jigFuncs,     Select) {
 
   var store = storage(),
       className = module.id.replace(/\//g, '-');
@@ -66,6 +66,9 @@ function (object,         Widget,         $,        template,
       urlSize: 26,
 
       template: template,
+
+      // The module name for the AutoComplete module
+      autoCompleteName: 'AutoComplete',
 
       strings: {
         shareTypeLabel: 'send to'
@@ -112,6 +115,11 @@ function (object,         Widget,         $,        template,
         }
 
         this.displayName = name;
+
+        // Figure out what module will handle autocomplete.
+        this.autoCompleteName = (this.svc.overlays &&
+                                this.svc.overlays[this.autoCompleteName]) ||
+                                this.autoCompleteName;
 
         //Listen for options changes and update the account.
         this.optionsChangedSub = dispatch.sub('optionsChanged', fn.bind(this, function (options) {
@@ -177,9 +185,13 @@ function (object,         Widget,         $,        template,
         }
         placeholder(this.bodyNode);
 
+        // Set up autocomplete. Since autocomplete can have a different
+        // format/display per service account, allow for service overrides.
         acNode = $('[name="to"]', this.bodyNode)[0];
         if (acNode) {
-          this.autoComplete = new AutoComplete(acNode, this.svc, this.svcAccount);
+          require([this.autoCompleteName], fn.bind(this, function (AutoComplete) {
+            this.autoComplete = new AutoComplete(acNode, this.svc, this.svcAccount);
+          }));
         }
 
         //Create ellipsis for anything wanting ... overflow
