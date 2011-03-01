@@ -42,6 +42,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ostring = Object.prototype.toString,
       empty = {}, fn,
       buttonId = 'ffshare-toolbar-button';
+  var SHARE_STATUS = ["", "start", "error"];
 
   // width/height tracking for the panel, initial values are defaults to
   // show the configure status panel
@@ -51,6 +52,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   var defaultHeight = 180, lastHeight = 180;
   var panelWidthMargin = 41;
   var panelHeightMargin = 45;
+  var forceReload = true;
 
   Cu.import("resource://ffshare/modules/ffshareAutoCompleteData.js");
   Cu.import("resource://ffshare/modules/injector.js");
@@ -180,11 +182,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         try {
           status = aRequest.nsIHttpChannel.responseStatus;
         } catch (e) {
-          //Could be just an invalid URL or not an http thing. Need to be sure to not endlessly
-          //load error page if it is already loaded.
-          //Also ignore this state for about:blank which is apparently used as
-          //a placeholder by FF while first creating the panel/browser element.
-          var href = this.browser.contentWindow.location.href;
+          // Could be just an invalid URL or not an http thing. Need to be sure to not endlessly
+          // load error page if it is already loaded.
+          // Also ignore this state for about:blank which is apparently used as
+          // a placeholder by FF while first creating the panel/browser element.
+          // Check against channel.name, that is what we were *trying* to load.
+          var href = aRequest.nsIHttpChannel.name;
           if (href !== ffshare.errorPage && href !== 'about:blank') {
             status = 1000;
           } else {
@@ -194,7 +197,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
         if (status < 200 || status > 399) {
           this.browser.contentWindow.location = ffshare.errorPage;
-          gBrowser.selectedTab.shareState.forceReload = true;
+          forceReload = true;
         }
       }
     },
@@ -254,169 +257,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
   };
 
-
-  /**
-   * This observer looks for conditions where the server is not reachable
-   * by the network, and puts up the "server down" page. This observer is
-   * related to the StateProgressListener, but that one handles the cases
-   * where the server is reachable by the network but causes an error.
-   */
-  var nsIHttpActivityObserver = Ci.nsIHttpActivityObserver;
-  function HttpActivityObserver(browser) {
-    this.browser = browser;
-  }
-  HttpActivityObserver.prototype = {
-    // copied largely from firebug net.js
-    registered: false,
-
-    registerObserver: function () {
-      if (!Ci.nsIHttpActivityDistributor) {
-        return;
-      }
-
-      if (this.registered) {
-        return;
-      }
-
-      var distributor = this.getActivityDistributor();
-      if (!distributor) {
-        return;
-      }
-
-      distributor.addObserver(this);
-      this.registered = true;
-    },
-
-    unregisterObserver: function () {
-      if (!Ci.nsIHttpActivityDistributor) {
-        return;
-      }
-
-      if (!this.registered) {
-        return;
-      }
-
-      var distributor = this.getActivityDistributor();
-      if (!distributor) {
-        return;
-      }
-
-      distributor.removeObserver(this);
-      this.registered = false;
-    },
-
-    getActivityDistributor: function () {
-      var activityDistributor = null;
-      try {
-        var dist = Cc["@mozilla.org/network/http-activity-distributor;1"];
-        if (dist) {
-          activityDistributor = dist.getService(Ci.nsIHttpActivityDistributor);
-        }
-      } catch (e) {
-        log("nsIHttpActivityDistributor no available " + e + "\n");
-      }
-      delete this.activityDistributor;
-      return (this.activityDistributor = activityDistributor);
-    },
-
-    getWindowForRequest: function (channel) {
-      var lctx;
-      try {
-        if (channel && channel.notificationCallbacks) {
-          lctx = channel.notificationCallbacks.getInterface(Ci.nsILoadContext);
-          return lctx.associatedWindow;
-        }
-      } catch(e) {}
-      try {
-        if (channel && channel.loadGroup && channel.loadGroup.notificationCallbacks) {
-          lctx = channel.loadGroup.notificationCallbacks.getInterface(Ci.nsILoadContext);
-          return lctx.associatedWindow;
-        }
-      } catch(e) {}
-      return null;
-    },
-
-    getDocumentForWin: function (win) {
-      try {
-        var theDoc = win.QueryInterface(Ci.nsIInterfaceRequestor)
-                          .getInterface(Ci.nsIWebNavigation)
-                          .QueryInterface(Ci.nsIDocShell)
-                          .chromeEventHandler.contentDocument;
-        //dump("got a document "+theDoc+"\n");
-        try {
-          return XPCNativeWrapper.unwrap(theDoc);
-        } catch (e) {
-          return theDoc.wrappedJSObject;
-        }
-      } catch(e) {}
-      return null;
-    },
-
-    getBrowserForRequest: function (channel) {
-      if (!this.browser.contentDocument)
-        return null;
-      var win = this.getWindowForRequest(channel);
-      if (!win) {
-        return null;
-      }
-      var theDoc = this.getDocumentForWin(win);
-      if (theDoc !== this.browser.contentDocument.wrappedJSObject) {
-        //dump("they dont match "+theDoc+" !== "+this.browser.contentDocument.wrappedJSObject+"\n");
-        return null;
-      }
-      return this.browser;
-    },
-
-    /* nsIActivityObserver */
-    observeActivity: function (httpChannel, activityType, activitySubtype,
-                              timestamp, extraSizeData, extraStringData) {
-      try {
-        if (httpChannel instanceof Ci.nsIHttpChannel) {
-          this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
-                extraSizeData, extraStringData);
-        }
-      } catch (e) {
-        log("observeActivity: EXCEPTION " + e + "\n");
-      }
-    },
-
-    observeRequest: function (httpChannel, activityType, activitySubtype,
-                             timestamp, extraSizeData, extraStringData) {
-      var browser = this.getBrowserForRequest(httpChannel);
-      if (!browser) {
-        return;
-      }
-
-      if (activityType === nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION) {
-        if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER) {
-          //dump("ACTIVITY_SUBTYPE_REQUEST_HEADER for "+httpChannel.name+" \n");
-          browser.__response_headers_received = false;
-        } else
-        if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE) {
-          // If we don't have response headers then we did not recieve a response,
-          // but skip the case where the page is the about:blank filler used
-          // by the browser when first loading a browser.
-          //dump("ACTIVITY_SUBTYPE_TRANSACTION_CLOSE for "+httpChannel.name+" \n");
-          if (!browser.__response_headers_received && browser.currentURI.spec !== 'about:blank') {
-            //dump("loading error page for "+httpChannel.name+"\n");
-            browser.loadURI(ffshare.errorPage);
-            gBrowser.selectedTab.shareState.forceReload = true;
-          }
-        } else
-        if (activitySubtype === nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_HEADER) {
-          //dump("ACTIVITY_SUBTYPE_RESPONSE_HEADER for "+httpChannel.name+" \n");
-          browser.__response_headers_received = true;
-        }
-      }
-    },
-
-    /* nsISupports */
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsISupports,
-                                           Ci.nsIActivityObserver])
-
-  };
-
-
   // singleton controller for the share panel
   // A state object is attached to each browser tab when the share panel
   // is opened for that tab.  The state object is removed from the current
@@ -444,9 +284,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       Services.obs.addObserver(this, 'content-document-global-created', false);
 
-      this.httpObserver = new HttpActivityObserver(this.browser);
-      this.httpObserver.registerObserver();
-
       var webProgress = this.browser.webProgress;
       this.stateProgressListener = new StateProgressListener(this.browser);
       webProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
@@ -455,8 +292,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     shutdown: function() {
       Services.obs.removeObserver(this, 'content-document-global-created');
-
-      this.httpObserver.unregisterObserver();
 
       var webProgress = this.browser.webProgress;
       webProgress.removeProgressListener(this.stateProgressListener);
@@ -500,7 +335,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           if (!skip) {
             topic = message.topic;
             data = message.data;
-
             if (topic && this[topic]) {
               this[topic](data);
             }
@@ -542,6 +376,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @param {Object} data info about the share.
      */
     success: function (data) {
+      this.updateStatus(0);
       this.close();
 
       if (ffshare.prefs.bookmarking) {
@@ -844,20 +679,35 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     // panelUI operations
     close: function () {
       this.panel.hidePopup();
-      gBrowser.selectedTab.shareState = null;
+      if (gBrowser.selectedTab.shareState) {
+        if (gBrowser.selectedTab.shareState.status === 0)
+          gBrowser.selectedTab.shareState = null;
+        else
+          gBrowser.selectedTab.shareState.open = false;
+      }
+
       // Always ensure the button is unchecked when the panel is hidden
       getButton().removeAttribute("checked");
     },
+    
+    updateStatus: function(status) {
+      if (typeof(status) == 'undefined')
+        status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : 0;
+      if (gBrowser.selectedTab.shareState)
+        gBrowser.selectedTab.shareState.status = status;
+      getButton().setAttribute("status", SHARE_STATUS[status]);
+    },
 
     hide: function () {
-      this.close();
+      this.panel.hidePopup();
+      getButton().removeAttribute("checked");
+      gBrowser.selectedTab.shareState.open = false;
     },
 
 
     show: function (options) {
       var tabURI = gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI,
           tabUrl = tabURI.spec;
-
       if (!ffshare.isValidURI(tabURI)) {
         return;
       }
@@ -866,7 +716,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
       gBrowser.selectedTab.shareState = {
         options: options, // currently not used for anything
-        forceReload: false
+        status: currentState ? currentState.status : 0,
+        open: true
       };
 
       var url = ffshare.prefs.share_url +
@@ -878,10 +729,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       //Make sure it can go all the way to zero.
       this.browser.style.minHeight = 0;
 
-      if (currentState && currentState.forceReload)
+      if (forceReload) {
         this.browser.loadURI(url);
-      else
+        forceReload = false;
+      } else {
         this.browser.setAttribute('src', url);
+      }
 
       var button = getButton();
       // Always ensure the button is checked if the panel is open
@@ -1259,14 +1112,21 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           self.switchTab(false);
         }, true);
       }
+
       var selectedTab = gBrowser.selectedTab;
       var visible = document.getElementById('share-popup').state == 'open';
-      if (visible && !selectedTab.shareState) {
-        sharePanel.hide();
+      var isopen = selectedTab.shareState && selectedTab.shareState.open;
+      if (visible && !isopen) {
+        sharePanel.close();
       }
-      if (selectedTab.shareState) {
+      if (isopen) {
         window.setTimeout(function () {
+          sharePanel.updateStatus();
           sharePanel.show({});
+        }, 0);
+      } else {
+        window.setTimeout(function () {
+          sharePanel.updateStatus();
         }, 0);
       }
     },
