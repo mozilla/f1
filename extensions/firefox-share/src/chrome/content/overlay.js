@@ -680,7 +680,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       // Always ensure the button is unchecked when the panel is hidden
-      getButton().removeAttribute("checked");
+      var button = getButton();
+      if (button)
+        button.removeAttribute("checked");
     },
     
     updateStatus: function(status) {
@@ -688,13 +690,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : 0;
       if (gBrowser.selectedTab.shareState)
         gBrowser.selectedTab.shareState.status = status;
-      getButton().setAttribute("status", SHARE_STATUS[status]);
+      var button = getButton();
+      if (button)
+        button.setAttribute("status", SHARE_STATUS[status]);
     },
 
     hide: function () {
       this.panel.hidePopup();
-      getButton().removeAttribute("checked");
       gBrowser.selectedTab.shareState.open = false;
+      var button = getButton();
+      if (button)
+        button.removeAttribute("checked");
     },
 
 
@@ -730,11 +736,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       var button = getButton();
-      // Always ensure the button is checked if the panel is open
-      button.setAttribute("checked", true);
-
-      // Always ensure we aren't glowing if the person clicks on the button
-      button.removeAttribute("firstRun");
+      if (button) {
+        // Always ensure the button is checked if the panel is open
+        button.setAttribute("checked", true);
+  
+        // Always ensure we aren't glowing if the person clicks on the button
+        button.removeAttribute("firstRun");
+      } else {
+        // use urlbar as the anchor
+        button = document.getElementById('identity-box');
+      }
 
       // fx 4
       var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
