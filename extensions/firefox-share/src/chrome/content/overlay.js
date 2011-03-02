@@ -617,7 +617,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         content = metas[i].getAttribute("content");
         if (content) {
           previews.push({
-            http_url : content,
+            http_url : gBrowser.currentURI.resolve(content),
             base64 : ""
           });
         }
@@ -627,7 +627,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         content = links[i].getAttribute("href");
         if (content) {
           previews.push({
-            http_url : content,
+            http_url : gBrowser.currentURI.resolve(content),
             base64 : ""
           });
         }
