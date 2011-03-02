@@ -120,8 +120,7 @@
   </div>
 
   <div id="statusCaptcha" class="status hidden intermediate captcha">
-    <div class="captcha-wrap vbox boxFlex center">
-      <div>
+    <table><tr><td>
       <form name="captchaForm" onsubmit="document.getElementById('captchaButton').click();return false;" class="hbox boxFlex">
         <div><img id="captchaImage" class="captchaImage"/></div>
         <div>
@@ -133,8 +132,7 @@
           <div class="subtext">(sorry, sometimes email providers require this)</div>
         </div>
       </form>
-      </div>
-    </div>
+    </td></tr></table>
   </div>
 
   <div id="statusToError" class="status hidden error">
