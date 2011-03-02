@@ -84,7 +84,7 @@ OAuth authorization api.
         session.save()
 
     def _get_or_create_account(self, domain, userid, username):
-        acct_hash = hashlib.sha1("%s#%s" % (username or '', userid or '')).hexdigest()
+        acct_hash = hashlib.sha1("%s#%s" % (username.encode('utf-8') or '', userid or '')).hexdigest()
         keys = [k for k in session.get('account_keys', '').split(',') if k]
         # Find or create an account
         for k in keys:
