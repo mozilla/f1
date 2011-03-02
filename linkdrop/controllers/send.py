@@ -167,7 +167,7 @@ Site provided description of the shared item, not supported by all services.
             link_timer.track('link-shorten', short_url=shorturl)
             args['shorturl'] = shorturl
 
-        acct_hash = hashlib.sha1("%s#%s" % (username.encode('utf-8') or '', userid or '')).hexdigest()
+        acct_hash = hashlib.sha1("%s#%s" % (username.encode('utf-8') or '', userid.encode('utf-8') or '')).hexdigest()
         timer = metrics.start_timer(request, domain=domain, message_len=len(message),
                                     long_url=longurl, short_url=shorturl, acct_id=acct_hash)
         # send the item.
