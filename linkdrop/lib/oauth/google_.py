@@ -47,6 +47,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.header import Header
+from email.utils import parseaddr
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -249,7 +250,7 @@ class api():
         from_email = from_ = profile['emails'][0]['value']
         fullname = profile.get('displayName', None)
         if fullname:
-            from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), from_,)
+            from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), Header(from_, 'utf-8').encode(),)
 
         url = "https://mail.google.com/mail/b/%s/smtp/" % from_
         to_ = options.get('to', None)
@@ -259,6 +260,11 @@ class api():
                 "message": "recipient address is invalid",
                 "status": 0
             }
+        to_ = parseaddr(to_)
+        if to_[0]:
+            to_ = '"%s" <%s>' % (Header(to_[0], 'utf-8').encode(), Header(to_[1], 'utf-8').encode())
+        else:
+            to_ = Header(to_[1], 'utf-8').encode()
 
         server = SMTP(self.host, self.port)
         # in the app:main set debug = true to enable
