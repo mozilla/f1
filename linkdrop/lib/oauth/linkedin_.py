@@ -175,7 +175,7 @@ class api():
             return result, error
 
         # poco-ize the results
-        entries = result.get('values')
+        entries = result.get('values', [])
         contacts = []
         for entry in entries:
             contacts.append(extract_li_data(entry))
