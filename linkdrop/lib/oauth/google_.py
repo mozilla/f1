@@ -252,7 +252,14 @@ class api():
             from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), from_,)
 
         url = "https://mail.google.com/mail/b/%s/smtp/" % from_
-        to_ = options['to']
+        to_ = options.get('to', None)
+        if not to_ or not '@' in to_:
+            return None, {
+                "provider": self.host,
+                "message": "recipient address is invalid",
+                "status": 0
+            }
+
         server = SMTP(self.host, self.port)
         # in the app:main set debug = true to enable
         if asbool(config.get('debug', False)):
@@ -331,6 +338,18 @@ class api():
                     server.ehlo_or_helo_if_needed()
                     server.authenticate(url, self.consumer, self.oauth_token)
                     server.sendmail(from_, to_, msg.as_string())
+                except smtplib.SMTPRecipientsRefused, exc:
+                    for to_, err in exc.recipients.items():
+                        error = {"provider": self.host,
+                                 "message": err[1],
+                                 "status": err[0]
+                                }
+                        break
+                except smtplib.SMTPException, exc:
+                    error = {"provider": self.host,
+                             "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
+                             "status": exc.smtp_code
+                            }
                 except UnicodeEncodeError, exc:
                     raise
                 except ValueError, exc:
