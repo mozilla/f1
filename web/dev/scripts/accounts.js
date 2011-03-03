@@ -35,6 +35,13 @@ function (storage,   dispatch,   rdapi,   services) {
            (username && cache.username === username));
   }
 
+  function fromJson(value) {
+    if (value) {
+      value = JSON.parse(value);
+    }
+    return value;
+  }
+
   var store = storage(), impl,
     changeTypes = {
       //localStorage is the most robust, since the change in localStorage
@@ -45,15 +52,9 @@ function (storage,   dispatch,   rdapi,   services) {
         accounts: function (ok, error) {
           // accounts now simply provides existing accounts retreived during
           // the oauth dances
-          var accountCache = store.accountCache,
-              serviceCache = store.serviceCache;
+          var accountCache = fromJson(store.accountCache) || [],
+              serviceCache = fromJson(store.serviceCache);
 
-          //Set up accountCache as a real object.
-          if (accountCache) {
-            accountCache = JSON.parse(accountCache);
-          } else {
-            accountCache = [];
-          }
           if (!serviceCache) {
             // fetch now, let the response call ok
             // Set up serviceCache.  This should only ever happen
@@ -61,11 +62,8 @@ function (storage,   dispatch,   rdapi,   services) {
             impl.fetch(ok, error);
             return;
           }
-          if (serviceCache) {
-            serviceCache = JSON.parse(serviceCache);
-          } else {
-            serviceCache = [];
-          }
+
+          serviceCache = serviceCache || [];
 
           //Call ok callback with current knowledge. If there is a change in the
           //account info, then the fetch will trigger changed event later.
@@ -81,16 +79,10 @@ function (storage,   dispatch,   rdapi,   services) {
           // We write into accountCache to have account.fetch continue to work.
           // We also write into serviceCache which will be used by api calls
           // to send the auth keys
-          var accountCache = store.accountCache,
-              serviceCache = store.serviceCache,
+          var accountCache = fromJson(store.accountCache) || [],
+              serviceCache = fromJson(store.serviceCache),
               existing = false,
               profile, p, a, acct;
-
-          if (accountCache) {
-            accountCache = JSON.parse(accountCache);
-          } else {
-            accountCache = [];
-          }
 
           // move the profile into accountCache
           profile = account_data.profile;
@@ -112,7 +104,6 @@ function (storage,   dispatch,   rdapi,   services) {
           // future we will remove accountCache
           if (serviceCache) {
             existing = false;
-            serviceCache = JSON.parse(serviceCache);
             for (a = 0; a < serviceCache.length; a++) {
               if (isCacheMatch(serviceCache[a], account_data.domain,
                                account_data.userid, account_data.username)) {
@@ -160,12 +151,11 @@ function (storage,   dispatch,   rdapi,   services) {
         },
 
         remove: function (domain, userid, username) {
-          var accountCache = store.accountCache,
-              serviceCache = store.serviceCache,
+          var accountCache = fromJson(store.accountCache),
+              serviceCache = fromJson(store.serviceCache),
               i, cache, a, p, s, svc;
 
           if (serviceCache) {
-            serviceCache = JSON.parse(serviceCache);
             for (i = 0; (cache = serviceCache[i]); i++) {
               if (isCacheMatch(cache, domain, userid, username)) {
                 serviceCache.splice(i, 1);
@@ -177,7 +167,6 @@ function (storage,   dispatch,   rdapi,   services) {
 
           // eventually we will deprecate accountCache
           if (accountCache) {
-            accountCache = JSON.parse(accountCache);
             for (p = 0; p < accountCache.length; p++) {
               s = accountCache[p].accounts;
               for (a = 0; a < s.length; a++) {
@@ -196,19 +185,55 @@ function (storage,   dispatch,   rdapi,   services) {
           // remove this clearCache call when 3.6 is removed.
           svc.clearCache(store);
 
-          // Notify anything that stores data based on account triplet
-          // of the change.
-          dispatch.pub('accountRemoved-' + [domain, userid, username].join('|'));
+          // Delete auxillary data.
+          impl.clearData(domain, userid, username);
 
           impl.changed();
         },
 
+        /**
+         * Set auxillary data related to an account. Deleted when the account
+         * is deleted.
+         */
+        setData: function (domain, userid, username, name, value) {
+          var key = [domain, userid, username].join('|') + 'Data',
+              data = fromJson(store[key]) || {};
+
+          if (value === undefined || value === null) {
+            delete data[name];
+          } else {
+            data[name] = value;
+          }
+
+          store[key] = JSON.stringify(value);
+
+          return value;
+        },
+
+        /**
+         * Get auxillary data related to an account.
+         */
+        getData: function (domain, userid, username, name) {
+          var key = [domain, userid, username].join('|') + 'Data',
+              data = fromJson(store[key]) || {};
+
+          return data ? data[name] : null;
+        },
+
+        /**
+         * Clears auxillary data related to an account. Deleted when the account
+         * is deleted.
+         */
+        clearData: function (domain, userid, username) {
+          var key = [domain, userid, username].join('|') + 'Data';
+          delete store[key];
+        },
+
         getService: function (domain, userid, username) {
-          var serviceCache = store.serviceCache,
+          var serviceCache = fromJson(store.serviceCache),
               i, cache;
 
           if (serviceCache) {
-            serviceCache = JSON.parse(serviceCache);
             for (i = 0; (cache = serviceCache[i]); i++) {
               if (isCacheMatch(cache, domain, userid, username)) {
                 return cache;
@@ -321,6 +346,36 @@ function (storage,   dispatch,   rdapi,   services) {
   accounts.clear = function () {
     delete store.accountCache;
     delete store.serviceCache;
+  };
+
+  /**
+   * Sets auxillary data associated with an account.
+   * @param {string} domain
+   * @param {string} userid
+   * @param {string} username
+   */
+  accounts.setData = function (account, userid, username, name, value) {
+    return impl.setData(account, userid, username, name, value);
+  };
+
+  /**
+   * Gets auxillary data associated with an account.
+   * @param {string} domain
+   * @param {string} userid
+   * @param {string} username
+   */
+  accounts.getData = function (account, userid, username, name) {
+    return impl.getData(account, userid, username, name);
+  };
+
+  /**
+   * Sets auxillary data associated with an account.
+   * @param {string} domain
+   * @param {string} userid
+   * @param {string} username
+   */
+  accounts.clearData = function (account, userid, username) {
+    return impl.clearData(account, userid, username);
   };
 
   /**

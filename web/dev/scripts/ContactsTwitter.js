@@ -40,12 +40,12 @@ function (object,         Contacts,     $) {
         return value;
       },
 
-      findContact: function (to, contacts) {
+      findContact: function (to) {
         var match = idRegExp.exec(to),
             value = '',
             name = (match && match[1]) || '';
         if (name) {
-          contacts.some(function (contact) {
+          (this.contacts || []).some(function (contact) {
             if (contact.username === name) {
               value = contact.userid;
               return true;

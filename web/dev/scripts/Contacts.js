@@ -25,23 +25,18 @@
 /*global require: false, define: false, window: false */
 "use strict";
 
-define([ 'jquery', 'blade/object', 'blade/fn', 'dispatch', 'rdapi',
-         'storage', 'accounts'],
-function ($,        object,         fn,         dispatch,   rdapi,
-          storage,   accounts) {
+define([ 'jquery', 'blade/object', 'blade/fn', 'dispatch', 'rdapi', 'accounts'],
+function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
 
-  var store = storage(),
-      Contacts;
+  var Contacts;
 
   Contacts = object(null, null, {
     init: function (svc, svcAccount) {
       this.svc = svc;
       this.svcAccount = svcAccount;
-      this.key = [svcAccount.domain, svcAccount.userid, svcAccount.username].join('|');
-      this.timeKey = this.key + 'Time';
-      this.contactsKey = this.key + 'Contacts';
+
       this.callbacks = [];
-      this.lastUpdated = store[this.timeKey] && parseInt(store[this.timeKey], 10);
+      this.lastUpdated = this.fromStore().lastUpdated;
       // Time check is one day.
       this.timeCheck = 24 * 60 * 60 * 1000;
 
@@ -52,11 +47,6 @@ function ($,        object,         fn,         dispatch,   rdapi,
           this.fetch();
         }
       }));
-
-      // listen for account removal, and remove the account at that time.
-      this.accountRemovedSub = dispatch.sub('accountRemoved-' + this.key, fn.bind(this, function () {
-        this.clear();
-      }));
     },
 
     /**
@@ -66,27 +56,20 @@ function ($,        object,         fn,         dispatch,   rdapi,
      */
     destroy: function () {
       dispatch.unsub('optionsChanged', this.optionsChangeSub);
-      dispatch.unsub('accountRemoved-' + this.key, this.accountRemovedSub);
     },
 
     clear: function () {
-      delete store[this.timeKey];
-      delete store[this.contactsKey];
+      var acct = this.svcAccount;
+      accounts.setData(acct.domain, acct.userid, acct.username, 'contacts');
     },
 
     needFetch: function () {
       return !this.lastUpdated || (new Date()).getTime() - this.lastUpdated > this.timeCheck;
     },
 
-    /**
-     * Private function to get the contacts out of local store.
-     */
-    parse: function () {
-      var contacts = store[this.contactsKey];
-      if (contacts) {
-        contacts = JSON.parse(contacts);
-      }
-      return contacts;
+    fromStore: function () {
+      var acct = this.svcAccount;
+      return accounts.getData(acct.domain, acct.userid, acct.username, 'contacts') || {};
     },
 
     /**
@@ -96,7 +79,7 @@ function ($,        object,         fn,         dispatch,   rdapi,
      */
     notify: function (callback) {
       this.callbacks.push(callback);
-      this.contacts = this.parse();
+      this.contacts = this.fromStore().list;
 
       if (!this.contacts || this.needFetch()) {
         this.fetch();
@@ -106,8 +89,9 @@ function ($,        object,         fn,         dispatch,   rdapi,
     },
 
     fetch: function () {
-      var svcData;
-      svcData = accounts.getService(this.svcAccount.domain, this.svcAccount.userid, this.svcAccount.username);
+      var acct = this.svcAccount,
+          svcData = accounts.getService(acct.domain, acct.userid, acct.username);
+
       rdapi('contacts/' + this.svcAccount.domain, {
         type: 'POST',
         data: {
@@ -123,8 +107,12 @@ function ($,        object,         fn,         dispatch,   rdapi,
             var entries = json.result.entry;
 
             this.contacts = this.getFormattedContacts(entries);
-            store[this.contactsKey] = JSON.stringify(this.contacts);
-            store[this.timeKey] = this.lastUpdated = (new Date()).getTime();
+            this.lastUpdated = (new Date()).getTime();
+
+            accounts.setData(acct.domain, acct.userid, acct.username, 'contacts', {
+              lastUpdated: this.lastUpdated,
+              list: this.contacts
+            });
 
             this.notifyCallbacks();
           }
@@ -138,10 +126,10 @@ function ($,        object,         fn,         dispatch,   rdapi,
       }));
     },
 
-    findContact: function (to, contacts) {
+    findContact: function (to) {
       var contactId;
 
-      contacts.some(function (contact) {
+      (this.contacts || []).some(function (contact) {
         if (contact.displayName === to) {
           contactId = contact.email || contact.userid || contact.username;
           return true;
@@ -182,15 +170,14 @@ function ($,        object,         fn,         dispatch,   rdapi,
      * @returns {String} a comma-separated list of ID-based contacts.
      */
     convert: function (toText) {
-      var contacts = this.svc.getContacts(store),
-          newrecip = [],
+      var newrecip = [],
           result = '',
           recip;
 
-      if (contacts) {
+      if (this.contacts) {
         recip = toText.split(',');
         recip.forEach(fn.bind(this, function (to) {
-          var contactId = this.findContact(to.trim(), contacts);
+          var contactId = this.findContact(to.trim());
           if (contactId) {
             newrecip.push(contactId);
           }

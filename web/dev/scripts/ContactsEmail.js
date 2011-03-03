@@ -43,7 +43,7 @@ function (object,         Contacts,     $) {
         return value;
       },
 
-      findContact: function (to, contacts) {
+      findContact: function (to) {
         return to;
       },
 
