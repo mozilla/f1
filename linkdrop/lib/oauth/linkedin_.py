@@ -9,7 +9,7 @@ from rfc822 import AddressList
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
-from linkdrop.lib.oauth.base import OAuth1, get_oauth_config
+from linkdrop.lib.oauth.base import OAuth1, get_oauth_config, OAuthKeysException
 
 from linkdrop.lib.base import render
 from linkdrop.lib.helpers import safeHTML, literal
@@ -73,7 +73,11 @@ class api():
     def __init__(self, account):
         self.config = get_oauth_config(domain)
         self.account = account
-        self.oauth_token = oauth.Token(key=account.get('oauth_token'), secret=account.get('oauth_token_secret'))
+        try:
+            self.oauth_token = oauth.Token(key=account.get('oauth_token'), secret=account.get('oauth_token_secret'))
+        except ValueError, e:
+            # missing oauth tokens, raise our own exception
+            raise OAuthKeysException(str(e))
         self.consumer_key = self.config.get('consumer_key')
         self.consumer_secret = self.config.get('consumer_secret')
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)

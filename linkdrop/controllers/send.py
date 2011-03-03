@@ -42,6 +42,7 @@ from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 from linkdrop.lib.shortener import shorten_link
+from linkdrop.lib.oauth.base import OAuthKeysException
 
 log = logging.getLogger(__name__)
 
@@ -151,6 +152,7 @@ Site provided description of the shared item, not supported by all services.
                     acct = a
                     break
         if not acct:
+            metrics.track(request, 'send-noaccount', domain=domain)
             error = {'provider': domain,
                      'message': "not logged in or no user account for that domain",
                      'status': 401
@@ -173,15 +175,17 @@ Site provided description of the shared item, not supported by all services.
         # send the item.
         try:
             result, error = provider.api(acct).sendmessage(message, args)
-        except ValueError, e:
+        except OAuthKeysException, e:
             # XXX - I doubt we really want a full exception logged here?
-            log.exception('error providing item to %s: %s', domain, e)
+            #log.exception('error providing item to %s: %s', domain, e)
             # XXX we need to handle this better, but if for some reason the
             # oauth values are bad we will get a ValueError raised
             error = {'provider': domain,
                      'message': "not logged in or no user account for that domain",
                      'status': 401
             }
+            
+            metrics.track(request, 'send-oauth-keys-missing', domain=domain)
             timer.track('send-error', error=error)
             return {'result': result, 'error': error}
 

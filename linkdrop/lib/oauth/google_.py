@@ -59,7 +59,7 @@ from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
 from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attributes, attributes
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
-from linkdrop.lib.oauth.base import get_oauth_config
+from linkdrop.lib.oauth.base import get_oauth_config, OAuthKeysException
 
 GOOGLE_OAUTH = 'https://www.google.com/accounts/OAuthGetAccessToken'
 
@@ -238,7 +238,11 @@ class api():
         self.port = 587
         self.config = get_oauth_config(domain)
         self.account = account
-        self.oauth_token = oauth.Token(key=str(account.get('oauth_token')), secret=str(account.get('oauth_token_secret')))
+        try:
+            self.oauth_token = oauth.Token(key=str(account.get('oauth_token')), secret=str(account.get('oauth_token_secret')))
+        except ValueError, e:
+            # missing oauth tokens, raise our own exception
+            raise OAuthKeysException(str(e))
         self.consumer_key = str(self.config.get('consumer_key'))
         self.consumer_secret = str(self.config.get('consumer_secret'))
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
