@@ -37,7 +37,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
   isGreaterThan073 = dotCompare(store.extensionVersion, "0.7.4") > -1,
   options = url.queryToObject(location.href.split('#')[1] || '') || {},
-  showNew = options.show === 'new';
+  showNew = options.show === 'new',
+  contactsServices = {};
 
   jig.addFn({
     domainType: function (account) {
@@ -77,6 +78,16 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         var html = '';
 
         json.forEach(function (item) {
+          // create a contact service for each account, to allow for clearing
+          // on deletion.
+          var svcAccount = item.accounts[0],
+              key = [svcAccount.domain, svcAccount.userid, svcAccount.username].join('|'),
+              svc = services.domains[svcAccount.domain],
+              contactsServiceName = svc.overlays && svc.overlays.Contacts || 'Contacts';
+
+          require([contactsServiceName], function (ContactsService) {
+            contactsServices[key] = new ContactsService(svc, svcAccount);
+          });
           html += jig('#accountTemplate', item);
         });
 
@@ -275,22 +286,25 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           }
         });
       })
-      .delegate('.refresh', 'click', function (evt) {
-        // clear all service caches
-        for (var s in services.domains) {
-          services.domains[s].clearCache(store);
-        }
-        accounts.changed();
-      })
       //Hook up remove buttons to remove an account
       .delegate('.remove', 'click', function (evt) {
         var buttonNode = evt.target,
             domain = buttonNode.getAttribute('data-domain'),
             userName = buttonNode.getAttribute('data-username'),
-            userId = buttonNode.getAttribute('data-userid');
+            userId = buttonNode.getAttribute('data-userid'),
+            contactKey = [domain, userId, userName].join('|'),
+            prop;
         try {
           accounts.remove(domain, userId, userName);
         } catch (e) {
+          // remove all contacts info.
+          for (prop in contactsServices) {
+            if (contactsServices.hasOwnProperty(prop)) {
+              contactsServices[prop].destroy();
+            }
+          }
+          contactsServices = {};
+
           // clear out account storage
           accounts.clear();
         }

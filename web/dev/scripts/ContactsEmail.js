@@ -25,14 +25,14 @@
 /*global define: false */
 "use strict";
 
-define([ 'blade/object', 'AutoComplete', 'jquery'],
-function (object,         AutoComplete,     $) {
+define([ 'blade/object', 'Contacts', 'jquery'],
+function (object,         Contacts,     $) {
 
   /**
    * Overrides the formatting of contacts and converting
    * one of those formatted contacts into a user ID.
    */
-  return object(AutoComplete, null, function (parent) {
+  return object(Contacts, null, function (parent) {
     return {
       formatContact: function (contact) {
         var value = contact.displayName;
@@ -45,6 +45,24 @@ function (object,         AutoComplete,     $) {
 
       findContact: function (to, contacts) {
         return to;
+      },
+
+      getFormattedContacts: function (entries) {
+        var data = [];
+        entries.forEach(function (entry) {
+          if (entry.emails && entry.emails.length) {
+            entry.emails.forEach(function (email) {
+              var displayName = entry.displayName ? entry.displayName : email.value;
+              data.push({
+                displayName: displayName,
+                email: email.value,
+                userid: null,
+                username: null
+              });
+            });
+          }
+        });
+        return data;
       }
     };
   });

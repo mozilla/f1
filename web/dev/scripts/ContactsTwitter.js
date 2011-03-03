@@ -25,15 +25,15 @@
 /*global define: false */
 "use strict";
 
-define([ 'blade/object', 'AutoComplete', 'jquery'],
-function (object,         AutoComplete,     $) {
+define([ 'blade/object', 'Contacts', 'jquery'],
+function (object,         Contacts,     $) {
   var idRegExp = /\@(\S+)/;
 
   /**
    * Overrides the formatting of contacts and converting
    * one of those formatted contacts into a user ID.
    */
-  return object(AutoComplete, null, function (parent) {
+  return object(Contacts, null, function (parent) {
     return {
       formatContact: function (contact) {
         var value = '@' + contact.username;
@@ -51,7 +51,7 @@ function (object,         AutoComplete,     $) {
               return true;
             }
             return false;
-          })
+          });
         }
 
         return value;

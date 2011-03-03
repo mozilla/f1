@@ -27,11 +27,11 @@
 
 define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./AccountPanel.html',
          'TextCounter', 'storage', 'module', 'placeholder', 'dispatch', 'accounts',
-         'require', 'rdapi', 'blade/fn', './jigFuncs', 'Select',
+         'require', 'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs', 'Select',
          'jquery.textOverflow'],
 function (object,         Widget,         $,        template,
           TextCounter,   storage,   module,   placeholder,   dispatch,   accounts,
-          require,   rdapi,   fn,         jigFuncs,     Select) {
+          require,   AutoComplete,   rdapi,   fn,         jigFuncs,     Select) {
 
   var store = storage(),
       className = module.id.replace(/\//g, '-');
@@ -67,8 +67,8 @@ function (object,         Widget,         $,        template,
 
       template: template,
 
-      // The module name for the AutoComplete module
-      autoCompleteName: 'AutoComplete',
+      // The module name for the Contacts module
+      contactsName: 'Contacts',
 
       strings: {
         shareTypeLabel: 'send to'
@@ -116,10 +116,10 @@ function (object,         Widget,         $,        template,
 
         this.displayName = name;
 
-        // Figure out what module will handle autocomplete.
-        this.autoCompleteName = (this.svc.overlays &&
-                                this.svc.overlays[this.autoCompleteName]) ||
-                                this.autoCompleteName;
+        // Figure out what module will handle contacts.
+        this.contactsName = (this.svc.overlays &&
+                                this.svc.overlays[this.contactsName]) ||
+                                this.contactsName;
 
         //Listen for options changes and update the account.
         this.optionsChangedSub = dispatch.sub('optionsChanged', fn.bind(this, function (options) {
@@ -185,12 +185,14 @@ function (object,         Widget,         $,        template,
         }
         placeholder(this.bodyNode);
 
-        // Set up autocomplete. Since autocomplete can have a different
-        // format/display per service account, allow for service overrides.
+        // Set up autocomplete and contacts used for autocomplete.
+        // Since contacts can have a different
+        // format/display per service, allow for service overrides.
         acNode = $('[name="to"]', this.bodyNode)[0];
         if (acNode) {
-          require([this.autoCompleteName], fn.bind(this, function (AutoComplete) {
-            this.autoComplete = new AutoComplete(acNode, this.svc, this.svcAccount);
+          require([this.contactsName], fn.bind(this, function (Contacts) {
+            this.contacts = new Contacts(this.svc, this.svcAccount);
+            this.autoComplete = new AutoComplete(acNode, this.contacts);
           }));
         }
 
@@ -400,7 +402,7 @@ function (object,         Widget,         $,        template,
 
         // fixup to addressing if necessary
         if (sendData.to) {
-          sendData.to = this.autoComplete.convert(sendData.to);
+          sendData.to = this.contacts.convert(sendData.to);
         }
 
         //Notify the page of a send.

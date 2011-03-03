@@ -30,9 +30,7 @@
 define([ 'blade/object', 'storage'],
 function (object,         storage) {
 
-  var contactsModelVersion = '2',
-      // See TODO at end of page, remove this once 3.6 UI is no longer supported.
-      newHotness = parseFloat(navigator.userAgent.split('Firefox/')[1]) >= 4,
+  var newHotness = parseFloat(navigator.userAgent.split('Firefox/')[1]) >= 4,
       store = storage(),
       svcs, prop;
 
@@ -57,8 +55,11 @@ function (object,         storage) {
   SvcBase.constructor = SvcBase;
   SvcBase.prototype = {
     clearCache: function (store) {
+      //This first delete is only needed for 3.6 support.
+      //Remove the call in accounts.js when it is removed.
       delete store[this.type + 'Contacts'];
     },
+    //This method can be removed once 3.6 support is dropped.
     getContacts: function (store) {
       if (store[this.type + 'Contacts']) {
         var contacts = JSON.parse(store[this.type + 'Contacts']);
@@ -66,24 +67,9 @@ function (object,         storage) {
       }
       return null;
     },
+    //This method can be removed once 3.6 support is dropped.
     setContacts: function (store, contacts) {
       store[this.type + 'Contacts'] = JSON.stringify(contacts);
-    },
-    getFormattedContacts: function (entries) {
-      var data = [];
-      entries.forEach(function (entry) {
-        if (entry.accounts && entry.accounts.length) {
-          entry.accounts.forEach(function (account) {
-            data.push({
-              displayName: entry.displayName,
-              email: '',
-              userid: account.userid,
-              username: account.username
-            });
-          });
-        }
-      });
-      return data;
     },
 
     // stub function that should not return data for non-mail services
@@ -109,24 +95,6 @@ function (object,         storage) {
     return true;
   };
 
-  EmailSvcBase.prototype.getFormattedContacts = function (entries) {
-    var data = [];
-    entries.forEach(function (entry) {
-      if (entry.emails && entry.emails.length) {
-        entry.emails.forEach(function (email) {
-          var displayName = entry.displayName ? entry.displayName : email.value;
-          data.push({
-            displayName: displayName,
-            email: email.value,
-            userid: null,
-            username: null
-          });
-        });
-      }
-    });
-    return data;
-  };
-
   // The old top browser UI in the 3.6 extension expects the contacts data
   // as an array.
   // TODO: remove when Firefox 3.6 is no longer supported.
@@ -147,7 +115,7 @@ function (object,         storage) {
   };
 
   EmailSvcBase.prototype.overlays = {
-    'AutoComplete': 'AutoCompleteEmail'
+    'Contacts': 'ContactsEmail'
   };
 
   svcs = {
@@ -178,7 +146,7 @@ function (object,         storage) {
           return 'http://twitter.com/' + account.username;
         },
         overlays: {
-          'AutoComplete': 'AutoCompleteTwitter'
+          'Contacts': 'ContactsTwitter'
         }
       }),
       'facebook.com': new SvcBase('Facebook', {
@@ -292,19 +260,14 @@ function (object,         storage) {
     if (svcs.domains.hasOwnProperty(prop)) {
       svcs.domainList.push(prop);
 
-      // Make sure the contacts model is on the right version. If not,
-      // clear it and refetch.
-      // TODO: remove newHotness check once the 3.6 add-on/UI is finally
+      // Clear out the old contacts model.
+      // TODO: Remove this once the 3.6 add-on/UI is finally
       // shut off.
-      if (newHotness && store.contactsModelVersion !== contactsModelVersion) {
+      if (newHotness) {
         delete store[svcs.domains[prop].type + 'Contacts'];
+        delete store.contactsModelVersion;
       }
     }
-  }
-
-  if (newHotness) {
-    // Set the contacts model to the right version.
-    store.contactsModelVersion = contactsModelVersion;
   }
 
   return svcs;

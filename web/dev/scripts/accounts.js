@@ -84,7 +84,7 @@ function (storage,   dispatch,   rdapi,   services) {
           var accountCache = store.accountCache,
               serviceCache = store.serviceCache,
               existing = false,
-              profile, p, a;
+              profile, p, a, acct;
 
           if (accountCache) {
             accountCache = JSON.parse(accountCache);
@@ -94,11 +94,10 @@ function (storage,   dispatch,   rdapi,   services) {
 
           // move the profile into accountCache
           profile = account_data.profile;
-          for (p=0; p < accountCache.length; p++) {
-              var acct = accountCache[p].accounts[0];
-              if (acct.domain === account_data.domain &&
-                  (acct.userid === account_data.userid) ||
-                  (acct.username === account_data.username)) {
+          for (p = 0; p < accountCache.length; p++) {
+            acct = accountCache[p].accounts[0];
+            if (isCacheMatch(acct, account_data.domain, account_data.userid,
+                             account_data.username)) {
               accountCache[p] = profile;
               existing = true;
               break;
@@ -132,6 +131,8 @@ function (storage,   dispatch,   rdapi,   services) {
           impl.changed();
         },
 
+        // remove this once there is time enough for all users
+        // to have been migrated over to the new cache.
         fetch: function (ok, error) {
           rdapi('account/get/full', {
             success: function (json) {
@@ -145,6 +146,7 @@ function (storage,   dispatch,   rdapi,   services) {
                 accountCache.push(json[p].profile);
 
                 // clear the contacts cache
+                // remove this clearCache call when 3.6 is removed.
                 svc = services.domains[json[p].domain];
                 svc.clearCache(store);
               }
@@ -190,7 +192,13 @@ function (storage,   dispatch,   rdapi,   services) {
 
           // clear the contacts cache
           svc = services.domains[domain];
+
+          // remove this clearCache call when 3.6 is removed.
           svc.clearCache(store);
+
+          // Notify anything that stores data based on account triplet
+          // of the change.
+          dispatch.pub('accountRemoved-' + [domain, userid, username].join('|'));
 
           impl.changed();
         },
