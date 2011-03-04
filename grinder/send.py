@@ -122,6 +122,8 @@ def send(userid, csrf, domain=linkdrop_service, message="take that!"):
       ( NVPair('domain', domain),
         NVPair('userid', userid),
         NVPair('csrftoken', csrf),
+        NVPair('shorten', 'true'),
+        NVPair('link', "http://www.google.com/%s" % grinder.getRunNumber() ),        
         NVPair('message', message), ),
       ( NVPair('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8'), ))
     assert result.getStatusCode()==200, result
