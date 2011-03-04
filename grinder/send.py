@@ -145,6 +145,7 @@ class TestRunner:
     def __init__(self):
         self.csrf = None
         self.linkdrop_cookie = None
+        self.userid = None
 
     def doit(self):
 	if linkdrop_static_per_send:
