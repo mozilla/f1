@@ -31,6 +31,10 @@ from HTTPClient import NVPair
 from HTTPClient import Cookie, CookieModule, CookiePolicyHandler
 
 connectionDefaults = HTTPPluginControl.getConnectionDefaults()
+
+# Decode gzipped responses
+connectionDefaults.useContentEncoding = 1
+
 httpUtilities = HTTPPluginControl.getHTTPUtilities()
 
 log = grinder.logger.output
