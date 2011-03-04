@@ -97,6 +97,41 @@
   outline: none;
 }
 
+.AutoCompleteRefresh {
+  position: absolute;
+  right: 0;
+  display: none;
+  border-color: #A6AFB6;
+  border-style: solid;
+  border-width: 0 1px 1px 1px;
+  margin: 0;
+  padding: 2px;
+  background: white;
+  line-height: 24px;
+  z-index: 100;
+}
+
+.addressing .AutoCompleteRefresh {
+  top: 26px;
+}
+
+.addressing .toSection .AutoCompleteRefresh {
+  top: 45px;
+}
+
+.AutoCompleteRefresh button {
+  float: right;
+}
+
+.AutoCompleteSpinner {
+  position: absolute;
+  top: 23px;
+  right: 3px;
+  width: 16px;
+  height: 16px;
+  background-image: url('/share/i/loader.gif');
+  z-index: 200;
+}
 
 * {
   padding: 0;
@@ -366,8 +401,12 @@ img.avatar {
 }
 
 .shareTypeSection {
-    padding: 2px 0 5px;
-    height: 52px;
+  padding: 2px 0 5px;
+  height: 52px;
+}
+
+.widgets-AccountPanel .addressing {
+  position: relative;
 }
 
 .hidden {
@@ -564,7 +603,7 @@ body .toSection input[type="text"] {
     border-top: 1px solid #CCCCCC;
 }
 
-.widgets-AccountPanel button.share:focus {
+.widgets-AccountPanel button:focus {
   box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
 }
 
