@@ -205,7 +205,7 @@ function (storage,   dispatch,   rdapi,   services) {
             data[name] = value;
           }
 
-          store[key] = JSON.stringify(value);
+          store[key] = JSON.stringify(data);
 
           return value;
         },
