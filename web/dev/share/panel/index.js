@@ -484,8 +484,12 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         options = shareOptions();
 
         //Be sure to clear any status messages
-        if (options.status) {
-          showStatus.apply(null, options.status);
+        if (typeof(options.status) !== 'undefined' && options.status) {
+          // do part of what showStatus would do
+          $('div.status').addClass('hidden');
+          $('#clickBlock').removeClass('hidden');
+          $('#' + options.status[0]).removeClass('hidden');
+          $('#' + options.status[0] + 'Message').text(options.status[1]);
         } else {
           cancelStatus();
         }

@@ -690,15 +690,18 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : 0;
       if (gBrowser.selectedTab.shareState)
         gBrowser.selectedTab.shareState.status = status;
-      if (status == 2) {
+
+      let nBox = gBrowser.getNotificationBox();
+      var current = nBox.getNotificationWithValue("F1 Share Failure");
+      if (status == 2 && !current) {
         // use the notification bar if the button is not in the urlbar
-        let nBox = gBrowser.getNotificationBox();
         let buttons = [
             {
             label: "try again",
             accessKey: null,
             callback: function() {
                 gBrowser.getNotificationBox().removeCurrentNotification();
+                gBrowser.selectedTab.shareState.status = 0;
                 window.setTimeout(function() {
                   ffshare.togglePanel();
                 }, 0);
@@ -708,7 +711,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                        "There was a problem sharing this page.", "F1 Share Failure",
                        null,
                        nBox.PRIORITY_WARNING_MEDIUM, buttons);
+      } else
+      if (status != 2 && current) {
+        gBrowser.getNotificationBox().removeCurrentNotification();
       }
+
       var button = getButton();
       if (button) {
         if (status == 2)
