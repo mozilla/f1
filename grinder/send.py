@@ -133,7 +133,7 @@ def send(userid, csrf, domain=linkdrop_service, message="take that!"):
 send = Test(4, "Send message").wrap(send)
 
 def getStatic(url="/share/"):
-	result = request1.POST(linkdrop_host + url)
+	result = request1.GET(linkdrop_host + url)
 	assert result.getStatusCode()==200, result
 	return result
 
