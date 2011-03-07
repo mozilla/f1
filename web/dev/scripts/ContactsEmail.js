@@ -21,12 +21,14 @@
  * Contributor(s):
  * */
 
-/*jslint indent: 2 */
+/*jslint indent: 2, regexp: false */
 /*global define: false */
 "use strict";
 
-define([ 'blade/object', 'Contacts', 'jquery'],
-function (object,         Contacts,     $) {
+define([ 'blade/object', 'Contacts', 'jquery', 'accounts', 'blade/fn'],
+function (object,         Contacts,     $,      accounts,   fn) {
+
+  var bracketRegExp = /<([^>])+>/;
 
   /**
    * Overrides the formatting of contacts and converting
@@ -47,21 +49,83 @@ function (object,         Contacts,     $) {
         return to;
       },
 
+      /**
+       * Determines if a to string is already in the contacts array.
+       * @param {String} to a plain email address (no name).
+       * @returns {Boolean}
+       */
+      contains: function (to) {
+        return this.contacts.some(function (contact) {
+          return contact.email === to;
+        });
+      },
+
+      incorporate: function (contactsText) {
+        var acct = this.svcAccount,
+              newContacts = [],
+              storedContacts,
+              contacts = contactsText.split(',');
+
+        contacts.forEach(fn.bind(this, function (contact) {
+          contact = contact.trim();
+
+          var match = bracketRegExp.exec(contact);
+
+          contact = (match && match[1]) || contact;
+
+          if (!this.contains(contact)) {
+            newContacts.push({
+              displayName: contact,
+              email: contact
+            });
+          }
+        }));
+
+        if (newContacts.length) {
+          // update storage of manually entered contacts.
+          storedContacts = accounts.getData(acct.domain,
+                                            acct.userid,
+                                            acct.username,
+                                            'enteredContacts') || [];
+
+          storedContacts = storedContacts.concat(newContacts);
+          accounts.setData(acct.domain, acct.userid, acct.username,
+                           'enteredContacts', storedContacts);
+
+          // update the master merged list of contacts.
+          this.contacts = this.contacts.concat(newContacts);
+          this.toStore({
+            list: this.contacts
+          });
+        }
+      },
+
       getFormattedContacts: function (entries) {
-        var data = [];
+        var data = [],
+            acct = this.svcAccount,
+            storedContacts = accounts.getData(acct.domain,
+                                              acct.userid,
+                                              acct.username,
+                                              'enteredContacts');
+
+        // convert server data to the right format.
         entries.forEach(function (entry) {
           if (entry.emails && entry.emails.length) {
             entry.emails.forEach(function (email) {
               var displayName = entry.displayName ? entry.displayName : email.value;
               data.push({
                 displayName: displayName,
-                email: email.value,
-                userid: null,
-                username: null
+                email: email.value
               });
             });
           }
         });
+
+        // add in any manually saved email addresses.
+        if (storedContacts) {
+          data = data.concat(storedContacts);
+        }
+
         return data;
       }
     };

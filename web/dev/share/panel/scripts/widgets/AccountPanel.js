@@ -127,15 +127,27 @@ function (object,         Widget,         $,        template,
           this.optionsChanged();
         }));
 
-        //Listen for updates to base63Preview
-        this.base64PreviewSub = dispatch.sub('base64Preview', function (dataUrl) {
+        //Listen for updates to base64Preview
+        this.base64PreviewSub = dispatch.sub('base64Preview', fn.bind(this, function (dataUrl) {
           $('[name="picture_base64"]', this.bodyNode).val(jigFuncs.rawBase64(dataUrl));
-        });
+        }));
+
+        // listen for successful send, and if so, update contacts list, if
+        // the send matches this account.
+        this.sendCompleteSub = dispatch.sub('sendComplete', fn.bind(this, function (data) {
+          var acct = this.svcAccount;
+          if (data.to && acct.domain === data.domain &&
+              acct.userid === data.userid &&
+              acct.username === data.username) {
+            this.contacts.incorporate(data.to);
+          }
+        }));
       },
 
       destroy: function () {
         dispatch.unsub(this.optionsChangedSub);
         dispatch.unsub(this.base64PreviewSub);
+        dispatch.unsub(this.sendCompleteSub);
         this.select.dom.unbind('change', this.selectChangeFunc);
         delete this.selectChangeFunc;
         this.select.destroy();
@@ -406,7 +418,7 @@ function (object,         Widget,         $,        template,
         }
 
         //Notify the page of a send.
-        $(document).trigger('sendMessage', [sendData]);
+        dispatch.pub('sendMessage', sendData);
       }
     };
   });

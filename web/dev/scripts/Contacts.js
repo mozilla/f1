@@ -67,9 +67,42 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
       return !this.lastUpdated || (new Date()).getTime() - this.lastUpdated > this.timeCheck;
     },
 
+    /**
+     * Retrieves stored contacts. Should only be used internally or by subclasses.
+     */
     fromStore: function () {
       var acct = this.svcAccount;
       return accounts.getData(acct.domain, acct.userid, acct.username, 'contacts') || {};
+    },
+
+    /**
+     * Saves contacts to storage. Should only be used internally or by
+     * subclasses.
+     *
+     * @param {Object} data an object with a "list" property which is this
+     * list of contacts to store.
+     */
+    toStore: function (data) {
+      var acct = this.svcAccount;
+
+      if (!data.lastUpdated) {
+        data.lastUpdated = this.lastUpdated;
+      }
+
+      accounts.setData(acct.domain, acct.userid, acct.username, 'contacts', data);
+
+      this.notifyCallbacks();
+
+      return data;
+    },
+
+    /**
+     * Includes any new names from a successful share into the autocomplete.
+     * By default, it does nothing, but subclasses may do something with it.
+     * @param {String} contactsText a comma-separated string of contacts that
+     * follow the format returned from findContact().
+     */
+    incorporate: function (contactsText) {
     },
 
     /**
@@ -92,11 +125,11 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
       var acct = this.svcAccount,
           svcData = accounts.getService(acct.domain, acct.userid, acct.username);
 
-      rdapi('contacts/' + this.svcAccount.domain, {
+      rdapi('contacts/' + acct.domain, {
         type: 'POST',
         data: {
-          username: this.svcAccount.username,
-          userid: this.svcAccount.userid,
+          username: acct.username,
+          userid: acct.userid,
           startindex: 0,
           maxresults: 500,
           account: JSON.stringify(svcData)
@@ -109,12 +142,9 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
             this.contacts = this.getFormattedContacts(entries);
             this.lastUpdated = (new Date()).getTime();
 
-            accounts.setData(acct.domain, acct.userid, acct.username, 'contacts', {
-              lastUpdated: this.lastUpdated,
+            this.toStore({
               list: this.contacts
             });
-
-            this.notifyCallbacks();
           }
         })
       });
