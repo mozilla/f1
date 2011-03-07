@@ -37,7 +37,7 @@ function (accounts) {
     var data, status;
     try {
       data = JSON.parse(evt.data);
-    } catch(e) {
+    } catch (e) {
       return;
     }
     if (data.target) {
@@ -58,12 +58,13 @@ function (accounts) {
     }
   }, false);
 
-  return function oauth(domain, callback) {
+  return function oauth(domain, forceLogin, callback) {
     if (callback) {
       authDone = callback;
     }
     var url = location.protocol + "//" + location.host + "/dev/auth.html",
-        currentTime = (new Date()).getTime();
+        currentTime = (new Date()).getTime(),
+        newLocation;
 
     //Could have a window handle, but could be closed, so account for it.
     if (win && win.closed) {
@@ -76,15 +77,15 @@ function (accounts) {
     //but just trying to reduce the edge cases of seeing multiple windows.
     if ((currentTime > lastTime + 4000)) {
       lastTime = currentTime;
-      var newlocation = url + "?domain=" + domain;
+      newLocation = url + "?domain=" + domain + (forceLogin ? '&forceLogin=1' : '');
       try {
-        win = window.open(newlocation,
+        win = window.open(newLocation,
           "ffshareOAuth",
           "dialog=yes, modal=yes, width=900, height=500, scrollbars=yes");
         win.focus();
-      } catch(e) {
+      } catch (e) {
         // XXX dialog=yes fails on fennec, lets just do window.location
-        window.location = newlocation+"&end_point_success="+encodeURI(window.location);
+        window.location = newLocation + "&end_point_success=" + encodeURI(window.location);
       }
     } else if (win) {
       win.focus();

@@ -25,26 +25,36 @@
 /*global define: false */
 "use strict";
 
-define([ 'blade/object', 'AutoComplete', 'jquery'],
-function (object,         AutoComplete,     $) {
+define([ 'blade/object', 'Contacts', 'jquery'],
+function (object,         Contacts,     $) {
+  var idRegExp = /\@(\S+)/;
 
   /**
    * Overrides the formatting of contacts and converting
    * one of those formatted contacts into a user ID.
    */
-  return object(AutoComplete, null, function (parent) {
+  return object(Contacts, null, function (parent) {
     return {
       formatContact: function (contact) {
-        var value = contact.displayName;
-        if (contact.email !== value) {
-          value += ' <' + contact.email + '>';
-        }
-
+        var value = '@' + contact.username;
         return value;
       },
 
-      findContact: function (to, contacts) {
-        return to;
+      findContact: function (to) {
+        var match = idRegExp.exec(to),
+            value = '',
+            name = (match && match[1]) || '';
+        if (name) {
+          (this.contacts || []).some(function (contact) {
+            if (contact.username === name) {
+              value = contact.userid;
+              return true;
+            }
+            return false;
+          });
+        }
+
+        return value;
       }
     };
   });

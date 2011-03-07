@@ -37,6 +37,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
   isGreaterThan073 = dotCompare(store.extensionVersion, "0.7.4") > -1,
   options = url.queryToObject(location.href.split('#')[1] || '') || {},
+  existingAccounts = {},
   showNew = options.show === 'new';
 
   jig.addFn({
@@ -76,14 +77,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       $(function () {
         var html = '';
 
-        //Weed out existing accounts for domains from available domainList,
-        //and generate account UI
         json.forEach(function (item) {
-          var index = services.domainList.indexOf(item.accounts[0].domain);
-          if (index !== -1) {
-            services.domainList.splice(index, 1);
-          }
           html += jig('#accountTemplate', item);
+
+          // remember which accounts already have an entry
+          existingAccounts[item.accounts[0].domain] = true;
         });
 
         //Generate UI for each list.
@@ -98,8 +96,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         services.domainList.forEach(function (domain) {
           var data = services.domains[domain];
           data.domain = domain;
+          data.enableSignOut = !data.forceLogin && existingAccounts[domain];
           html += jig('#addTemplate', services.domains[domain]);
         });
+
         if (html) {
           $('#availableHeader').removeClass('hidden');
           $('#available')
@@ -271,7 +271,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           domain = node.getAttribute('data-domain'),
           selectionName = services.domains[domain].type;
 
-        oauth(domain, function (success) {
+        oauth(domain, existingAccounts[domain], function (success) {
           if (success) {
             //Make sure to bring the user back to this service if
             //the auth is successful.
@@ -280,13 +280,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             showStatus('statusOAuthFailed');
           }
         });
-      })
-      .delegate('.refresh', 'click', function (evt) {
-        // clear all service caches
-        for (var s in services.domains) {
-          services.domains[s].clearCache(store);
-        }
-        accounts.changed();
       })
       //Hook up remove buttons to remove an account
       .delegate('.remove', 'click', function (evt) {
@@ -301,8 +294,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           accounts.clear();
         }
         evt.preventDefault();
-      }).
-      delegate('#settings [type="checkbox"]', 'click', function (evt) {
+      })
+      .delegate('#settings [type="checkbox"]', 'click', function (evt) {
         //Listen for changes in prefs and update localStorage, inform opener
         //of changes.
         var node = evt.target,

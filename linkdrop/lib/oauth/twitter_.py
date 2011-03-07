@@ -187,7 +187,7 @@ class api():
 
             direct = options.get('to', None)
             if direct:
-                result = self.api().direct_messages.new(text=message, user_id=direct)
+                result = self.api().direct_messages.new(text=message, user=direct)
             else:
                 result = self.api().statuses.update(status=message)
             result[domain] = result['id']
