@@ -396,8 +396,17 @@ class api():
         profile = self.account.get('profile', {})
         accounts = profile.get('accounts', [{}])
         userdomain = 'default'
-        if accounts[0].get('domain') == 'googleapps.com':
-            userdomain = accounts[0].get('userid').split('@')[-1]
+
+        # google domains can have two contacts lists, the users and the domains
+        # shared contacts.
+        # shared contacts are only available in paid-for google domain accounts
+        # and do not show the users full contacts list.  I also did not find
+        # docs on how to detect whether shared contacts is available or not,
+        # so we will bypass this and simply use the users contacts list.
+        #if accounts[0].get('domain') == 'googleapps.com':
+        #    # set the domain so we get the shared contacts
+        #    userdomain = accounts[0].get('userid').split('@')[-1]
+
         url = 'http://www.google.com/m8/feeds/contacts/%s/full?v=1&max-results=%d' % (userdomain, page,)
 
         method = 'GET'
