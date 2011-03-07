@@ -6,7 +6,7 @@
         "widgets": "../share/panel/scripts/widgets"
     },
     name: "index",
-    include: ['widgets/AccountPanelLinkedIn', 'AutoCompleteEmail', 'AutoCompleteTwitter'],
+    include: ['widgets/AccountPanelLinkedIn', 'ContactsEmail', 'ContactsTwitter'],
     exclude: ['jquery', 'require/text'],
     out: './index.js'
 })

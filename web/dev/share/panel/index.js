@@ -42,16 +42,15 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           storage,   services,   shareOptions,   PageInfo,           rssFeed,
           DebugPanel,           AccountPanel) {
 
-  const SHARE_DONE=0;
-  const SHARE_START=1;
-  const SHARE_ERROR=2;
   var showStatus,
     actions = services.domains,
     options = shareOptions(),
     bodyDom, timer, pageInfo, sendData, showNew,
     accountPanels = [],
-    hashReload = false,
-    store = storage();
+    store = storage(),
+    SHARE_DONE = 0,
+    SHARE_START = 1,
+    SHARE_ERROR = 2;
 
   function hide() {
     dispatch.pub('hide');
@@ -77,7 +76,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     if (statusId !== 'statusSharing' &&
         statusId !== 'statusShared') {
       updateChromeStatus(SHARE_ERROR);
-      options.status = [statusId, shouldCloseOrMessage]
+      options.status = [statusId, shouldCloseOrMessage];
     } else {
       options.status = null;
     }
@@ -92,7 +91,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       }, 2000);
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
-      //hashReload = true;
     }
 
     //Tell the extension that the size of the content may have changed.
@@ -115,7 +113,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     updateChromeStatus(SHARE_DONE);
     resetStatusDisplay();
   }
-  
+
   function showStatusShared() {
     // if no sendData, we're in debug mode, default to twitter to show the
     // panel for debugging
@@ -191,6 +189,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           accountPanels.forEach(function (panel) {
             panel.clearSavedData();
           });
+
+          // notify on successful send for components that want to do
+          // work, like save any new contacts.
+          dispatch.pub('sendComplete', sendData);
         }
       },
       error: function (xhr, textStatus, err) {
@@ -225,10 +227,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         shortenData;
 
     sendData.account = JSON.stringify(svcData);
-    
+
     // hide the panel now...
     updateChromeStatus(SHARE_START);
-    hideShare();
+    hide();
 
     //First see if a bitly URL is needed.
     if (svcConfig.shorten && shortenPrefs) {
@@ -403,7 +405,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     }
 
     //Listen to sendMessage events from the AccountPanels
-    $(document).bind('sendMessage', function (evt, data) {
+    dispatch.sub('sendMessage', function (data) {
       sendMessage(data);
     });
 
@@ -421,7 +423,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       .delegate('nav .close', 'click', close);
 
     $('#authOkButton').click(function (evt) {
-      oauth(sendData.domain, function (success) {
+      oauth(sendData.domain, false, function (success) {
         if (success) {
           accounts.clear();
           accounts();
