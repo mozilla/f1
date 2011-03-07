@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+ <!-- ***** BEGIN LICENSE BLOCK *****
+   - Version: MPL 1.1
+   -
+   - The contents of this file are subject to the Mozilla Public License Version
+   - 1.1 (the "License"); you may not use this file except in compliance with
+   - the License. You may obtain a copy of the License at
+   - http://www.mozilla.org/MPL/
+   -
+   - Software distributed under the License is distributed on an "AS IS" basis,
+   - WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+   - for the specific language governing rights and limitations under the
+   - License.
+   -
+   - The Original Code is Raindrop.
+   -
+   - The Initial Developer of the Original Code is
+   - Mozilla Messaging, Inc..
+   - Portions created by the Initial Developer are Copyright (C) 2009
+   - the Initial Developer. All Rights Reserved.
+   -
+   - Contributor(s):
+   - -->
+
+
+<!DOCTYPE overlay SYSTEM "chrome://ffshare/locale/overlay.dtd">
+
+<?xml-stylesheet href="chrome://browser/skin/platform.css" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/skin/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/content/browser.css" type="text/css"?>
+<?xml-stylesheet href="chrome://ffshare/skin/overlay.css" type="text/css"?>
+
+<overlay id="ffshare-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+         xmlns:html="http://www.w3.org/1999/xhtml">
+  <script type="application/javascript;version=1.8" src="overlay.js"></script>
+<!--
+  <stringbundleset id="stringbundleset">
+    <stringbundle id="ffshare-strings" src="chrome://ffshare/locale/overlay.properties"/>
+  </stringbundleset>
+-->
+  <commandset id="mainCommandSet"> <!-- ok -->
+    <command id="cmd_toggleSharePage" oncommand="ffshare.togglePanel();"/>
+  </commandset>
+
+  <keyset id="mainKeyset"> <!-- ok -->
+    <key id="key_ffshare" keycode="" command="cmd_toggleSharePage"/>
+  </keyset>
+
+  <hbox id="pageactions-container"> <!-- ok -->
+        <pageaction id="f1-share" title="Share with F1"
+          command="cmd_toggleSharePage"/>
+  </hbox>
+
+  <vbox id="browser-controls"> <!-- ok -->
+    <toolbarbutton id="ffshare-toolbar-button"
+                 class="button-control"
+                 label="&ffshareToolbarButton.label;"
+                 tooltiptext="&ffshareToolbarButton.tooltip;"
+                 type="checkbox"
+                 insertafter="tool-star"
+                 command="cmd_toggleSharePage"/>
+  </vbox>
+
+
+</overlay>
