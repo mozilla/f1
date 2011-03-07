@@ -423,7 +423,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       .delegate('nav .close', 'click', close);
 
     $('#authOkButton').click(function (evt) {
-      oauth(sendData.domain, function (success) {
+      oauth(sendData.domain, false, function (success) {
         if (success) {
           accounts.clear();
           accounts();

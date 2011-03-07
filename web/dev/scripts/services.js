@@ -126,8 +126,7 @@ function (object,         storage) {
           //or remove it from use.
           direct: true,
           subject: false,
-          counter: true,
-          multipleNeedsSignOut: true
+          counter: true
         },
         shareTypes: [{
           type: 'public',
@@ -146,6 +145,10 @@ function (object,         storage) {
         accountLink: function (account) {
           return 'http://twitter.com/' + account.username;
         },
+        forceLogin: {
+          name: 'force_login',
+          value: true
+        },
         overlays: {
           'Contacts': 'ContactsTwitter'
         }
@@ -156,8 +159,7 @@ function (object,         storage) {
           //or remove it from use.
           direct: true,
           subject: false,
-          counter: true,
-          multipleNeedsSignOut: true
+          counter: true
         },
         shareTypes: [{
           type: 'wall',
@@ -187,6 +189,10 @@ function (object,         storage) {
         signOutUrl: 'http://google.com/preferences',
         accountLink: function (account) {
           return 'http://google.com/profiles/' + account.username;
+        },
+        forceLogin: {
+          name: 'pape_max_auth_age',
+          value: 0
         }
       }),
       'googleapps.com': new EmailSvcBase('Google Apps', {
@@ -201,6 +207,10 @@ function (object,         storage) {
         signOutUrl: 'http://google.com/preferences',
         accountLink: function (account) {
           return 'http://google.com/profiles/' + account.username;
+        },
+        forceLogin: {
+          name: 'pape_max_auth_age',
+          value: 0
         }
       }),
       'yahoo.com': new EmailSvcBase('Yahoo', {
@@ -224,8 +234,7 @@ function (object,         storage) {
           //or remove it from use.
           direct: true,
           subject: true,
-          counter: false,
-          multipleNeedsSignOut: true
+          counter: false
         },
         shareTypes: [{
           type: 'public',

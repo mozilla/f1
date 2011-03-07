@@ -37,6 +37,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
   isGreaterThan073 = dotCompare(store.extensionVersion, "0.7.4") > -1,
   options = url.queryToObject(location.href.split('#')[1] || '') || {},
+  existingAccounts = {},
   showNew = options.show === 'new';
 
   jig.addFn({
@@ -74,14 +75,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   accounts.onChange();
   accounts(function (json) {
       $(function () {
-        var html = '',
-            existingAccount = {};
+        var html = '';
 
         json.forEach(function (item) {
           html += jig('#accountTemplate', item);
 
           // remember which accounts already have an entry
-          existingAccount[item.accounts[0].domain] = true;
+          existingAccounts[item.accounts[0].domain] = true;
         });
 
         //Generate UI for each list.
@@ -96,7 +96,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         services.domainList.forEach(function (domain) {
           var data = services.domains[domain];
           data.domain = domain;
-          data.enableSignOut = data.features.multipleNeedsSignOut && existingAccount[domain];
+          data.enableSignOut = !data.forceLogin && existingAccounts[domain];
           html += jig('#addTemplate', services.domains[domain]);
         });
 
@@ -271,7 +271,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           domain = node.getAttribute('data-domain'),
           selectionName = services.domains[domain].type;
 
-        oauth(domain, function (success) {
+        oauth(domain, existingAccounts[domain], function (success) {
           if (success) {
             //Make sure to bring the user back to this service if
             //the auth is successful.

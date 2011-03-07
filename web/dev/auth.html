@@ -241,8 +241,8 @@
 
   </style>
   <script>
-    require(["require", "jquery", "blade/url", "jquery.cookie"],
-    function (require,   $,        url) {
+    require(["require", "jquery", "blade/url", "services", "jquery.cookie"],
+    function (require,   $,        url,         services) {
       var target = window.location.href.split('#')[1];
       if (target && (target === 'oauth_success' || target === 'oauth_failure')) {
 
@@ -259,24 +259,42 @@
         $.cookie("account_tokens", null);
         window.close();
       }
+
       var search = window.location.href.split('?')[1];
       if (search) {
         search = search.split('#')[0];
-        var args = url.queryToObject(search);
-        if (args['domain']) {
-          $("#domain").attr("value", args['domain']);
-	  if (args['domain'] == 'googleapps.com') {
-	    $('#oauth').removeClass('hidden');
-	    $('#message').addClass('hidden');
-	    $('#submitbtn').click(function (evt) {
-	      $('#oauth').addClass('hidden');
-	      $('#message').removeClass('hidden');
-	      document.authForm.submit();
-	    });
-	  } else {
-	    document.authForm.submit();
-	  }
-        }
+
+        var args = url.queryToObject(search),
+            domain = args.domain;
+
+        $(function () {
+            if (domain) {
+              // add a force login param to the form if asked.
+              if (args.forceLogin) {
+                var forceLogin = services.domains[domain].forceLogin;
+                if (forceLogin) {
+                  $('<input type="hidden" name="' +
+                    forceLogin.name +
+                    '" value="' + forceLogin.value + '">').appendTo('[name="authForm"]');
+                }
+              }
+
+              $("#domain").attr("value", args['domain']);
+
+              if (args['domain'] == 'googleapps.com') {
+                // show UI for googleapp
+                $('#oauth').removeClass('hidden');
+                $('#message').addClass('hidden');
+                $('#submitbtn').click(function (evt) {
+                  $('#oauth').addClass('hidden');
+                  $('#message').removeClass('hidden');
+                  document.authForm.submit();
+                });
+              } else {
+                document.authForm.submit();
+              }
+            }
+        });
       }
     });
   </script>
