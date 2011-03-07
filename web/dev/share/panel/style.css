@@ -123,14 +123,18 @@
   float: right;
 }
 
-.AutoCompleteSpinner {
+.addressing .AutoCompleteSpinner {
   position: absolute;
-  top: 23px;
+  top: 6px;
   right: 3px;
   width: 16px;
   height: 16px;
   background-image: url('/share/i/loader.gif');
   z-index: 200;
+}
+
+.addressing .toSection .AutoCompleteSpinner {
+  top: 23px;
 }
 
 * {
