@@ -256,7 +256,7 @@
         };
         window.opener.postMessage(JSON.stringify(data), '*');
         // clear the cookie, we no longer want it around
-        $.cookie("account_tokens", null);
+        $.cookie("account_tokens", "", {"path": "/"});
         window.close();
       }
 
