@@ -20,6 +20,7 @@
  *
  * Contributor(s):
  * */
+@import url("mobile.css"); /* force all the time for now */
 
 * {
   margin: 0;
@@ -27,6 +28,10 @@
   -moz-box-sizing: border-box;
   -webkit-box-sizing: border-box;
   list-style-type: none;
+}
+
+.mobile {
+  display: none;
 }
 
 body {

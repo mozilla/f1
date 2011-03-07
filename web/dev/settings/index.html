@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=320, initial-scale=1, maximum-scale=1">
   <title>F1: Config</title>
   <link rel="stylesheet" type="text/css" href="/dev/settings/style.css">
 
@@ -16,6 +17,7 @@
 <a id="feedback" href="http://feedback.mozillalabs.com/forums/68185-messaging-add-ons" target="_blank">Feedback</a>
 
 <div id="wrapper">
+  <h1 class="mobile title">F1 Configuration</h1>
 
   <div id="header" class="row">
     <div class="c2 logo">
@@ -136,17 +138,15 @@
 <!-- Templates -->
 
 <script id="addTemplate" type="text/template">
-  <li class="hbox {isNew [}newItem{]}">
-    <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name} {isNew [}<span class="new">new!</span>{]}</div>
-    <button class="config auth" data-domain="{domain}">add <span class="add"></span></button>
+  <li class="hbox {isNew [}newItem{]} config auth" data-domain="{domain}">
+    <div class="accountType overflow boxFlex" data-domain="{domain}"><span class="icon {type}"></span> {name} {isNew [}<span class="new">new!</span>{]}</div><span class="add"></span>
   </li>
 </script>
 
 <script id="accountTemplate" type="text/template">
   {.acct accounts[0]}
-  <li class="hbox">
-    <div class="accountType overflow boxFlex"><span class="icon {domainType(_)}"></span> {domainName(_)} <span class="username">({accountName(displayName, acct)})</span></div>
-    <button class="config remove" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}">remove <span class="remove"></span></button>
+  <li class="hbox config remove" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}">
+    <div class="accountType overflow boxFlex" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}"><span class="icon {domainType(_)}"></span> {domainName(_)} <span class="username">({accountName(null, acct)})</span></div><span class="remove"></span>
   </li>
 </script>
 

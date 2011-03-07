@@ -1,0 +1,51 @@
+
+body {
+    margin: .5em;
+}
+
+body #header.row {
+    display: none
+}
+
+body .mobile {
+    display: inherit;
+}
+
+body #wrapper {
+    width: 100%;
+    max-width: 720px;
+}
+
+body .title {
+  display: inline-block;
+  float: right;
+  min-height: 1%;
+  margin: 0 10px;
+  position: relative;
+}
+
+div span.remove,
+div span.add {
+  color: #fff;
+  font-weight: bold;
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  background-image: url("i/sprite.png");
+  background-repeat: no-repeat;
+  vertical-align: text-bottom;
+  margin: 5px;
+}
+
+div span.remove {
+  background-position: center -305px;
+}
+
+div span.add {
+  background-position: center -339px;
+}
+
+body li.remove,
+body li.auth {
+    cursor: pointer;
+}

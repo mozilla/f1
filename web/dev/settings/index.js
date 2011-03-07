@@ -28,7 +28,8 @@
 
 define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
          "dispatch", "storage", "accounts", "dotCompare", "blade/url",
-         "services", "placeholder", "jquery.colorFade", "jquery.textOverflow"],
+         "services", "placeholder", "jquery.colorFade", "jquery.textOverflow",
+         "jquery.cookie"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,
           dispatch,   storage,   accounts,   dotCompare,   url,
           services,   placeholder) {
@@ -68,6 +69,17 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     } else {
       showStatus('statusServerError', err);
     }
+  }
+
+  // handle a redirect to the settings page for fennec
+  var account_data = $.cookie("account_tokens");
+  if (account_data) {
+    var oauth_data = {
+      target: 'oauth_success',
+      account: JSON.parse(account_data)
+    };
+    accounts.update(oauth_data.account);
+    $.cookie("account_tokens", "", {"path": "/"});
   }
 
   //Set up knowledge of accounts and changes.
@@ -290,16 +302,21 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       })
       //Hook up remove buttons to remove an account
       .delegate('.remove', 'click', function (evt) {
-        var buttonNode = evt.target,
-            domain = buttonNode.getAttribute('data-domain'),
-            userName = buttonNode.getAttribute('data-username'),
-            userId = buttonNode.getAttribute('data-userid');
+        var domain = $(this).attr('data-domain'),
+            userName = $(this).attr('data-username'),
+            userId = $(this).attr('data-userid');
         try {
           accounts.remove(domain, userId, userName);
         } catch (e) {
           // clear out account storage
           accounts.clear();
         }
+        $(this).remove();
+        if ($('#existing').children().length < 1) {
+          $('#existingHeader').addClass('hidden');
+          $('#existing').addClass('hidden');
+        }
+        
         evt.preventDefault();
       }).
       delegate('#settings [type="checkbox"]', 'click', function (evt) {
