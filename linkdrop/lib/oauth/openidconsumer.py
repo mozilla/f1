@@ -311,8 +311,9 @@ class OpenIDResponder():
         if log_debug:
             log.debug('Handling processing of response from server')
         
-        openid_session = session['openid_session']
-        if not openid_session:
+        openid_session = session.get('openid_session', None)
+        if openid_session is None:
+            log.error("no openid_session is available, is memcached running?")
             raise AccessException("openid session missing")
         
         # Setup the consumer and parse the information coming back
