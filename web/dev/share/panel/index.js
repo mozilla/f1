@@ -231,6 +231,21 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     hideShare();
 
     //First see if a bitly URL is needed.
+    if (typeof(navigator.services.shortener) !== 'undefined') {
+      navigator.services.shortener.get(
+        [], function() {},
+        sendData.link,
+        function(json) {
+          dump("we got: "+json.shorturl+"\n");
+          sendData.shorturl = json.shorturl;
+          dump("sendData: "+sendData.shorturl+"\n");
+          callSendApi();
+        },
+        function(xhr, textStatus, errorThrown) {
+          showStatus('statusShortenerError', errorThrown);
+        }
+      );
+    } else
     if (svcConfig.shorten && shortenPrefs) {
       shortenData = {
         format: 'json',
