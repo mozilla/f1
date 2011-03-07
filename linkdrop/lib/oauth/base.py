@@ -16,6 +16,9 @@ from paste.deploy.converters import asbool
 
 log = logging.getLogger("oauth.base")
 
+class OAuthKeysException(Exception):
+    pass
+
 class AccessException(Exception):
     pass
 

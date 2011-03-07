@@ -617,7 +617,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         content = metas[i].getAttribute("content");
         if (content) {
           previews.push({
-            http_url : content,
+            http_url : gBrowser.currentURI.resolve(content),
             base64 : ""
           });
         }
@@ -627,7 +627,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         content = links[i].getAttribute("href");
         if (content) {
           previews.push({
-            http_url : content,
+            http_url : gBrowser.currentURI.resolve(content),
             base64 : ""
           });
         }
@@ -680,7 +680,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       // Always ensure the button is unchecked when the panel is hidden
-      getButton().removeAttribute("checked");
+      var button = getButton();
+      if (button)
+        button.removeAttribute("checked");
     },
     
     updateStatus: function(status) {
@@ -688,13 +690,39 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : 0;
       if (gBrowser.selectedTab.shareState)
         gBrowser.selectedTab.shareState.status = status;
-      getButton().setAttribute("status", SHARE_STATUS[status]);
+      if (status == 2) {
+        // use the notification bar if the button is not in the urlbar
+        let nBox = gBrowser.getNotificationBox();
+        let buttons = [
+            {
+            label: "try again",
+            accessKey: null,
+            callback: function() {
+                gBrowser.getNotificationBox().removeCurrentNotification();
+                window.setTimeout(function() {
+                  ffshare.togglePanel();
+                }, 0);
+            }
+        }];
+        nBox.appendNotification(
+                       "There was a problem sharing this page.", "F1 Share Failure",
+                       null,
+                       nBox.PRIORITY_WARNING_MEDIUM, buttons);
+      }
+      var button = getButton();
+      if (button) {
+        if (status == 2)
+          status = 0;
+        button.setAttribute("status", SHARE_STATUS[status]);
+      }
     },
 
     hide: function () {
       this.panel.hidePopup();
-      getButton().removeAttribute("checked");
       gBrowser.selectedTab.shareState.open = false;
+      var button = getButton();
+      if (button)
+        button.removeAttribute("checked");
     },
 
 
@@ -730,11 +758,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
 
       var button = getButton();
-      // Always ensure the button is checked if the panel is open
-      button.setAttribute("checked", true);
-
-      // Always ensure we aren't glowing if the person clicks on the button
-      button.removeAttribute("firstRun");
+      if (button) {
+        // Always ensure the button is checked if the panel is open
+        button.setAttribute("checked", true);
+  
+        // Always ensure we aren't glowing if the person clicks on the button
+        button.removeAttribute("firstRun");
+      } else {
+        // use urlbar as the anchor
+        button = document.getElementById('identity-box');
+      }
 
       // fx 4
       var position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';

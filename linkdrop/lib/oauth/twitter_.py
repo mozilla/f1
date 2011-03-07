@@ -28,6 +28,7 @@ import json
 import httplib2
 import oauth2 as oauth
 import logging
+from urllib2 import URLError
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -192,6 +193,12 @@ class api():
             result[domain] = result['id']
         except TwitterHTTPError, exc:
             error = self._twitter_exc_to_error(exc)
+        except URLError, e:
+            # connection timeouts when twitter is unavailable?
+            error = {
+                'provider': domain,
+                'message': e.args[0]
+            }
         return result, error
     
     def profile(self):
@@ -201,6 +208,11 @@ class api():
             result[domain] = result['id']
         except TwitterHTTPError, exc:
             error = self._twitter_exc_to_error(exc)
+        except URLError, e:
+            error = {
+                'provider': domain,
+                'message': e.args[0]
+            }
         return result, error
 
     def getcontacts(self, start=0, page=25, group=None):
@@ -223,4 +235,9 @@ class api():
             return connectedto, None
         except TwitterHTTPError, exc:
             error = self._twitter_exc_to_error(exc)
+        except URLError, e:
+            error = {
+                'provider': domain,
+                'message': e.args[0]
+            }
         return result, error

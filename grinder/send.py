@@ -31,6 +31,10 @@ from HTTPClient import NVPair
 from HTTPClient import Cookie, CookieModule, CookiePolicyHandler
 
 connectionDefaults = HTTPPluginControl.getConnectionDefaults()
+
+# Decode gzipped responses
+connectionDefaults.useContentEncoding = 1
+
 httpUtilities = HTTPPluginControl.getHTTPUtilities()
 
 log = grinder.logger.output
@@ -118,6 +122,8 @@ def send(userid, csrf, domain=linkdrop_service, message="take that!"):
       ( NVPair('domain', domain),
         NVPair('userid', userid),
         NVPair('csrftoken', csrf),
+        NVPair('shorten', 'true'),
+        NVPair('link', "http://www.google.com/%s" % grinder.getRunNumber() ),        
         NVPair('message', message), ),
       ( NVPair('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8'), ))
     assert result.getStatusCode()==200, result
@@ -127,7 +133,7 @@ def send(userid, csrf, domain=linkdrop_service, message="take that!"):
 send = Test(4, "Send message").wrap(send)
 
 def getStatic(url="/share/"):
-	result = request1.POST(linkdrop_host + url)
+	result = request1.GET(linkdrop_host + url)
 	assert result.getStatusCode()==200, result
 	return result
 
@@ -139,6 +145,7 @@ class TestRunner:
     def __init__(self):
         self.csrf = None
         self.linkdrop_cookie = None
+        self.userid = None
 
     def doit(self):
 	if linkdrop_static_per_send:

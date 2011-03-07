@@ -895,6 +895,7 @@ div.status td {
 
 #statusCaptcha {
   line-height: normal;
+  background-color: #f2f2f2;
 }
 
 div.captcha-wrap {
