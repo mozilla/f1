@@ -59,9 +59,6 @@ class OAuth1():
                                         qualified=True)}
         if self.scope:
             params[ 'scope' ] = self.scope
-        # force_login is twitter specific
-        if asbool(request.POST.get('force_login')):
-            params['force_login']='true'
         
         # We go through some shennanigans here to specify a callback url
         oauth_request = oauth.Request.from_consumer_and_token(self.consumer,
@@ -78,8 +75,14 @@ class OAuth1():
         session['token'] = content
         session.save()
         
+        # force_login is twitter specific
+        if self.provider == 'twitter.com' and asbool(request.POST.get('force_login')):
+            http_url=self.authorization_url+'?force_login=true'
+        else:
+            http_url=self.authorization_url
+
         # Send the user to the oauth provider to authorize us
-        oauth_request = oauth.Request.from_token_and_callback(token=request_token, http_url=self.authorization_url)
+        oauth_request = oauth.Request.from_token_and_callback(token=request_token, http_url=http_url)
         return redirect(oauth_request.to_url())
 
     def verify(self):
