@@ -372,6 +372,12 @@ ul#tabs li.selected {
   line-height: 24px;
 }
 
+.accountType .multipleSignOut {
+    float: right;
+    margin-right: 10px;
+    color: #AAAAAA;
+}
+
 #config ul li:last-child {
   border-bottom: none;
   -moz-border-radius: 0 0 5px 5px;

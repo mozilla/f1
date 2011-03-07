@@ -82,14 +82,18 @@ function ($,        object,         fn,         module,   dispatch,
           // don't navigate away from the field on tab when selecting an item,
           // or when tabbing to the refresh contacts button.
           .bind("keydown", fn.bind(this, function (event) {
-            if (event.keyCode === $.ui.keyCode.TAB &&
-                (this.dom.data("autocomplete").menu.active || this.refreshShowing)) {
-              event.preventDefault();
-
+            if (event.keyCode === $.ui.keyCode.TAB) {
               if (this.refreshShowing) {
+                // refresh contacts showing so focus on the refresh button.
+                event.preventDefault();
                 this.focusingOnRefresh = true;
                 this.refreshDom.find('button').focus();
+              } else if (this.dom.data("autocomplete").menu.active) {
+                //autocomplete is up.
+//                debugger;
+                event.preventDefault();
               }
+//debugger;
             } else if (event.keyCode === $.ui.keyCode.ESCAPE && this.refreshShowing) {
               this.askRefresh = false;
               this.hideRefresh();
@@ -110,17 +114,17 @@ function ($,        object,         fn,         module,   dispatch,
             minLength: 0,
             source: fn.bind(this, function (request, response) {
               // delegate back to autocomplete, but extract the last term
-              var filtered = $.ui.autocomplete.filter(this.acOptions, extractLast(request.term));
+              this.filtered = $.ui.autocomplete.filter(this.acOptions, extractLast(request.term));
 
               // give the user the option to refresh the contacts
               // if no matches.
-              if (!filtered.length && this.askRefresh) {
+              if (!this.filtered.length && this.askRefresh) {
                 setTimeout(fn.bind(this, this.showRefresh), 0);
               } else if (this.refreshShowing) {
                 this.hideRefresh();
               }
 
-              response(filtered);
+              response(this.filtered);
             }),
             focus: function () {
               // prevent value inserted on focus

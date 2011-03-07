@@ -74,10 +74,14 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   accounts.onChange();
   accounts(function (json) {
       $(function () {
-        var html = '';
+        var html = '',
+            existingAccount = {};
 
         json.forEach(function (item) {
           html += jig('#accountTemplate', item);
+
+          // remember which accounts already have an entry
+          existingAccount[item.accounts[0].domain] = true;
         });
 
         //Generate UI for each list.
@@ -92,8 +96,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         services.domainList.forEach(function (domain) {
           var data = services.domains[domain];
           data.domain = domain;
+          data.enableSignOut = data.features.multipleNeedsSignOut && existingAccount[domain];
           html += jig('#addTemplate', services.domains[domain]);
         });
+
         if (html) {
           $('#availableHeader').removeClass('hidden');
           $('#available')

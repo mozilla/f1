@@ -126,7 +126,8 @@ function (object,         storage) {
           //or remove it from use.
           direct: true,
           subject: false,
-          counter: true
+          counter: true,
+          multipleNeedsSignOut: true
         },
         shareTypes: [{
           type: 'public',
@@ -155,7 +156,8 @@ function (object,         storage) {
           //or remove it from use.
           direct: true,
           subject: false,
-          counter: true
+          counter: true,
+          multipleNeedsSignOut: true
         },
         shareTypes: [{
           type: 'wall',
@@ -222,7 +224,8 @@ function (object,         storage) {
           //or remove it from use.
           direct: true,
           subject: true,
-          counter: false
+          counter: false,
+          multipleNeedsSignOut: true
         },
         shareTypes: [{
           type: 'public',
@@ -239,7 +242,7 @@ function (object,         storage) {
         }],
         serviceUrl: 'http://linkedin.com',
         revokeUrl: 'http://linkedin.com/settings/connections',
-        signOutUrl: 'http://linkedin.com/logout',
+        signOutUrl: 'https://www.linkedin.com/secure/login?session_full_logout=&trk=hb_signout',
         accountLink: function (account) {
           return 'http://linkedin.com/' + account.username;
         },

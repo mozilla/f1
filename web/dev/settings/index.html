@@ -125,7 +125,10 @@
 
 <script id="addTemplate" type="text/template">
   <li class="hbox {isNew [}newItem{]}">
-    <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name} {isNew [}<span class="new">new!</span>{]}</div>
+    <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name}
+      {isNew [}<span class="new">new!</span>{]}
+      <div class="multipleSignOut {!enableSignOut[}hidden{]}">Additional accounts require <a href="{signOutUrl}" target="_blank">logout</a></div>
+    </div>
     <button class="config auth" data-domain="{domain}">add <span class="add"></span></button>
   </li>
 </script>
