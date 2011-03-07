@@ -47,6 +47,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.header import Header
+from email.utils import parseaddr
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -58,7 +59,7 @@ from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
 from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attributes, attributes
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
-from linkdrop.lib.oauth.base import get_oauth_config
+from linkdrop.lib.oauth.base import get_oauth_config, OAuthKeysException
 
 GOOGLE_OAUTH = 'https://www.google.com/accounts/OAuthGetAccessToken'
 
@@ -237,7 +238,11 @@ class api():
         self.port = 587
         self.config = get_oauth_config(domain)
         self.account = account
-        self.oauth_token = oauth.Token(key=str(account.get('oauth_token')), secret=str(account.get('oauth_token_secret')))
+        try:
+            self.oauth_token = oauth.Token(key=str(account.get('oauth_token')), secret=str(account.get('oauth_token_secret')))
+        except ValueError, e:
+            # missing oauth tokens, raise our own exception
+            raise OAuthKeysException(str(e))
         self.consumer_key = str(self.config.get('consumer_key'))
         self.consumer_secret = str(self.config.get('consumer_secret'))
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
@@ -249,10 +254,22 @@ class api():
         from_email = from_ = profile['emails'][0]['value']
         fullname = profile.get('displayName', None)
         if fullname:
-            from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), from_,)
+            from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), Header(from_, 'utf-8').encode(),)
 
         url = "https://mail.google.com/mail/b/%s/smtp/" % from_
-        to_ = options['to']
+        to_ = options.get('to', None)
+        if not to_ or not '@' in to_:
+            return None, {
+                "provider": self.host,
+                "message": "recipient address is invalid",
+                "status": 0
+            }
+        to_ = parseaddr(to_)
+        if to_[0]:
+            to_ = '"%s" <%s>' % (Header(to_[0], 'utf-8').encode(), Header(to_[1], 'utf-8').encode())
+        else:
+            to_ = Header(to_[1], 'utf-8').encode()
+
         server = SMTP(self.host, self.port)
         # in the app:main set debug = true to enable
         if asbool(config.get('debug', False)):
@@ -331,6 +348,18 @@ class api():
                     server.ehlo_or_helo_if_needed()
                     server.authenticate(url, self.consumer, self.oauth_token)
                     server.sendmail(from_, to_, msg.as_string())
+                except smtplib.SMTPRecipientsRefused, exc:
+                    for to_, err in exc.recipients.items():
+                        error = {"provider": self.host,
+                                 "message": err[1],
+                                 "status": err[0]
+                                }
+                        break
+                except smtplib.SMTPException, exc:
+                    error = {"provider": self.host,
+                             "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
+                             "status": exc.smtp_code
+                            }
                 except UnicodeEncodeError, exc:
                     raise
                 except ValueError, exc:
@@ -367,8 +396,17 @@ class api():
         profile = self.account.get('profile', {})
         accounts = profile.get('accounts', [{}])
         userdomain = 'default'
-        if accounts[0].get('domain') == 'googleapps.com':
-            userdomain = accounts[0].get('userid').split('@')[-1]
+
+        # google domains can have two contacts lists, the users and the domains
+        # shared contacts.
+        # shared contacts are only available in paid-for google domain accounts
+        # and do not show the users full contacts list.  I also did not find
+        # docs on how to detect whether shared contacts is available or not,
+        # so we will bypass this and simply use the users contacts list.
+        #if accounts[0].get('domain') == 'googleapps.com':
+        #    # set the domain so we get the shared contacts
+        #    userdomain = accounts[0].get('userid').split('@')[-1]
+
         url = 'http://www.google.com/m8/feeds/contacts/%s/full?v=1&max-results=%d' % (userdomain, page,)
 
         method = 'GET'

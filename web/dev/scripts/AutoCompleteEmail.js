@@ -20,26 +20,32 @@
  *
  * Contributor(s):
  * */
-const Cu = Components.utils;
 
-let EXPORTED_SYMBOLS = ["ffshareAutoCompleteData"];
+/*jslint indent: 2 */
+/*global define: false */
+"use strict";
 
-let data = {};
+define([ 'blade/object', 'AutoComplete', 'jquery'],
+function (object,         AutoComplete,     $) {
 
-function _() {
-  return; // comment out for verbose debugging
-  let msg = Array.join(arguments, " ");
-  dump(msg + "\n");
-  Cu.reportError(msg);
-}
+  /**
+   * Overrides the formatting of contacts and converting
+   * one of those formatted contacts into a user ID.
+   */
+  return object(AutoComplete, null, function (parent) {
+    return {
+      formatContact: function (contact) {
+        var value = contact.displayName;
+        if (contact.email !== value) {
+          value += ' <' + contact.email + '>';
+        }
 
-let ffshareAutoCompleteData = {
-  get: function (domain) {
-    _("XXX getting data for "+domain);
-    return data[domain];
-  },
-  set: function (acdata) {
-    _("XXX setting "+ (acdata.contacts ? acdata.contacts.length : "none") +" contacts for "+acdata.domain);
-    data[acdata.domain] = (acdata.contacts || []);
-  }
-};
+        return value;
+      },
+
+      findContact: function (to, contacts) {
+        return to;
+      }
+    };
+  });
+});
