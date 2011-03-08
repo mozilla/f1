@@ -83,17 +83,30 @@ function ($,        object,         fn,         module,   dispatch,
           // or when tabbing to the refresh contacts button.
           .bind("keydown", fn.bind(this, function (event) {
             if (event.keyCode === $.ui.keyCode.TAB) {
-              if (this.refreshShowing) {
-                // refresh contacts showing so focus on the refresh button.
-                event.preventDefault();
-                this.focusingOnRefresh = true;
-                this.refreshDom.find('button').focus();
-              } else if (this.dom.data("autocomplete").menu.active) {
+              if (this.dom.data("autocomplete").menu.active) {
                 //autocomplete is up.
-//                debugger;
                 event.preventDefault();
               }
-//debugger;
+
+              // select the first item in the autocomplete.
+              if (this.open) {
+                var item = this.dom.autocomplete('widget').find('li');
+                this.dom.data("autocomplete").menu.active = item;
+
+                this.dom.autocomplete().select();
+                event.preventDefault();
+              }
+
+              // close out the refresh UI immediately so user can see the
+              // rest of the input form.
+              if (this.refreshShowing) {
+                this.hideRefresh();
+              }
+            } else if (event.keyCode === $.ui.keyCode.DOWN && this.refreshShowing) {
+              // refresh contacts showing so focus on the refresh button.
+              event.preventDefault();
+              this.focusingOnRefresh = true;
+              this.refreshDom.find('button').focus();
             } else if (event.keyCode === $.ui.keyCode.ESCAPE && this.refreshShowing) {
               this.askRefresh = false;
               this.hideRefresh();
@@ -146,8 +159,11 @@ function ($,        object,         fn,         module,   dispatch,
               if (!this.relatedWidth) {
                 this.determineRelatedWidth();
               }
-
+              this.open = true;
               this.dom.autocomplete('widget').width(this.relatedWidth);
+            }),
+            close: fn.bind(this, function (event, ui) {
+              this.open = false;
             })
           });
       }
