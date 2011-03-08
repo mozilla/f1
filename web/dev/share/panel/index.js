@@ -50,7 +50,12 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     store = storage(),
     SHARE_DONE = 0,
     SHARE_START = 1,
-    SHARE_ERROR = 2;
+    SHARE_ERROR = 2,
+    okStatusIds = {
+      statusSettings: true,
+      statusSharing: true,
+      statusShared: true
+    };
 
   function hide() {
     dispatch.pub('hide');
@@ -73,8 +78,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     $('#clickBlock').removeClass('hidden');
     $('#' + statusId).removeClass('hidden');
 
-    if (statusId !== 'statusSharing' &&
-        statusId !== 'statusShared') {
+    if (!okStatusIds[statusId]) {
       updateChromeStatus(SHARE_ERROR);
       options.status = [statusId, shouldCloseOrMessage];
     } else {

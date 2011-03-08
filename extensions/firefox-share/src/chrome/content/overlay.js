@@ -761,15 +761,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @param {Integer} an index value that has meaning in the SHARE_STATUS array
      * @param {Boolean} only passed by the final success call
      */
-    updateStatus: function(status, success) {
+    updateStatus: function (status, success) {
       var button = getButton(),
-          nBox, notification, buttons;
+          nBox = gBrowser.getNotificationBox(),
+          notification = nBox.getNotificationWithValue("mozilla-f1-share-error"),
+          buttons;
+
       if (typeof(status) === 'undefined') {
-        status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : 0;
+        status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : SHARE_DONE;
       }
+
       if (status === SHARE_ERROR) {
-        nBox = gBrowser.getNotificationBox();
-        notification = nBox.getNotificationWithValue("mozilla-f1-share-error");
         // Check that we aren't already displaying our notification
         if (!notification) {
           buttons = [{
@@ -790,6 +792,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         }
         // Reset the status now that we've shown the warning
         status = SHARE_DONE;
+      } else if (status === SHARE_DONE && notification) {
+        nBox.removeNotification(notification);
       }
 
       if (gBrowser.selectedTab.shareState) {
@@ -800,7 +804,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         // Only a final successful share should be passing this value
         if (success) {
           button.setAttribute("status", SHARE_STATUS[SHARE_FINISHED]);
-          window.setTimeout(function() {
+          window.setTimeout(function () {
             button.setAttribute("status", SHARE_STATUS[status]);
           }, 2900);
         } else {
