@@ -159,7 +159,8 @@ function (object,         storage) {
           //or remove it from use.
           direct: true,
           subject: false,
-          counter: true
+          counter: true,
+          medium: true
         },
         shareTypes: [{
           type: 'wall',

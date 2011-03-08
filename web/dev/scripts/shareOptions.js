@@ -41,7 +41,9 @@ define(['storage', 'blade/url'], function (storage, url) {
 
     var options = {},
         store = storage(),
-        urlArgs, prop;
+        vimeoCdnRegExp = /vimeocdn\.com\//,
+        vimeoSourceRegExp = /clip_id=(\d+)/,
+        urlArgs, prop, source, videoId;
 
     if (str) {
       urlArgs = url.queryToObject(str);
@@ -59,6 +61,35 @@ define(['storage', 'blade/url'], function (storage, url) {
     if (!options.prefs.system) {
       options.prefs.system = 'prod';
     }
+
+    source = options.source;
+
+    //If the source is larger than ~4KB then it will exceed the GET size
+    //limits in most browsers, so discard it.
+    if (source && source.length > 4000) {
+      source = '';
+      delete options.source;
+    }
+
+    //START domain-specific hacks
+    // vimeo.com does not give a usable video embed, fix it up here.
+    if (source && vimeoCdnRegExp.test(source)) {
+      // facebook will not allow embedding without a picture.
+      // The home page of vimeo does not include a picture.
+      if (!options.previews || !options.previews[0] || !options.previews[0].http_url) {
+        delete options.source;
+      } else {
+        videoId = vimeoSourceRegExp.exec(source);
+        videoId = videoId && videoId[1];
+        if (videoId) {
+          options.source = 'http://vimeo.com/moogaloop.swf?clip_id=' + videoId + '&amp;server=vimeo.com&amp;show_title=1&amp;show_byline=1&amp;show_portrait=1&amp;color=00dcdc&amp;fullscreen=1&amp;autoplay=0&amp;loop=0';
+        } else {
+          delete options.source;
+        }
+      }
+    }
+
+    //END domain-specific hacks.
 
     //Save the extension version in the localStorage, for use in
     //other pages like settings.

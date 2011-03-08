@@ -261,7 +261,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   // is opened for that tab.  The state object is removed from the current
   // tab when the panel is closed.
   var sharePanel = {
-    init: function() {
+    init: function () {
       this.browser = document.getElementById('share-browser');
       this.panel = document.getElementById('share-popup');
 
@@ -289,7 +289,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     },
 
-    shutdown: function() {
+    shutdown: function () {
       Services.obs.removeObserver(this, 'content-document-global-created');
 
       var webProgress = this.browser.webProgress;
@@ -348,13 +348,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + "." + pref.name, pref.value);
     },
 
-    getOptions: function(options) {
+    getOptions: function (options) {
       options = options || {};
       mixin(options, {
         version: ffshare.version,
         title: this.getPageTitle(),
         description: this.getPageDescription(),
         medium: this.getPageMedium(),
+        source: this.getSourceURL(),
         url: gBrowser.currentURI.spec,
         canonicalUrl: this.getCanonicalURL(),
         shortUrl: this.getShortURL(),
@@ -470,6 +471,72 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         if (content) {
           return unescapeXml(content);
         }
+      }
+      return "";
+    },
+
+    getSourceURL: function () {
+      //Ideally each page would report the medium correctly, but some
+      //do not, like vimeo, so always just look for a video source.
+      var source = this.getVideoSourceURL();
+      return source || "";
+    },
+
+    getVideoSourceURL: function () {
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:video']");
+      for (var i = 0; i < metas.length; i++) {
+        var content = metas[i].getAttribute("content");
+        if (content) {
+          return unescapeXml(content);
+        }
+      }
+      return this.getVideoSourceURLHacks();
+    },
+
+    getVideoSourceURLHacks: function () {
+      var canonical = this.getCanonicalURL(),
+          host = gBrowser.currentURI.host,
+          params, embeds, i, src, flashvars, value;
+
+      //YouTube hack to get the right source without too many parameters
+      if (host.indexOf("youtube.com") >= 0 &&
+          canonical.match(/v=([A-Za-z0-9._%\-]*)[&\w;=\+_\-]*/)) {
+        var id = canonical.match(/v=([A-Za-z0-9._%\-]*)[&\w;=\+_\-]*/)[1];
+        return "http://www.youtube.com/v/" + id;
+      }
+
+      //Vimeo hack to find the <object data="src"><param name="flashvars"/></object> pieces we need
+      embeds = gBrowser.contentDocument.querySelectorAll("object[type='application/x-shockwave-flash'][data]");
+      params = gBrowser.contentDocument.querySelectorAll("param[name='flashvars']");
+      for (i = 0; i < embeds.length; i++) {
+        src = embeds[i].getAttribute("data");
+        flashvars = params[0].getAttribute("value");
+        if (flashvars) {
+          src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
+        }
+        return gBrowser.currentURI.resolve(unescapeXml(src));
+      }
+
+      //A generic hack that looks for the <param name="movie"> which is often available
+      // for backwards compat and IE
+      params = gBrowser.contentDocument.querySelectorAll("param[name='movie']");
+      for (i = 0; i < params.length; i++) {
+        value = params[i].getAttribute("value");
+        if (value) {
+          return gBrowser.currentURI.resolve(unescapeXml(value));
+        }
+      }
+
+      //This one is fairly bad because the flashvars can exceed a reasonable
+      // url length limit and since it is only sent to flash it is often large
+      embeds = gBrowser.contentDocument.querySelectorAll("embed[src]");
+      for (i = 0; i < embeds.length; i++) {
+        src = embeds[i].getAttribute("src");
+        flashvars = embeds[i].getAttribute("flashvars");
+        if (flashvars) {
+          src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
+        }
+        return gBrowser.currentURI.resolve(unescapeXml(src));
       }
       return "";
     },
@@ -673,36 +740,41 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     close: function () {
       this.panel.hidePopup();
       if (gBrowser.selectedTab.shareState) {
-        if (gBrowser.selectedTab.shareState.status === 0)
+        if (gBrowser.selectedTab.shareState.status === 0) {
           gBrowser.selectedTab.shareState = null;
-        else
+        } else {
           gBrowser.selectedTab.shareState.open = false;
+        }
       }
 
       // Always ensure the button is unchecked when the panel is hidden
       var button = getButton();
-      if (button)
+      if (button) {
         button.removeAttribute("checked");
+      }
     },
-    
-    updateStatus: function(status) {
-      if (typeof(status) == 'undefined')
+
+    updateStatus: function (status) {
+      var nBox, buttons;
+
+      if (typeof(status) === 'undefined') {
         status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : 0;
-      if (gBrowser.selectedTab.shareState)
+      }
+      if (gBrowser.selectedTab.shareState) {
         gBrowser.selectedTab.shareState.status = status;
-      if (status == 2) {
+      }
+      if (status === 2) {
         // use the notification bar if the button is not in the urlbar
-        let nBox = gBrowser.getNotificationBox();
-        let buttons = [
-            {
-            label: "try again",
-            accessKey: null,
-            callback: function() {
-                gBrowser.getNotificationBox().removeCurrentNotification();
-                window.setTimeout(function() {
-                  ffshare.togglePanel();
-                }, 0);
-            }
+        nBox = gBrowser.getNotificationBox();
+        buttons = [{
+          label: "try again",
+          accessKey: null,
+          callback: function () {
+            gBrowser.getNotificationBox().removeCurrentNotification();
+            window.setTimeout(function () {
+              ffshare.togglePanel();
+            }, 0);
+          }
         }];
         nBox.appendNotification(
                        "There was a problem sharing this page.", "F1 Share Failure",
@@ -711,8 +783,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
       var button = getButton();
       if (button) {
-        if (status == 2)
+        if (status === 2) {
           status = 0;
+        }
         button.setAttribute("status", SHARE_STATUS[status]);
       }
     },
@@ -721,8 +794,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.panel.hidePopup();
       gBrowser.selectedTab.shareState.open = false;
       var button = getButton();
-      if (button)
+      if (button) {
         button.removeAttribute("checked");
+      }
     },
 
 
@@ -761,7 +835,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (button) {
         // Always ensure the button is checked if the panel is open
         button.setAttribute("checked", true);
-  
+
         // Always ensure we aren't glowing if the person clicks on the button
         button.removeAttribute("firstRun");
       } else {
@@ -1053,8 +1127,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         try {
           pref = subject.QueryInterface(Ci.nsIPrefBranch);
           ffshare.prefs.bookmarking = pref.getBoolPref(data);
-        } catch (e) {
-          error(e);
+        } catch (e2) {
+          error(e2);
         }
       }
     },
@@ -1133,14 +1207,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (waitForLoad) {
         // this double-loads the share panel since image data may not be
         // available yet
-        let self = this;
-        gBrowser.contentWindow.addEventListener('DOMContentLoaded', function() {
+        var self = this;
+        gBrowser.contentWindow.addEventListener('DOMContentLoaded', function () {
           self.switchTab(false);
         }, true);
       }
 
       var selectedTab = gBrowser.selectedTab;
-      var visible = document.getElementById('share-popup').state == 'open';
+      var visible = document.getElementById('share-popup').state === 'open';
       var isopen = selectedTab.shareState && selectedTab.shareState.open;
       if (visible && !isopen) {
         sharePanel.close();
@@ -1159,7 +1233,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     onTabViewShow: function (e) {
       // Triggered by TabView (panorama). Always hide it if being shown.
-      if (document.getElementById('share-popup').state == 'open') {
+      if (document.getElementById('share-popup').state === 'open') {
         sharePanel.hide();
       }
     },
@@ -1173,7 +1247,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     togglePanel: function (options) {
-      if (document.getElementById('share-popup').state == 'open') {
+      if (document.getElementById('share-popup').state === 'open') {
         sharePanel.close();
       } else {
         sharePanel.show(options);
