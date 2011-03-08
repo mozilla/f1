@@ -40,7 +40,7 @@
   </stringbundleset>
 -->
   <commandset id="mainCommandSet"> <!-- ok -->
-    <command id="cmd_toggleSharePage" oncommand="ffshare.togglePanel();"/>
+    <command id="cmd_toggleSharePage" oncommand="ffshare.open();"/>
   </commandset>
 
   <keyset id="mainKeyset"> <!-- ok -->

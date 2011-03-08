@@ -48,14 +48,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       buttonId = 'ffshare-toolbar-button';
   var SHARE_STATUS = ["", "start", "error"];
 
-  // width/height tracking for the panel, initial values are defaults to
-  // show the configure status panel
-  // with fx3, we have to set the dimensions of the panel, with fx4, we have to
-  // set the dimensions of the browser in the panel.
-  var defaultWidth = 400, lastWidth = 400;
-  var defaultHeight = 180, lastHeight = 180;
-  var panelWidthMargin = 41;
-  var panelHeightMargin = 45;
   var forceReload = true;
 
   Cu.import("resource://ffshare/modules/injector.js");
@@ -89,12 +81,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   XPCOMUtils.defineLazyServiceGetter(Services, "bookmarks",
                                      "@mozilla.org/browser/nav-bookmarks-service;1",
                                      "nsINavBookmarksService");
-
-  Cu.import("resource://gre/modules/AddonManager.jsm");
-
-  function getButton() {
-    return document.getElementById(buttonId);
-  }
 
   function mixin(target, source, override) {
     //TODO: consider ES5 getters and setters in here.
@@ -176,255 +162,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     }
   };
 
-  /**
-   * This progress listener looks for HTTP codes that are errors/not
-   * successses and puts up the "server down" page bundled in the extension.
-   * This listener is related to the HttpActivityObserver, but that one handles
-   * cases when the server is just not reachable via the network. This one
-   * handles the cases where the server is reachable but is freaking out.
-   */
-  function StateProgressListener(browser) {
-    this.browser = browser;
-  }
 
-  StateProgressListener.prototype = {
-    // detect communication from the iframe via location setting
-    QueryInterface: function (aIID) {
-      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-          aIID.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    },
-
-    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
-      var flags = Components.interfaces.nsIWebProgressListener;
-      if (aStateFlags & flags.STATE_IS_WINDOW &&
-                 aStateFlags & flags.STATE_STOP) {
-        var status;
-
-        try {
-          status = aRequest.nsIHttpChannel.responseStatus;
-        } catch (e) {
-          // Could be just an invalid URL or not an http thing. Need to be sure to not endlessly
-          // load error page if it is already loaded.
-          // Also ignore this state for about:blank which is apparently used as
-          // a placeholder by FF while first creating the panel/browser element.
-          // Check against channel.name, that is what we were *trying* to load.
-          var href = aRequest.nsIHttpChannel.name;
-          if (href !== ffshare.errorPage && href !== 'about:blank') {
-            status = 1000;
-          } else {
-            status = 200;
-          }
-        }
-
-        if (status < 200 || status > 399) {
-          this.browser.contentWindow.location = ffshare.errorPage;
-          forceReload = true;
-        }
-      }
-    },
-
-    onLocationChange: function (aWebProgress, aRequest, aLocation) {},
-    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
-    onSecurityChange: function (aWebProgress, aRequest, aState) {},
-    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {
-        //log("onStatus Change: " + aRequest.nsIHttpChannel.responseStatus + ": " + aRequest.loadFlags + ", " + aRequest + ", " + aMessage);
-    }
-  };
-
-  var firstRunProgressListener = {
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
-                                           Ci.nsISupportsWeakReference,
-                                           Ci.nsISupports]),
-
-    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
-      // maybe can just use onLocationChange, but I don't think so?
-      var flags = Ci.nsIWebProgressListener;
-
-      // This seems like an excessive check but works very well
-      if (aStateFlags & flags.STATE_IS_WINDOW &&
-                 aStateFlags & flags.STATE_STOP) {
-        if (!ffshare.didOnFirstRun) {
-          //Be sure to disable first run after one try. Even if it does
-          //not work, do not want to annoy the user with continual popping up
-          //of the front page.
-          ffshare.didOnFirstRun = true;
-          ffshare.onFirstRun();
-        }
-      }
-    },
-
-    onLocationChange: function (aWebProgress, aRequest, aLocation) {},
-    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
-    onSecurityChange: function (aWebProgress, aRequest, aState) {},
-    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
-  };
-
-  var canShareProgressListener = {
-    QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
-                                           Ci.nsISupportsWeakReference,
-                                           Ci.nsISupports]),
-
-    onLocationChange: function (aWebProgress, aRequest, aLocation) {
-      ffshare.canShareURI(aLocation);
-      //dump("onlocationchange causing switchtab\n");
-      window.setTimeout(function () {
-        ffshare.switchTab(true);
-      }, 0);
-    },
-
-    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {},
-    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
-    onSecurityChange: function (aWebProgress, aRequest, aState) {},
-    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
-  };
-
-  // singleton controller for the share panel
-  // A state object is attached to each browser tab when the share panel
-  // is opened for that tab.  The state object is removed from the current
-  // tab when the panel is closed.
-  var sharePanel = {
-    init: function() {
-if (0) { // not needed in fennec
-      this.browser = document.getElementById('share-browser');
-      this.panel = document.getElementById('share-popup');
-
-      // hookup esc to also close the panel
-      // XXX not working, maybe need to listen on window
-      this.panel.addEventListener('keypress', fn.bind(this, function (e) {
-        if (e.keyCode === 27 /*"VK_ESC"*/) {
-          this.close();
-        }
-      }), false);
-
-      this.loadListener = fn.bind(this, function (evt) {
-        var self = this;
-        window.setTimeout(function () {
-          self.sizeToContent();
-        }, 0);
-      });
-      this.browser.addEventListener("load", this.loadListener, true);
-}
-
-      Services.obs.addObserver(this, 'content-document-global-created', false);
-
-if (0) { // fennec?
-      var webProgress = this.browser.webProgress;
-      this.stateProgressListener = new StateProgressListener(this.browser);
-      webProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
-}
-    },
-
-    shutdown: function() {
-      Services.obs.removeObserver(this, 'content-document-global-created');
-if (0) { // fennec?
-      var webProgress = this.browser.webProgress;
-      webProgress.removeProgressListener(this.stateProgressListener);
-      this.stateProgressListener = null;
-}
-    },
-
-    observe: function (aSubject, aTopic, aData) {
-      if (!aSubject.location.href) {
-        return;
-      }
-
-      // is this window a child of OUR XUL window?
-      var mainWindow = aSubject.QueryInterface(Ci.nsIInterfaceRequestor)
-                     .getInterface(Ci.nsIWebNavigation)
-                     .QueryInterface(Ci.nsIDocShellTreeItem)
-                     .rootTreeItem
-                     .QueryInterface(Ci.nsIInterfaceRequestor)
-                     .getInterface(Ci.nsIDOMWindow);
-      mainWindow = mainWindow.wrappedJSObject ? mainWindow.wrappedJSObject : mainWindow;
-      if (mainWindow !== this.panel.ownerDocument.defaultView) {
-        return;
-      }
-      // listen for messages now
-      var contentWindow = this.browser.contentWindow;
-      contentWindow = contentWindow.wrappedJSObject ? contentWindow.wrappedJSObject : contentWindow;
-      contentWindow.addEventListener("message", fn.bind(this, function (evt) {
-        //Make sure we only act on messages from the page we expect.
-        if (ffshare.prefs.share_url.indexOf(evt.origin) === 0) {
-          //Mesages have the following properties:
-          //name: the string name of the messsage
-          //data: the JSON structure of data for the message.
-          var message = evt.data, skip = false, topic, data;
-
-          try {
-            //Only some messages are valid JSON, only care about the ones
-            //that are.
-            message = JSON.parse(message);
-          } catch (e) {
-            skip = true;
-          }
-          if (!skip) {
-            topic = message.topic;
-            data = message.data;
-            if (topic && this[topic]) {
-              this[topic](data);
-            }
-          }
-        }
-      }), false);
-    },
-
-    //Fired when a pref changes from content space. the pref object has
-    //a name and value.
-    prefChanged: function (pref) {
-      extPrefs.setCharPref("extensions." + FFSHARE_EXT_ID + "." + pref.name, pref.value);
-    },
-
-    getOptions: function(options) {
-      options = options || {};
-      mixin(options, {
-        version: ffshare.version,
-        title: this.getPageTitle(),
-        description: this.getPageDescription(),
-        medium: this.getPageMedium(),
-        url: gBrowser.currentURI.spec,
-        canonicalUrl: this.getCanonicalURL(),
-        shortUrl: this.getShortURL(),
-        previews: this.previews(),
-        siteName: this.getSiteName(),
-        prefs: {
-          system: ffshare.prefs.system,
-          bookmarking: ffshare.prefs.bookmarking,
-          use_accel_key: ffshare.prefs.use_accel_key
-        }
-      });
-      return options;
-    },
-
-    /**
-     * PostMessage APIs
-     * Called by content page when share is successful.
-     * @param {Object} data info about the share.
-     */
-    success: function (data) {
-      this.updateStatus(0);
-      this.close();
-
-      if (ffshare.prefs.bookmarking) {
-        var tags = ['shared', 'f1'];
-        if (data.domain === 'twitter.com') {
-          tags.push("twitter");
-        }
-        if (data.domain === 'facebook.com') {
-          tags.push("facebook");
-        }
-
-        var nsiuri = Services.io.newURI(gBrowser.currentURI.spec, null, null);
-        Services.bookmarks.insertBookmark(Services.bookmarks.unfiledBookmarksFolder,
-                                          nsiuri, Services.bookmarks.DEFAULT_INDEX,
-                                          this.getPageTitle().trim());
-
-        PlacesUtils.tagging.tagURI(nsiuri, tags);
-      }
-    },
+  // functions to get information from the content we are sharing
+  var contentInfo = {
 
     getPageTitle: function () {
       var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:title']"),
@@ -671,155 +411,28 @@ if (0) { // fennec?
         }
       );
       return previews;
-    },
+    }
+  }
 
-    escapeHtml: function (text) {
-      return text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
-    },
-
-    sizeToContent: function () {
-      var doc = this.browser.contentDocument.wrappedJSObject;
-      var wrapper = doc && doc.getElementById('wrapper');
-      if (!wrapper) {
-        return;
-      }
-      // XXX argh, we really should look at the panel and see what margins/padding
-      // sizes are and calculate that way, however this is pretty complex due
-      // to how the background image of the panel is used,
-      //dump("content size is "+wrapper.scrollWidth+" x "+wrapper.scrollHeight+"\n");
-      var h = lastWidth > defaultHeight ? lastWidth: defaultHeight;
-      lastWidth = wrapper.scrollWidth;
-      lastHeight = wrapper.scrollHeight > 0 ? wrapper.scrollHeight : h;
-      this.browser.style.width = lastWidth + "px";
-      this.browser.style.height = lastHeight + "px";
-    },
-
-
-    // panelUI operations
-    close: function () {
-      this.panel.hidePopup();
-      if (gBrowser.selectedTab.shareState) {
-        if (gBrowser.selectedTab.shareState.status === 0)
-          gBrowser.selectedTab.shareState = null;
-        else
-          gBrowser.selectedTab.shareState.open = false;
-      }
-
-      // Always ensure the button is unchecked when the panel is hidden
-      var button = getButton();
-      if (button)
-        button.removeAttribute("checked");
+  var fennecTab = {
+    init: function() {
+      
     },
     
-    updateStatus: function(status) {
-      if (typeof(status) == 'undefined')
-        status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : 0;
-      if (gBrowser.selectedTab.shareState)
-        gBrowser.selectedTab.shareState.status = status;
-      if (status == 2) {
-        // use the notification bar if the button is not in the urlbar
-        let nBox = gBrowser.getNotificationBox();
-        let buttons = [
-            {
-            label: "try again",
-            accessKey: null,
-            callback: function() {
-                gBrowser.getNotificationBox().removeCurrentNotification();
-                window.setTimeout(function() {
-                  ffshare.togglePanel();
-                }, 0);
-            }
-        }];
-        nBox.appendNotification(
-                       "There was a problem sharing this page.", "F1 Share Failure",
-                       null,
-                       nBox.PRIORITY_WARNING_MEDIUM, buttons);
-      }
-      var button = getButton();
-      if (button) {
-        if (status == 2)
-          status = 0;
-        button.setAttribute("status", SHARE_STATUS[status]);
-      }
-    },
-
-    hide: function () {
-      this.panel.hidePopup();
-      gBrowser.selectedTab.shareState.open = false;
-      var button = getButton();
-      if (button)
-        button.removeAttribute("checked");
-    },
-
-
-    show: function (options) {
-      var tabURI = gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI,
-          tabUrl = tabURI.spec;
-      if (!ffshare.isValidURI(tabURI)) {
-        return;
-      }
-      var currentState = gBrowser.selectedTab.shareState;
-      options = this.getOptions(options);
-
-      gBrowser.selectedTab.shareState = {
-        options: options, // currently not used for anything
-        status: currentState ? currentState.status : 0,
-        open: true
-      };
-
-      var url = ffshare.prefs.share_url +
-                '#options=' + encodeURIComponent(JSON.stringify(options));
-
-      // adjust the size
-      this.browser.style.width = lastWidth + 'px';
-      this.browser.style.height = lastHeight + 'px';
-      //Make sure it can go all the way to zero.
-      this.browser.style.minHeight = 0;
-
-      if (forceReload) {
-        this.browser.loadURI(url);
-        forceReload = false;
-      } else {
-        this.browser.setAttribute('src', url);
-      }
-
-      var button = getButton();
-      if (button) {
-        // Always ensure the button is checked if the panel is open
-        button.setAttribute("checked", true);
-  
-        // Always ensure we aren't glowing if the person clicks on the button
-        button.removeAttribute("firstRun");
-      } else {
-        // use urlbar as the anchor
-        button = document.getElementById('identity-box');
-      }
-
-      // fennec
-      this.browser = Browser.addTab(url, true, browser);
-    }
-  };
-  
-  var fennecTab = {
-
     getOptions: function(options) {
-      // XXX the calls to sharePanel here need to get data from the browser
+      // XXX the calls to contentInfo here need to get data from the browser
       // tab that has the page content we want to share
       options = options || {};
       mixin(options, {
         version: ffshare.version,
-        title: '',//sharePanel.getPageTitle(),
-        description: '',//sharePanel.getPageDescription(),
-        medium: '',//sharePanel.getPageMedium(),
+        title: '',//contentInfo.getPageTitle(),
+        description: '',//contentInfo.getPageDescription(),
+        medium: '',//contentInfo.getPageMedium(),
         url: Browser.selectedTab.browser.currentURI.spec,
-        canonicalUrl: '',//sharePanel.getCanonicalURL(),
-        shortUrl: '',//sharePanel.getShortURL(),
-        previews: '',//sharePanel.previews(),
-        siteName: '',//sharePanel.getSiteName(),
+        canonicalUrl: '',//contentInfo.getCanonicalURL(),
+        shortUrl: '',//contentInfo.getShortURL(),
+        previews: '',//contentInfo.previews(),
+        siteName: '',//contentInfo.getSiteName(),
         prefs: {
           system: ffshare.prefs.system,
           bookmarking: ffshare.prefs.bookmarking,
@@ -847,6 +460,18 @@ if (0) { // fennec?
       var url = ffshare.prefs.share_url +
                 '#options=' + encodeURIComponent(JSON.stringify(options));
       Browser.addTab(url, true, Browser.selectedTab.browser);
+    },
+    
+    close: function() {
+      // close the share tab
+    },
+    
+    hide: function() {
+      // api called from share panel content, we can just close on fennec
+    },
+    
+    updateStatus: function() {
+      // called from content to provide user notification of share status
     }
   }
 
@@ -900,213 +525,14 @@ if (0) { // fennec?
     keycode : "VK_F1",
     oldKeycodeId: "key_old_ffshare",
 
-    onInstallUpgrade: function (version) {
-      ffshare.version = version;
-
-      //Only run if the versions do not match.
-      if (version === ffshare.prefs.previous_version) {
-        return;
-      }
-
-      //Update prefs.previous_version pref. Do this now in case an error below
-      //prevents it -- do not want to get in a situation where for instance
-      //we pop the front page URL for every tab navigation.
-      ffshare.prefs.previous_version = version;
-      extPrefs.setCharPref("extensions." + FFSHARE_EXT_ID + ".previous_version", version);
-
-      // Place the button in the toolbar, before the URL bar.
-      try {
-        var beforeId = "urlbar-container";   // ID of element to insert before
-
-        var navBar  = document.getElementById("nav-bar"),
-            curSet  = navBar.currentSet.split(","),
-            set, pos;
-
-        //TODO: REMOVE this at some point. 0.7.x versions of the extension
-        //added the button to the end of the list, and this list is not updated
-        //on uninstall. So for now remove the buttonId from the end of the list.
-        //This could be frustrating for users how explicitly move it to the end
-        //for for at least the first 0.8.x release, do this so that most people
-        //get the new position, then remove this line in the next release.
-        if (curSet[curSet.length - 1] === buttonId) {
-          curSet.pop();
-        }
-
-        if (curSet.indexOf(buttonId) === -1) {
-          //Insert our ID before the URL bar ID.
-          pos = curSet.indexOf(beforeId) || curSet.length;
-          curSet.splice(pos, 0, buttonId);
-          set = curSet.join(",");
-
-          navBar.setAttribute("currentset", set);
-          navBar.currentSet = set;
-          document.persist(navBar.id, "currentset");
-          try {
-            BrowserToolboxCustomizeDone(true);
-          }
-          catch (e) {}
-        }
-      }
-      catch (ex) {}
-
-      if (ffshare.prefs.firstRun) {
-        //Make sure to set the pref first to avoid bad things if later code
-        //throws and we cannot set the pref.
-        ffshare.prefs.firstRun = false;
-        extPrefs.setBoolPref("extensions." + FFSHARE_EXT_ID + ".first-install", false);
-
-        //Register first run listener.
-        gBrowser.getBrowserForTab(gBrowser.selectedTab).addProgressListener(firstRunProgressListener, Ci.nsIWebProgress.NOTIFY_STATE_DOCUMENT);
-        this.addedFirstRunProgressListener = true;
-      }
-    },
-
     onLoad: function () {
-      sharePanel.init();
-
-      AddonManager.getAddonByID(FFSHARE_EXT_ID, function (addon) {
-        ffshare.onInstallUpgrade(addon.version);
-      });
-
-      try {
-        gBrowser.addProgressListener(canShareProgressListener);
-      } catch (ex) {
-        error("onLoad: "+ex);
-      }
-
-      document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
-
-      this.initKeyCode();
+      fennecTab.init();
 
       Services.prefs.addObserver("extensions." + FFSHARE_EXT_ID + ".", this, false);
-
-      //Events triggered by TabView (panorama)
-      this.tabViewShowListener = fn.bind(this, ffshare.onTabViewShow);
-      this.tabViewHideListener = fn.bind(this, ffshare.onTabViewHide);
-      window.addEventListener('tabviewshow', this.tabViewShowListener, false);
-      window.addEventListener('tabviewhide', this.tabViewHideListener, false);
     },
 
     onUnload: function () {
-      // initialization code
-      if (this.addedFirstRunProgressListener) {
-        gBrowser.getBrowserForTab(gBrowser.selectedTab).removeProgressListener(firstRunProgressListener);
-      }
-
-      try {
-        gBrowser.removeProgressListener(canShareProgressListener);
-      } catch (e) {
-        error("onUnload: "+e);
-      }
-
-      document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
-
       Services.prefs.removeObserver("extensions." + FFSHARE_EXT_ID + ".", this);
-
-      //Events triggered by TabView (panorama)
-      window.removeEventListener('tabviewshow', this.tabViewShowListener, false);
-      window.removeEventListener('tabviewhide', this.tabViewHideListener, false);
-      this.tabViewShowListener = null;
-      this.tabViewHideListener = null;
-    },
-
-    onFirstRun: function () {
-      // create a hidden iframe and get it to load the standard contents
-      // to prefill the cache
-      var browser = gBrowser.getBrowserForTab(gBrowser.selectedTab);
-      var notificationBox = gBrowser.getNotificationBox(browser);
-      var iframeNode = document.createElement("browser");
-      iframeNode.setAttribute("type", "content");
-      iframeNode.setAttribute("style", "width: 100px; height: 100px; background: pink;");
-      iframeNode.setAttribute("src", ffshare.prefs.share_url);
-      iframeNode.setAttribute("style", "visibility: collapse;");
-      notificationBox.insertBefore(iframeNode, notificationBox.firstChild);
-
-      //Taken from https://developer.mozilla.org/en/Code_snippets/Tabbed_browser
-      function openAndReuseOneTabPerURL(url) {
-        var browserEnumerator = Services.wm.getEnumerator("navigator:browser"),
-            rect, browser, buttonNode;
-        // Check each browser instance for our URL
-        var found = false;
-        try {
-          while (!found && browserEnumerator.hasMoreElements()) {
-            var browserWin = browserEnumerator.getNext();
-            var tabbrowser = browserWin.gBrowser;
-
-            // Sometimes we don't get a tabbrowser element
-            if (tabbrowser) {
-              // Check each tab of this browser instance
-              var numTabs = tabbrowser.browsers.length;
-              for (var index = 0; index < numTabs; index++) {
-                var currentBrowser = tabbrowser.getBrowserAtIndex(index);
-                if (currentBrowser.currentURI &&
-                    url === currentBrowser.currentURI.spec) {
-
-                  // The URL is already opened. Select this tab.
-                  tabbrowser.selectedTab = tabbrowser.tabContainer.childNodes[index];
-
-                  // Focus *this* browser-window
-                  browserWin.focus();
-
-                  buttonNode = browserWin.document.getElementById(buttonId);
-                  //Button may not be there if customized and removed from toolbar.
-                  if (buttonNode) {
-                    buttonNode.setAttribute("firstRun", "true");
-                  }
-
-                  found = true;
-                  break;
-                }
-              }
-            }
-          }
-        // Minefield likes to error out in this loop sometimes
-        } catch (ignore) { }
-
-        // Our URL isn't open. Open it now.
-        if (!found) {
-          var recentWindow = Services.wm.getMostRecentWindow("navigator:browser");
-          if (recentWindow) {
-            // If our window is opened and ready just open the tab
-            //   possible values: (loading, complete, or uninitialized)
-            if (recentWindow.document.readyState === "complete") {
-              sendJustInstalledEvent(recentWindow, url);
-            } else {
-              // Otherwise the window, while existing, might not be ready yet so we wait to open our tab
-              recentWindow.addEventListener("load", makeInstalledLoadHandler(recentWindow, url), true);
-            }
-          }
-          else {
-            // No browser windows are open, so open a new one.
-            window.open(url);
-          }
-        }
-      }
-
-      openAndReuseOneTabPerURL(this.prefs.frontpage_url);
-    },
-
-    // This function is to be run once at onLoad
-    // Checks for the existence of key code already and saves or gives it an ID for later
-    // We could get away without this check but we're being nice to existing key commands
-    initKeyCode: function () {
-      var keys = document.getElementsByTagName("key");
-      for (var i = 0; i < keys.length; i++) {
-        // has the keycode we want to take and isn't already ours
-        if (this.keycode === keys[i].getAttribute("keycode") &&
-            this.keycodeId !== keys[i].id) {
-
-          if (keys[i].id) {
-            this.oldKeycodeId = keys[i].id;
-          }
-          else {
-            keys[i].id = this.oldKeycodeId;
-          }
-
-          break;
-        }
-      }
-      this.setAccelKey(this.prefs.use_accel_key);
     },
 
     observe: function (subject, topic, data) {
@@ -1116,15 +542,7 @@ if (0) { // fennec?
         return;
       }
 
-      if ("extensions." + FFSHARE_EXT_ID + ".use_accel_key" === data) {
-        try {
-          pref = subject.QueryInterface(Ci.nsIPrefBranch);
-          //dump("topic: " + topic + " -- data: " + data + " == pref: " + pref.getBoolPref(data) + "\n");
-          ffshare.setAccelKey(pref.getBoolPref(data));
-        } catch (e) {
-          error("observe: "+e);
-        }
-      } else if ("extensions." + FFSHARE_EXT_ID + ".bookmarking" === data) {
+      if ("extensions." + FFSHARE_EXT_ID + ".bookmarking" === data) {
         try {
           pref = subject.QueryInterface(Ci.nsIPrefBranch);
           ffshare.prefs.bookmarking = pref.getBoolPref(data);
@@ -1132,38 +550,6 @@ if (0) { // fennec?
           error("observe: "+e);
         }
       }
-    },
-
-    setAccelKey: function (keyOn) {
-      var oldKey = document.getElementById(this.oldKeycodeId),
-          f1Key = document.getElementById(this.keycodeId),
-          keyset = document.getElementById("mainKeyset"),
-          p;
-
-      if (keyOn) {
-        try {
-          if (oldKey) {
-            oldKey.setAttribute("keycode", "");
-          }
-          f1Key.setAttribute("keycode", this.keycode);
-        } catch (e) {
-          error("setAccelKey: "+e);
-        }
-      } else {
-        try {
-          f1Key.setAttribute("keycode", "");
-          if (oldKey) {
-            oldKey.setAttribute("keycode", this.keycode);
-          }
-        } catch (ex) {
-          error("setAccelKey: "+ex);
-        }
-      }
-
-      // now we invalidate the keyset cache so our changes take effect
-      p = keyset.parentNode;
-      p.appendChild(p.removeChild(keyset));
-
     },
 
     isValidURI: function (aURI) {
@@ -1183,25 +569,6 @@ if (0) { // fennec?
       } catch (e) {
         throw e;
       }
-    },
-
-    onContextMenuItemShowing: function (e) {
-      try {
-        var hide = (gContextMenu.onTextInput || gContextMenu.onLink ||
-                    gContextMenu.onImage || gContextMenu.isContentSelected ||
-                    gContextMenu.onCanvas || gContextMenu.onVideo ||
-                    gContextMenu.onAudio),
-            hideSelected = (gContextMenu.onTextInput || gContextMenu.onLink ||
-                            !gContextMenu.isContentSelected ||
-                            gContextMenu.onImage || gContextMenu.onCanvas ||
-                            gContextMenu.onVideo || gContextMenu.onAudio);
-
-        document.getElementById("context-ffshare").hidden = hide;
-        document.getElementById("context-ffshare-separator").hidden = hide;
-
-        document.getElementById("context-selected-ffshare").hidden = hideSelected;
-        document.getElementById("context-selected-ffshare-separator").hidden = hideSelected;
-      } catch (ignore) { }
     },
 
     switchTab: function (waitForLoad) {
@@ -1233,33 +600,8 @@ if (0) { // fennec?
       }
     },
 
-    onTabViewShow: function (e) {
-      // Triggered by TabView (panorama). Always hide it if being shown.
-      if (document.getElementById('share-popup').state == 'open') {
-        sharePanel.hide();
-      }
-    },
-
-    onTabViewHide: function (e) {
-      // Triggered by TabView (panorama). Restore share panel if needed.
-      // Hmm this never seems to be called? browser-tabview.js shows
-      // creation of a 'tabviewhide' event, but this function does
-      // not seem to be called.
-      this.switchTab();
-    },
-
-    togglePanel: function (options) {
-      var panel = document.getElementById('share-popup');
-      if (!panel) {
-        // XXX fennec, of course this isn't a great way to know...
-        fennecTab.open();
-        return;
-      }
-      if (panel && panel.state == 'open') {
-        sharePanel.close();
-      } else {
-        sharePanel.show(options);
-      }
+    open: function (options) {
+      fennecTab.open();
     }
   };
 
@@ -1284,13 +626,15 @@ if (0) { // fennec?
   }
 dump("system: "+ffshare.prefs.system+"\n");
 dump("panel url: "+ffshare.prefs.frontpage_url+"\n");
+
+  // injecting api into content
   var ffapi = {
     apibase: null, // null == 'navigator.mozilla.labs'
     name: 'share', // builds to 'navigator.mozilla.labs.share'
     script: null, // null == use injected default script
     getapi: function () {
       return function (options) {
-        ffshare.togglePanel(options);
+        ffshare.open(options);
       };
     }
   };
