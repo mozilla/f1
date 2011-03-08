@@ -258,7 +258,10 @@ function (object,         Widget,         $,        template,
                                          $('.counter', this.bodyNode),
                                          this.svc.textLimit - this.urlSize);
         }
+        this.updateCounter();
+      },
 
+      updateCounter: function () {
         // Update counter. If using a short url from the web page itself, it could
         // potentially be a different length than a bit.ly url so account for
         // that. The + 1 is to account for a space before adding the URL to the
@@ -321,6 +324,11 @@ function (object,         Widget,         $,        template,
         root.find('[name="to"]').val(opts.to);
         root.find('[name="subject"]').val(opts.subject);
         root.find('[name="message"]').val(opts.message);
+
+        // update text limit for the text counter, if enabled.
+        if (this.counter) {
+          this.updateCounter();
+        }
 
         //Kick the placeholder logic to recompute, to avoid gray text issues.
         placeholder(this.bodyNode);

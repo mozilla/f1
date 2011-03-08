@@ -123,6 +123,10 @@ a:hover {
   text-decoration: underline;
 }
 
+.status.error {
+    text-align: center;
+}
+
 .error {
   color: #FF0000;
 }

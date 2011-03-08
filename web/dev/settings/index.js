@@ -55,20 +55,16 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     }
   });
 
-  function showStatus(statusId, message) {
+  function clearStatus() {
     $('div.status').addClass('hidden');
+  }
+
+  function showStatus(statusId, message) {
+    clearStatus();
     $('#' + statusId).removeClass('hidden');
 
     if (message) {
       $('#' + statusId + ' .message').text(message);
-    }
-  }
-
-  function onError(xhr, textStatus, err) {
-    if (xhr.status === 503) {
-      showStatus('statusServerBusyClose');
-    } else {
-      showStatus('statusServerError', err);
     }
   }
 
@@ -123,9 +119,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           });
         }
       });
-    },
-    //error handler for accounts
-    onError
+    }
   );
 
   $(function () {
@@ -278,6 +272,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         var domain = $(this).attr('data-domain'),
           selectionName = services.domains[domain].type;
 
+        clearStatus();
         oauth(domain, existingAccounts[domain], function (success) {
           if (success) {
             //Make sure to bring the user back to this service if
@@ -293,7 +288,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         var domain = $(this).attr('data-domain'),
             userName = $(this).attr('data-username'),
             userId = $(this).attr('data-userid');
+
         try {
+          clearStatus();
           accounts.remove(domain, userId, userName);
         } catch (e) {
           // clear out account storage
@@ -346,6 +343,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       .delegate("ul#tabs li", 'click', function (evt) {
         var target = $(this),
             tabDom = $('#' + target.attr('data-tab'));
+
+        // clear any status that was visible.
+        clearStatus();
 
         // Show tab selected.
         target.addClass("selected");

@@ -43,7 +43,7 @@ function (object,         Contacts,     $) {
       findContact: function (to) {
         var match = idRegExp.exec(to),
             value = '',
-            name = (match && match[1]) || '';
+            name = (match && match[1]) || to;
         if (name) {
           (this.contacts || []).some(function (contact) {
             if (contact.username === name) {
