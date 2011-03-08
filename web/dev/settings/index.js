@@ -91,9 +91,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         html = '';
         services.domainList.forEach(function (domain) {
           var data = services.domains[domain];
-          data.domain = domain;
-          data.enableSignOut = !data.forceLogin && existingAccounts[domain];
-          html += jig('#addTemplate', services.domains[domain]);
+          if (isGreaterThan073 || !existingAccounts[domain]) {
+            data.domain = domain;
+            data.enableSignOut = !data.forceLogin && existingAccounts[domain];
+            html += jig('#addTemplate', services.domains[domain]);
+          }
         });
 
         if (html) {
