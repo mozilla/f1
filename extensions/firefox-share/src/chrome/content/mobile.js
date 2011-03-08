@@ -32,6 +32,10 @@
   getComputedStyle: false, gNavToolbox: false, XPCNativeWrapper: false,
   Image: false */
 
+
+// XXX This is a hacked up version of overlay.js just to get things working
+// in fennec
+
 var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 (function () {
@@ -59,6 +63,26 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   // Firefox 4 has the nice Services module
   Cu.import("resource://gre/modules/Services.jsm");
+
+  ///// prefs support that works with both fx and fennec //////
+
+  var extPrefs = Components.classes["@mozilla.org/preferences-service;1"]
+                      .getService(Components.interfaces.nsIPrefBranch2);
+
+
+  // argh!
+  function getCharPref(name, def) {
+    try {
+      return extPrefs.getCharPref(name);
+    } catch(e) {}
+    return def;
+  }
+  function getBoolPref(name, def) {
+    try {
+      return extPrefs.getBoolPref(name);
+    } catch(e) {}
+    return def;
+  }
 
   //////  Extensions to the Services object //////
 
@@ -100,10 +124,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   }
 
   function log(msg) {
+    dump("LOG: "+msg+"\n");
     Cu.reportError('.' + msg); // avoid clearing on empty log
   }
 
   function error(msg) {
+    dump("ERROR: "+msg+"\n");
     Cu.reportError('.' + msg); // avoid clearing on empty log
   }
 
@@ -262,6 +288,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   // tab when the panel is closed.
   var sharePanel = {
     init: function() {
+if (0) { // not needed in fennec
       this.browser = document.getElementById('share-browser');
       this.panel = document.getElementById('share-popup');
 
@@ -280,21 +307,24 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         }, 0);
       });
       this.browser.addEventListener("load", this.loadListener, true);
+}
 
       Services.obs.addObserver(this, 'content-document-global-created', false);
 
+if (0) { // fennec?
       var webProgress = this.browser.webProgress;
       this.stateProgressListener = new StateProgressListener(this.browser);
       webProgress.addProgressListener(this.stateProgressListener, Components.interfaces.nsIWebProgress.NOTIFY_STATE_WINDOW);
-
+}
     },
 
     shutdown: function() {
       Services.obs.removeObserver(this, 'content-document-global-created');
-
+if (0) { // fennec?
       var webProgress = this.browser.webProgress;
       webProgress.removeProgressListener(this.stateProgressListener);
       this.stateProgressListener = null;
+}
     },
 
     observe: function (aSubject, aTopic, aData) {
@@ -773,6 +803,52 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       this.browser = Browser.addTab(url, true, browser);
     }
   };
+  
+  var fennecTab = {
+
+    getOptions: function(options) {
+      // XXX the calls to sharePanel here need to get data from the browser
+      // tab that has the page content we want to share
+      options = options || {};
+      mixin(options, {
+        version: ffshare.version,
+        title: '',//sharePanel.getPageTitle(),
+        description: '',//sharePanel.getPageDescription(),
+        medium: '',//sharePanel.getPageMedium(),
+        url: Browser.selectedTab.browser.currentURI.spec,
+        canonicalUrl: '',//sharePanel.getCanonicalURL(),
+        shortUrl: '',//sharePanel.getShortURL(),
+        previews: '',//sharePanel.previews(),
+        siteName: '',//sharePanel.getSiteName(),
+        prefs: {
+          system: ffshare.prefs.system,
+          bookmarking: ffshare.prefs.bookmarking,
+          use_accel_key: ffshare.prefs.use_accel_key
+        }
+      });
+      return options;
+    },
+    
+    open: function() {
+      var tabURI = Browser.selectedTab.browser.currentURI,
+          tabUrl = tabURI.spec;
+      if (!ffshare.isValidURI(tabURI)) {
+        return;
+      }
+      var currentState = Browser.selectedTab.shareState;
+      var options = this.getOptions(options);
+
+      Browser.selectedTab.shareState = {
+        options: options, // currently not used for anything
+        status: currentState ? currentState.status : 0,
+        open: true
+      };
+
+      var url = ffshare.prefs.share_url +
+                '#options=' + encodeURIComponent(JSON.stringify(options));
+      Browser.addTab(url, true, Browser.selectedTab.browser);
+    }
+  }
 
 
   function sendJustInstalledEvent(win, url) {
@@ -800,25 +876,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       sendJustInstalledEvent(win, url);
     };
     return handler;
-  }
-
-  var extPrefs = Components.classes["@mozilla.org/preferences-service;1"].
-                        getService(Components.interfaces.nsIPrefService).
-                        getBranch("extensions." + FFSHARE_EXT_ID + ".").
-                        QueryInterface(Components.interfaces.nsIPrefBranch2);
-
-  // argh!
-  function getCharPref(name, def) {
-    try {
-      return extPrefs.getCharPref(name);
-    } catch(e) {}
-    return def;
-  }
-  function getBoolPref(name, def) {
-    try {
-      return extPrefs.getBoolPref(name);
-    } catch(e) {}
-    return def;
   }
 
   ffshare = {
@@ -914,7 +971,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       try {
         gBrowser.addProgressListener(canShareProgressListener);
       } catch (ex) {
-        error(ex);
+        error("onLoad: "+ex);
       }
 
       document.getElementById("contentAreaContextMenu").addEventListener("popupshowing", this.onContextMenuItemShowing, false);
@@ -939,7 +996,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       try {
         gBrowser.removeProgressListener(canShareProgressListener);
       } catch (e) {
-        error(e);
+        error("onUnload: "+e);
       }
 
       document.getElementById("contentAreaContextMenu").removeEventListener("popupshowing", this.onContextMenuItemShowing, false);
@@ -1065,14 +1122,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           //dump("topic: " + topic + " -- data: " + data + " == pref: " + pref.getBoolPref(data) + "\n");
           ffshare.setAccelKey(pref.getBoolPref(data));
         } catch (e) {
-          error(e);
+          error("observe: "+e);
         }
       } else if ("extensions." + FFSHARE_EXT_ID + ".bookmarking" === data) {
         try {
           pref = subject.QueryInterface(Ci.nsIPrefBranch);
           ffshare.prefs.bookmarking = pref.getBoolPref(data);
         } catch (e) {
-          error(e);
+          error("observe: "+e);
         }
       }
     },
@@ -1090,7 +1147,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           }
           f1Key.setAttribute("keycode", this.keycode);
         } catch (e) {
-          error(e);
+          error("setAccelKey: "+e);
         }
       } else {
         try {
@@ -1099,7 +1156,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
             oldKey.setAttribute("keycode", this.keycode);
           }
         } catch (ex) {
-          error(ex);
+          error("setAccelKey: "+ex);
         }
       }
 
@@ -1148,6 +1205,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     switchTab: function (waitForLoad) {
+      dump("switchTab called\n");
       if (waitForLoad) {
         // this double-loads the share panel since image data may not be
         // available yet
@@ -1191,7 +1249,13 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     togglePanel: function (options) {
-      if (document.getElementById('share-popup').state == 'open') {
+      var panel = document.getElementById('share-popup');
+      if (!panel) {
+        // XXX fennec, of course this isn't a great way to know...
+        fennecTab.open();
+        return;
+      }
+      if (panel && panel.state == 'open') {
         sharePanel.close();
       } else {
         sharePanel.show(options);
@@ -1218,7 +1282,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       ffshare.prefs.frontpage_url = 'http://f1.mozillamessaging.com/';
     }
   }
-
+dump("system: "+ffshare.prefs.system+"\n");
+dump("panel url: "+ffshare.prefs.frontpage_url+"\n");
   var ffapi = {
     apibase: null, // null == 'navigator.mozilla.labs'
     name: 'share', // builds to 'navigator.mozilla.labs.share'

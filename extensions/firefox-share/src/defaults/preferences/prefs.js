@@ -1,4 +1,4 @@
-pref("extensions.ffshare@mozilla.org.system", "prod");
+pref("extensions.ffshare@mozilla.org.system", "dev");
 pref("extensions.ffshare@mozilla.org.bookmarking", true);
 pref("extensions.ffshare@mozilla.org.use_accel_key", true);
 
