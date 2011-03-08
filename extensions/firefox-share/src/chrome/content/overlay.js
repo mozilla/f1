@@ -41,8 +41,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       slice = Array.prototype.slice,
       ostring = Object.prototype.toString,
       empty = {}, fn,
-      buttonId = 'ffshare-toolbar-button';
-  var SHARE_STATUS = ["", "start", "error"];
+      buttonId = 'ffshare-toolbar-button',
+      SHARE_STATUS = ["", "start", "", "finished"],
+      SHARE_DONE = 0,
+      SHARE_START = 1,
+      SHARE_ERROR = 2,
+      SHARE_FINISHED = 3;
 
   // width/height tracking for the panel, initial values are defaults to
   // show the configure status panel
@@ -57,11 +61,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   Cu.import("resource://ffshare/modules/injector.js");
   Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-  // Firefox 4 has the nice Services module
   Cu.import("resource://gre/modules/Services.jsm");
 
   //////  Extensions to the Services object //////
-
   XPCOMUtils.defineLazyServiceGetter(Services, "bookmarks",
                                      "@mozilla.org/browser/nav-bookmarks-service;1",
                                      "nsINavBookmarksService");
@@ -163,14 +165,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   StateProgressListener.prototype = {
     // detect communication from the iframe via location setting
-    QueryInterface: function (aIID) {
-      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-          aIID.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    },
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
+                                           Ci.nsISupportsWeakReference,
+                                           Ci.nsISupports]),
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       var flags = Components.interfaces.nsIWebProgressListener;
@@ -376,9 +373,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @param {Object} data info about the share.
      */
     success: function (data) {
-      this.updateStatus(0);
+      this.updateStatus(0, true);
       this.close();
 
+      // XXX we should work out a better bookmarking system
+      // https://github.com/mozilla/f1/issues/66
       if (ffshare.prefs.bookmarking) {
         var tags = ['shared', 'f1'];
         if (data.domain === 'twitter.com') {
@@ -736,7 +735,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
 
-    // panelUI operations
+    /**
+     * Called when we want to hide the panel and possibly destroy the shareState information
+     */
     close: function () {
       this.panel.hidePopup();
       if (gBrowser.selectedTab.shareState) {
@@ -754,42 +755,67 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
     },
 
-    updateStatus: function (status) {
-      var nBox, buttons;
+    /**
+     * Updates the state of the toolbar button during a share activity or
+     * afterward when a share error is received.
+     * @param {Integer} an index value that has meaning in the SHARE_STATUS array
+     * @param {Boolean} only passed by the final success call
+     */
+    updateStatus: function (status, success) {
+      var button = getButton(),
+          nBox = gBrowser.getNotificationBox(),
+          notification = nBox.getNotificationWithValue("mozilla-f1-share-error"),
+          buttons;
 
       if (typeof(status) === 'undefined') {
-        status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : 0;
+        status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : SHARE_DONE;
       }
+
+      if (status === SHARE_ERROR) {
+        // Check that we aren't already displaying our notification
+        if (!notification) {
+          buttons = [{
+            label: "try again",
+            accessKey: null,
+            callback: function () {
+              var nb = gBrowser.getNotificationBox();
+              nb.removeNotification(nb.getNotificationWithValue("mozilla-f1-share-error"));
+              window.setTimeout(function () {
+                ffshare.togglePanel();
+              }, 0);
+            }
+          }];
+          nBox.appendNotification("There was a problem sharing this page.",
+                                  "mozilla-f1-share-error",
+                                  null,
+                                  nBox.PRIORITY_WARNING_MEDIUM, buttons);
+        }
+        // Reset the status now that we've shown the warning
+        status = SHARE_DONE;
+      } else if (status === SHARE_DONE && notification) {
+        nBox.removeNotification(notification);
+      }
+
       if (gBrowser.selectedTab.shareState) {
         gBrowser.selectedTab.shareState.status = status;
       }
-      if (status === 2) {
-        // use the notification bar if the button is not in the urlbar
-        nBox = gBrowser.getNotificationBox();
-        buttons = [{
-          label: "try again",
-          accessKey: null,
-          callback: function () {
-            gBrowser.getNotificationBox().removeCurrentNotification();
-            window.setTimeout(function () {
-              ffshare.togglePanel();
-            }, 0);
-          }
-        }];
-        nBox.appendNotification(
-                       "There was a problem sharing this page.", "F1 Share Failure",
-                       null,
-                       nBox.PRIORITY_WARNING_MEDIUM, buttons);
-      }
-      var button = getButton();
+
       if (button) {
-        if (status === 2) {
-          status = 0;
+        // Only a final successful share should be passing this value
+        if (success) {
+          button.setAttribute("status", SHARE_STATUS[SHARE_FINISHED]);
+          window.setTimeout(function () {
+            button.setAttribute("status", SHARE_STATUS[status]);
+          }, 2900);
+        } else {
+          button.setAttribute("status", SHARE_STATUS[status]);
         }
-        button.setAttribute("status", SHARE_STATUS[status]);
       }
     },
 
+    /**
+     * Called when we only want to hide the panel and preserve the shareState information
+     */
     hide: function () {
       this.panel.hidePopup();
       gBrowser.selectedTab.shareState.open = false;

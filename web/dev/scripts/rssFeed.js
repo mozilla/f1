@@ -61,7 +61,7 @@ define([], function () {
     var node = document.createElement("script");
     node.charset = "utf-8";
     node.async = true;
-    node.src = 'http://www.google.com/uds/Gfeeds?v=1.0&callback=onRssFeedLoad&context=' +
+    node.src = 'https://www.google.com/uds/Gfeeds?v=1.0&callback=onRssFeedLoad&context=' +
               '&output=json&' +
               'q=http%3A%2F%2Fmozillalabs.com%2Fmessaging%2Ffeed%2F';
     document.getElementsByTagName('head')[0].appendChild(node);
