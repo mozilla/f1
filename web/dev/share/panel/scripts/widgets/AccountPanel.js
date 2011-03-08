@@ -309,6 +309,8 @@ function (object,         Widget,         $,        template,
         root.find('[name="title"]').val(opts.title);
         root.find('[name="caption"]').val(opts.caption);
         root.find('[name="description"]').val(opts.description);
+        root.find('[name="medium"]').val(opts.medium);
+        root.find('[name="source"]').val(opts.source);
 
         //Only set share types if they are available for this type of account.
         if (this.select) {
