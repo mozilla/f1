@@ -88,7 +88,6 @@ define(['storage', 'blade/url'], function (storage, url) {
         }
       }
     }
-
     //END domain-specific hacks.
 
     //Save the extension version in the localStorage, for use in
