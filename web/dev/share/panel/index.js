@@ -340,7 +340,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
   function updateAccounts(accounts) {
     var panelOverlays = [],
-        panelOverlayMap = {};
+        panelOverlayMap = {},
+        //Only do one overlay request per domain. This can be removed
+        //when requirejs is updated to 0.23.0 or later.
+        processedDomains = {};
 
     if ((accounts && accounts.length)) {
       //Collect any UI overrides used for AccountPanel based on the services
@@ -349,9 +352,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         var domain = account.accounts[0].domain,
             overlays = actions[domain].overlays,
             overlay = overlays && overlays['widgets/AccountPanel'];
-        if (overlay) {
+        if (overlay && !processedDomains[domain]) {
           panelOverlays.push(overlay);
           panelOverlayMap[domain] = overlay;
+          processedDomains[domain] = true;
         }
       });
 
