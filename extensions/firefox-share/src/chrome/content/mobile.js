@@ -36,6 +36,20 @@
 // XXX This is a hacked up version of overlay.js just to get things working
 // in fennec
 
+// TODO:
+//
+// a quick laundrey list that I can see....
+//
+// - hookup postmessage communication that the observer on content-document-global-created
+//   does in the fx overlay
+// - make the contentInfo object work
+// - refactor contentInfo so it can be shared between both fx and fennec
+// - move shared code to a single file
+// - see if the ffshare object can be refactored to share code between fx and fennec
+// - if injector will work in fennec, split that out to a shared file
+// - at some point, share/panel got redesigned specificly to mobile, we need to
+//   either move that to share/panel/m or otherwise deal with the differences
+
 var ffshare;
 var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 (function () {
