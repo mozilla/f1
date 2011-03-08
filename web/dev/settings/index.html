@@ -166,7 +166,7 @@
 <script id="accountTemplate" type="text/template">
   {.acct accounts[0]}
   <li class="hbox config remove" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}">
-    <div class="accountType overflow boxFlex" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}"><span class="icon {domainType(_)}"></span> {domainName(_)} <span class="username">({accountName(null, acct)})</span></div><span class="remove"></span>
+    <div class="accountType overflow boxFlex" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}"><span class="icon {domainType(_)}"></span> {domainName(_)} <span class="username">({accountName(displayName, acct)})</span></div><span class="remove"></span>
   </li>
 </script>
 
