@@ -4,6 +4,12 @@ body {
 }
 
 body #header.row {
+    margin: 0;
+    padding: 0 10px 0;    
+    float: none;
+}
+
+body #header.row .logo {
     display: none
 }
 
@@ -16,12 +22,14 @@ body #wrapper {
     max-width: 720px;
 }
 
-body .title {
+body #header.row .c1 {
+    height: auto;
   display: inline-block;
-  float: right;
   min-height: 1%;
-  margin: 0 10px;
+  margin: 0;
   position: relative;
+  width: 100%;
+  line-height: normal;
 }
 
 div span.remove,
@@ -48,4 +56,11 @@ div span.add {
 body li.remove,
 body li.auth {
     cursor: pointer;
+}
+
+body #newsFooter > div {
+    -moz-box-orient: vertical;
+}
+body #newsFooter .privacy {
+    margin: 10px 0 0 0;
 }

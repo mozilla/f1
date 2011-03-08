@@ -75,11 +75,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   // handle a redirect to the settings page for fennec
   var account_data = $.cookie("account_tokens");
   if (account_data) {
-    var oauth_data = {
-      target: 'oauth_success',
-      account: JSON.parse(account_data)
-    };
-    accounts.update(oauth_data.account);
+    accounts.update(JSON.parse(account_data));
     $.cookie("account_tokens", "", {"path": "/"});
   }
 
@@ -302,11 +298,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         } catch (e) {
           // clear out account storage
           accounts.clear();
-        }
-        $(this).remove();
-        if ($('#existing').children().length < 1) {
-          $('#existingHeader').addClass('hidden');
-          $('#existing').addClass('hidden');
         }
         
         evt.preventDefault();

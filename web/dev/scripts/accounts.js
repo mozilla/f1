@@ -67,11 +67,6 @@ function (storage,   dispatch,   rdapi,   services) {
 
           //Call ok callback with current knowledge. If there is a change in the
           //account info, then the fetch will trigger changed event later.
-          if (impl.options && impl.options.fetch) {
-            impl.fetch(ok, error);
-            return;
-          }
-          
           if (ok) {
             ok(accountCache, serviceCache);
           }
@@ -268,10 +263,6 @@ function (storage,   dispatch,   rdapi,   services) {
               action();
             }
           }, false);
-        },
-        
-        config: function(options) {
-          impl.options = options;
           //Also use direct notification in case storage events fail.
           dispatch.sub('accountsChanged', action);
         }
@@ -296,11 +287,7 @@ function (storage,   dispatch,   rdapi,   services) {
 
         onChange: function (action) {
           dispatch.sub('accountsChanged', action);
-        },
-        config: function(options) {
-          impl.options = options;
         }
-        
       }
     };
 
@@ -340,10 +327,6 @@ function (storage,   dispatch,   rdapi,   services) {
    */
   accounts.fetch = function (ok, error) {
     impl.fetch(ok, error);
-  };
-
-  accounts.config = function (options) {
-    impl.config(options);
   };
 
   /**
