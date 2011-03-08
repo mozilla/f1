@@ -1,27 +1,17 @@
-version := 0.1.7
-xpi_version := 0.7.3
-
+version := 0.2.7
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
 srcdir=$(TOPSRCDIR)/extensions/firefox-share/src/
 objdir=$(TOPSRCDIR)/extensions/firefox-share/dist/
 stage_dir=$(objdir)/stage
-xpi_dir=$(TOPSRCDIR)/web
+xpi_dir=$(TOPSRCDIR)/web/dev
 web_dir=$(TOPSRCDIR)/web/dev
 static_dir=$(TOPSRCDIR)/web/$(version)
 webbuild_dir=$(TOPSRCDIR)/tools/webbuild
 requirejs_dir=$(webbuild_dir)/requirejs
 
-ifeq ($(release_build),)
-  xpi_type := dev
-  update_url :=
-else
-  xpi_type := rel
-  update_url :=
-endif
-
-xpi_name := share-$(xpi_version)-$(xpi_type).xpi
+xpi_name := ffshare.xpi
 xpi_files := chrome.manifest chrome install.rdf defaults components modules
 dep_files := Makefile $(shell find $(srcdir) -type f)
 
@@ -72,12 +62,17 @@ web: $(static_dir)
 $(static_dir):
 	rsync -av $(web_dir)/ $(static_dir)/
 
-	perl -i -pe "s:version='[^']+':version='$(version)':" $(TOPSRCDIR)/setup.py
+	perl -i -pe "s:VERSION='[^']+':VERSION='$(version)':" $(TOPSRCDIR)/setup.py
+	perl -i -pe 's:/dev/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/staging.ini
+	perl -i -pe 's:/dev/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/production.ini
+
 	find $(static_dir) -name \*.html | xargs perl -i -pe 's:/dev/:/$(version)/:go'
+	perl -i -pe 's:/dev/:/$(version)/:go' $(static_dir)/scripts/oauth.js
 
 	cd $(static_dir) && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/settings && $(requirejs_dir)/build/build.sh build.js
 	cd $(static_dir)/share && $(requirejs_dir)/build/build.sh build.js
+	cd $(static_dir)/share/panel && $(requirejs_dir)/build/build.sh build.js
 
 clean:
 	rm -rf $(objdir)

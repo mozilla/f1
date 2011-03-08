@@ -21,17 +21,27 @@
  * Contributor(s):
  * */
 
-#ffshare-toolbar-button
-{
-  list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
+#ffshare-toolbar-button > label {
+  display: none;
 }
+
 #ffshare-toolbar-button > image {
+  list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
   width: auto;
   height: auto;
 }
+#ffshare-toolbar-button[firstRun] > image {
+  list-style-image: url("chrome://ffshare/skin/toolbar-button-glow.png");
+}
 
-/* Styles to style the autocomplete results */
-.autocomplete-richlistitem[type="ffshare"] .ac-site-icon,
-.autocomplete-richlistitem[type="ffshare"] .ac-url-box {
-    display: none !important;
+#ffshare-toolbar-button[status="start"] > image {
+  list-style-image: url("chrome://ffshare/skin/status-sharing.png");
+}
+
+#ffshare-toolbar-button[status="error"] > image {
+  list-style-image: url("chrome://ffshare/skin/status-error.png");
+}
+
+.ffshare-panel .panel-inner-arrowcontent {
+    padding: 0;
 }

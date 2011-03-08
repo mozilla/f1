@@ -21,37 +21,47 @@
  * Contributor(s):
  * */
 
-#ffshare-toolbar-button
-{
+#ffshare-toolbar-button {
   list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
   -moz-image-region: rect(0px, 35px, 23px, 0px);
 }
 #ffshare-toolbar-button[disabled="true"],
-#ffshare-toolbar-button[disabled="true"]:active
-{
+#ffshare-toolbar-button[disabled="true"]:active {
   -moz-image-region: rect(23px, 35px, 46px, 0px);
 }
-#ffshare-toolbar-button:active
-{
+#ffshare-toolbar-button:active {
   -moz-image-region: rect(46px, 35px, 69px, 0px);
 }
-
-/* Styles to style the autocomplete results */
-.autocomplete-richlistitem[type="ffshare"] .ac-site-icon,
-.autocomplete-richlistitem[type="ffshare"] .ac-url-box {
-    display: none !important;
+#ffshare-toolbar-button[checked="true"] {
+  background: none;
+  border-color: transparent;
+  -moz-image-region: rect(46px, 35px, 69px, 0px);
+}
+#ffshare-toolbar-button[firstRun] {
+  list-style-image: url("chrome://ffshare/skin/toolbar-button-glow.png");
+  -moz-image-region: rect(0px, 35px, 23px, 0px);
+}
+#ffshare-toolbar-button[status="start"] {
+  list-style-image: url("chrome://ffshare/skin/status-sharing.png");
 }
 
 .ffshare-panel {
-  min-width: 376px !important;
-  min-height: 392px !important;
+  width: 441px; /* note this value hard-coded in overlay.js */
+  min-width: 441px !important;
+  min-height: 234px !important;
 }
 
 .ffshare-browser {
-  width: 100%;
+  width: 400px; /* note this value tied to ffshare-panel width as well */
   height: 100%;
 }
 
+.ffshare-tabbed {
+  position: relative;
+  top: 0;
+  left: 0;
+  float: left;
+}
 /* Popup Bounding Box */
 
 .doorhanger-rtl {
@@ -61,7 +71,7 @@
   margin-top: -10px;
   margin-left: -16px;
   min-width: 280px;
-  -moz-border-image: url(chrome://browser/skin/hud-panel.png) 26 10 22 50 / 26px 18px 22px 50px repeat; 
+  -moz-border-image: url(chrome://browser/skin/hud-panel.png) 26 10 22 50 / 26px 18px 22px 50px repeat;
 }
 
 .doorhanger-ltr {
@@ -71,7 +81,7 @@
   margin-top: -10px;
   margin-right: -16px;
   min-width: 280px;
-  -moz-border-image: url(chrome://browser/skin/hud-panel.png) 26 50 22 10 / 26px 50px 22px 18px repeat; 
+  -moz-border-image: url(chrome://browser/skin/hud-panel.png) 26 50 22 10 / 26px 50px 22px 18px repeat;
 }
 
 .doorhanger-rtl .doorhanger-inner {

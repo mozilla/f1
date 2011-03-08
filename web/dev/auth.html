@@ -241,34 +241,60 @@
 
   </style>
   <script>
-    require(["require", "jquery", "blade/url"],
-    function (require,   $,        url) {
+    require(["require", "jquery", "blade/url", "services", "jquery.cookie"],
+    function (require,   $,        url,         services) {
       var target = window.location.href.split('#')[1];
       if (target && (target === 'oauth_success' || target === 'oauth_failure')) {
 
         //TODO: ideally lock down the domain be location.hostname, but
         //a problem for 127 addresses?
-        window.opener.postMessage(target, '*');
+        // XXX hacky way to handle fennec, since we didn't open a window,
+        // catch the exception when using window.opener and redirect
+        var data = {
+          target: target,
+          account: JSON.parse($.cookie("account_tokens"))
+        };
+        window.opener.postMessage(JSON.stringify(data), '*');
+        // clear the cookie, we no longer want it around
+        $.cookie("account_tokens", "", {"path": "/"});
         window.close();
       }
+
       var search = window.location.href.split('?')[1];
       if (search) {
         search = search.split('#')[0];
-        var args = url.queryToObject(search);
-        if (args['domain']) {
-          $("#domain").attr("value", args['domain']);
-	  if (args['domain'] == 'googleapps.com') {
-	    $('#oauth').removeClass('hidden');
-	    $('#message').addClass('hidden');
-	    $('#submitbtn').click(function (evt) {
-	      $('#oauth').addClass('hidden');
-	      $('#message').removeClass('hidden');
-	      document.authForm.submit();
-	    });
-	  } else {
-	    document.authForm.submit();
-	  }
-        }
+
+        var args = url.queryToObject(search),
+            domain = args.domain;
+
+        $(function () {
+            if (domain) {
+              // add a force login param to the form if asked.
+              if (args.forceLogin) {
+                var forceLogin = services.domains[domain].forceLogin;
+                if (forceLogin) {
+                  $('<input type="hidden" name="' +
+                    forceLogin.name +
+                    '" value="' + forceLogin.value + '">').appendTo('[name="authForm"]');
+                }
+              }
+
+              $("#domain").attr("value", args['domain']);
+
+              if (args['domain'] == 'googleapps.com') {
+                // show UI for googleapp
+                $('#oauth').removeClass('hidden');
+                $('#message').addClass('hidden');
+                $('#submitbtn').click(function (evt) {
+                  $('#oauth').addClass('hidden');
+                  $('#message').removeClass('hidden');
+                  document.authForm.submit();
+                });
+              } else {
+                document.authForm.submit();
+              }
+            }
+        });
       }
     });
   </script>
@@ -281,8 +307,8 @@
       <span class="text">Enter your Google Apps domain</span>
       <div class="controls hbox">
         <input class="boxFlex google" name="openid_identifier" id="openid_identifier" value="">
-        <input class="boxFlex google" type="hidden" name="end_point_success" value="/auth.html#oauth_success">
-        <input class="boxFlex google" type="hidden" name="end_point_auth_failure" value="/auth.html#oauth_failure">
+        <input class="boxFlex google" type="hidden" name="end_point_success" value="/dev/auth.html#oauth_success">
+        <input class="boxFlex google" type="hidden" name="end_point_auth_failure" value="/dev/auth.html#oauth_failure">
         <button id='submitbtn' type="submit">submit</button>
       </div>
       <span class="subtext">ex: yourappdomain.com</span>

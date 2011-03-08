@@ -34,11 +34,11 @@
   </stringbundleset>
 
   <commandset id="mainCommandSet">
-    <command id="cmd_openSharePage" oncommand="ffshare.onOpenShareCommand();"/>
+    <command id="cmd_toggleSharePage" oncommand="ffshare.togglePanel();"/>
   </commandset>
 
   <keyset id="mainKeyset">
-    <key id="key_ffshare" keycode="" command="cmd_openSharePage"/>
+    <key id="key_ffshare" keycode="" command="cmd_toggleSharePage"/>
   </keyset>
 
   <popupset id="mainPopupSet">
@@ -56,7 +56,7 @@
                 insertafter="context-sendpage"
                 label="&ffshareContext.label;"
                 accesskey="&ffshareContext.accesskey;"
-                command="cmd_openSharePage"/>
+                command="cmd_toggleSharePage"/>
       <menuseparator id="context-ffshare-separator"
                      insertafter="context-sendpage"/>
       <!--
@@ -75,8 +75,22 @@
                 insertafter="context-sep-selectall"
                 label="&ffshareContext.label;"
                 accesskey="&ffshareContext.accesskey;"
-                command="cmd_openSharePage"/>
+                command="cmd_toggleSharePage"/>
     </popup>
+
+    <panel id="share-popup"
+           type="arrow"
+           noautohide="true"
+           class="ffshare-panel"
+           level="parent">
+      <browser id="share-browser"
+              type="content"
+              flex="1"
+              src="about:blank"
+              disablehistory="true"
+              contextmenu="contentAreaContextMenu"
+              class="ffshare-browser"/>
+    </panel>
 
   </popupset>
 
@@ -95,7 +109,7 @@
               insertafter="menu_sendLink"
               label="&ffshareMenu.label;"
               accesskey="&ffshareMenu.accesskey;"
-              command="cmd_openSharePage"/>
+              command="cmd_toggleSharePage"/>
     <menuseparator id="menu_ffshare_separator"
                    insertafter="menu_sendLink"/>
   </menupopup>
@@ -119,7 +133,8 @@
                  class="toolbarbutton-1 chromeclass-toolbar-additional"
                  label="&ffshareToolbarButton.label;"
                  tooltiptext="&ffshareToolbarButton.tooltip;"
-                 command="cmd_openSharePage"/>
+                 type="checkbox"
+                 command="cmd_toggleSharePage"/>
 
   <tabbrowser id="content"/>
 

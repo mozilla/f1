@@ -26,16 +26,24 @@
 /*global define: false, window: false, location: false */
 "use strict";
 
-define([], function () {
+define([ 'accounts'],
+function (accounts) {
+
   var authDone, win, lastTime = 0;
 
   //Handle communication from the auth window, when it completes.
   window.addEventListener("message", function (evt) {
     //TODO: ideally lock down the domain check on evt.origin.
-    var status = evt.data;
-    if (status) {
-      if (status === 'oauth_success') {
+    var data, status;
+    try {
+      data = JSON.parse(evt.data);
+    } catch (e) {
+      return;
+    }
+    if (data.target) {
+      if (data.target === 'oauth_success' && data.account) {
         status = true;
+        accounts.update(data.account);
       } else {
         status = false;
       }
@@ -50,12 +58,13 @@ define([], function () {
     }
   }, false);
 
-  return function oauth(domain, callback) {
+  return function oauth(domain, forceLogin, callback) {
     if (callback) {
       authDone = callback;
     }
-    var url = location.protocol + "//" + location.host + "/auth.html",
-        currentTime = (new Date()).getTime();
+    var url = location.protocol + "//" + location.host + "/dev/auth.html",
+        currentTime = (new Date()).getTime(),
+        newLocation;
 
     //Could have a window handle, but could be closed, so account for it.
     if (win && win.closed) {
@@ -68,10 +77,16 @@ define([], function () {
     //but just trying to reduce the edge cases of seeing multiple windows.
     if ((currentTime > lastTime + 4000)) {
       lastTime = currentTime;
-      win = window.open(url + "?domain=" + domain,
-        "ffshareOAuth",
-        "dialog=yes, modal=yes, width=900, height=500, scrollbars=yes");
-      win.focus();
+      newLocation = url + "?domain=" + domain + (forceLogin ? '&forceLogin=1' : '');
+      try {
+        win = window.open(newLocation,
+          "ffshareOAuth",
+          "dialog=yes, modal=yes, width=900, height=500, scrollbars=yes");
+        win.focus();
+      } catch (e) {
+        // XXX dialog=yes fails on fennec, lets just do window.location
+        window.location = newLocation + "&end_point_success=" + encodeURI(window.location);
+      }
     } else if (win) {
       win.focus();
     }

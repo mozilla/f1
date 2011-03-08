@@ -23,202 +23,154 @@
 
 /*jslint indent: 2 */
 /*global define: false, window: false, location: true, localStorage: false,
-  opener: false, setTimeout: false */
+  opener: false, setTimeout: false, navigator: false */
 
 'use strict';
 
-define([ 'rdapi', "blade/url", "TextCounter"],
-function (rdapi,   url,         TextCounter) {
+define([ 'blade/object', 'storage'],
+function (object,         storage) {
 
-  var options = url.queryToObject(location.href.split('#')[1] || '') || {},
-  showNew = options.show === 'new';
+  var newHotness = parseFloat(navigator.userAgent.split('Firefox/')[1]) >= 4,
+      store = storage(),
+      svcs, prop;
 
-  function svcBase(name, options) {
+  function SvcBase(name, options) {
     if (!name) {
-        return;
+      return;
     }
     this.name = name;
-    this.type = name.replace(/\s/g,'').toLowerCase();
-    this.tabName = this.type+'Tab';
-    this.icon = 'i/'+this.type+'Icon.png';
-    this.shorten = false;
-    this.autoCompleteWidget = null;
+    this.type = name.replace(/\s/g, '').toLowerCase();
+    this.tabName = this.type + 'Tab';
+    this.icon = 'i/' + this.type + 'Icon.png';
 
-    // text counter support
-    this.counter = null;
-    this.textlimit = 0;
-    this.urlsize = 26;
-
-    // set options
+    // set features
     this.features = {
       counter: false,
       direct: false,
       subject: false
-    }
+    };
 
-    for (var i in options) {
-      this[i] = options[i];
-    }
+    object.mixin(this, options, true);
   }
-  svcBase.constructor = svcBase;
-  svcBase.prototype = {
-    validate: function (sendData) {
-      if (this.counter)
-        return !this.counter || !this.counter.isOver();
-      return true;
+  SvcBase.constructor = SvcBase;
+  SvcBase.prototype = {
+    clearCache: function (store) {
+      //This first delete is only needed for 3.6 support.
+      //Remove the call in accounts.js when it is removed.
+      delete store[this.type + 'Contacts'];
     },
-    startCounter: function(data) {
-      if (this.textlimit < 1)
-        return;
-      //Set up text counter
-      if (!this.counter) {
-        this.counter = new TextCounter($('#'+this.type+' textarea.message'),
-                                       $('#'+this.type+' .counter'),
-                                       this.textlimit - this.urlsize);
+    //This method can be removed once 3.6 support is dropped.
+    getContacts: function (store) {
+      if (store[this.type + 'Contacts']) {
+        var contacts = JSON.parse(store[this.type + 'Contacts']);
+        return contacts;
       }
-      // Update counter. If using a short url from the web page itself, it could
-      // potentially be a different length than a bit.ly url so account for
-      // that. The + 1 is to account for a space before adding the URL to the
-      // tweet.
-      this.counter.updateLimit(data.shortUrl ?
-                               (this.textlimit - (data.shortUrl.length + 1)) :
-                               this.textlimit - this.urlsize);
-    },
-    getFormData: function () {
-      var dom = $('#'+this.type);
-      return {
-        to: dom.find('[name="to"]').val().trim() || '',
-        subject: dom.find('[name="subject"]').val().trim() || '',
-        message: dom.find('textarea.message').val().trim() || '',
-        picture: dom.find('[name="picture"]').val().trim() || '',
-        canonicalUrl: dom.find('[name="link"]').val().trim() || '',
-        title: dom.find('[name="title"]').val().trim() || '',
-        description: dom.find('[name="description"]').val().trim() || '',
-        shortUrl: dom.find('[name="surl"]').val().trim() || '',
-        source: dom.find('[name="source"]').val().trim() || '',
-        medium: dom.find('[name="medium"]').val().trim() || ''
-      };
-    },
-    setFormData: function (data) {
-      var dom = $('#'+this.type);
-      if (data.to) {
-        dom.find('[name="to"]').val(data.to);
-      }
-      if (data.subject) {
-        dom.find('[name="subject"]').val(data.subject);
-      }
-      if (data.message) {
-        dom.find('textarea.message').val(data.message);
-      }
-      var picture = data.previews && data.previews[0];
-      if (picture) {
-        dom.find('[name="picture"]').val(picture);
-      }
-      if (data.canonicalUrl || data.url) {
-        dom.find('[name="link"]').val(data.canonicalUrl || data.url);
-      }
-      if (data.title) {
-        dom.find('[name="title"]').val(data.title);
-      }
-      if (data.description) {
-        dom.find('[name="description"]').val(data.description);
-      }
-      if (data.shortUrl) {
-        dom.find('[name="surl"]').val(data.shortUrl);
-      }
-      if (data.source) {
-        dom.find('[name="source"]').val(data.source);
-      }
-      if (data.medium) {
-        dom.find('[name="medium"]').val(data.medium);
-      }
-      this.startCounter(data);
-    },
-    clearCache: function(store) {
-      delete store[this.type+'Contacts'];
-    },
-    getContacts: function(store) {
-      if (store[this.type+'Contacts'])
-        return JSON.parse(store[this.type+'Contacts']);
       return null;
     },
-    setContacts: function(store, contacts) {
-      store[this.type+'Contacts'] = JSON.stringify(contacts);
+    //This method can be removed once 3.6 support is dropped.
+    setContacts: function (store, contacts) {
+      store[this.type + 'Contacts'] = JSON.stringify(contacts);
     },
-    getFormattedContacts: function(entries) {
-      var data = {};
-      entries.forEach(function (entry) {
-        if (entry.accounts && entry.accounts.length) {
-          entry.accounts.forEach(function (account) {
-            data[entry.displayName] = {
-              email: '',
-              userid: account.userid,
-              username: account.username
-            };
-          });
-        }
-      });
-      return data;
+
+    // stub function that should not return data for non-mail services
+    // for the FF 3.6 extension.
+    get36FormattedContacts: function () {
+      return null;
     }
   };
 
   /* common functionality for email based services */
-  function emailSvcBase() {
-    svcBase.constructor.apply(this, arguments);
+  function EmailSvcBase() {
+    SvcBase.constructor.apply(this, arguments);
     this.features.direct = true;
     this.features.subject = true;
-  };
-  emailSvcBase.prototype = new svcBase();
-  emailSvcBase.constructor = emailSvcBase;
-  emailSvcBase.prototype.validate = function (sendData) {
+  }
+
+  EmailSvcBase.prototype = new SvcBase();
+  EmailSvcBase.constructor = EmailSvcBase;
+  EmailSvcBase.prototype.validate = function (sendData) {
     if (!sendData.to || !sendData.to.trim()) {
-      showStatus('statusToError');
       return false;
     }
     return true;
   };
-  emailSvcBase.prototype.getFormattedContacts = function(entries) {
-    var data = {};
+
+  // The old top browser UI in the 3.6 extension expects the contacts data
+  // as an array.
+  // TODO: remove when Firefox 3.6 is no longer supported.
+  EmailSvcBase.prototype.get36FormattedContacts = function (entries) {
+    var data = [];
     entries.forEach(function (entry) {
       if (entry.emails && entry.emails.length) {
         entry.emails.forEach(function (email) {
           var displayName = entry.displayName ? entry.displayName : email.value;
-          data[displayName] = {
-              email: email.value,
-              userid: null,
-              username: null
-            };
+          data.push({
+            displayName: displayName,
+            email: email.value
+          });
         });
       }
     });
     return data;
-  }
+  };
 
-  var svcs = {
-    showNew: showNew,
+  EmailSvcBase.prototype.overlays = {
+    'Contacts': 'ContactsEmail'
+  };
+
+  svcs = {
     domains: {
-      'twitter.com': new svcBase('Twitter', {
+      'twitter.com': new SvcBase('Twitter', {
         features: {
+          //TODO: remove direct when old UI is no longer in use,
+          //or remove it from use.
           direct: true,
           subject: false,
           counter: true
         },
-        textlimit: 140,
+        shareTypes: [{
+          type: 'public',
+          name: 'public'
+        }, {
+          type: 'direct',
+          name: 'direct message',
+          showTo: true,
+          toLabel: 'type in name of recipient'
+        }],
+        textLimit: 140,
         shorten: true,
         serviceUrl: 'http://twitter.com',
         revokeUrl: 'http://twitter.com/settings/connections',
         signOutUrl: 'http://twitter.com/logout',
         accountLink: function (account) {
           return 'http://twitter.com/' + account.username;
+        },
+        forceLogin: {
+          name: 'force_login',
+          value: true
+        },
+        overlays: {
+          'Contacts': 'ContactsTwitter'
         }
       }),
-      'facebook.com': new svcBase('Facebook', {
+      'facebook.com': new SvcBase('Facebook', {
         features: {
+          //TODO: remove direct when old UI is no longer in use,
+          //or remove it from use.
           direct: true,
           subject: false,
           counter: true
         },
-        textlimit: 420,
+        shareTypes: [{
+          type: 'wall',
+          name: 'my wall'
+        }, {
+          type: 'groupWall',
+          name: 'group wall',
+          showTo: true,
+          toLabel: 'type in the name of the group'
+        }],
+        textLimit: 420,
         serviceUrl: 'http://facebook.com',
         revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
         signOutUrl: 'http://facebook.com',
@@ -226,24 +178,47 @@ function (rdapi,   url,         TextCounter) {
           return 'http://www.facebook.com/profile.php?id=' + account.userid;
         }
       }),
-      'google.com': new emailSvcBase('Gmail', {
+      'google.com': new EmailSvcBase('Gmail', {
+        shareTypes: [{
+          type: 'direct',
+          name: 'direct',
+          showTo: true
+        }],
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
         signOutUrl: 'http://google.com/preferences',
         accountLink: function (account) {
           return 'http://google.com/profiles/' + account.username;
+        },
+        forceLogin: {
+          name: 'pape_max_auth_age',
+          value: 0
         }
       }),
-      'googleapps.com': new emailSvcBase('Google Apps', {
+      'googleapps.com': new EmailSvcBase('Google Apps', {
+        shareTypes: [{
+          type: 'direct',
+          name: 'direct',
+          showTo: true
+        }],
         icon: 'i/gmailIcon.png',
         serviceUrl: 'https://mail.google.com',
         revokeUrl: 'https://www.google.com/accounts/IssuedAuthSubTokens',
         signOutUrl: 'http://google.com/preferences',
         accountLink: function (account) {
           return 'http://google.com/profiles/' + account.username;
+        },
+        forceLogin: {
+          name: 'pape_max_auth_age',
+          value: 0
         }
       }),
-      'yahoo.com': new emailSvcBase('Yahoo', {
+      'yahoo.com': new EmailSvcBase('Yahoo', {
+        shareTypes: [{
+          type: 'direct',
+          name: 'direct',
+          showTo: true
+        }],
         name: 'Yahoo!',
         serviceUrl: 'http://mail.yahoo.com', // XXX yahoo doesn't have ssl enabled mail?
         revokeUrl: 'https://api.login.yahoo.com/WSLogin/V1/unlink',
@@ -252,25 +227,59 @@ function (rdapi,   url,         TextCounter) {
           return 'http://profiles.yahoo.com/' + account.username;
         }
       }),
-      'linkedin.com': new svcBase('LinkedIn', {
+      'linkedin.com': new SvcBase('LinkedIn', {
+        isNew: true,
         features: {
+          //TODO: remove direct when old UI is no longer in use,
+          //or remove it from use.
           direct: true,
           subject: true,
           counter: false
         },
+        shareTypes: [{
+          type: 'public',
+          name: 'anyone'
+        }, {
+          type: 'myConnections',
+          name: 'connections only',
+          specialTo: 'connections-only'
+        }, {
+          type: 'contact',
+          name: 'send message',
+          showTo: true,
+          toLabel: 'type in the name of the contact'
+        }],
         serviceUrl: 'http://linkedin.com',
         revokeUrl: 'http://linkedin.com/settings/connections',
-        signOutUrl: 'http://linkedin.com/logout',
+        signOutUrl: 'https://www.linkedin.com/secure/login?session_full_logout=&trk=hb_signout',
         accountLink: function (account) {
           return 'http://linkedin.com/' + account.username;
+        },
+        overlays: {
+          'widgets/AccountPanel': 'widgets/AccountPanelLinkedIn'
         }
       })
     },
-    domainList: []
+    domainList: [],
+
+    //Patch to allow old share UI to work
+    //Remove when it goes away.
+    svcBaseProto: SvcBase.prototype
   };
 
-  for (var i in svcs.domains) {
-    svcs.domainList.push(i);
+  // Build up an list of services
+  for (prop in svcs.domains) {
+    if (svcs.domains.hasOwnProperty(prop)) {
+      svcs.domainList.push(prop);
+
+      // Clear out the old contacts model.
+      // TODO: Remove this once the 3.6 add-on/UI is finally
+      // shut off.
+      if (newHotness) {
+        delete store[svcs.domains[prop].type + 'Contacts'];
+        delete store.contactsModelVersion;
+      }
+    }
   }
 
   return svcs;

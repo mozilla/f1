@@ -38,7 +38,8 @@ body {
 }
 
 .hidden,
-#tabs li.hidden {
+#tabs li.hidden,
+.hbox > *.hidden {
   display: none;
 }
 
@@ -117,6 +118,37 @@ a:hover {
   text-decoration: underline;
 }
 
+.status.error {
+    text-align: center;
+}
+
+.error {
+  color: #FF0000;
+}
+/* From the uservoice feedback button */
+#feedback {
+    position: fixed;
+    top: 40%;
+    left: 0;
+    width: 25px;
+    height: 98px;
+    padding: 0;
+    margin: -45px 0 0;
+    text-indent: -1000px;
+    background-image: url("http://cdn.uservoice.com/images/widgets/en/feedback_tab_white.png");
+    background-position: 2px 50%;
+    background-color: red;
+    border-color: #FF0000 #FF0000 #FF0000 -moz-use-text-color;
+    border-style: outset outset outset none;
+    border-width: 1px 1px 1px medium;
+    z-index: 500;
+}
+#feedback:hover {
+    text-decoration: none;
+    background-color: #0066CC;
+    border-color: #0066CC #0066CC #0066CC -moz-use-text-color;
+}
+
 strong {
   font-weight: bold;
 }
@@ -126,6 +158,26 @@ strong {
   margin: 0 auto;
   overflow: hidden;
   position: relative;
+}
+
+#shortenForm label.text {
+    line-height: 24px;
+}
+
+#shortenForm input {
+  width: 220px;
+  height: 24px;
+  border-color: #aaa;
+  border-style: solid;
+  border-width: 1px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15) inset;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  padding: 2px 5px;
+}
+
+#shortenForm select {
+    width: 220px;
 }
 
 /*
@@ -167,6 +219,17 @@ h1 {
   color: #00A0FF;
 }
 
+span.micro {
+    font-size: 12px;
+    margin: 5px 0 10px 0;
+    display: block;
+    color: #666;
+}
+
+a.micro {
+    margin: 0 10px;
+}
+
 /*
     header
 */
@@ -186,6 +249,7 @@ h1 {
 #header.row .logo {
   background-image: url("i/f1Logo.png");
   background-repeat: no-repeat;
+  background-position: 0 -9px;
 }
 
 /*
@@ -310,6 +374,12 @@ ul#tabs li.selected {
 
 #config ul li .accountType {
   line-height: 24px;
+}
+
+.accountType .multipleSignOut {
+    float: right;
+    margin-right: 10px;
+    color: #AAAAAA;
 }
 
 #config ul li:last-child {
