@@ -93,7 +93,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     $('#clickBlock').removeClass('hidden');
     $('#' + statusId).removeClass('hidden');
 
-    dump("showStatus "+statusId+","+shouldCloseOrMessage+"\n");
     if (!okStatusIds[statusId]) {
       updateChromeStatus(SHARE_ERROR, statusId, shouldCloseOrMessage);
     }
