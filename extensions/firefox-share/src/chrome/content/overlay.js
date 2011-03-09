@@ -41,8 +41,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       slice = Array.prototype.slice,
       ostring = Object.prototype.toString,
       empty = {}, fn,
-      buttonId = 'ffshare-toolbar-button';
-  var SHARE_STATUS = ["", "start", "error"];
+      buttonId = 'ffshare-toolbar-button',
+      SHARE_STATUS = ["", "start", "", "finished"],
+      SHARE_DONE = 0,
+      SHARE_START = 1,
+      SHARE_ERROR = 2,
+      SHARE_FINISHED = 3;
 
   // width/height tracking for the panel, initial values are defaults to
   // show the configure status panel
@@ -57,11 +61,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   Cu.import("resource://ffshare/modules/injector.js");
   Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-  // Firefox 4 has the nice Services module
   Cu.import("resource://gre/modules/Services.jsm");
 
   //////  Extensions to the Services object //////
-
   XPCOMUtils.defineLazyServiceGetter(Services, "bookmarks",
                                      "@mozilla.org/browser/nav-bookmarks-service;1",
                                      "nsINavBookmarksService");
@@ -163,14 +165,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   StateProgressListener.prototype = {
     // detect communication from the iframe via location setting
-    QueryInterface: function (aIID) {
-      if (aIID.equals(Components.interfaces.nsIWebProgressListener)   ||
-          aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-          aIID.equals(Components.interfaces.nsISupports)) {
-        return this;
-      }
-      throw Components.results.NS_NOINTERFACE;
-    },
+    QueryInterface: XPCOMUtils.generateQI([Ci.nsIWebProgressListener,
+                                           Ci.nsISupportsWeakReference,
+                                           Ci.nsISupports]),
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
       var flags = Components.interfaces.nsIWebProgressListener;
@@ -261,7 +258,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
   // is opened for that tab.  The state object is removed from the current
   // tab when the panel is closed.
   var sharePanel = {
-    init: function() {
+    init: function () {
       this.browser = document.getElementById('share-browser');
       this.panel = document.getElementById('share-popup');
 
@@ -289,7 +286,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     },
 
-    shutdown: function() {
+    shutdown: function () {
       Services.obs.removeObserver(this, 'content-document-global-created');
 
       var webProgress = this.browser.webProgress;
@@ -348,13 +345,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + "." + pref.name, pref.value);
     },
 
-    getOptions: function(options) {
+    getOptions: function (options) {
       options = options || {};
       mixin(options, {
         version: ffshare.version,
         title: this.getPageTitle(),
         description: this.getPageDescription(),
         medium: this.getPageMedium(),
+        source: this.getSourceURL(),
         url: gBrowser.currentURI.spec,
         canonicalUrl: this.getCanonicalURL(),
         shortUrl: this.getShortURL(),
@@ -375,9 +373,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @param {Object} data info about the share.
      */
     success: function (data) {
-      this.updateStatus(0);
+      this.updateStatus([SHARE_DONE], true);
       this.close();
 
+      // XXX we should work out a better bookmarking system
+      // https://github.com/mozilla/f1/issues/66
       if (ffshare.prefs.bookmarking) {
         var tags = ['shared', 'f1'];
         if (data.domain === 'twitter.com') {
@@ -470,6 +470,72 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         if (content) {
           return unescapeXml(content);
         }
+      }
+      return "";
+    },
+
+    getSourceURL: function () {
+      //Ideally each page would report the medium correctly, but some
+      //do not, like vimeo, so always just look for a video source.
+      var source = this.getVideoSourceURL();
+      return source || "";
+    },
+
+    getVideoSourceURL: function () {
+      var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:video']");
+      for (var i = 0; i < metas.length; i++) {
+        var content = metas[i].getAttribute("content");
+        if (content) {
+          return unescapeXml(content);
+        }
+      }
+      return this.getVideoSourceURLHacks();
+    },
+
+    getVideoSourceURLHacks: function () {
+      var canonical = this.getCanonicalURL(),
+          host = gBrowser.currentURI.host,
+          params, embeds, i, src, flashvars, value;
+
+      //YouTube hack to get the right source without too many parameters
+      if (host.indexOf("youtube.com") >= 0 &&
+          canonical.match(/v=([A-Za-z0-9._%\-]*)[&\w;=\+_\-]*/)) {
+        var id = canonical.match(/v=([A-Za-z0-9._%\-]*)[&\w;=\+_\-]*/)[1];
+        return "http://www.youtube.com/v/" + id;
+      }
+
+      //Vimeo hack to find the <object data="src"><param name="flashvars"/></object> pieces we need
+      embeds = gBrowser.contentDocument.querySelectorAll("object[type='application/x-shockwave-flash'][data]");
+      params = gBrowser.contentDocument.querySelectorAll("param[name='flashvars']");
+      for (i = 0; i < embeds.length; i++) {
+        src = embeds[i].getAttribute("data");
+        flashvars = params[0].getAttribute("value");
+        if (flashvars) {
+          src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
+        }
+        return gBrowser.currentURI.resolve(unescapeXml(src));
+      }
+
+      //A generic hack that looks for the <param name="movie"> which is often available
+      // for backwards compat and IE
+      params = gBrowser.contentDocument.querySelectorAll("param[name='movie']");
+      for (i = 0; i < params.length; i++) {
+        value = params[i].getAttribute("value");
+        if (value) {
+          return gBrowser.currentURI.resolve(unescapeXml(value));
+        }
+      }
+
+      //This one is fairly bad because the flashvars can exceed a reasonable
+      // url length limit and since it is only sent to flash it is often large
+      embeds = gBrowser.contentDocument.querySelectorAll("embed[src]");
+      for (i = 0; i < embeds.length; i++) {
+        src = embeds[i].getAttribute("src");
+        flashvars = embeds[i].getAttribute("flashvars");
+        if (flashvars) {
+          src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
+        }
+        return gBrowser.currentURI.resolve(unescapeXml(src));
       }
       return "";
     },
@@ -643,6 +709,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       return previews;
     },
 
+    getShareState: function() {
+      var win = this.browser.contentWindow.wrappedJSObject;
+      win.postMessage(JSON.stringify({
+          topic: 'shareState',
+          data: gBrowser.selectedTab.shareState
+        }), win.location.protocol + "//" + win.location.host);
+    },
+
     escapeHtml: function (text) {
       return text
         .replace(/&/g, '&amp;')
@@ -669,75 +743,109 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
 
-    // panelUI operations
+    /**
+     * Called when we want to hide the panel and possibly destroy the shareState information
+     */
     close: function () {
       this.panel.hidePopup();
       if (gBrowser.selectedTab.shareState) {
-        if (gBrowser.selectedTab.shareState.status === 0)
+        if (gBrowser.selectedTab.shareState.status === 0) {
           gBrowser.selectedTab.shareState = null;
-        else
+        } else {
           gBrowser.selectedTab.shareState.open = false;
+        }
       }
 
       // Always ensure the button is unchecked when the panel is hidden
       var button = getButton();
-      if (button)
+      if (button) {
         button.removeAttribute("checked");
+      }
     },
-    
-    updateStatus: function(status) {
-      if (typeof(status) == 'undefined')
-        status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : 0;
-      if (gBrowser.selectedTab.shareState)
-        gBrowser.selectedTab.shareState.status = status;
 
-      let nBox = gBrowser.getNotificationBox();
-      var current = nBox.getNotificationWithValue("F1 Share Failure");
-      if (status == 2 && !current) {
-        // use the notification bar if the button is not in the urlbar
-        let buttons = [
-            {
+    /**
+     * Updates the state of the toolbar button during a share activity or
+     * afterward when a share error is received.
+     * @param {Integer} an index value that has meaning in the SHARE_STATUS array
+     * @param {Boolean} only passed by the final success call
+     */
+    updateStatus: function (statusData, success) {
+      var button = getButton(),
+          nBox = gBrowser.getNotificationBox(),
+          notification = nBox.getNotificationWithValue("mozilla-f1-share-error"),
+          status,
+          buttons;
+
+      if (typeof(statusData) === 'undefined') {
+        statusData = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : [SHARE_DONE];
+      }
+      status = statusData[0];
+
+      if (status === SHARE_ERROR) {
+        // Check that we aren't already displaying our notification
+        if (!notification) {
+          buttons = [{
             label: "try again",
             accessKey: null,
-            callback: function() {
-                gBrowser.getNotificationBox().removeCurrentNotification();
-                gBrowser.selectedTab.shareState.status = 0;
-                window.setTimeout(function() {
-                  ffshare.togglePanel();
-                }, 0);
+            callback: function () {
+              var nb = gBrowser.getNotificationBox();
+              nb.removeNotification(nb.getNotificationWithValue("mozilla-f1-share-error"));
+              window.setTimeout(function () {
+                ffshare.togglePanel();
+              }, 0);
             }
-        }];
-        nBox.appendNotification(
-                       "There was a problem sharing this page.", "F1 Share Failure",
-                       null,
-                       nBox.PRIORITY_WARNING_MEDIUM, buttons);
-      } else
-      if (status != 2 && current) {
-        gBrowser.getNotificationBox().removeCurrentNotification();
+          }];
+          nBox.appendNotification("There was a problem sharing this page.",
+                                  "mozilla-f1-share-error",
+                                  null,
+                                  nBox.PRIORITY_WARNING_MEDIUM, buttons);
+        }
+      } else if (status === SHARE_DONE && notification) {
+        nBox.removeNotification(notification);
       }
 
-      var button = getButton();
+      if (gBrowser.selectedTab.shareState) {
+        gBrowser.selectedTab.shareState.status = statusData;
+      }
+
       if (button) {
-        if (status == 2)
-          status = 0;
-        button.setAttribute("status", SHARE_STATUS[status]);
+        // Only a final successful share should be passing this value
+        if (success) {
+          button.setAttribute("status", SHARE_STATUS[SHARE_FINISHED]);
+          window.setTimeout(function () {
+            button.setAttribute("status", SHARE_STATUS[status]);
+          }, 2900);
+        } else {
+          button.setAttribute("status", SHARE_STATUS[status]);
+        }
       }
     },
 
+    /**
+     * Called when we only want to hide the panel and preserve the shareState information
+     */
     hide: function () {
       this.panel.hidePopup();
       gBrowser.selectedTab.shareState.open = false;
       var button = getButton();
-      if (button)
+      if (button) {
         button.removeAttribute("checked");
+      }
     },
 
 
     show: function (options) {
-      var tabURI = gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI,
-          tabUrl = tabURI.spec;
+      var contentBrowser = gBrowser.getBrowserForTab(gBrowser.selectedTab),
+          tabURI = contentBrowser.currentURI,
+          tabUrl = tabURI.spec,
+          nBox = gBrowser.getNotificationBox(contentBrowser),
+          notification = nBox.getNotificationWithValue("mozilla-f1-share-error");
+          
       if (!ffshare.isValidURI(tabURI)) {
         return;
+      }
+      if (notification) {
+        nBox.removeNotification(notification);        
       }
       var currentState = gBrowser.selectedTab.shareState;
       options = this.getOptions(options);
@@ -768,7 +876,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (button) {
         // Always ensure the button is checked if the panel is open
         button.setAttribute("checked", true);
-  
+
         // Always ensure we aren't glowing if the person clicks on the button
         button.removeAttribute("firstRun");
       } else {
@@ -1060,8 +1168,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         try {
           pref = subject.QueryInterface(Ci.nsIPrefBranch);
           ffshare.prefs.bookmarking = pref.getBoolPref(data);
-        } catch (e) {
-          error(e);
+        } catch (e2) {
+          error(e2);
         }
       }
     },
@@ -1140,21 +1248,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       if (waitForLoad) {
         // this double-loads the share panel since image data may not be
         // available yet
-        let self = this;
-        gBrowser.contentWindow.addEventListener('DOMContentLoaded', function() {
+        var self = this;
+        gBrowser.contentWindow.addEventListener('DOMContentLoaded', function () {
           self.switchTab(false);
         }, true);
       }
 
       var selectedTab = gBrowser.selectedTab;
-      var visible = document.getElementById('share-popup').state == 'open';
+      var visible = document.getElementById('share-popup').state === 'open';
       var isopen = selectedTab.shareState && selectedTab.shareState.open;
       if (visible && !isopen) {
         sharePanel.close();
       }
       if (isopen) {
         window.setTimeout(function () {
-          sharePanel.updateStatus();
           sharePanel.show({});
         }, 0);
       } else {
@@ -1166,7 +1273,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     onTabViewShow: function (e) {
       // Triggered by TabView (panorama). Always hide it if being shown.
-      if (document.getElementById('share-popup').state == 'open') {
+      if (document.getElementById('share-popup').state === 'open') {
         sharePanel.hide();
       }
     },
@@ -1180,7 +1287,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     },
 
     togglePanel: function (options) {
-      if (document.getElementById('share-popup').state == 'open') {
+      if (document.getElementById('share-popup').state === 'open') {
         sharePanel.close();
       } else {
         sharePanel.show(options);

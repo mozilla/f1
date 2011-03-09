@@ -27,11 +27,11 @@
 
 define([ 'blade/object', 'blade/Widget', 'jquery', 'text!./AccountPanel.html',
          'TextCounter', 'storage', 'module', 'placeholder', 'dispatch', 'accounts',
-         'require', 'rdapi', 'blade/fn', './jigFuncs', 'Select',
+         'require', 'AutoComplete', 'rdapi', 'blade/fn', './jigFuncs', 'Select',
          'jquery.textOverflow'],
 function (object,         Widget,         $,        template,
           TextCounter,   storage,   module,   placeholder,   dispatch,   accounts,
-          require,   rdapi,   fn,         jigFuncs,     Select) {
+          require,   AutoComplete,   rdapi,   fn,         jigFuncs,     Select) {
 
   var store = storage(),
       className = module.id.replace(/\//g, '-');
@@ -67,8 +67,8 @@ function (object,         Widget,         $,        template,
 
       template: template,
 
-      // The module name for the AutoComplete module
-      autoCompleteName: 'AutoComplete',
+      // The module name for the Contacts module
+      contactsName: 'Contacts',
 
       strings: {
         shareTypeLabel: 'send to'
@@ -116,10 +116,10 @@ function (object,         Widget,         $,        template,
 
         this.displayName = name;
 
-        // Figure out what module will handle autocomplete.
-        this.autoCompleteName = (this.svc.overlays &&
-                                this.svc.overlays[this.autoCompleteName]) ||
-                                this.autoCompleteName;
+        // Figure out what module will handle contacts.
+        this.contactsName = (this.svc.overlays &&
+                                this.svc.overlays[this.contactsName]) ||
+                                this.contactsName;
 
         //Listen for options changes and update the account.
         this.optionsChangedSub = dispatch.sub('optionsChanged', fn.bind(this, function (options) {
@@ -127,15 +127,27 @@ function (object,         Widget,         $,        template,
           this.optionsChanged();
         }));
 
-        //Listen for updates to base63Preview
-        this.base64PreviewSub = dispatch.sub('base64Preview', function (dataUrl) {
+        //Listen for updates to base64Preview
+        this.base64PreviewSub = dispatch.sub('base64Preview', fn.bind(this, function (dataUrl) {
           $('[name="picture_base64"]', this.bodyNode).val(jigFuncs.rawBase64(dataUrl));
-        });
+        }));
+
+        // listen for successful send, and if so, update contacts list, if
+        // the send matches this account.
+        this.sendCompleteSub = dispatch.sub('sendComplete', fn.bind(this, function (data) {
+          var acct = this.svcAccount;
+          if (data.to && acct.domain === data.domain &&
+              acct.userid === data.userid &&
+              acct.username === data.username) {
+            this.contacts.incorporate(data.to);
+          }
+        }));
       },
 
       destroy: function () {
         dispatch.unsub(this.optionsChangedSub);
         dispatch.unsub(this.base64PreviewSub);
+        dispatch.unsub(this.sendCompleteSub);
         this.select.dom.unbind('change', this.selectChangeFunc);
         delete this.selectChangeFunc;
         this.select.destroy();
@@ -185,12 +197,14 @@ function (object,         Widget,         $,        template,
         }
         placeholder(this.bodyNode);
 
-        // Set up autocomplete. Since autocomplete can have a different
-        // format/display per service account, allow for service overrides.
+        // Set up autocomplete and contacts used for autocomplete.
+        // Since contacts can have a different
+        // format/display per service, allow for service overrides.
         acNode = $('[name="to"]', this.bodyNode)[0];
         if (acNode) {
-          require([this.autoCompleteName], fn.bind(this, function (AutoComplete) {
-            this.autoComplete = new AutoComplete(acNode, this.svc, this.svcAccount);
+          require([this.contactsName], fn.bind(this, function (Contacts) {
+            this.contacts = new Contacts(this.svc, this.svcAccount);
+            this.autoComplete = new AutoComplete(acNode, this.contacts);
           }));
         }
 
@@ -244,7 +258,10 @@ function (object,         Widget,         $,        template,
                                          $('.counter', this.bodyNode),
                                          this.svc.textLimit - this.urlSize);
         }
+        this.updateCounter();
+      },
 
+      updateCounter: function () {
         // Update counter. If using a short url from the web page itself, it could
         // potentially be a different length than a bit.ly url so account for
         // that. The + 1 is to account for a space before adding the URL to the
@@ -292,6 +309,8 @@ function (object,         Widget,         $,        template,
         root.find('[name="title"]').val(opts.title);
         root.find('[name="caption"]').val(opts.caption);
         root.find('[name="description"]').val(opts.description);
+        root.find('[name="medium"]').val(opts.medium);
+        root.find('[name="source"]').val(opts.source);
 
         //Only set share types if they are available for this type of account.
         if (this.select) {
@@ -307,6 +326,11 @@ function (object,         Widget,         $,        template,
         root.find('[name="to"]').val(opts.to);
         root.find('[name="subject"]').val(opts.subject);
         root.find('[name="message"]').val(opts.message);
+
+        // update text limit for the text counter, if enabled.
+        if (this.counter) {
+          this.updateCounter();
+        }
 
         //Kick the placeholder logic to recompute, to avoid gray text issues.
         placeholder(this.bodyNode);
@@ -400,11 +424,11 @@ function (object,         Widget,         $,        template,
 
         // fixup to addressing if necessary
         if (sendData.to) {
-          sendData.to = this.autoComplete.convert(sendData.to);
+          sendData.to = this.contacts.convert(sendData.to);
         }
 
         //Notify the page of a send.
-        $(document).trigger('sendMessage', [sendData]);
+        dispatch.pub('sendMessage', sendData);
       }
     };
   });

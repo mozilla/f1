@@ -37,6 +37,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
   isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
   isGreaterThan073 = dotCompare(store.extensionVersion, "0.7.4") > -1,
   options = url.queryToObject(location.href.split('#')[1] || '') || {},
+  existingAccounts = {},
   showNew = options.show === 'new';
 
   jig.addFn({
@@ -53,20 +54,16 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     }
   });
 
-  function showStatus(statusId, message) {
+  function clearStatus() {
     $('div.status').addClass('hidden');
+  }
+
+  function showStatus(statusId, message) {
+    clearStatus();
     $('#' + statusId).removeClass('hidden');
 
     if (message) {
       $('#' + statusId + ' .message').text(message);
-    }
-  }
-
-  function onError(xhr, textStatus, err) {
-    if (xhr.status === 503) {
-      showStatus('statusServerBusyClose');
-    } else {
-      showStatus('statusServerError', err);
     }
   }
 
@@ -76,14 +73,11 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       $(function () {
         var html = '';
 
-        //Weed out existing accounts for domains from available domainList,
-        //and generate account UI
         json.forEach(function (item) {
-          var index = services.domainList.indexOf(item.accounts[0].domain);
-          if (index !== -1) {
-            services.domainList.splice(index, 1);
-          }
           html += jig('#accountTemplate', item);
+
+          // remember which accounts already have an entry
+          existingAccounts[item.accounts[0].domain] = true;
         });
 
         //Generate UI for each list.
@@ -97,9 +91,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         html = '';
         services.domainList.forEach(function (domain) {
           var data = services.domains[domain];
-          data.domain = domain;
-          html += jig('#addTemplate', services.domains[domain]);
+          if (isGreaterThan073 || !existingAccounts[domain]) {
+            data.domain = domain;
+            data.enableSignOut = !data.forceLogin && existingAccounts[domain];
+            html += jig('#addTemplate', services.domains[domain]);
+          }
         });
+
         if (html) {
           $('#availableHeader').removeClass('hidden');
           $('#available')
@@ -115,9 +113,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           });
         }
       });
-    },
-    //error handler for accounts
-    onError
+    }
   );
 
   $(function () {
@@ -271,7 +267,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           domain = node.getAttribute('data-domain'),
           selectionName = services.domains[domain].type;
 
-        oauth(domain, function (success) {
+        clearStatus();
+        oauth(domain, existingAccounts[domain], function (success) {
           if (success) {
             //Make sure to bring the user back to this service if
             //the auth is successful.
@@ -281,28 +278,23 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           }
         });
       })
-      .delegate('.refresh', 'click', function (evt) {
-        // clear all service caches
-        for (var s in services.domains) {
-          services.domains[s].clearCache(store);
-        }
-        accounts.changed();
-      })
       //Hook up remove buttons to remove an account
       .delegate('.remove', 'click', function (evt) {
         var buttonNode = evt.target,
             domain = buttonNode.getAttribute('data-domain'),
             userName = buttonNode.getAttribute('data-username'),
             userId = buttonNode.getAttribute('data-userid');
+
         try {
+          clearStatus();
           accounts.remove(domain, userId, userName);
         } catch (e) {
           // clear out account storage
           accounts.clear();
         }
         evt.preventDefault();
-      }).
-      delegate('#settings [type="checkbox"]', 'click', function (evt) {
+      })
+      .delegate('#settings [type="checkbox"]', 'click', function (evt) {
         //Listen for changes in prefs and update localStorage, inform opener
         //of changes.
         var node = evt.target,
@@ -347,6 +339,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         var target = $(this),
             tabDom = $('#' + target.attr('data-tab'));
 
+        // clear any status that was visible.
+        clearStatus();
+
         // Show tab selected.
         target.addClass("selected");
         target.siblings().removeClass("selected");
@@ -381,7 +376,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     node = document.createElement("script");
     node.charset = "utf-8";
     node.async = true;
-    node.src = 'http://www.google.com/uds/Gfeeds?v=1.0&callback=onFeedLoad&context=' +
+    node.src = 'https://www.google.com/uds/Gfeeds?v=1.0&callback=onFeedLoad&context=' +
               '&output=json&' +
               'q=http%3A%2F%2Fmozillalabs.com%2Fmessaging%2Ffeed%2F';
     $('head')[0].appendChild(node);
