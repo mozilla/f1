@@ -1,4 +1,4 @@
-version := 0.3.0
+version := 0.3.1
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
@@ -12,7 +12,7 @@ webbuild_dir=$(TOPSRCDIR)/tools/webbuild
 requirejs_dir=$(webbuild_dir)/requirejs
 
 xpi_name := ffshare.xpi
-xpi_files := chrome.manifest chrome install.rdf defaults components modules
+xpi_files := chrome.manifest chrome install.rdf defaults modules
 dep_files := Makefile $(shell find $(srcdir) -type f)
 
 SLINK = ln -sf
@@ -28,7 +28,7 @@ xpi: $(xpi_dir)/$(xpi_name)
 $(xpi_dir):
 	mkdir -p $(xpi_dir)
 
-stage_files = $(stage_dir)/defaults $(stage_dir)/chrome $(stage_dir)/install.rdf $(stage_dir)/chrome.manifest $(stage_dir)/components $(stage_dir)/modules
+stage_files = $(stage_dir)/defaults $(stage_dir)/chrome $(stage_dir)/install.rdf $(stage_dir)/chrome.manifest $(stage_dir)/modules
 
 $(stage_dir):
 	mkdir -p $(stage_dir)
@@ -42,9 +42,6 @@ $(stage_dir)/install.rdf: $(srcdir)/install.rdf
 
 $(stage_dir)/chrome: $(srcdir)/chrome
 	$(SLINK) $(srcdir)/chrome $(stage_dir)/chrome
-
-$(stage_dir)/components: $(srcdir)/components
-	$(SLINK) $(srcdir)/components $(stage_dir)/components
 
 $(stage_dir)/modules: $(srcdir)/modules
 	$(SLINK) $(srcdir)/modules $(stage_dir)/modules

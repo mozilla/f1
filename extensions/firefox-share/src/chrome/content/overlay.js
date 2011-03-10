@@ -516,13 +516,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       //Vimeo hack to find the <object data="src"><param name="flashvars"/></object> pieces we need
       embeds = gBrowser.contentDocument.querySelectorAll("object[type='application/x-shockwave-flash'][data]");
       params = gBrowser.contentDocument.querySelectorAll("param[name='flashvars']");
-      for (i = 0; i < embeds.length; i++) {
-        src = embeds[i].getAttribute("data");
-        flashvars = params[0].getAttribute("value");
-        if (flashvars) {
-          src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
+      if (params && params.length) {
+        for (i = 0; i < embeds.length; i++) {
+          src = embeds[i].getAttribute("data");
+          flashvars = params[0].getAttribute("value");
+          if (flashvars) {
+            src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
+          }
+          return gBrowser.currentURI.resolve(unescapeXml(src));
         }
-        return gBrowser.currentURI.resolve(unescapeXml(src));
       }
 
       //A generic hack that looks for the <param name="movie"> which is often available
@@ -850,12 +852,12 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           tabUrl = tabURI.spec,
           nBox = gBrowser.getNotificationBox(contentBrowser),
           notification = nBox.getNotificationWithValue("mozilla-f1-share-error");
-          
+
       if (!ffshare.isValidURI(tabURI)) {
         return;
       }
       if (notification) {
-        nBox.removeNotification(notification);        
+        nBox.removeNotification(notification);
       }
       var currentState = gBrowser.selectedTab.shareState;
       options = this.getOptions(options);
