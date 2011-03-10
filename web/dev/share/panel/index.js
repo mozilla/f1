@@ -35,12 +35,12 @@ require({
 define([ "require", "jquery", "blade/object", "blade/fn", "rdapi", "oauth",
         "blade/jig", "blade/url", "placeholder", "AutoComplete", "dispatch", "accounts",
          "storage", "services", "shareOptions", "widgets/PageInfo", "rssFeed",
-         "widgets/DebugPanel", "widgets/AccountPanel",
+         "widgets/DebugPanel", "widgets/AccountPanel", "dotCompare",
          "jquery-ui-1.8.7.min", "jquery.textOverflow"],
 function (require,   $,        object,         fn,         rdapi,   oauth,
           jig,         url,        placeholder,   AutoComplete,   dispatch,   accounts,
           storage,   services,   shareOptions,   PageInfo,           rssFeed,
-          DebugPanel,           AccountPanel) {
+          DebugPanel,           AccountPanel,           dotCompare) {
 
   var actions = services.domains,
     options = shareOptions(),
@@ -54,7 +54,8 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       statusSettings: true,
       statusSharing: true,
       statusShared: true
-    };
+    },
+    isGreaterThan076 = dotCompare(store.extensionVersion, "0.7.7") > -1;
 
   function hide() {
     dispatch.pub('hide');
@@ -98,7 +99,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     }
     _showStatus(statusId, shouldCloseOrMessage);
   }
-    
+
   function _showStatus(statusId, shouldCloseOrMessage) {
     if (shouldCloseOrMessage === true) {
       setTimeout(function () {
@@ -249,9 +250,12 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
     sendData.account = JSON.stringify(svcData);
 
-    // hide the panel now...
+    // hide the panel now, but only if the extension can show status
+    // itself (0.7.7 or greater)
     updateChromeStatus(SHARE_START);
-    hide();
+    if (isGreaterThan076) {
+      hide();
+    }
 
     //First see if a bitly URL is needed.
     if (svcConfig.shorten && shortenPrefs) {
