@@ -74,6 +74,21 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     return document.getElementById(buttonId);
   }
 
+  function getBrowserTabForUrl(url) {
+    if (!url)
+      return gBrowser.selectedTab;
+    if (gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI.spec == url)
+      return gBrowser.selectedTab;
+    var numTabs = gBrowser.browsers.length;
+    for (var index = 0; index < numTabs; index++) {
+      var currentBrowser = gBrowser.getBrowserAtIndex(index);
+      if (url == currentBrowser.currentURI.spec) {
+        return gBrowser.tabs[index];
+      }
+    }
+    return gBrowser.selectedTab;
+  }
+
   function mixin(target, source, override) {
     //TODO: consider ES5 getters and setters in here.
     for (var prop in source) {
@@ -373,21 +388,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @param {Object} data info about the share.
      */
     success: function (data) {
-      this.updateStatus([SHARE_DONE], true);
+      this.updateStatus([SHARE_DONE,,,data.url], true);
       this.close();
 
       // XXX we should work out a better bookmarking system
       // https://github.com/mozilla/f1/issues/66
       if (ffshare.prefs.bookmarking) {
-        var tags = ['shared', 'f1'];
-        if (data.domain === 'twitter.com') {
-          tags.push("twitter");
-        }
-        if (data.domain === 'facebook.com') {
-          tags.push("facebook");
-        }
+        var tags = ['shared', 'f1', data.service];
 
-        var nsiuri = Services.io.newURI(gBrowser.currentURI.spec, null, null);
+        var nsiuri = Services.io.newURI(data.url, null, null);
         Services.bookmarks.insertBookmark(Services.bookmarks.unfiledBookmarksFolder,
                                           nsiuri, Services.bookmarks.DEFAULT_INDEX,
                                           this.getPageTitle().trim());
@@ -770,14 +779,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @param {Boolean} only passed by the final success call
      */
     updateStatus: function (statusData, success) {
-      var button = getButton(),
-          nBox = gBrowser.getNotificationBox(),
+      var contentTab = getBrowserTabForUrl(statusData && statusData.length > 3 ? statusData[3] : null),
+          button = getButton(),
+          nBox = gBrowser.getNotificationBox(gBrowser.getBrowserForTab(contentTab)),
           notification = nBox.getNotificationWithValue("mozilla-f1-share-error"),
           status,
           buttons;
 
       if (typeof(statusData) === 'undefined') {
-        statusData = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : [SHARE_DONE];
+        statusData = contentTab.shareState ? contentTab.shareState.status : [SHARE_DONE];
       }
       status = statusData[0];
 
@@ -804,11 +814,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         nBox.removeNotification(notification);
       }
 
-      if (gBrowser.selectedTab.shareState) {
-        gBrowser.selectedTab.shareState.status = statusData;
+      if (contentTab.shareState) {
+        contentTab.shareState.status = statusData;
       }
 
-      if (button) {
+      if (button && gBrowser.selectedTab == contentTab) {
         // Only a final successful share should be passing this value
         if (success) {
           button.setAttribute("status", SHARE_STATUS[SHARE_FINISHED]);
