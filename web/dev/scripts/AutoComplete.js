@@ -82,14 +82,16 @@ function ($,        object,         fn,         module,   dispatch,
           // don't navigate away from the field on tab when selecting an item,
           // or when tabbing to the refresh contacts button.
           .bind("keydown", fn.bind(this, function (event) {
-            if (event.keyCode === $.ui.keyCode.TAB) {
+            if (event.keyCode === $.ui.keyCode.ENTER) {
+              // Do not submit the form on enter in the autocomplete field.
+              event.preventDefault();
+            } else if (event.keyCode === $.ui.keyCode.TAB) {
               if (this.dom.data("autocomplete").menu.active) {
                 //autocomplete is up.
                 event.preventDefault();
-              }
-
-              // select the first item in the autocomplete.
-              if (this.open) {
+                this.dom.autocomplete().select();
+              } else if (this.open) {
+                // select the first item in the autocomplete.
                 var item = this.dom.autocomplete('widget').find('li');
                 this.dom.data("autocomplete").menu.active = item;
 

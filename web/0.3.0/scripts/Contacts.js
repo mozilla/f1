@@ -157,7 +157,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
     },
 
     findContact: function (to) {
-      var contactId;
+      var contactId = to;
 
       (this.contacts || []).some(function (contact) {
         if (contact.displayName === to) {
