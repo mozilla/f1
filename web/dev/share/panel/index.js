@@ -68,7 +68,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   window.closeShare = close;
 
   function updateChromeStatus(status, statusId, message) {
-    dispatch.pub('updateStatus', [status, statusId, message]);
+    dispatch.pub('updateStatus', [status, statusId, message, options.url]);
   }
   window.updateChromeStatus = updateChromeStatus;
 
@@ -105,7 +105,9 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         dispatch.pub('success', {
           domain: sendData.domain,
           username: sendData.username,
-          userid: sendData.userid
+          userid: sendData.userid,
+          url: options.url,
+          service: services.domains[sendData.domain].name
         });
         $('div.status').addClass('hidden');
       }, 2000);
