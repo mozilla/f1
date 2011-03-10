@@ -35,15 +35,14 @@ require({
 define([ "require", "jquery", "blade/object", "blade/fn", "rdapi", "oauth",
         "blade/jig", "blade/url", "placeholder", "AutoComplete", "dispatch", "accounts",
          "storage", "services", "shareOptions", "widgets/PageInfo", "rssFeed",
-         "widgets/DebugPanel", "widgets/AccountPanel",
+         "widgets/DebugPanel", "widgets/AccountPanel", "dotCompare",
          "jquery-ui-1.8.7.min", "jquery.textOverflow"],
 function (require,   $,        object,         fn,         rdapi,   oauth,
           jig,         url,        placeholder,   AutoComplete,   dispatch,   accounts,
           storage,   services,   shareOptions,   PageInfo,           rssFeed,
-          DebugPanel,           AccountPanel) {
+          DebugPanel,           AccountPanel,           dotCompare) {
 
-  var showStatus,
-    actions = services.domains,
+  var actions = services.domains,
     options = shareOptions(),
     bodyDom, timer, pageInfo, sendData, showNew,
     accountPanels = [],
@@ -55,7 +54,8 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       statusSettings: true,
       statusSharing: true,
       statusShared: true
-    };
+    },
+    isGreaterThan076 = dotCompare(store.extensionVersion, "0.7.7") > -1;
 
   function hide() {
     dispatch.pub('hide');
@@ -68,28 +68,47 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   //For debug tab purpose, make it global.
   window.closeShare = close;
 
-  function updateChromeStatus(status) {
-    dispatch.pub('updateStatus', status);
+  function updateChromeStatus(status, statusId, message) {
+    dispatch.pub('updateStatus', [status, statusId, message, options.url]);
   }
   window.updateChromeStatus = updateChromeStatus;
 
-  showStatus = function (statusId, shouldCloseOrMessage) {
+  function shareStateUpdate(shareState) {
+    var status = null;
+    if (shareState && shareState.status) {
+      // remove the status number
+      status = shareState.status.slice(1);
+    }
+    if (status && status[0]) {
+      _showStatus.apply(null, status);
+    } else {
+      cancelStatus();
+    }
+    // we could switch to handling options this way:
+    //dispatch.pub('optionsChanged', shareState.options);
+  }
+  dispatch.sub('shareState', shareStateUpdate);
+
+  function showStatus (statusId, shouldCloseOrMessage) {
     $('div.status').addClass('hidden');
     $('#clickBlock').removeClass('hidden');
     $('#' + statusId).removeClass('hidden');
 
     if (!okStatusIds[statusId]) {
-      updateChromeStatus(SHARE_ERROR);
-      options.status = [statusId, shouldCloseOrMessage];
-    } else {
-      options.status = null;
+      updateChromeStatus(SHARE_ERROR, statusId, shouldCloseOrMessage);
     }
+    _showStatus(statusId, shouldCloseOrMessage);
+  }
+
+  function _showStatus(statusId, shouldCloseOrMessage) {
     if (shouldCloseOrMessage === true) {
       setTimeout(function () {
         dispatch.pub('success', {
           domain: sendData.domain,
           username: sendData.username,
-          userid: sendData.userid
+          userid: sendData.userid,
+          url: options.url,
+          service: services.domains[sendData.domain].name
         });
         $('div.status').addClass('hidden');
       }, 2000);
@@ -113,7 +132,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
   function cancelStatus() {
     // clear any existing status
-    options.status = null;
     updateChromeStatus(SHARE_DONE);
     resetStatusDisplay();
   }
@@ -232,9 +250,12 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
     sendData.account = JSON.stringify(svcData);
 
-    // hide the panel now...
+    // hide the panel now, but only if the extension can show status
+    // itself (0.7.7 or greater)
     updateChromeStatus(SHARE_START);
-    hide();
+    if (isGreaterThan076) {
+      hide();
+    }
 
     //First see if a bitly URL is needed.
     if (svcConfig.shorten && shortenPrefs) {
@@ -340,7 +361,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
   function updateAccounts(accounts) {
     var panelOverlays = [],
-        panelOverlayMap = {};
+        panelOverlayMap = {},
+        //Only do one overlay request per domain. This can be removed
+        //when requirejs is updated to 0.23.0 or later.
+        processedDomains = {};
 
     if ((accounts && accounts.length)) {
       //Collect any UI overrides used for AccountPanel based on the services
@@ -349,9 +373,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         var domain = account.accounts[0].domain,
             overlays = actions[domain].overlays,
             overlay = overlays && overlays['widgets/AccountPanel'];
-        if (overlay) {
+        if (overlay && !processedDomains[domain]) {
           panelOverlays.push(overlay);
           panelOverlayMap[domain] = overlay;
+          processedDomains[domain] = true;
         }
       });
 
@@ -487,15 +512,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         //Force contact with the server via the true argument.
         location.reload(true);
       } else {
+        // XXX we could move to pure post message, see shareStateUpdate
         options = shareOptions();
 
-        //Be sure to clear any status messages
-        if (options.status) {
-          showStatus.apply(null, options.status);
-        } else {
-          cancelStatus();
-        }
-
+        dispatch.pub('getShareState', null);
         dispatch.pub('optionsChanged', options);
         checkBase64Preview();
 

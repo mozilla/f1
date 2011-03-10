@@ -133,5 +133,4 @@ Name of the group to return.
             }
             result = None
             metrics.track(request, 'contacts-oauth-keys-missing', domain=domain)
-            timer.track('send-error', error=error)
         return {'result': result, 'error': error}

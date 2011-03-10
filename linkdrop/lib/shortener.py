@@ -26,10 +26,21 @@ import json
 import urllib
 from pylons import config, url
 
+import logging
+log = logging.getLogger('__name__')
+
 def shorten_link(long_url):
     longUrl = cgi.escape(long_url)
     bitly_userid= config.get('bitly.userid')
     bitly_key = config.get('bitly.key')
     bitly_result = urllib.urlopen("http://api.bit.ly/v3/shorten?login=%(bitly_userid)s&apiKey=%(bitly_key)s&longUrl=%(longUrl)s&format=json" % locals()).read()
-    bitly_data = json.loads(bitly_result)['data']
+    try:
+        bitly_data = json.loads(bitly_result)['data']
+    except ValueError:
+        bitly_data = None
+    if not bitly_data:
+        # The index of ['url'] is going to fail - it isn't clear what we
+        # should do, but we might as well capture in the logs why.
+        log.error("unexpected bitly response: %r", bitly_result)
+
     return bitly_data["url"]

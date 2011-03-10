@@ -107,12 +107,12 @@ class responder(OpenIDResponder):
     def __init__(self, consumer=None, oauth_key=None, oauth_secret=None, request_attributes=None, *args,
                  **kwargs):
         """Handle Google Auth
-        
+
         This also handles making an OAuth request during the OpenID
         authentication.
-        
+
         """
-        
+
         OpenIDResponder.__init__(self, domain)
         self.consumer_key = str(self.config.get('consumer_key'))
         self.consumer_secret = str(self.config.get('consumer_secret'))
@@ -124,13 +124,13 @@ class responder(OpenIDResponder):
         if identifier:
             return "https://www.google.com/accounts/o8/site-xrds?hd=%s" % (identifier)
         return "https://www.google.com/accounts/o8/id"
-    
+
     def _update_authrequest(self, authrequest):
         """Update the authrequest with Attribute Exchange and optionally OAuth
-        
+
         To optionally request OAuth, the request POST must include an ``oauth_scope``
         parameter that indicates what Google Apps should have access requested.
-        
+
         """
         request_attributes = request.POST.get('ax_attributes', ax_attributes.keys())
         ax_request = ax.FetchRequest()
@@ -152,7 +152,7 @@ class responder(OpenIDResponder):
 
         oauth_request = OAuthRequest(consumer=self.consumer_key, scope=self.scope or 'http://www.google.com/m8/feeds/')
         authrequest.addExtension(oauth_request)
-        
+
         if 'popup_mode' in request.POST:
             kw_args = {'mode': request.POST['popup_mode']}
             if 'popup_icon' in request.POST:
@@ -160,7 +160,7 @@ class responder(OpenIDResponder):
             ui_request = UIRequest(**kw_args)
             authrequest.addExtension(ui_request)
         return None
-    
+
     def _update_verify(self, consumer):
         pass
 
@@ -184,15 +184,15 @@ class responder(OpenIDResponder):
         #        'providerName': 'Google',
         #        'verifiedEmail': u'mixedpuppy@gmail.com',
         #        'identifier': 'https://www.google.com/accounts/o8/id?id=AItOawnEHbJcEY5EtwX7vf81_x2P4KUjha35VyQ'}}
-        
+
         # google OpenID for domains result is:
         #{'profile': {
         #    'displayName': u'Shane Caraveo',
-        #    'name': {'givenName': u'Shane', 'formatted': u'Shane Caraveo', 'familyName': u'Caraveo'}, 
+        #    'name': {'givenName': u'Shane', 'formatted': u'Shane Caraveo', 'familyName': u'Caraveo'},
         #    'providerName': 'OpenID',
         #    'identifier': u'http://g.caraveo.com/openid?id=103543354513986529024',
         #    'emails': [u'mixedpuppy@g.caraveo.com']}}
-        
+
         profile = result_data['profile']
         provider = domain
         if profile.get('providerName').lower() == 'openid':
@@ -274,7 +274,7 @@ class api():
         # in the app:main set debug = true to enable
         if asbool(config.get('debug', False)):
             server.set_debuglevel(True)
-        
+
         subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
         title = options.get('title', options.get('link', options.get('shorturl', '')))
         description = options.get('description', '')[:280]
@@ -390,7 +390,7 @@ class api():
                 this_group = this_group[14:]
             if group == this_group:
                 return entry.id.text
-        
+
     def getcontacts(self, start=0, page=25, group=None):
         contacts = []
         profile = self.account.get('profile', {})
@@ -431,19 +431,20 @@ class api():
                    "status": int(resp.status)
                    }
             return None, error
-            
+
         feed = gdata.contacts.ContactsFeedFromString(content)
         for entry in feed.entry:
             #print entry.group_membership_info
-            p = {
-                'displayName': entry.title.text,
-            }
             if entry.email:
-                email = entry.email[0]
-                p['emails'] = [{'value': email.address, 'primary': email.primary}]
-                if not p['displayName']:
-                    p['displayName'] = email.address
-            contacts.append(p)
+                p = {
+                    'displayName': entry.title.text,
+                    'emails': []
+                }
+                for email in entry.email:
+                    p['emails'].append({'value': email.address, 'primary': email.primary})
+                    if not p['displayName']:
+                        p['displayName'] = email.address
+                contacts.append(p)
         result = {
             'entry': contacts,
             'itemsPerPage': feed.items_per_page.text,
