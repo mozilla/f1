@@ -1,0 +1,138 @@
+ <!-- ***** BEGIN LICENSE BLOCK *****
+   - Version: MPL 1.1
+   -
+   - The contents of this file are subject to the Mozilla Public License Version
+   - 1.1 (the "License"); you may not use this file except in compliance with
+   - the License. You may obtain a copy of the License at
+   - http://www.mozilla.org/MPL/
+   -
+   - Software distributed under the License is distributed on an "AS IS" basis,
+   - WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+   - for the specific language governing rights and limitations under the
+   - License.
+   -
+   - The Original Code is Raindrop.
+   -
+   - The Initial Developer of the Original Code is
+   - Mozilla Messaging, Inc..
+   - Portions created by the Initial Developer are Copyright (C) 2009
+   - the Initial Developer. All Rights Reserved.
+   -
+   - Contributor(s):
+   - -->
+<!DOCTYPE html>
+<html xmlns:og="http://opengraphprotocol.org/schema/"
+      xmlns:fb="http://www.facebook.com/2008/fbml">
+<head>
+  <link rel="stylesheet" type="text/css" href="/0.2.9/style.css">
+  <link rel="stylesheet" type="text/css" href="/0.2.9/jquery.fancybox-1.3.4.css">
+  <link rel="stylesheet" type="text/css" href="chrome://ffshare-web/content/installed.css">
+  <title>Mozilla F1</title>
+  <script type="text/javascript" data-main="/0.2.9/index.js" src="/0.2.9/scripts/requireplugins-jquery.js"></script>
+  <link rel="icon" type="image/x-icon" href="/0.2.9/favicon.png" />
+
+  <!-- https://github.com/mozilla/f1/wiki/Page-Meta-Properties -->
+
+  <link rel="shortlink" href="http://bit.ly/mozillaF1"/>
+  <link rel="canonical" href="http://f1.mozillamessaging.com/"/>
+
+  <meta property="og:title" content="Mozilla F1"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="http://f1.mozillamessaging.com/"/>
+  <meta property="og:image" content="http://f1.mozillamessaging.com/i/f1LogoVert.png"/>
+  <meta property="og:site_name" content="Mozilla F1"/>
+  <meta property="og:description"
+        content="F1 is a browser extension that allows you to share links in a
+                 fast and fun way. Share links from within the browser, from any
+                 webpage, using the same services you already know and love."/>
+
+  <meta property="fb:app_id" content="173375079345318,146290642084944"/>
+
+  <meta name="title" content="Mozilla F1"/>
+  <meta name="description"
+        content="F1 is a browser extension that allows you to share links in a
+                 fast and fun way. Share links from within the browser, from any
+                 webpage, using the same services you already know and love."/>
+
+  <meta name="application-url" content="http://f1.mozillamessaging.com/"/>
+
+  <link rel="image_src" href="http://f1.mozillamessaging.com/i/f1LogoVert.png"/>
+
+</head>
+<body>
+  <div id="wrapper">
+    <div id="header" class="row">
+      <div class="c2 logo">
+      </div>
+      <div class="c1 dl">
+        <button id="downloadFF4" class="download downloadXpi">
+          Install Mozilla F1
+          <span class="meta">available for Firefox 4 beta</span>
+        </button>
+        <button id="firefox" class="download">
+            Get Firefox 4 beta to use <br>this add-on
+        </button>
+        <a id="no36" href="#info36">*Firefox 3.6 is no longer supported</a>
+        <div id="noButtonFF4">
+          <img src="/0.2.9/i/check.png"> status: installed
+        </div>
+      </div>
+    </div>
+    <div class="row headline">
+      <div class="c2">
+        <img src="/i/panel/f1panel.png">
+      </div>
+      <div class="c1 description">
+        <h1>Share links fast.</h1>
+        <h2>So, what&rsquo;s F1?</h2>
+        F1 is a browser extension that allows you to share links in a fast and fun way. Share links from within the browser, from any webpage, using the same services you already know and love. Mozilla F1 is made by <a href="http://mozillamessaging.com/">Mozilla Messaging</a>.
+        <button class="fancybox">watch demo</button>
+      </div>
+    </div>
+
+    <div class="row">
+      <hr>
+      <div class="c2 description">
+        <img src="/i/panel/f1accounts.png">
+      </div>
+      <div class="c1 description">
+        <h2>Share with your<br> favorite services</h2>
+          With support for Facebook, Twitter, Gmail, Google Apps, Yahoo Mail and LinkedIn, we have your favorite services covered&mdash;and we're adding more services with every release.
+      </div>
+    </div>
+    <div class="row about">
+      <hr>
+      <div class="c3 description">
+        <h2>Once you've installed F1 sharing is as easy as...</h2>
+      </div>
+      <div class="c1 description steps">
+        <span class="step">1</span> Hit the F1 icon in the toolbar
+        <img src="i/panel/step-01.png">
+      </div>
+      <div class="c1 description steps">
+        <span class="step">2</span> Choose your service in the menu
+        <img src="i/panel/step-022.png">
+      </div>
+      <div class="c1 description steps">
+        <span class="step">3</span> Express yourself and hit share!
+        <img src="i/panel/step-03.png">
+      </div>
+    </div>
+    <div id="info36" class="row">
+      <div class="c3">
+        <strong>*Firefox 3.6 support</strong>: F1 uses some advanced technology
+        and UI capabilities that are not possible in Firefox 3.6 and earlier.
+        If you installed the previous version of F1 that works with Firefox 3.6,
+        it will continue to work while Firefox 4 is in beta. Once Firefox 4 is
+        released, the older 3.6 compatible extension will be phased out.
+      </div>
+    </div>
+    <div id="footer" class="row">
+      <div class="c3">
+        Mozilla Messaging 2010 | <a href="/0.2.9/service/privacy.html">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+
+  <iframe id="installFrame" src="/0.2.9/blank.html"></iframe>
+</body>
