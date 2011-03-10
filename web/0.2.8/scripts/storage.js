@@ -20,26 +20,33 @@
  *
  * Contributor(s):
  * */
-const Cu = Components.utils;
 
-let EXPORTED_SYMBOLS = ["ffshareAutoCompleteData"];
+/*jslint indent: 2 */
+/*global define: false, localStorage: false */
+"use strict";
 
-let data = {};
+define([], function () {
+  var store = localStorage, type = 'localStorage';
 
-function _() {
-  return; // comment out for verbose debugging
-  let msg = Array.join(arguments, " ");
-  dump(msg + "\n");
-  Cu.reportError(msg);
-}
-
-let ffshareAutoCompleteData = {
-  get: function (domain) {
-    _("XXX getting data for "+domain);
-    return data[domain];
-  },
-  set: function (acdata) {
-    _("XXX setting "+ (acdata.contacts ? acdata.contacts.length : "none") +" contacts for "+acdata.domain);
-    data[acdata.domain] = (acdata.contacts || []);
+  //Capability detect for localStorage. At least one add-on does weird things
+  //with it.
+  try {
+    store.tempVar = 'temp';
+    //Test reading.
+    if (store.tempVar === 'temp') {}
+    //Test deletion.
+    delete store.tempVar;
+  } catch (e) {
+    //Just use a simple in-memory object. Not as nice, but code will still work.
+    store = {};
+    type = 'memory';
   }
-};
+
+  function storage() {
+    return store;
+  }
+
+  storage.type = type;
+
+  return storage;
+});

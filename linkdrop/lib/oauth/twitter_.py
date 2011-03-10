@@ -28,6 +28,7 @@ import json
 import httplib2
 import oauth2 as oauth
 import logging
+from urllib2 import URLError
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -145,6 +146,27 @@ class api():
     def rawcall(self, url, body):
         raise Exception("NOT IMPLEMENTED")
 
+    def _twitter_exc_to_error(self, exc):
+        msg = "TwitterHTTPError %d" % (exc.e.code)
+        if exc.e.code != 404:
+            error_response = exc.e.read()
+            try:
+                details = json.loads(error_response)
+            except ValueError, ee:
+                # sometimes the error does not contain a json object, let's
+                # try to see what it is
+                msg = error_response
+                log.error("twitter returned non-json in an error response: %s", msg)
+            else:
+                if 'error' in details:
+                    msg = details['error']
+                else:
+                    msg = str(details)
+        return {'provider': domain,
+                'message': msg,
+                'status': exc.e.code
+        }
+
     def sendmessage(self, message, options={}):
         result = error = None
         try:
@@ -165,25 +187,17 @@ class api():
 
             direct = options.get('to', None)
             if direct:
-                result = self.api().direct_messages.new(text=message, user_id=direct)
+                result = self.api().direct_messages.new(text=message, user=direct)
             else:
                 result = self.api().statuses.update(status=message)
             result[domain] = result['id']
         except TwitterHTTPError, exc:
-            try:
-                details = json.load(exc.e)
-                if 'error' in details:
-                    msg = details['error']
-                else:
-                    msg = str(details)
-            except ValueError, ee:
-                # sometimes the error does not contain a json object, lets
-                # try to see what it is
-                msg = "%r" % (exc,)
-                log.exception(exc)
-            error = {'provider': domain,
-                     'message': msg,
-                     'status': exc.e.code
+            error = self._twitter_exc_to_error(exc)
+        except URLError, e:
+            # connection timeouts when twitter is unavailable?
+            error = {
+                'provider': domain,
+                'message': e.args[0]
             }
         return result, error
     
@@ -193,16 +207,11 @@ class api():
             result = self.api().account.verify_credentials()
             result[domain] = result['id']
         except TwitterHTTPError, exc:
-            details = "TwitterHTTPError %d" % (exc.e.code)
-            if exc.e.code != 404:
-                details = json.load(exc.e)
-            if 'error' in details:
-                msg = details['error']
-            else:
-                msg = str(details)
-            error = {'provider': domain,
-                     'message': msg,
-                     'status': exc.e.code
+            error = self._twitter_exc_to_error(exc)
+        except URLError, e:
+            error = {
+                'provider': domain,
+                'message': e.args[0]
             }
         return result, error
 
@@ -225,15 +234,10 @@ class api():
 
             return connectedto, None
         except TwitterHTTPError, exc:
-            details = "TwitterHTTPError %d" % (exc.e.code)
-            if exc.e.code != 404:
-                details = json.load(exc.e)
-            if 'error' in details:
-                msg = details['error']
-            else:
-                msg = str(details)
-            error = {'provider': domain,
-                     'message': msg,
-                     'status': exc.e.code
+            error = self._twitter_exc_to_error(exc)
+        except URLError, e:
+            error = {
+                'provider': domain,
+                'message': e.args[0]
             }
         return result, error

@@ -47,6 +47,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.header import Header
+from email.utils import parseaddr
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -58,7 +59,7 @@ from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
 from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attributes, attributes
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
-from linkdrop.lib.oauth.base import get_oauth_config
+from linkdrop.lib.oauth.base import get_oauth_config, OAuthKeysException
 
 GOOGLE_OAUTH = 'https://www.google.com/accounts/OAuthGetAccessToken'
 
@@ -106,12 +107,12 @@ class responder(OpenIDResponder):
     def __init__(self, consumer=None, oauth_key=None, oauth_secret=None, request_attributes=None, *args,
                  **kwargs):
         """Handle Google Auth
-        
+
         This also handles making an OAuth request during the OpenID
         authentication.
-        
+
         """
-        
+
         OpenIDResponder.__init__(self, domain)
         self.consumer_key = str(self.config.get('consumer_key'))
         self.consumer_secret = str(self.config.get('consumer_secret'))
@@ -123,13 +124,13 @@ class responder(OpenIDResponder):
         if identifier:
             return "https://www.google.com/accounts/o8/site-xrds?hd=%s" % (identifier)
         return "https://www.google.com/accounts/o8/id"
-    
+
     def _update_authrequest(self, authrequest):
         """Update the authrequest with Attribute Exchange and optionally OAuth
-        
+
         To optionally request OAuth, the request POST must include an ``oauth_scope``
         parameter that indicates what Google Apps should have access requested.
-        
+
         """
         request_attributes = request.POST.get('ax_attributes', ax_attributes.keys())
         ax_request = ax.FetchRequest()
@@ -151,7 +152,7 @@ class responder(OpenIDResponder):
 
         oauth_request = OAuthRequest(consumer=self.consumer_key, scope=self.scope or 'http://www.google.com/m8/feeds/')
         authrequest.addExtension(oauth_request)
-        
+
         if 'popup_mode' in request.POST:
             kw_args = {'mode': request.POST['popup_mode']}
             if 'popup_icon' in request.POST:
@@ -159,7 +160,7 @@ class responder(OpenIDResponder):
             ui_request = UIRequest(**kw_args)
             authrequest.addExtension(ui_request)
         return None
-    
+
     def _update_verify(self, consumer):
         pass
 
@@ -183,15 +184,15 @@ class responder(OpenIDResponder):
         #        'providerName': 'Google',
         #        'verifiedEmail': u'mixedpuppy@gmail.com',
         #        'identifier': 'https://www.google.com/accounts/o8/id?id=AItOawnEHbJcEY5EtwX7vf81_x2P4KUjha35VyQ'}}
-        
+
         # google OpenID for domains result is:
         #{'profile': {
         #    'displayName': u'Shane Caraveo',
-        #    'name': {'givenName': u'Shane', 'formatted': u'Shane Caraveo', 'familyName': u'Caraveo'}, 
+        #    'name': {'givenName': u'Shane', 'formatted': u'Shane Caraveo', 'familyName': u'Caraveo'},
         #    'providerName': 'OpenID',
         #    'identifier': u'http://g.caraveo.com/openid?id=103543354513986529024',
         #    'emails': [u'mixedpuppy@g.caraveo.com']}}
-        
+
         profile = result_data['profile']
         provider = domain
         if profile.get('providerName').lower() == 'openid':
@@ -237,7 +238,11 @@ class api():
         self.port = 587
         self.config = get_oauth_config(domain)
         self.account = account
-        self.oauth_token = oauth.Token(key=str(account.get('oauth_token')), secret=str(account.get('oauth_token_secret')))
+        try:
+            self.oauth_token = oauth.Token(key=str(account.get('oauth_token')), secret=str(account.get('oauth_token_secret')))
+        except ValueError, e:
+            # missing oauth tokens, raise our own exception
+            raise OAuthKeysException(str(e))
         self.consumer_key = str(self.config.get('consumer_key'))
         self.consumer_secret = str(self.config.get('consumer_secret'))
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
@@ -249,15 +254,27 @@ class api():
         from_email = from_ = profile['emails'][0]['value']
         fullname = profile.get('displayName', None)
         if fullname:
-            from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), from_,)
+            from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), Header(from_, 'utf-8').encode(),)
 
         url = "https://mail.google.com/mail/b/%s/smtp/" % from_
-        to_ = options['to']
+        to_ = options.get('to', None)
+        if not to_ or not '@' in to_:
+            return None, {
+                "provider": self.host,
+                "message": "recipient address is invalid",
+                "status": 0
+            }
+        to_ = parseaddr(to_)
+        if to_[0]:
+            to_ = '"%s" <%s>' % (Header(to_[0], 'utf-8').encode(), Header(to_[1], 'utf-8').encode())
+        else:
+            to_ = Header(to_[1], 'utf-8').encode()
+
         server = SMTP(self.host, self.port)
         # in the app:main set debug = true to enable
         if asbool(config.get('debug', False)):
             server.set_debuglevel(True)
-        
+
         subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
         title = options.get('title', options.get('link', options.get('shorturl', '')))
         description = options.get('description', '')[:280]
@@ -331,6 +348,18 @@ class api():
                     server.ehlo_or_helo_if_needed()
                     server.authenticate(url, self.consumer, self.oauth_token)
                     server.sendmail(from_, to_, msg.as_string())
+                except smtplib.SMTPRecipientsRefused, exc:
+                    for to_, err in exc.recipients.items():
+                        error = {"provider": self.host,
+                                 "message": err[1],
+                                 "status": err[0]
+                                }
+                        break
+                except smtplib.SMTPException, exc:
+                    error = {"provider": self.host,
+                             "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
+                             "status": exc.smtp_code
+                            }
                 except UnicodeEncodeError, exc:
                     raise
                 except ValueError, exc:
@@ -361,14 +390,23 @@ class api():
                 this_group = this_group[14:]
             if group == this_group:
                 return entry.id.text
-        
+
     def getcontacts(self, start=0, page=25, group=None):
         contacts = []
         profile = self.account.get('profile', {})
         accounts = profile.get('accounts', [{}])
         userdomain = 'default'
-        if accounts[0].get('domain') == 'googleapps.com':
-            userdomain = accounts[0].get('userid').split('@')[-1]
+
+        # google domains can have two contacts lists, the users and the domains
+        # shared contacts.
+        # shared contacts are only available in paid-for google domain accounts
+        # and do not show the users full contacts list.  I also did not find
+        # docs on how to detect whether shared contacts is available or not,
+        # so we will bypass this and simply use the users contacts list.
+        #if accounts[0].get('domain') == 'googleapps.com':
+        #    # set the domain so we get the shared contacts
+        #    userdomain = accounts[0].get('userid').split('@')[-1]
+
         url = 'http://www.google.com/m8/feeds/contacts/%s/full?v=1&max-results=%d' % (userdomain, page,)
 
         method = 'GET'
@@ -393,19 +431,20 @@ class api():
                    "status": int(resp.status)
                    }
             return None, error
-            
+
         feed = gdata.contacts.ContactsFeedFromString(content)
         for entry in feed.entry:
             #print entry.group_membership_info
-            p = {
-                'displayName': entry.title.text,
-            }
             if entry.email:
-                email = entry.email[0]
-                p['emails'] = [{'value': email.address, 'primary': email.primary}]
-                if not p['displayName']:
-                    p['displayName'] = email.address
-            contacts.append(p)
+                p = {
+                    'displayName': entry.title.text,
+                    'emails': []
+                }
+                for email in entry.email:
+                    p['emails'].append({'value': email.address, 'primary': email.primary})
+                    if not p['displayName']:
+                        p['displayName'] = email.address
+                contacts.append(p)
         result = {
             'entry': contacts,
             'itemsPerPage': feed.items_per_page.text,

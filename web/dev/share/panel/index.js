@@ -42,13 +42,24 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           storage,   services,   shareOptions,   PageInfo,           rssFeed,
           DebugPanel,           AccountPanel) {
 
-  var showStatus,
-    actions = services.domains,
+  var actions = services.domains,
     options = shareOptions(),
     bodyDom, timer, pageInfo, sendData, showNew,
     accountPanels = [],
-    hashReload = false,
-    store = storage();
+    store = storage(),
+    SHARE_DONE = 0,
+    SHARE_START = 1,
+    SHARE_ERROR = 2,
+    okStatusIds = {
+      statusSettings: true,
+      statusSharing: true,
+      statusShared: true
+    };
+
+  function hide() {
+    dispatch.pub('hide');
+  }
+  window.hideShare = hide;
 
   function close() {
     dispatch.pub('close');
@@ -56,11 +67,39 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   //For debug tab purpose, make it global.
   window.closeShare = close;
 
-  showStatus = function (statusId, shouldCloseOrMessage) {
+  function updateChromeStatus(status, statusId, message) {
+    dispatch.pub('updateStatus', [status, statusId, message]);
+  }
+  window.updateChromeStatus = updateChromeStatus;
+
+  function shareStateUpdate(shareState) {
+    var status = null;
+    if (shareState && shareState.status) {
+      // remove the status number
+      status = shareState.status.slice(1);
+    }
+    if (status && status[0]) {
+      _showStatus.apply(null, status);
+    } else {
+      cancelStatus();
+    }
+    // we could switch to handling options this way:
+    //dispatch.pub('optionsChanged', shareState.options);
+  }
+  dispatch.sub('shareState', shareStateUpdate);
+
+  function showStatus (statusId, shouldCloseOrMessage) {
     $('div.status').addClass('hidden');
     $('#clickBlock').removeClass('hidden');
     $('#' + statusId).removeClass('hidden');
 
+    if (!okStatusIds[statusId]) {
+      updateChromeStatus(SHARE_ERROR, statusId, shouldCloseOrMessage);
+    }
+    _showStatus(statusId, shouldCloseOrMessage);
+  }
+    
+  function _showStatus(statusId, shouldCloseOrMessage) {
     if (shouldCloseOrMessage === true) {
       setTimeout(function () {
         dispatch.pub('success', {
@@ -72,7 +111,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       }, 2000);
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
-      hashReload = true;
     }
 
     //Tell the extension that the size of the content may have changed.
@@ -82,11 +120,17 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   //Make it globally visible for debug purposes
   window.showStatus = showStatus;
 
-  function cancelStatus() {
+  function resetStatusDisplay() {
     $('#clickBlock').addClass('hidden');
     $('div.status').addClass('hidden');
     //Be sure form field placeholders are up to date.
     placeholder();
+  }
+
+  function cancelStatus() {
+    // clear any existing status
+    updateChromeStatus(SHARE_DONE);
+    resetStatusDisplay();
   }
 
   function showStatusShared() {
@@ -160,12 +204,15 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         } else {
           store.lastSelection = actions[sendData.domain].type;
           showStatusShared();
-        }
+          //Be sure to delete sessionRestore data
+          accountPanels.forEach(function (panel) {
+            panel.clearSavedData();
+          });
 
-        //Be sure to delete sessionRestore data
-        accountPanels.forEach(function (panel) {
-          panel.clearSavedData();
-        });
+          // notify on successful send for components that want to do
+          // work, like save any new contacts.
+          dispatch.pub('sendComplete', sendData);
+        }
       },
       error: function (xhr, textStatus, err) {
         if (xhr.status === 403) {
@@ -179,6 +226,8 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           reAuth();
         } else if (xhr.status === 503) {
           showStatus('statusServerBusy');
+        } else if (xhr.status === 0) {
+          showStatus('statusServerError');
         } else {
           showStatus('statusError', err);
         }
@@ -197,6 +246,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         shortenData;
 
     sendData.account = JSON.stringify(svcData);
+
+    // hide the panel now...
+    updateChromeStatus(SHARE_START);
+    hide();
 
     //First see if a bitly URL is needed.
     if (svcConfig.shorten && shortenPrefs) {
@@ -302,7 +355,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
   function updateAccounts(accounts) {
     var panelOverlays = [],
-        panelOverlayMap = {};
+        panelOverlayMap = {},
+        //Only do one overlay request per domain. This can be removed
+        //when requirejs is updated to 0.23.0 or later.
+        processedDomains = {};
 
     if ((accounts && accounts.length)) {
       //Collect any UI overrides used for AccountPanel based on the services
@@ -311,9 +367,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         var domain = account.accounts[0].domain,
             overlays = actions[domain].overlays,
             overlay = overlays && overlays['widgets/AccountPanel'];
-        if (overlay) {
+        if (overlay && !processedDomains[domain]) {
           panelOverlays.push(overlay);
           panelOverlayMap[domain] = overlay;
+          processedDomains[domain] = true;
         }
       });
 
@@ -371,7 +428,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     }
 
     //Listen to sendMessage events from the AccountPanels
-    $(document).bind('sendMessage', function (evt, data) {
+    dispatch.sub('sendMessage', function (data) {
       sendMessage(data);
     });
 
@@ -381,7 +438,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         cancelStatus();
       })
       .delegate('.statusErrorCloseButton', 'click', function (evt) {
-        close();
+        cancelStatus();
       })
       .delegate('.statusResetErrorButton', 'click', function (evt) {
         location.reload();
@@ -389,7 +446,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       .delegate('nav .close', 'click', close);
 
     $('#authOkButton').click(function (evt) {
-      oauth(sendData.domain, function (success) {
+      oauth(sendData.domain, false, function (success) {
         if (success) {
           accounts.clear();
           accounts();
@@ -445,16 +502,14 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
     window.addEventListener("hashchange", function () {
       var now = (new Date()).getTime();
-      if (hashReload || now - refreshStamp > refreshInterval) {
+      if (now - refreshStamp > refreshInterval) {
         //Force contact with the server via the true argument.
         location.reload(true);
-        hashReload = false;
       } else {
+        // XXX we could move to pure post message, see shareStateUpdate
         options = shareOptions();
 
-        //Be sure to clear any status messages
-        cancelStatus();
-
+        dispatch.pub('getShareState', null);
         dispatch.pub('optionsChanged', options);
         checkBase64Preview();
 

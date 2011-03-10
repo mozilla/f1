@@ -31,6 +31,7 @@ from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.decorators import jsonify
 from pylons.decorators.util import get_pylons
+from pylons.controllers.core import HTTPException
 
 from linkdrop.lib.base import BaseController, render
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg, get_redirect_response
@@ -83,7 +84,7 @@ OAuth authorization api.
         session.save()
 
     def _get_or_create_account(self, domain, userid, username):
-        acct_hash = hashlib.sha1("%s#%s" % (username or '', userid or '')).hexdigest()
+        acct_hash = hashlib.sha1("%s#%s" % ((username or '').encode('utf-8'), (userid or '').encode('utf-8'))).hexdigest()
         keys = [k for k in session.get('account_keys', '').split(',') if k]
         # Find or create an account
         for k in keys:
@@ -130,8 +131,13 @@ OAuth authorization api.
             session.save()
         except AccessException, e:
             self._redirectException(e)
+        # lib/oauth/*.py throws redirect exceptions in a number of places and
+        # we don't want those "exceptions" to be logged as errors.
+        except HTTPException, e:
+            log.info("account verification for %s caused a redirection: %s", provider, e)
+            raise
         except Exception, e:
-            log.exception('failed to verify the account')
+            log.exception('failed to verify the %s account', provider)
             self._redirectException(e)
         resp = get_redirect_response(session.get('end_point_success', config.get('oauth_success')))
         resp.set_cookie('account_tokens', urllib.quote(json.dumps(acct)))

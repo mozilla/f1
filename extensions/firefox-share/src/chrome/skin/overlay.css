@@ -41,11 +41,8 @@
   list-style-image: url("chrome://ffshare/skin/toolbar-button-glow.png");
   -moz-image-region: rect(0px, 35px, 23px, 0px);
 }
-
-/* Styles to style the autocomplete results */
-.autocomplete-richlistitem[type="ffshare"] .ac-site-icon,
-.autocomplete-richlistitem[type="ffshare"] .ac-url-box {
-    display: none !important;
+#ffshare-toolbar-button[status="start"] {
+  list-style-image: url("chrome://ffshare/skin/status-sharing.png");
 }
 
 .ffshare-panel {

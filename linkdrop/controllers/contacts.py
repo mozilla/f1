@@ -33,7 +33,9 @@ from pylons.decorators.util import get_pylons
 from linkdrop.lib.base import BaseController, render
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
 from linkdrop.lib.oauth import get_provider
+from linkdrop.lib.oauth.base import OAuthKeysException
 from linkdrop.lib import constants
+from linkdrop.lib.metrics import metrics
 
 log = logging.getLogger(__name__)
 
@@ -97,6 +99,7 @@ Name of the group to return.
                      'message': "no user session exists, auth required",
                      'status': 401
             }
+            metrics.track(request, 'contacts-unauthed', domain=domain)
             return {'result': None, 'error': error}
         provider = get_provider(domain)
 
@@ -113,11 +116,21 @@ Name of the group to return.
                     acct = a
                     break
         if not acct:
+            metrics.track(request, 'contacts-noaccount', domain=domain)
             error = {'provider': domain,
                      'message': "not logged in or no user account for that domain",
                      'status': 401
             }
             return {'result': None, 'error': error}
 
-        result, error = provider.api(acct).getcontacts(startIndex, maxResults, group)
+        try:
+            result, error = provider.api(acct).getcontacts(startIndex, maxResults, group)
+        except OAuthKeysException, e:
+            # more than likely we're missing oauth tokens for some reason.
+            error = {'provider': domain,
+                     'message': "not logged in or no user account for that domain",
+                     'status': 401
+            }
+            result = None
+            metrics.track(request, 'contacts-oauth-keys-missing', domain=domain)
         return {'result': result, 'error': error}

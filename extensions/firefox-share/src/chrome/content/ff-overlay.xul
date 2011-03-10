@@ -88,7 +88,6 @@
               flex="1"
               src="about:blank"
               disablehistory="true"
-              autocompletepopup="PopupAutoCompleteRichResult"
               contextmenu="contentAreaContextMenu"
               class="ffshare-browser"/>
     </panel>
