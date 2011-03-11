@@ -82,7 +82,17 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     if (status && status[0]) {
       _showStatus.apply(null, status);
     } else {
+      //clear all status, but if settings config needs to be shown, show it.
       cancelStatus();
+      accounts(
+        function (accts) {
+          if (!accts || !accts.length) {
+            showStatus('statusSettings');
+          }
+        }, function (err) {
+          showStatus('statusSettings');
+        }
+      );
     }
     // we could switch to handling options this way:
     //dispatch.pub('optionsChanged', shareState.options);
