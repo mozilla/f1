@@ -22,7 +22,7 @@
  * */
 
 #ffshare-toolbar-button {
-  list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
+  list-style-image: url("resource://f1/chrome/skin/toolbar-button.png");
   -moz-image-region: rect(0px, 35px, 23px, 0px);
 }
 #ffshare-toolbar-button[disabled="true"],
@@ -38,11 +38,11 @@
   -moz-image-region: rect(46px, 35px, 69px, 0px);
 }
 #ffshare-toolbar-button[firstRun] {
-  list-style-image: url("chrome://ffshare/skin/toolbar-button-glow.png");
+  list-style-image: url("resource://f1/chrome/skin/toolbar-button-glow.png");
   -moz-image-region: rect(0px, 35px, 23px, 0px);
 }
 #ffshare-toolbar-button[status="start"] {
-  list-style-image: url("chrome://ffshare/skin/status-sharing.png");
+  list-style-image: url("resource://f1/chrome/skin/status-sharing.png");
 }
 
 .ffshare-panel {
