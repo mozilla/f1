@@ -13,6 +13,7 @@ data/sessions
 ^grinder/.*\.log.*
 ^grinder/.*-file-store
 ^grinder/.*\$py.class
+tests/web/testenv
 web-static
 web/share-0.1-dev.xpi
 web/current
