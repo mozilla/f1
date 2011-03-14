@@ -172,6 +172,23 @@ f1.prototype = {
             Cu.import("resource://f1/modules/panel.js", tmp);
             this._sharePanel = new tmp.sharePanel(this._window);
             
+            // Inject code into content
+            tmp = {};
+            let self = this;
+            Cu.import("resource://f1/modules/injector.js", tmp);
+            let ffapi = {
+                apibase: null, // null == 'navigator.mozilla.labs'
+                name: 'share', // builds to 'navigator.mozilla.labs.share'
+                script: null, // null == use injected default script
+                getapi: function () {
+                    return function (options) {
+                        self.togglePanel(options);
+                    };
+                }
+            };
+            tmp.InjectorInit(self._window);
+            self._window.injector.register(ffapi);
+              
             // Load FUEL to access Application and setup preferences
             let Application = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
             this.prefs = {
