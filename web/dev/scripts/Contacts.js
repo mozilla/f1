@@ -134,6 +134,8 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
           maxresults: 500,
           account: JSON.stringify(svcData)
         },
+        //Only wait for 10 seconds, then give up.
+        timeout: 10000,
         success: fn.bind(this, function (json) {
           //Transform data to a form usable by the front end.
           if (json && !json.error) {
@@ -146,6 +148,11 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
               list: this.contacts
             });
           }
+        }),
+        error: fn.bind(this, function (xhr, textStatus, errorThrown) {
+          // does not matter what the error is, just eat it and hide
+          // the UI showing a wait.
+          this.notifyCallbacks();
         })
       });
     },

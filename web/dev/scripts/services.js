@@ -177,6 +177,9 @@ function (object,         storage) {
         signOutUrl: 'http://facebook.com',
         accountLink: function (account) {
           return 'http://www.facebook.com/profile.php?id=' + account.userid;
+        },
+        overlays: {
+          'widgets/AccountPanel': 'widgets/AccountPanelFaceBook'
         }
       }),
       'google.com': new EmailSvcBase('Gmail', {
