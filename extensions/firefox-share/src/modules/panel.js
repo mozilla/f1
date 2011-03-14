@@ -1,7 +1,30 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Raindrop.
+ *
+ * The Initial Developer of the Original Code is
+ * Mozilla Messaging, Inc..
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ **/
+const SHARE_STATUS = ["", "start", "", "finished"];
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://f1/modules/progress.js");
 Cu.import("resource://gre/modules/Services.jsm");
-
+Cu.import("resource://gre/modules/PlacesUtils.jsm");
 
 function mixin(target, source, override) {
     //TODO: consider ES5 getters and setters in here.
@@ -165,8 +188,10 @@ sharePanel.prototype = {
             }
 
             let nsiuri = Services.io.newURI(this.gBrowser.currentURI.spec, null, null);
-            Services.bookmarks.insertBookmark(Services.bookmarks.unfiledBookmarksFolder, nsiuri, Services.bookmarks.DEFAULT_INDEX, this.getPageTitle().trim());
-
+            Services.bookmarks.insertBookmark(
+                Services.bookmarks.unfiledBookmarksFolder, nsiuri,
+                Services.bookmarks.DEFAULT_INDEX, this.getPageTitle().trim()
+            );
             PlacesUtils.tagging.tagURI(nsiuri, tags);
         }
     },
@@ -252,7 +277,8 @@ sharePanel.prototype = {
     },
 
     getShortURL: function () {
-        let shorturl = this.gBrowser.contentDocument.getElementById("shorturl"), links = this.gBrowser.contentDocument.querySelectorAll("link[rel='shortlink']");
+        let shorturl = this.gBrowser.contentDocument.getElementById("shorturl")
+        let links = this.gBrowser.contentDocument.querySelectorAll("link[rel='shortlink']");
 
         // flickr does id="shorturl"
         if (shorturl) {
@@ -338,10 +364,12 @@ sharePanel.prototype = {
      * originating from the share UI in content-space
      */
     generateBase64Preview: function (imgUrl) {
-        let img = new Image();
+        let img = new this.browser.contentWindow.Image();
         img.onload = fn.bind(this, function () {
 
-            let canvas = this.gBrowser.contentDocument.createElement("canvas"), win = this.browser.contentWindow.wrappedJSObject, w = img.width, h = img.height, dataUrl, canvasW, canvasH, ctx, scale;
+            let canvas = this.gBrowser.contentDocument.createElement("canvas");
+            let win = this.browser.contentWindow.wrappedJSObject;
+            let w = img.width, h = img.height, dataUrl, canvasW, canvasH, ctx, scale;
 
             //Put upper constraints on the image size.
             if (w > 10000) {
@@ -380,7 +408,9 @@ sharePanel.prototype = {
         // Look for FB og:image and then rel="image_src" to use if available
         // for og:image see: http://developers.facebook.com/docs/share
         // for image_src see: http://about.digg.com/thumbnails
-        let metas = this.gBrowser.contentDocument.querySelectorAll("meta[property='og:image']"), links = this.gBrowser.contentDocument.querySelectorAll("link[rel='image_src']"), previews = [], i, content;
+        let metas = this.gBrowser.contentDocument.querySelectorAll("meta[property='og:image']")
+        let links = this.gBrowser.contentDocument.querySelectorAll("link[rel='image_src']")
+        let previews = [], i, content;
 
         for (i = 0; i < metas.length; i++) {
             content = metas[i].getAttribute("content");
@@ -463,7 +493,11 @@ sharePanel.prototype = {
                     }, 0);
                 }
             }];
-            nBox.appendNotification("There was a problem sharing this page.", "F1 Share Failure", null, nBox.PRIORITY_WARNING_MEDIUM, buttons);
+            nBox.appendNotification(
+                this.ffshare._getString("ffshareProblem.status"),
+                this.ffshare._getString("ffshareProblem.code"),
+                null, nBox.PRIORITY_WARNING_MEDIUM, buttons
+            );
         }
 
         if (this.button) {
@@ -480,14 +514,12 @@ sharePanel.prototype = {
 
     show: function (options) {
         let tabURI = this.gBrowser.getBrowserForTab(this.gBrowser.selectedTab).currentURI, tabUrl = tabURI.spec;
-        /*if (!this.ffshare.isValidURI(tabURI)) {
-            dump("invalid uri! " + tabURI + "\n");
+        if (!this.ffshare.isValidURI(tabURI)) {
             return;
-        }*/
+        }
 
         let currentState = this.gBrowser.selectedTab.shareState;
         options = this.getOptions(options);
-        dump("got options: " + options + "\n");
 
         this.gBrowser.selectedTab.shareState = {
             options: options,
@@ -526,7 +558,6 @@ sharePanel.prototype = {
 
         // fx 4
         let position = 'bottomcenter topleft';
-        dump("going to open popup!!\n");
         this.panel.openPopup(anchor, position, 0, 0, false, false);
     }
 };

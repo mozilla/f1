@@ -84,6 +84,7 @@ function f1(win, add)
 {
     this._addon = add;
     this._window = win;
+    this._getString = getString;
     
     // Hang on, the window may not be fully loaded yet
     let self = this;
@@ -131,6 +132,15 @@ f1.prototype = {
         unloaders.push(function() toolbox.removeChild(button));
     },
     
+    _labelize: function() {
+        let item = this._window.document.getElementById('context-ffshare');
+        item.label = getString("ffshareContext.label");
+        item = this._window.document.getElementById('context-selected-ffshare');
+        item.label = getString("ffshareContext.label");
+        item = this._window.document.getElementById('menu_ffshare');
+        item.label = getString("ffshareMenu.label");
+    },
+    
     togglePanel: function(options) {
         let popup = this._window.document.getElementById('share-popup');
         if (popup.state == 'open') {
@@ -141,7 +151,7 @@ f1.prototype = {
     },
     
     whoFrom: function() {
-        
+        // XXX: Implement
     },
     
     isValidURI: function (aURI) {
@@ -156,6 +166,7 @@ f1.prototype = {
             
             this._sharePanel = this._window.document.getElementById('share-popup');
             this._addToolbarButton();
+            this._labelize();
             
             Cu.import("resource://f1/modules/panel.js", tmp);
             this._sharePanel = new tmp.sharePanel(this._window);
@@ -163,16 +174,38 @@ f1.prototype = {
             // Load FUEL to access Application and setup preferences
             let Application = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
             this.prefs = {
-                system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
-                share_url: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
-                frontpage_url: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
-                bookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
-                previous_version: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".previous_version", ""),
+                system: Application.prefs.getValue(
+                    "extensions." + FFSHARE_EXT_ID + ".system",
+                    "prod"
+                ),
+                share_url: Application.prefs.getValue(
+                    "extensions." + FFSHARE_EXT_ID + ".share_url",
+                    "https://f1.mozillamessaging.com/share/panel/"
+                ),
+                frontpage_url: Application.prefs.getValue(
+                    "extensions." + FFSHARE_EXT_ID + ".frontpage_url",
+                    "http://f1.mozillamessaging.com/"
+                ),
+                bookmarking: Application.prefs.getValue(
+                    "extensions." + FFSHARE_EXT_ID + ".bookmarking",
+                    true
+                ),
+                previous_version: Application.prefs.getValue(
+                    "extensions." + FFSHARE_EXT_ID + ".previous_version",
+                    ""
+                ),
                 
-                // Cannot rename firstRun to first_install since it would mess up already deployed clients,
-                // would pop a new F1 window on an upgrade vs. fresh install.
-                firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", ""),
-                use_accel_key: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".use_accel_key", true)
+                // Cannot rename firstRun to first_install since it would mess
+                // up already deployed clients, would pop a new F1 window on
+                // an upgrade vs. fresh install.
+                firstRun: Application.prefs.getValue(
+                    "extensions." + FFSHARE_EXT_ID + ".first-install",
+                    ""
+                ),
+                use_accel_key: Application.prefs.getValue(
+                    "extensions." + FFSHARE_EXT_ID + ".use_accel_key",
+                    true
+                )
            };
         }
     }

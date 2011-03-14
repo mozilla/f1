@@ -1,4 +1,5 @@
 const { interfaces: Ci } = Components;
+const errorPage = "resource://f1/chrome/content/down.html";
 
 // This progress listener looks for HTTP codes that are errors/not
 // successses and puts up the "server down" page bundled in the extension.
@@ -36,7 +37,7 @@ StateProgressListener.prototype = {
                 // a placeholder by FF while first creating the panel/browser element.
                 // Check against channel.name, that is what we were *trying* to load.
                 var href = aRequest.nsIHttpChannel.name;
-                if (href !== ffshare.errorPage && href !== 'about:blank') {
+                if (href !== errorPage && href !== 'about:blank') {
                     status = 1000;
                 } else {
                     status = 200;
@@ -44,7 +45,7 @@ StateProgressListener.prototype = {
             }
 
             if (status < 200 || status > 399) {
-                this.browser.contentWindow.location = ffshare.errorPage;
+                this.browser.contentWindow.location = errorPage;
                 forceReload = true;
             }
         }
