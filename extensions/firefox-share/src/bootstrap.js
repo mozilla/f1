@@ -257,6 +257,10 @@ function startup(data, reason) AddonManager.getAddonByID(data.id, function(addon
 function shutdown(data, reason)
 {
     if (reason == APP_SHUTDOWN) return;
+
+    let resource = Services.io.getProtocolHandler("resource")
+                   .QueryInterface(Ci.nsIResProtocolHandler);
+    resource.setSubstitution("f1", null);
     unloaders.forEach(function(unload) unload && unload());
 }
 
