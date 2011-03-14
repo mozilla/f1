@@ -121,6 +121,7 @@ f1.prototype = {
         button.tooltipText = getString("ffshareToolbarButton.tooltip");
         button.class = "toolbarbutton-1 chromeclass-toolbar-additional"
         button.command = "cmd_toggleSharePage";
+        button.style.border = "none";
         
         // Reset click handlers of cloned button
         button.ondragexit = button.aboutHomeOverrideTooltip = null;

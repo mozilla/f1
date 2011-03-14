@@ -25,6 +25,7 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://f1/modules/progress.js");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/PlacesUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function mixin(target, source, override) {
     //TODO: consider ES5 getters and setters in here.
@@ -87,6 +88,13 @@ sharePanel.prototype = {
         let webProgress = this.browser.webProgress;
         this.stateProgressListener = new StateProgressListener(this.browser);
         webProgress.addProgressListener(this.stateProgressListener, Ci.nsIWebProgress.NOTIFY_STATE_WINDOW);
+        
+        // Extend Services object
+        XPCOMUtils.defineLazyServiceGetter(
+            Services, "bookmarks",
+            "@mozilla.org/browser/nav-bookmarks-service;1",
+            "nsINavBookmarksService"
+        );
     },
 
     shutdown: function () {
