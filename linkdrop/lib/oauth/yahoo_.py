@@ -201,7 +201,14 @@ class api():
         from_email = from_ = profile.get('verifiedEmail')
         fullname = profile.get('displayName', None)
 
-        to_addrs = AddressList(options['to'])
+        to_addrs = AddressList(options.get('to', None))
+        if not to_addrs.addresslist:
+            return None, {
+                "provider": domain,
+                "message": "recipient address is invalid",
+                "status": 0
+            }
+
         subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
         title = options.get('title', options.get('link', options.get('shorturl', '')))
         description = options.get('description', '')[:280]
