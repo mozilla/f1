@@ -21,6 +21,10 @@ StateProgressListener.prototype = {
 
     onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
         var flags = Ci.nsIWebProgressListener;
+        
+        if (!('nsIHttpChannel' in aRequest))
+            return;
+        
         if (aStateFlags & flags.STATE_IS_WINDOW && aStateFlags & flags.STATE_STOP) {
             var status;
             try {

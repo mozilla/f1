@@ -11,7 +11,7 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is F1.
+ * The Original Code is Raindrop.
  *
  * The Initial Developer of the Original Code is The Mozilla Foundation.
  * Portions created by the Initial Developer are Copyright (C) 2011
@@ -34,6 +34,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+const FFSHARE_EXT_ID = "ffshare@mozilla.org";
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 
 Cu.import("resource://gre/modules/Services.jsm");
@@ -84,21 +85,37 @@ function f1(win, add)
     this._addon = add;
     this._window = win;
     
-    let uri = this._addon.getResourceURI("chrome/content/ff-overlay.xul").spec;
-    this._window.document.loadOverlay(uri, this);
+    // Hang on, the window may not be fully loaded yet
+    let self = this;
+    function checkWindow()
+    {
+        if (!win.document.getElementById("nav-bar")) {
+            let timeout = win.setTimeout(checkWindow, 1000);
+            unloaders.push(function() win.clearTimeout(timeout));
+        } else {
+            let uri = self._addon.getResourceURI("chrome/content/ff-overlay.xul").spec;
+            win.document.loadOverlay(uri, self);
+        }
+    }
+    checkWindow();
 }
 f1.prototype = {
     _addToolbarButton: function() {
+        let self = this;
+        
+        // Don't add a toolbar button if one is already present
+        if (this._window.document.getElementById("ffshare-toolbar-button"))
+            return;
+        
         // We clone an existing button because creating a new one from scratch
         // does not seem to work (perhaps some missing properties?)
-        let self = this;
         let toolbox = this._window.document.getElementById("nav-bar");
         let homeButton = this._window.document.getElementById("home-button");
         let button = homeButton.cloneNode(false);
         
         // Setup label and tooltip
         button.id = "ffshare-toolbar-button";
-        button.type="checkbox"
+        button.type = "checkbox";
         button.label = getString("ffshareToolbarButton.label");
         button.tooltipText = getString("ffshareToolbarButton.tooltip");
         button.class = "toolbarbutton-1 chromeclass-toolbar-additional"
@@ -111,13 +128,12 @@ f1.prototype = {
         // Put our button right before the URL bar
         let urlbar = this._window.document.getElementById("urlbar-container");
         toolbox.insertBefore(button, urlbar);
-        
-        Cu.import("resource://f1/modules/panel.js");
-        this._sharePanel = new sharePanel(this._window);
+        unloaders.push(function() toolbox.removeChild(button));
     },
     
     togglePanel: function(options) {
-        if (this._window.document.getElementById('share-popup').state == 'open') {
+        let popup = this._window.document.getElementById('share-popup');
+        if (popup.state == 'open') {
             this._sharePanel.close();
         } else {
             this._sharePanel.show(options);
@@ -128,10 +144,36 @@ f1.prototype = {
         
     },
     
+    isValidURI: function (aURI) {
+      // Only open the share frame for http/https/ftp urls, file urls for testing.
+      return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') ||
+                       aURI.schemeIs('file') || aURI.schemeIs('ftp')));
+    },
+    
     observe: function(subject, topic, data) {
         if (topic == "xul-overlay-merged") {
+            let tmp = {};
+            
             this._sharePanel = this._window.document.getElementById('share-popup');
             this._addToolbarButton();
+            
+            Cu.import("resource://f1/modules/panel.js", tmp);
+            this._sharePanel = new tmp.sharePanel(this._window);
+            
+            // Load FUEL to access Application and setup preferences
+            let Application = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
+            this.prefs = {
+                system: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".system", "prod"),
+                share_url: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".share_url", ""),
+                frontpage_url: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".frontpage_url", ""),
+                bookmarking: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".bookmarking", true),
+                previous_version: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".previous_version", ""),
+                
+                // Cannot rename firstRun to first_install since it would mess up already deployed clients,
+                // would pop a new F1 window on an upgrade vs. fresh install.
+                firstRun: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".first-install", ""),
+                use_accel_key: Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".use_accel_key", true)
+           };
         }
     }
 };
@@ -150,23 +192,30 @@ function startup(data, reason) AddonManager.getAddonByID(data.id, function(addon
     getString.init(addon);
     
     /* We use winWatcher to create an instance per window (current and future) */
+    function f1Factory(win) {
+        win.addEventListener("load", function() {
+            win.removeEventListener("load", arguments.callee, false);
+            let doc = win.document.documentElement;
+            if (doc.getAttribute("windowtype") == "navigator:browser") {
+                win.gBrowser.f1 = new f1(win, addon);
+            }
+        }, false);
+    }
+    
     let iter = Cc["@mozilla.org/appshell/window-mediator;1"]
                .getService(Ci.nsIWindowMediator)
                .getEnumerator("navigator:browser");
     while (iter.hasMoreElements()) {
         let win = iter.getNext().QueryInterface(Ci.nsIDOMWindow);
-        win.gBrowser.f1 = new f1(win, addon);
+        if (win.gBrowser != null)
+            win.gBrowser.f1 = new f1(win, addon)
+        else
+            f1Factory(win);
     }
     function winWatcher(subject, topic) {
         if (topic != "domwindowopened")
             return;
-        subject.addEventListener("load", function() {
-            subject.removeEventListener("load", arguments.callee, false);
-            let doc = subject.document.documentElement;
-            if (doc.getAttribute("windowtype") == "navigator:browser") {
-                subject.gBrowser.f1 = new f1(subject, addon);
-            }
-        }, false);
+        f1Factory(subject);
     }
     Services.ww.registerNotification(winWatcher);
     unloaders.push(function() Services.ww.unregisterNotification(winWatcher));
