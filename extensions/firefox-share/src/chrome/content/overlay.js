@@ -494,8 +494,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:video']");
       for (var i = 0; i < metas.length; i++) {
         var content = metas[i].getAttribute("content");
-        if (content) {
-          return unescapeXml(content);
+        if (content && (content = this._validURL(unescapeXml(content)))) {
+          return content;
         }
       }
       return this.getVideoSourceURLHacks();
@@ -504,7 +504,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     getVideoSourceURLHacks: function () {
       var canonical = this.getCanonicalURL(),
           host = gBrowser.currentURI.host,
-          params, embeds, i, src, flashvars, value;
+          params, embeds, i, src, flashvars, value, url;
 
       //YouTube hack to get the right source without too many parameters
       if (host.indexOf("youtube.com") >= 0 &&
@@ -523,7 +523,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           if (flashvars) {
             src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
           }
-          return gBrowser.currentURI.resolve(unescapeXml(src));
+          if ((url = this._validURL(unescapeXml(src)))) {
+            return url;
+          }
         }
       }
 
@@ -533,7 +535,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       for (i = 0; i < params.length; i++) {
         value = params[i].getAttribute("value");
         if (value) {
-          return gBrowser.currentURI.resolve(unescapeXml(value));
+          if ((url = this._validURL(unescapeXml(value)))) {
+            return url;
+          }
         }
       }
 
@@ -546,7 +550,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         if (flashvars) {
           src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
         }
-        return gBrowser.currentURI.resolve(unescapeXml(src));
+        if ((url = this._validURL(unescapeXml(src)))) {
+          return url;
+        }
       }
       return "";
     },
@@ -556,14 +562,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           links = gBrowser.contentDocument.querySelectorAll("link[rel='shortlink']");
 
       // flickr does id="shorturl"
-      if (shorturl) {
-        return shorturl.getAttribute("href");
+      if (shorturl && (shorturl = this._validURL(shorturl.getAttribute("href")))) {
+        return shorturl;
       }
 
       for (var i = 0; i < links.length; i++) {
-        var content = links[i].getAttribute("href");
+        var content = this._validURL(links[i].getAttribute("href"));
         if (content) {
-          return gBrowser.currentURI.resolve(content);
+          return content;
         }
       }
       return "";
@@ -574,18 +580,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           i, content;
 
       for (i = 0; i < links.length; i++) {
-        content = links[i].getAttribute("content");
-        if (content) {
-          return gBrowser.currentURI.resolve(content);
+        if ((content = this._validURL(links[i].getAttribute("content")))) {
+          return content;
         }
       }
 
       links = gBrowser.contentDocument.querySelectorAll("link[rel='canonical']");
 
       for (i = 0; i < links.length; i++) {
-        content = links[i].getAttribute("href");
-        if (content) {
-          return gBrowser.currentURI.resolve(content);
+        if ((content = this._validURL(links[i].getAttribute("href")))) {
+          return content;
         }
       }
 
@@ -598,7 +602,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     getCanonicalURLHacks: function () {
       // Google Maps Hack :( obviously this regex isn't robust
       if (/^maps\.google\.[a-zA-Z]{2,5}/.test(gBrowser.currentURI.host)) {
-        return gBrowser.contentDocument.getElementById("link").getAttribute("href");
+        return this._validURL(gBrowser.contentDocument.getElementById("link").getAttribute("href"));
       }
 
       return '';
@@ -682,6 +686,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     },
 
+    _validURL: function(url) {
+      // hacky validation of a url to make sure it at least appears valid
+      url = gBrowser.currentURI.resolve(url);
+      if (!/\w+:\/\/[^\/]+\/.+/.test(url))
+        return null;
+      return url;
+    },
+    
     previews: function () {
       // Look for FB og:image and then rel="image_src" to use if available
       // for og:image see: http://developers.facebook.com/docs/share
@@ -691,20 +703,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           previews = [], i, content;
 
       for (i = 0; i < metas.length; i++) {
-        content = metas[i].getAttribute("content");
+        content = this._validURL(metas[i].getAttribute("content"));
         if (content) {
           previews.push({
-            http_url : gBrowser.currentURI.resolve(content),
+            http_url : content,
             base64 : ""
           });
         }
       }
 
       for (i = 0; i < links.length; i++) {
-        content = links[i].getAttribute("href");
+        content = this._validURL(links[i].getAttribute("href"));
         if (content) {
           previews.push({
-            http_url : gBrowser.currentURI.resolve(content),
+            http_url : content,
             base64 : ""
           });
         }
