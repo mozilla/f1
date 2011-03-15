@@ -1,0 +1,558 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Raindrop.
+ *
+ * The Initial Developer of the Original Code is
+ * Mozilla Messaging, Inc..
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ * */
+
+* {
+  margin: 0;
+  padding: 0;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  list-style-type: none;
+}
+
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 21px;
+  color: #0a0a0a;
+  overflow-y: scroll;
+}
+
+.hidden,
+#tabs li.hidden,
+.hbox > *.hidden {
+  display: none;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+button::-moz-focus-inner {
+  border: 0;
+}
+
+button {
+  height: 24px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #aaa;
+  cursor: pointer;
+  padding: 0 10px;
+
+  -moz-border-radius: 2px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+
+  background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
+}
+
+button:active {
+  -moz-box-shadow: 0 0 1px #666666 inset;
+  -webkit-box-shadow: 0 0 1px #666666 inset;
+  box-shadow: 0 0 1px #666666 inset;
+
+  background-image: -moz-linear-gradient(center top , #eee 0%, #ccc 100%);
+  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #eee), color-stop(100%, #ccc));
+}
+
+button span.remove,
+button span.add {
+  color: #fff;
+  font-weight: bold;
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  background-image: url("i/sprite.png");
+  background-repeat: no-repeat;
+  vertical-align: text-bottom;
+  margin: 0 0 0 5px;
+}
+
+button.done {
+    height: 32px;
+    font-size: 14px;
+    padding: 0 20px;
+    margin-bottom: 40px;
+}
+
+button.config {
+  width: 100px;
+  text-align: center;
+}
+
+button span.remove {
+  background-position: center -305px;
+}
+
+button span.add {
+  background-position: center -339px;
+}
+
+a {
+  color: #00a0ff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.status.error {
+    text-align: center;
+}
+
+.error {
+  color: #FF0000;
+}
+/* From the uservoice feedback button */
+#feedback {
+    position: fixed;
+    top: 40%;
+    left: 0;
+    width: 25px;
+    height: 98px;
+    padding: 0;
+    margin: -45px 0 0;
+    text-indent: -1000px;
+    background-image: url("https://cdn.uservoice.com/images/widgets/en/feedback_tab_white.png");
+    background-position: 2px 50%;
+    background-color: red;
+    border-color: #FF0000 #FF0000 #FF0000 -moz-use-text-color;
+    border-style: outset outset outset none;
+    border-width: 1px 1px 1px medium;
+    z-index: 500;
+}
+#feedback:hover {
+    text-decoration: none;
+    background-color: #0066CC;
+    border-color: #0066CC #0066CC #0066CC -moz-use-text-color;
+}
+
+strong {
+  font-weight: bold;
+}
+
+#wrapper {
+  width: 720px;
+  margin: 0 auto;
+  overflow: hidden;
+  position: relative;
+}
+
+#shortenForm label.text {
+    line-height: 24px;
+}
+
+#shortenForm input {
+  width: 220px;
+  height: 24px;
+  border-color: #aaa;
+  border-style: solid;
+  border-width: 1px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15) inset;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  padding: 2px 5px;
+}
+
+#shortenForm select {
+    width: 220px;
+}
+
+/*
+    grid
+*/
+
+.c1, .c2, .c3 {
+  display: inline-block;
+  float: left;
+  min-height: 1%;
+  margin: 0 10px;
+  position: relative;
+}
+
+.c1 {
+  width: 220px;
+}
+
+.c2 {
+  width: 460px;
+}
+
+.c3 {
+  width: 700px;
+}
+
+.row {
+  float: left;
+  margin: 10px 0;
+}
+
+.row.about {
+  margin: 20px 0;
+}
+
+h1 {
+  font-size: 18px;
+  font-weight: normal;
+  color: #00A0FF;
+}
+
+span.micro {
+    font-size: 12px;
+    margin: 5px 0 10px 0;
+    display: block;
+    color: #666;
+}
+
+a.micro {
+    margin: 0 10px;
+}
+
+/*
+    header
+*/
+
+#header.row {
+  margin: 36px 0;
+}
+
+#header.row .c3,
+#header.row .c2,
+#header.row .c1 {
+  height: 90px;
+  line-height: 90px;
+  text-align: right;
+}
+
+#header.row .logo {
+  background-image: url("i/f1Logo.png");
+  background-repeat: no-repeat;
+  background-position: 0 -9px;
+}
+
+/*
+    tabs
+*/
+
+ul#tabs {
+  display: block;
+  margin: 10px 10px 0 10px;
+}
+
+ul#tabs li {
+  display: inline-block;
+  padding: 7px 20px;
+  border-width: 1px 1px 0 1px;
+  border-color: #ccc;
+  border-style: solid;
+  float: left;
+  margin: 0 5px;
+  background-color: #fff;
+  cursor: pointer;
+  -moz-border-radius: 3px 3px 0 0;
+  -webkit-border-radius: 3px 3px 0 0;
+  border-radius: 3px 3px 0 0;
+}
+
+ul#tabs li.selected {
+  background-color: #fafafa;
+  position: relative;
+  z-index: 2;
+}
+
+/*
+    config
+*/
+
+#config {
+  border-top: 1px solid #ccc;
+  margin: -1px 10px 0 10px;
+  position: relative;
+  z-index: 1;
+  background-image: -moz-linear-gradient(top, #fafafa 0%, #fff 20px);
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 10px;
+  display: inline-block;
+  background-image: url("i/sprite.png");
+  background-repeat: no-repeat;
+  vertical-align: text-bottom;
+}
+
+.icon.twitter {
+  background-position: center -36px;
+}
+
+.icon.facebook {
+  background-position: center -69px;
+}
+
+.icon.gmail {
+  background-position: center -101px;
+}
+
+.icon.yahoo {
+  background-position: center -132px;
+}
+
+.icon.googleapps {
+  background-position: center -165px;
+}
+
+.icon.linkedin {
+  background-image: url("i/LinkedIn_Logo16px.png");
+  background-position: center;
+}
+
+.icon.rss {
+  background-position: center -271px;
+  margin: 0;
+}
+
+#done {
+  padding: 0 10px;
+}
+
+.panel {
+  width: 100%;
+  margin: 20px 0;
+}
+
+#config .about {
+  color: #444;
+  text-align: center;
+}
+
+#config .username {
+  color: #aaa;
+}
+
+#config .new {
+  color: #ff5959;
+  font-style: italic;
+}
+
+#config ul {
+  margin: 10px 0 20px;
+  border: 1px solid #ccc;
+  background-color: #fafafa;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+}
+
+#config ul li {
+  width: 100%;
+  padding: 10px 20px;
+  border-bottom: 1px solid #ccc;
+}
+
+#config ul li .accountType {
+  line-height: 24px;
+}
+
+.accountType .multipleSignOut {
+    float: right;
+    margin-right: 10px;
+    color: #AAAAAA;
+}
+
+#config ul li:last-child {
+  border-bottom: none;
+  -moz-border-radius: 0 0 5px 5px;
+  -webkit-border-radius: 0 0 5px 5px;
+  border-radius: 0 0 5px 5px;
+}
+
+#settings .key {
+  margin-right: 10px;
+  padding: 0 3px 0 5px;
+  -moz-border-radius: 4px;
+  -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.75), 0 1px 0 rgba(0, 0, 0, 0.3);
+  background: -moz-linear-gradient(#f8f8f8, #dddee0) repeat scroll 0 0 #ecedef;
+  color: #434343;
+  font-weight: bold;
+  text-align: center;
+  text-shadow: 0 1px 1px white;
+   -moz-user-select: none;
+}
+
+#newsFooter {
+  padding: 0 10px;
+  margin: 10px 0;
+  position: absolute;
+  bottom: 0;
+  width: 720px;
+}
+
+#newsFooter .privacy {
+  margin: 0 0 0 10px;
+  color: #444;
+}
+
+/*
+    hbox & vbox
+*/
+
+.hbox {
+	display: -webkit-box;
+	-webkit-box-orient: horizontal;
+	-webkit-box-align: stretch;
+
+	display: -moz-box;
+	-moz-box-orient: horizontal;
+	-moz-box-align: stretch;
+
+	display: box;
+	box-orient: horizontal;
+	box-align: stretch;
+
+	width: 100%;
+}
+
+.hbox > * {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+	display: block;
+}
+
+.vbox {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-box-align: stretch;
+
+	display: -moz-box;
+	-moz-box-orient: vertical;
+	-moz-box-align: stretch;
+
+	display: box;
+	box-orient: vertical;
+	box-align: stretch;
+}
+
+.vbox > * {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+	display: block;
+}
+
+.spacer {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+
+.reverse {
+	-webkit-box-direction: reverse;
+	-moz-box-direction: reverse;
+	box-direction: reverse;
+}
+
+.boxFlex0 {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+}
+
+.boxFlex1, .boxFlex {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+
+.boxFlex2 {
+	-webkit-box-flex: 2;
+	-moz-box-flex: 2;
+	box-flex: 2;
+}
+
+.boxGroup1 {
+	-webkit-box-flex-group: 1;
+	-moz-box-flex-group: 1;
+	box-flex-group: 1;
+}
+
+.boxGroup2 {
+	-webkit-box-flex-group: 2;
+	-moz-box-flex-group: 2;
+	box-flex-group: 2;
+}
+
+.start {
+	-webkit-box-pack: start;
+	-moz-box-pack: start;
+	box-pack: start;
+}
+
+.end {
+	-webkit-box-pack: end;
+	-moz-box-pack: end;
+	box-pack: end;
+}
+
+.center {
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	box-pack: center;
+}
+
+/*
+    clearfix
+*/
+
+.clearfix:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+}
+
+html[xmlns] .clearfix {
+	display: block;
+}
+
+* html .clearfix {
+	height: 1%;
+}
+
+/*
+    webkit specific styles
+*/
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+
+.overflow {
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  white-space: nowrap;
+}
+
+}
