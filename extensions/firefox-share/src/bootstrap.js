@@ -105,12 +105,10 @@ function f1(win, add)
 }
 f1.prototype = {
     _beStylin: function() {
-        var sss = Components.classes["@mozilla.org/content/style-sheet-service;1"]
-                            .getService(Components.interfaces.nsIStyleSheetService);
-        let uri = this._addon.getResourceURI("chrome/skin/overlay.css");
-        if(!sss.sheetRegistered(uri, sss.USER_SHEET))
-          sss.loadAndRegisterSheet(uri, sss.USER_SHEET);
-        unloaders.push(function() sss.unregisterSheet(uri, sss.USER_SHEET));
+        // not sure how to undo this for unload
+        let document = this._window.document;
+        var pi = document.createProcessingInstruction("xml-stylesheet", "href=\"resource://f1/chrome/skin/overlay.css\" type=\"text/css\"");
+        document.insertBefore(pi,document.firstChild);
     },
     _command: function() {
         let document = this._window.document;
