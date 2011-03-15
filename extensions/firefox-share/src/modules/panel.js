@@ -48,12 +48,12 @@ function unescapeXml(text) {
 // A state object is attached to each browser tab when the share panel
 // is opened for that tab.  The state object is removed from the current
 // tab when the panel is closed.
-function sharePanel(window) {
+function sharePanel(window, ffshare) {
     this.window = window;
 
     this.gBrowser = window.gBrowser;
     this.document = window.document;
-    this.ffshare = this.gBrowser.f1;
+    this.ffshare = ffshare;
 
     this.button = this.document.getElementById('ffshare-toolbar-button');
     this.browser = this.document.getElementById('share-browser');
