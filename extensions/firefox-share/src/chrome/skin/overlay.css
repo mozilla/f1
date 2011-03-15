@@ -22,26 +22,23 @@
  * */
 @namespace xul url(http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul);
 
-/* this is untested, will it work? */
-@import url(resource://f1/chrome/skin/windows/overlay.css) -moz-windows-theme;
-
 #ffshare-toolbar-button > label {
   display: none;
 }
 
 #ffshare-toolbar-button > image {
-  list-style-image: url("resource://f1/chrome/skin/toolbar-button.png");
+  list-style-image: url("resource://ffshare/chrome/skin/toolbar-button.png");
   width: auto;
   height: auto;
 }
 #ffshare-toolbar-button[firstRun] > image {
-  list-style-image: url("resource://f1/chrome/skin/toolbar-button-glow.png");
+  list-style-image: url("resource://ffshare/chrome/skin/toolbar-button-glow.png");
 }
 
 #ffshare-toolbar-button[status="start"] > image {
-  list-style-image: url("resource://f1/chrome/skin/status-sharing.png");
+  list-style-image: url("resource://ffshare/chrome/skin/status-sharing.png");
 }
 
 #ffshare-toolbar-button[status="finished"] > image {
-  list-style-image: url("resource://f1/chrome/skin/status-shared.png");
+  list-style-image: url("resource://ffshare/chrome/skin/status-shared.png");
 }

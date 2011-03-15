@@ -22,7 +22,7 @@
  **/
 const SHARE_STATUS = ["", "start", "", "finished"];
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
-Cu.import("resource://f1/modules/progress.js");
+Cu.import("resource://ffshare/modules/progress.js");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/PlacesUtils.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");

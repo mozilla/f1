@@ -1,5 +1,5 @@
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
-const errorPage = "resource://f1/chrome/content/down.html";
+const errorPage = "resource://ffshare/chrome/content/down.html";
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 // This progress listener looks for HTTP codes that are errors/not
