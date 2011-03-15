@@ -26,18 +26,22 @@
 }
 
 #ffshare-toolbar-button > image {
-  list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
+  list-style-image: url("resource://f1/chrome/skin/windows/toolbar-button.png");
   width: auto;
   height: auto;
 }
 #ffshare-toolbar-button[firstRun] > image {
-  list-style-image: url("chrome://ffshare/skin/toolbar-button-glow.png");
+  list-style-image: url("resource://f1/chrome/skin/windows/toolbar-button-glow.png");
 }
 
 #ffshare-toolbar-button[status="start"] > image {
-  list-style-image: url("chrome://ffshare/skin/status-sharing.png");
+  list-style-image: url("resource://f1/chrome/skin/windows/status-sharing.png");
 }
 
 #ffshare-toolbar-button[status="finished"] > image {
-  list-style-image: url("chrome://ffshare/skin/status-shared.png");
+  list-style-image: url("resource://f1/chrome/skin/windows/status-shared.png");
+}
+
+.ffshare-panel .panel-inner-arrowcontent {
+    padding: 0;
 }
