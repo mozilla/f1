@@ -14,6 +14,7 @@ data/sessions
 ^grinder/.*-file-store
 ^grinder/.*\$py.class
 tests/web/testenv
+tests/web/mozmill
 web-static
 web/share-0.1-dev.xpi
 web/current

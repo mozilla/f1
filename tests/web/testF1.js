@@ -1,43 +1,39 @@
 
 /*jslint strict: false, indent: 2 */
-/*global mozmill: false, controller: false, elementslib: false */
+/*global require: false, mozmill: false, controller: false, elementslib: false */
 
-var setupModule = function (module) {
-  module.controller = mozmill.getBrowserController();
-};
 
-var setupTest = function (test) {
+var f1 = require('./lib/f1'),
+    tabs = require('./lib/tabs'),
+    log = require('./lib/l').og,
+    e = elementslib,
+    c;
+
+function setupModule(module) {
+  c = module.controller = mozmill.getBrowserController();
+}
+
+function setupTest(test) {
   // Open a tab to something that can be shared (home page is not shareable)
-  controller.click(new elementslib.Elem(controller.menus['file-menu']['menu_newNavigatorTab']));
-  controller.open('http://www.wikipedia.org');
-  controller.waitForPageLoad();
+  tabs.open(c, 'http://www.google.com');
+  f1.open(c);
+}
 
-  // Open F1
-  controller.click(new elementslib.ID(controller.window.document, 'ffshare-toolbar-button'));
+function testTextInput(test) {
+  var doc = f1.doc(c),
+      node = doc.querySelectorAll('#gmail input[name="to"]')[0];
 
-  var browser = new elementslib.ID(controller.window.document, 'share-browser');
+  log('DOC: ' + doc);
+  log('NODE: ' + node);
 
-  // todo: what we really want to know is that the form is completely updated
-  // with the current tab's information. May need to listen to postMessage,
-  // but may be tricky to set up.
-  controller.waitForPageLoad(browser.document, 5000, 300);
-};
+  var toElem = new e.Elem(node);
+      //toElem = e.Elem();
 
+  c.type(toElem, "foobar");
+  c.assertValue(toElem, "foobar");
+}
 
-var testTextInput = function (test) {
-  var //browser = new elementslib.ID(controller.window.document, 'share-browser'),
-      document = controller.window.frames[2].document,
-      toElem = new elementslib.Name(controller.window.frames[2].document, "to");
-      //toElem = elementslib.Elem(document.querySelectorAll('#gmail input[name="to"]')[0]);
-
-//Cu.reportError('.' + 'foo');
-
-  controller.type(toElem, "jrburke@gmail.com");
-  controller.assertValue(toElem, "jrburke@gmail.com");
-};
-
-var teardownTest = function (test) {
+function teardownTest(test) {
   // Close F1
-  controller.click(new elementslib.ID(controller.window.document, 'ffshare-toolbar-button'));
-  controller.click(new elementslib.Elem(controller.menus['file-menu']['menu_close']));
-};
+  f1.close(c);
+}
