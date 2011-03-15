@@ -27,7 +27,7 @@ function f1(win)
             let timeout = win.setTimeout(checkWindow, 1000);
             unloaders.push(function() win.clearTimeout(timeout));
         } else {
-            self.setMeUp();
+            self.init();
         }
     }
     checkWindow();
@@ -49,7 +49,7 @@ f1.prototype = {
                        aURI.schemeIs('file') || aURI.schemeIs('ftp')));
     },
     
-    setMeUp: function() {
+    init: function() {
         let tmp = {};
         
         Cu.import("resource://ffshare/modules/panel.js", tmp);
