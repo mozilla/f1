@@ -5,9 +5,11 @@ const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/AddonManager.jsm");
 
+Cu.import("resource://ffshare/modules/progress.js");
+
 const NS_XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
-var buttonId = 'ffshare-toolbar-button';
+const buttonId = 'ffshare-toolbar-button';
 
 var EXPORTED_SYMBOLS = ["startAddon"];
 
@@ -15,9 +17,19 @@ function startAddon(win) {
     win.gBrowser.f1 = new f1(win);
 }
 
+function log(msg) {
+    dump(msg+"\n");
+    Cu.reportError('.' + msg); // avoid clearing on empty log
+}
+
+function error(msg) {
+    dump(msg+"\n");
+    Cu.reportError('.' + msg); // avoid clearing on empty log
+}
+
 function f1(win)
 {
-    this._window = win;
+    this.window = win;
     
     // Hang on, the window may not be fully loaded yet
     let self = this;
@@ -35,26 +47,61 @@ function f1(win)
 f1.prototype = {
 
     togglePanel: function(options) {
-        let popup = this._window.document.getElementById('share-popup');
+        let popup = this.window.document.getElementById('share-popup');
         if (popup.state == 'open') {
-            this._sharePanel.close();
+            this.sharePanel.close();
         } else {
-            this._sharePanel.show(options);
+            this.sharePanel.show(options);
         }
     },
-    
+
+    switchTab: function (waitForLoad) {
+      let self = this;
+      if (waitForLoad) {
+        // this double-loads the share panel since image data may not be
+        // available yet
+        this.window.gBrowser.contentWindow.addEventListener('DOMContentLoaded', function () {
+          self.switchTab(false);
+        }, true);
+      }
+
+      var selectedTab = this.window.gBrowser.selectedTab;
+      var visible = this.window.document.getElementById('share-popup').state === 'open';
+      var isopen = selectedTab.shareState && selectedTab.shareState.open;
+      if (visible && !isopen) {
+        this.sharePanel.close();
+      }
+      if (isopen) {
+        this.window.setTimeout(function () {
+          self.sharePanel.show({});
+        }, 0);
+      } else {
+        this.window.setTimeout(function () {
+          self.sharePanel.updateStatus();
+        }, 0);
+      }
+    },
+
+    canShareURI: function (aURI) {
+      var command = this.window.document.getElementById("cmd_toggleSharePage");
+      try {
+        if (this.isValidURI(aURI)) {
+          command.removeAttribute("disabled");
+        } else {
+          command.setAttribute("disabled", "true");
+        }
+      } catch (e) {
+        throw e;
+      }
+    },
+
     isValidURI: function (aURI) {
       // Only open the share frame for http/https/ftp urls, file urls for testing.
       return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') ||
                        aURI.schemeIs('file') || aURI.schemeIs('ftp')));
     },
     
-    init: function() {
-        let tmp = {};
-        
-        Cu.import("resource://ffshare/modules/panel.js", tmp);
-        this._sharePanel = new tmp.sharePanel(this._window, this);
-        
+    installAPI: function() {
         // Inject code into content
         tmp = {};
         let self = this;
@@ -69,9 +116,16 @@ f1.prototype = {
                 };
             }
         };
-        tmp.InjectorInit(self._window);
-        self._window.injector.register(ffapi);
-          
+        tmp.InjectorInit(self.window);
+        self.window.injector.register(ffapi);
+    },
+    
+    init: function() {
+        let tmp = {};
+        
+        Cu.import("resource://ffshare/modules/panel.js", tmp);
+        this.sharePanel = new tmp.sharePanel(this.window, this);
+        
         // Load FUEL to access Application and setup preferences
         let Application = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
         this.prefs = {
@@ -108,6 +162,21 @@ f1.prototype = {
                 true
             )
        };
+       
+        try {
+            this.canShareProgressListener = new LocationChangeProgressListener(this);
+            this.window.gBrowser.addProgressListener(this.canShareProgressListener);
+        } catch (e) {
+            error(e);
+        }
+    },
+    
+    unload: function() {
+        try {
+            this.window.gBrowser.removeProgressListener(this.canShareProgressListener);
+        } catch (e) {
+            error(e);
+        }
     }
 };
 
