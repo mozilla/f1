@@ -20,12 +20,17 @@
  *
  * Contributor(s):
  **/
-const SHARE_STATUS = ["", "start", "", "finished"];
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://ffshare/modules/progress.js");
 Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/PlacesUtils.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
+const SHARE_STATUS = ["", "start", "", "finished"];
+const SHARE_DONE = 0;
+const SHARE_START = 1;
+const SHARE_ERROR = 2;
+const SHARE_FINISHED = 3;
 
 function mixin(target, source, override) {
   //TODO: consider ES5 getters and setters in here.
@@ -86,7 +91,7 @@ sharePanel.prototype = {
     Services.obs.addObserver(this, 'content-document-global-created', false);
 
     let webProgress = this.browser.webProgress;
-    this.stateProgressListener = new StateProgressListener(this.browser, this);
+    this.stateProgressListener = new StateProgressListener(this);
     webProgress.addProgressListener(this.stateProgressListener, Ci.nsIWebProgress.NOTIFY_STATE_WINDOW);
     
     // Extend Services object
@@ -445,6 +450,8 @@ sharePanel.prototype = {
    * originating from the share UI in content-space
    */
   generateBase64Preview: function (imgUrl) {
+    // XXX TODO this is broken
+    try {
     let self = this;
     let img = new this.browser.contentWindow.Image();
     img.onload = function () {
@@ -485,7 +492,9 @@ sharePanel.prototype = {
 
     };
     img.src = imgUrl;
-
+    } catch(e) {
+      dump("generateBase64Preview: "+e+"\n");
+    }
   },
 
   _validURL: function(url) {
@@ -676,7 +685,7 @@ sharePanel.prototype = {
         nBox = this.gBrowser.getNotificationBox(contentBrowser),
         notification = nBox.getNotificationWithValue("mozilla-f1-share-error");
 
-    if (!ffshare.isValidURI(tabURI)) {
+    if (!this.ffshare.isValidURI(tabURI)) {
       return;
     }
 
@@ -722,7 +731,7 @@ sharePanel.prototype = {
     }
 
     // fx 4
-    let position = (getComputedStyle(gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
+    let position = (this.window.getComputedStyle(this.window.gNavToolbox, "").direction === "rtl") ? 'bottomcenter topright' : 'bottomcenter topleft';
     this.panel.openPopup(anchor, position, 0, 0, false, false);
   }
 };
