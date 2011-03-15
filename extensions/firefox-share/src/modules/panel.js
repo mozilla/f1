@@ -86,7 +86,7 @@ sharePanel.prototype = {
         Services.obs.addObserver(this, 'content-document-global-created', false);
 
         let webProgress = this.browser.webProgress;
-        this.stateProgressListener = new StateProgressListener(this.browser);
+        this.stateProgressListener = new StateProgressListener(this.browser, this);
         webProgress.addProgressListener(this.stateProgressListener, Ci.nsIWebProgress.NOTIFY_STATE_WINDOW);
         
         // Extend Services object
