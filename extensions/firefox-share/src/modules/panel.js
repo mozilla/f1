@@ -196,11 +196,13 @@ sharePanel.prototype = {
             }
 
             let nsiuri = Services.io.newURI(this.gBrowser.currentURI.spec, null, null);
-            Services.bookmarks.insertBookmark(
-                Services.bookmarks.unfiledBookmarksFolder, nsiuri,
-                Services.bookmarks.DEFAULT_INDEX, this.getPageTitle().trim()
-            );
-            PlacesUtils.tagging.tagURI(nsiuri, tags);
+            if (!Services.bookmarks.isBookmarked(nsiuri)) {
+                Services.bookmarks.insertBookmark(
+                    Services.bookmarks.unfiledBookmarksFolder, nsiuri,
+                    Services.bookmarks.DEFAULT_INDEX, this.getPageTitle().trim()
+                );
+                PlacesUtils.tagging.tagURI(nsiuri, tags);
+            }
         }
     },
 
