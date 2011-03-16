@@ -201,8 +201,8 @@ sharePanel.prototype = {
                     Services.bookmarks.unfiledBookmarksFolder, nsiuri,
                     Services.bookmarks.DEFAULT_INDEX, this.getPageTitle().trim()
                 );
-                PlacesUtils.tagging.tagURI(nsiuri, tags);
             }
+            PlacesUtils.tagging.tagURI(nsiuri, tags);
         }
     },
 
