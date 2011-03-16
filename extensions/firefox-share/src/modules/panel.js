@@ -201,10 +201,12 @@ sharePanel.prototype = {
       let tags = ['shared', 'f1', data.service];
 
       let nsiuri = Services.io.newURI(data.url, null, null);
-      Services.bookmarks.insertBookmark(
-        Services.bookmarks.unfiledBookmarksFolder, nsiuri,
-        Services.bookmarks.DEFAULT_INDEX, this.getPageTitle().trim()
-      );
+      if (!Services.bookmarks.isBookmarked(nsiuri)) {
+          Services.bookmarks.insertBookmark(
+              Services.bookmarks.unfiledBookmarksFolder, nsiuri,
+              Services.bookmarks.DEFAULT_INDEX, this.getPageTitle().trim()
+          );
+      }
       PlacesUtils.tagging.tagURI(nsiuri, tags);
     }
   },
