@@ -83,35 +83,5 @@ LocationChangeProgressListener.prototype = {
   onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
 };
 
-function FirstRunProgressListener(f1) {
-    this.f1 = f1;
-}
-FirstRunProgressListener.prototype = {
-    QueryInterface: XPCOMUtils.generateQI(
-        [Ci.nsIWebProgressListener, Ci.nsISupportsWeakReference, Ci.nsISupports]
-    ),
-
-    onStateChange: function (aWebProgress, aRequest, aStateFlags, aStatus) {
-        // maybe can just use onLocationChange, but I don't think so?
-        let flags = Ci.nsIWebProgressListener;
-        // This seems like an excessive check but works very well
-        if (aStateFlags & flags.STATE_IS_WINDOW && aStateFlags & flags.STATE_STOP) {
-            if (!this.f1.didOnFirstRun) {
-                //Be sure to disable first run after one try. Even if it does
-                //not work, do not want to annoy the user with continual popping up
-                //of the front page.
-                this.f1.didOnFirstRun = true;
-                this.f1.onFirstRun();
-            }
-        }
-    },
-
-    onLocationChange: function (aWebProgress, aRequest, aLocation) {},
-    onProgressChange: function (aWebProgress, aRequest, aCurSelfProgress, aMaxSelfProgress, aCurTotalProgress, aMaxTotalProgress) {},
-    onSecurityChange: function (aWebProgress, aRequest, aState) {},
-    onStatusChange: function (aWebProgress, aRequest, aStatus, aMessage) {}
-};
-
 var EXPORTED_SYMBOLS = ["StateProgressListener",
-                        "LocationChangeProgressListener",
-                        "FirstRunProgressListener"];
+                        "LocationChangeProgressListener"];

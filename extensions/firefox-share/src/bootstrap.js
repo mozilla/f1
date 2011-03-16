@@ -46,7 +46,7 @@ function loadIntoWindow(win) {
   try {
     dump("install addon\n");
     unloaders = installOverlay(win);
-    startAddon(win);
+    unloaders.push.apply(startAddon(win));
   } catch(e) {
     dump("load error "+e+"\n");
   }

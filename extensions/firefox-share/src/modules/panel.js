@@ -26,6 +26,7 @@ Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/PlacesUtils.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+const FFSHARE_EXT_ID = "ffshare@mozilla.org";
 const SHARE_STATUS = ["", "start", "", "finished"];
 const SHARE_DONE = 0;
 const SHARE_START = 1;
@@ -159,6 +160,7 @@ sharePanel.prototype = {
   // Fired when a pref changes from content space. the pref object has
   // a name and value.
   prefChanged: function (pref) {
+    let Application = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
     Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + "." + pref.name, pref.value);
   },
 
