@@ -397,10 +397,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         var tags = ['shared', 'f1', data.service];
 
         var nsiuri = Services.io.newURI(data.url, null, null);
-        Services.bookmarks.insertBookmark(Services.bookmarks.unfiledBookmarksFolder,
-                                          nsiuri, Services.bookmarks.DEFAULT_INDEX,
-                                          this.getPageTitle().trim());
-
+        if (!Services.bookmarks.isBookmarked(nsiuri)) {
+          Services.bookmarks.insertBookmark(Services.bookmarks.unfiledBookmarksFolder,
+                                            nsiuri, Services.bookmarks.DEFAULT_INDEX,
+                                            this.getPageTitle().trim());
+        }
         PlacesUtils.tagging.tagURI(nsiuri, tags);
       }
     },
@@ -693,7 +694,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         return null;
       return url;
     },
-    
+
     previews: function () {
       // Look for FB og:image and then rel="image_src" to use if available
       // for og:image see: http://developers.facebook.com/docs/share
