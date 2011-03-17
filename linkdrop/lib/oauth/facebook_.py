@@ -235,7 +235,7 @@ class api():
                # json decode error, just call _make_error
                # _make_error will capture the response if it has trouble
                # making sense of it.
-               return None, self._make_error(client, {}, resp)
+               return None, self._make_error(client, {'exception': str(e)}, resp)
 
           result = error = None
           if 'id' in data:

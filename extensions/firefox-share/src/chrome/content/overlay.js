@@ -74,6 +74,21 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     return document.getElementById(buttonId);
   }
 
+  function getBrowserTabForUrl(url) {
+    if (!url)
+      return gBrowser.selectedTab;
+    if (gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI.spec == url)
+      return gBrowser.selectedTab;
+    var numTabs = gBrowser.browsers.length;
+    for (var index = 0; index < numTabs; index++) {
+      var currentBrowser = gBrowser.getBrowserAtIndex(index);
+      if (url == currentBrowser.currentURI.spec) {
+        return gBrowser.tabs[index];
+      }
+    }
+    return gBrowser.selectedTab;
+  }
+
   function mixin(target, source, override) {
     //TODO: consider ES5 getters and setters in here.
     for (var prop in source) {
@@ -373,25 +388,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @param {Object} data info about the share.
      */
     success: function (data) {
-      this.updateStatus(0, true);
+      this.updateStatus([SHARE_DONE,,,data.url], true);
       this.close();
 
       // XXX we should work out a better bookmarking system
       // https://github.com/mozilla/f1/issues/66
       if (ffshare.prefs.bookmarking) {
-        var tags = ['shared', 'f1'];
-        if (data.domain === 'twitter.com') {
-          tags.push("twitter");
-        }
-        if (data.domain === 'facebook.com') {
-          tags.push("facebook");
-        }
+        var tags = ['shared', 'f1', data.service];
 
-        var nsiuri = Services.io.newURI(gBrowser.currentURI.spec, null, null);
-        Services.bookmarks.insertBookmark(Services.bookmarks.unfiledBookmarksFolder,
-                                          nsiuri, Services.bookmarks.DEFAULT_INDEX,
-                                          this.getPageTitle().trim());
-
+        var nsiuri = Services.io.newURI(data.url, null, null);
+        if (!Services.bookmarks.isBookmarked(nsiuri)) {
+          Services.bookmarks.insertBookmark(Services.bookmarks.unfiledBookmarksFolder,
+                                            nsiuri, Services.bookmarks.DEFAULT_INDEX,
+                                            this.getPageTitle().trim());
+        }
         PlacesUtils.tagging.tagURI(nsiuri, tags);
       }
     },
@@ -485,8 +495,8 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       var metas = gBrowser.contentDocument.querySelectorAll("meta[property='og:video']");
       for (var i = 0; i < metas.length; i++) {
         var content = metas[i].getAttribute("content");
-        if (content) {
-          return unescapeXml(content);
+        if (content && (content = this._validURL(unescapeXml(content)))) {
+          return content;
         }
       }
       return this.getVideoSourceURLHacks();
@@ -495,7 +505,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     getVideoSourceURLHacks: function () {
       var canonical = this.getCanonicalURL(),
           host = gBrowser.currentURI.host,
-          params, embeds, i, src, flashvars, value;
+          params, embeds, i, src, flashvars, value, url;
 
       //YouTube hack to get the right source without too many parameters
       if (host.indexOf("youtube.com") >= 0 &&
@@ -507,13 +517,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       //Vimeo hack to find the <object data="src"><param name="flashvars"/></object> pieces we need
       embeds = gBrowser.contentDocument.querySelectorAll("object[type='application/x-shockwave-flash'][data]");
       params = gBrowser.contentDocument.querySelectorAll("param[name='flashvars']");
-      for (i = 0; i < embeds.length; i++) {
-        src = embeds[i].getAttribute("data");
-        flashvars = params[0].getAttribute("value");
-        if (flashvars) {
-          src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
+      if (params && params.length) {
+        for (i = 0; i < embeds.length; i++) {
+          src = embeds[i].getAttribute("data");
+          flashvars = params[0].getAttribute("value");
+          if (flashvars) {
+            src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
+          }
+          if ((url = this._validURL(unescapeXml(src)))) {
+            return url;
+          }
         }
-        return gBrowser.currentURI.resolve(unescapeXml(src));
       }
 
       //A generic hack that looks for the <param name="movie"> which is often available
@@ -522,7 +536,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       for (i = 0; i < params.length; i++) {
         value = params[i].getAttribute("value");
         if (value) {
-          return gBrowser.currentURI.resolve(unescapeXml(value));
+          if ((url = this._validURL(unescapeXml(value)))) {
+            return url;
+          }
         }
       }
 
@@ -535,7 +551,9 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         if (flashvars) {
           src += (src.indexOf("?") < 0 ? "?" : "&amp;") + decodeURIComponent(flashvars);
         }
-        return gBrowser.currentURI.resolve(unescapeXml(src));
+        if ((url = this._validURL(unescapeXml(src)))) {
+          return url;
+        }
       }
       return "";
     },
@@ -545,14 +563,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           links = gBrowser.contentDocument.querySelectorAll("link[rel='shortlink']");
 
       // flickr does id="shorturl"
-      if (shorturl) {
-        return shorturl.getAttribute("href");
+      if (shorturl && (shorturl = this._validURL(shorturl.getAttribute("href")))) {
+        return shorturl;
       }
 
       for (var i = 0; i < links.length; i++) {
-        var content = links[i].getAttribute("href");
+        var content = this._validURL(links[i].getAttribute("href"));
         if (content) {
-          return gBrowser.currentURI.resolve(content);
+          return content;
         }
       }
       return "";
@@ -563,18 +581,16 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           i, content;
 
       for (i = 0; i < links.length; i++) {
-        content = links[i].getAttribute("content");
-        if (content) {
-          return gBrowser.currentURI.resolve(content);
+        if ((content = this._validURL(links[i].getAttribute("content")))) {
+          return content;
         }
       }
 
       links = gBrowser.contentDocument.querySelectorAll("link[rel='canonical']");
 
       for (i = 0; i < links.length; i++) {
-        content = links[i].getAttribute("href");
-        if (content) {
-          return gBrowser.currentURI.resolve(content);
+        if ((content = this._validURL(links[i].getAttribute("href")))) {
+          return content;
         }
       }
 
@@ -587,7 +603,7 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
     getCanonicalURLHacks: function () {
       // Google Maps Hack :( obviously this regex isn't robust
       if (/^maps\.google\.[a-zA-Z]{2,5}/.test(gBrowser.currentURI.host)) {
-        return gBrowser.contentDocument.getElementById("link").getAttribute("href");
+        return this._validURL(gBrowser.contentDocument.getElementById("link").getAttribute("href"));
       }
 
       return '';
@@ -671,6 +687,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
     },
 
+    _validURL: function(url) {
+      // hacky validation of a url to make sure it at least appears valid
+      url = gBrowser.currentURI.resolve(url);
+      if (!/\w+:\/\/[^\/]+\/.+/.test(url))
+        return null;
+      return url;
+    },
+
     previews: function () {
       // Look for FB og:image and then rel="image_src" to use if available
       // for og:image see: http://developers.facebook.com/docs/share
@@ -680,20 +704,20 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
           previews = [], i, content;
 
       for (i = 0; i < metas.length; i++) {
-        content = metas[i].getAttribute("content");
+        content = this._validURL(metas[i].getAttribute("content"));
         if (content) {
           previews.push({
-            http_url : gBrowser.currentURI.resolve(content),
+            http_url : content,
             base64 : ""
           });
         }
       }
 
       for (i = 0; i < links.length; i++) {
-        content = links[i].getAttribute("href");
+        content = this._validURL(links[i].getAttribute("href"));
         if (content) {
           previews.push({
-            http_url : gBrowser.currentURI.resolve(content),
+            http_url : content,
             base64 : ""
           });
         }
@@ -707,6 +731,14 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         }
       );
       return previews;
+    },
+
+    getShareState: function() {
+      var win = this.browser.contentWindow.wrappedJSObject;
+      win.postMessage(JSON.stringify({
+          topic: 'shareState',
+          data: gBrowser.selectedTab.shareState
+        }), win.location.protocol + "//" + win.location.host);
     },
 
     escapeHtml: function (text) {
@@ -761,15 +793,18 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
      * @param {Integer} an index value that has meaning in the SHARE_STATUS array
      * @param {Boolean} only passed by the final success call
      */
-    updateStatus: function (status, success) {
-      var button = getButton(),
-          nBox = gBrowser.getNotificationBox(),
+    updateStatus: function (statusData, success) {
+      var contentTab = getBrowserTabForUrl(statusData && statusData.length > 3 ? statusData[3] : null),
+          button = getButton(),
+          nBox = gBrowser.getNotificationBox(gBrowser.getBrowserForTab(contentTab)),
           notification = nBox.getNotificationWithValue("mozilla-f1-share-error"),
+          status,
           buttons;
 
-      if (typeof(status) === 'undefined') {
-        status = gBrowser.selectedTab.shareState ? gBrowser.selectedTab.shareState.status : SHARE_DONE;
+      if (typeof(statusData) === 'undefined') {
+        statusData = contentTab.shareState ? contentTab.shareState.status : [SHARE_DONE];
       }
+      status = statusData[0];
 
       if (status === SHARE_ERROR) {
         // Check that we aren't already displaying our notification
@@ -790,17 +825,15 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
                                   null,
                                   nBox.PRIORITY_WARNING_MEDIUM, buttons);
         }
-        // Reset the status now that we've shown the warning
-        status = SHARE_DONE;
       } else if (status === SHARE_DONE && notification) {
         nBox.removeNotification(notification);
       }
 
-      if (gBrowser.selectedTab.shareState) {
-        gBrowser.selectedTab.shareState.status = status;
+      if (contentTab.shareState) {
+        contentTab.shareState.status = statusData;
       }
 
-      if (button) {
+      if (button && gBrowser.selectedTab == contentTab) {
         // Only a final successful share should be passing this value
         if (success) {
           button.setAttribute("status", SHARE_STATUS[SHARE_FINISHED]);
@@ -827,10 +860,17 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
 
     show: function (options) {
-      var tabURI = gBrowser.getBrowserForTab(gBrowser.selectedTab).currentURI,
-          tabUrl = tabURI.spec;
+      var contentBrowser = gBrowser.getBrowserForTab(gBrowser.selectedTab),
+          tabURI = contentBrowser.currentURI,
+          tabUrl = tabURI.spec,
+          nBox = gBrowser.getNotificationBox(contentBrowser),
+          notification = nBox.getNotificationWithValue("mozilla-f1-share-error");
+
       if (!ffshare.isValidURI(tabURI)) {
         return;
+      }
+      if (notification) {
+        nBox.removeNotification(notification);
       }
       var currentState = gBrowser.selectedTab.shareState;
       options = this.getOptions(options);
@@ -1247,7 +1287,6 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
       }
       if (isopen) {
         window.setTimeout(function () {
-          sharePanel.updateStatus();
           sharePanel.show({});
         }, 0);
       } else {
