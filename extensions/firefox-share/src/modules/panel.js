@@ -472,13 +472,11 @@ sharePanel.prototype = {
    * originating from the share UI in content-space
    */
   generateBase64Preview: function (imgUrl) {
-    // XXX TODO this is broken
-    try {
     let self = this;
-    let img = new this.browser.contentWindow.Image();
+    let img = new this.window.Image();
     img.onload = function () {
 
-      let canvas = self.gBrowser.contentDocument.createElement("canvas"),
+      let canvas = self.document.createElement("canvas"),
           win = self.browser.contentWindow.wrappedJSObject,
           w = img.width,
           h = img.height,
@@ -514,9 +512,6 @@ sharePanel.prototype = {
 
     };
     img.src = imgUrl;
-    } catch(e) {
-      dump("generateBase64Preview: "+e+"\n");
-    }
   },
 
   _validURL: function(url) {
