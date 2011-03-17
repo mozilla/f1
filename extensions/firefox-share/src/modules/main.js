@@ -11,9 +11,13 @@ const NS_XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
 
 const buttonId = 'ffshare-toolbar-button';
 
-var EXPORTED_SYMBOLS = ["startAddon"];
+const EXPORTED_SYMBOLS = ["installFFShareIntoWindow"];
 
-function startAddon(win) {
+/**
+ * Install the 'ffshare' object into a window. Returns an array of
+ * unloader functions.
+ */
+function installFFShareIntoWindow(win) {
     win.ffshare = new FFShare(win);
     let unloaders = [];
     unloaders.push(function () {
