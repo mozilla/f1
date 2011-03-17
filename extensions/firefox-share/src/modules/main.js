@@ -14,11 +14,11 @@ const buttonId = 'ffshare-toolbar-button';
 var EXPORTED_SYMBOLS = ["startAddon"];
 
 function startAddon(win) {
-    win.gBrowser.f1 = new f1(win);
+    win.ffshare = new FFShare(win);
     let unloaders = [];
     unloaders.push(function () {
-        win.gBrowser.f1.unload();
-        win.gBrowser.f1 = null;
+        win.ffshare.unload();
+        win.ffshare = null;
     });
     return unloaders;
 }
@@ -122,8 +122,7 @@ function openAndReuseOneTabPerURL(url) {
 }
 
 
-function f1(win)
-{
+function FFShare(win) {
     this.window = win;
     
     // Hang on, the window may not be fully loaded yet
@@ -139,7 +138,7 @@ function f1(win)
     }
     checkWindow();
 }
-f1.prototype = {
+FFShare.prototype = {
     keycodeId: "key_ffshare",
     keycode : "VK_F1",
     oldKeycodeId: "key_old_ffshare",

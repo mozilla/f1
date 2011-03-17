@@ -38,7 +38,7 @@ function installOverlay(win) {
   
   let command = document.createElementNS(NS_XUL, 'command');
   command.setAttribute('id', 'cmd_toggleSharePage');
-  command.setAttribute('oncommand', "gBrowser.f1.togglePanel();");
+  command.setAttribute('oncommand', "ffshare.togglePanel();");
   commandset.appendChild(command);
   document.documentElement.appendChild(commandset);
 
