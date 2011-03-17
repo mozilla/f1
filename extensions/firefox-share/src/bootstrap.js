@@ -121,10 +121,9 @@ function startup(data, reason) AddonManager.getAddonByID(data.id, function(addon
 
     Services.ww.registerNotification(windowWatcher);
     unloaders.push(function() Services.ww.unregisterNotification(windowWatcher));
-})
+});
 
-function shutdown(data, reason)
-{
+function shutdown(data, reason) {
     if (reason == APP_SHUTDOWN) return;
 
     let id = getAddonShortName(data.id);
@@ -134,10 +133,8 @@ function shutdown(data, reason)
     unloaders.forEach(function(unload) unload && unload());
 }
 
-function install()
-{
+function install() {
 }
 
-function uninstall()
-{
+function uninstall() {
 }
