@@ -407,7 +407,7 @@ class api():
         #    # set the domain so we get the shared contacts
         #    userdomain = accounts[0].get('userid').split('@')[-1]
 
-        url = 'http://www.google.com/m8/feeds/contacts/%s/full?v=1&max-results=%d' % (userdomain, page,)
+        url = 'http://www.google.com/m8/feeds/contacts/%s/full?v=1&orderby=lastmodified&sortorder=descending&max-results=%d' % (userdomain, page,)
 
         method = 'GET'
         if start > 0:

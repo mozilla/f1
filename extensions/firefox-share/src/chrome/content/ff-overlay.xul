@@ -23,18 +23,13 @@
    - Contributor(s):
    - -->
 
-<?xml-stylesheet href="chrome://ffshare/skin/overlay.css" type="text/css"?>
-<!DOCTYPE overlay SYSTEM "chrome://ffshare/locale/overlay.dtd">
+<?xml-stylesheet href="resource://f1/chrome/skin/overlay.css" type="text/css"?>
+<!DOCTYPE overlay SYSTEM "">
 <overlay id="ffshare-overlay" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
          xmlns:html="http://www.w3.org/1999/xhtml">
-  <script type="application/javascript;version=1.8" src="overlay.js"></script>
-
-  <stringbundleset id="stringbundleset">
-    <stringbundle id="ffshare-strings" src="chrome://ffshare/locale/overlay.properties"/>
-  </stringbundleset>
-
+  <!--<script type="application/javascript;version=1.8" src="overlay.js"></script>-->
   <commandset id="mainCommandSet">
-    <command id="cmd_toggleSharePage" oncommand="ffshare.togglePanel();"/>
+    <command id="cmd_toggleSharePage" oncommand="gBrowser.f1.togglePanel();"/>
   </commandset>
 
   <keyset id="mainKeyset">
@@ -54,8 +49,6 @@
     <popup id="contentAreaContextMenu">
       <menuitem id="context-ffshare"
                 insertafter="context-sendpage"
-                label="&ffshareContext.label;"
-                accesskey="&ffshareContext.accesskey;"
                 command="cmd_toggleSharePage"/>
       <menuseparator id="context-ffshare-separator"
                      insertafter="context-sendpage"/>
@@ -73,8 +66,6 @@
                      hidden="true"/>
       <menuitem id="context-selected-ffshare"
                 insertafter="context-sep-selectall"
-                label="&ffshareContext.label;"
-                accesskey="&ffshareContext.accesskey;"
                 command="cmd_toggleSharePage"/>
     </popup>
 
@@ -94,7 +85,6 @@
 
   </popupset>
 
-
   <!--
     Insert ourselves into the file menu after send link
     File ->
@@ -107,8 +97,6 @@
   <menupopup id="menu_FilePopup">
     <menuitem id="menu_ffshare"
               insertafter="menu_sendLink"
-              label="&ffshareMenu.label;"
-              accesskey="&ffshareMenu.accesskey;"
               command="cmd_toggleSharePage"/>
     <menuseparator id="menu_ffshare_separator"
                    insertafter="menu_sendLink"/>
@@ -119,23 +107,20 @@
            id="share-indicator"
            src="http://www.mozilla.org/favicon.ico"
            class="urlbar-icon"
-           onclick="ffshare.whoFrom()"
+           onclick="gBrowser.f1.whoFrom()"
            width="16"
            height="16"
            style="margin-left: 3px;visibility: collapse;"/>
   </hbox>
 
-  <toolbarpalette id="BrowserToolbarPalette">
+  <!--<toolbarpalette id="BrowserToolbarPalette">
     <toolbarbutton id="ffshare-toolbar-button"/>
   </toolbarpalette>
 
   <toolbarbutton id="ffshare-toolbar-button"
                  class="toolbarbutton-1 chromeclass-toolbar-additional"
-                 label="&ffshareToolbarButton.label;"
-                 tooltiptext="&ffshareToolbarButton.tooltip;"
                  type="checkbox"
                  command="cmd_toggleSharePage"/>
-
-  <tabbrowser id="content"/>
+  <tabbrowser id="content"/>-->
 
 </overlay>
