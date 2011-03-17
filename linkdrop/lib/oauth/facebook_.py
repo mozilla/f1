@@ -29,7 +29,6 @@ try:
 except ImportError:
      from cgi import parse_qs
 import json
-import httplib2
 import urllib
 import random
 import copy
@@ -38,6 +37,7 @@ import logging
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from linkdrop.lib.oauth.base import OAuth2
+from linkdrop.lib.protocap import HttpRequestor
 
 domain = 'facebook.com'
 log = logging.getLogger(domain)
@@ -143,12 +143,18 @@ class responder(OAuth2):
      def _get_credentials(self, access_token):
           profile_url = config.get("oauth.facebook.com.profile", self.profile_url)
           fields = 'id,first_name,last_name,name,link,birthday,email,website,verified,picture,gender,timezone'
-          client = httplib2.Http()
+          client = HttpRequestor()
           resp, content = client.request(url(profile_url, access_token=access_token, fields=fields))
           if resp['status'] != '200':
-               raise Exception("Error status: %r", resp['status'])
+               reason = "Error status: %r", resp['status']
+               client.save_capture(reason)
+               raise Exception(reason)
 
-          fb_profile = json.loads(content)
+          try:
+               fb_profile = json.loads(content)
+          except ValueError:
+               client.save_capture('non-json facebook 200 response')
+               raise
           
           profile = extract_fb_data(fb_profile)
           result_data = {'profile': profile,
@@ -160,7 +166,7 @@ class api():
      def __init__(self, account):
           self.access_token = account.get('oauth_token')
      
-     def _make_error(self, data, resp):
+     def _make_error(self, client, data, resp):
           # Facebook makes error handling fun!  So much for standards.
           # handle the various error mechanisms they deliver and hope
           # something works. (this is in part, proper oauth2 error
@@ -201,6 +207,7 @@ class api():
                }
           # who knows, some other abberation 
           else:
+               client.save_capture('nonsensical response')
                error = {
                     'message': "expectedly, an unexpected facebook error: %r"% (data,),
                }
@@ -220,15 +227,15 @@ class api():
                     'Content-type': content_type,
                     'Content-Length': str(len(body))
                }
-          resp, content = httplib2.Http().request(url, method=method, headers=headers, body=body)
-
+          client = HttpRequestor()
+          resp, content = client.request(url, method=method, headers=headers, body=body)
           try:
                data = json.loads(content)
           except ValueError, e:
                # json decode error, just call _make_error
-               # XXX we want to log the request/response here so we can figure
-               # out how to reproduce these errors.
-               return None, self._make_error({}, resp)
+               # _make_error will capture the response if it has trouble
+               # making sense of it.
+               return None, self._make_error(client, {}, resp)
 
           result = error = None
           if 'id' in data:
@@ -238,7 +245,7 @@ class api():
                result = data
                result[domain] = None
           else:
-               error = self._make_error(data, resp)
+               error = self._make_error(client, data, resp)
 
           return result, error
 

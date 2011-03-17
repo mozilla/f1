@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+status: 200
+x-cnection: close
+content-location: https://graph.facebook.com/oauth/access_token?client_secret=1234&code=5678&client_id=1234&redirect_uri=http%3A//linkdrop.caraveo.com%3A5000/api/account/verify%3Fprovider%3Dfacebook.com
+x-powered-by: HPHP
+expires: Sat, 01 Jan 2000 00:00:00 GMT
+x-fb-server: 10.28.28.119
+x-fb-rev: 353909
+pragma: no-cache
+cache-control: private, no-cache, no-store, must-revalidate
+date: Wed, 16 Mar 2011 04:28:07 GMT
+content-type: text/plain; charset=UTF-8
+
+access_token=12345678

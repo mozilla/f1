@@ -1,0 +1,4 @@
+GET /me?access_token=12345-678&fields=id%2Cfirst_name%2Clast_name%2Cname%2Clink%2Cbirthday%2Cemail%2Cwebsite%2Cverified%2Cpicture%2Cgender%2Ctimezone
+accept-encoding: gzip, deflate
+user-agent: Python-httplib2/$Rev$
+

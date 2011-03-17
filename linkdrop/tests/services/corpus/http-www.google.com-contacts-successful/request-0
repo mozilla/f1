@@ -1,0 +1,4 @@
+GET /m8/feeds/contacts/default/full?max-results=500&oauth_nonce=1234&oauth_timestamp=1300151116&oauth_consumer_key=linkdrop.caraveo.com&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&oauth_token=12345678&oauth_signature=xxxx
+accept-encoding: gzip, deflate
+user-agent: Python-httplib2/$Rev$
+

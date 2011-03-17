@@ -7,8 +7,6 @@ command.
 This module initializes the application via ``websetup`` (`paster
 setup-app`) and provides the base testing objects.
 """
-from unittest import TestCase
-
 from paste.deploy import loadapp
 from paste.script.appinstall import SetupCommand
 from pylons import url
@@ -20,15 +18,25 @@ import pylons.test
 __all__ = ['environ', 'url', 'TestController']
 
 # Invoke websetup with the current config file
-SetupCommand('setup-app').run([pylons.test.pylonsapp.config['__file__']])
+SetupCommand('setup-app').run([pylons.test.pylonsapp.application.wrap_app.app.config['__file__']])
+
+# oh, this is just insane - re-enable all 'linkdrop' child loggers
+# due to http://bugs.python.org/issue11424 and the fact we have a logger
+# called 'linkdrop-metrics'
+# Note we don't see this in production due to when the logs are
+# initialized in a real app vs in tests.
+import logging
+for log_name in logging.getLogger().manager.loggerDict.keys():
+    if log_name.startswith("linkdrop."):
+        logging.getLogger(log_name).disabled = False
 
 environ = {}
 
-class TestController(TestCase):
-
+# Note the base for our test cases is *not* a unittest.TestCase as some
+# nose features don't work with such classes.
+class TestController(object):
     def __init__(self, *args, **kwargs):
         wsgiapp = pylons.test.pylonsapp
         config = wsgiapp.config
         self.app = TestApp(wsgiapp)
         url._push_object(URLGenerator(config['routes.map'], environ))
-        TestCase.__init__(self, *args, **kwargs)

@@ -1,0 +1,78 @@
+HTTP/1.1 200 OK
+status: 200
+gdata-version: 1.0
+x-xss-protection: 1; mode=block
+content-location: http://www.google.com/m8/feeds/contacts/default/full?max-results=500&oauth_nonce=1234&oauth_timestamp=1300151116&oauth_consumer_key=linkdrop.caraveo.com&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&oauth_token=12345678&oauth_signature=xxxx
+x-content-type-options: nosniff
+expires: Tue, 15 Mar 2011 01:05:55 GMT
+vary: Accept, X-GData-Authorization, GData-Version
+server: GSE
+last-modified: Tue, 15 Mar 2011 01:05:55 GMT
+cache-control: private, max-age=0, must-revalidate, no-transform
+date: Tue, 15 Mar 2011 01:05:55 GMT
+x-frame-options: SAMEORIGIN
+content-type: application/atom+xml; charset=UTF-8
+
+<?xml version='1.0' encoding='UTF-8'?>
+    <feed xmlns='http://www.w3.org/2005/Atom' 
+          xmlns:openSearch='http://a9.com/-/spec/opensearchrss/1.0/' 
+          xmlns:gContact='http://schemas.google.com/contact/2008' 
+          xmlns:batch='http://schemas.google.com/gdata/batch' 
+          xmlns:gd='http://schemas.google.com/g/2005'>
+        <id>test.user@gmail.com</id>
+        <updated>2011-03-15T01:05:55.254Z</updated>
+        <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/contact/2008#contact'/>
+        <title type='text'>Test User's Contacts</title>
+        <link rel='alternate' type='text/html' href='http://www.google.com/'/>
+        <link rel='http://schemas.google.com/g/2005#feed' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full?v=1'/>
+        <link rel='http://schemas.google.com/g/2005#post' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full?v=1'/>
+        <link rel='http://schemas.google.com/g/2005#batch' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full/batch?v=1'/>
+        <link rel='self' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full?max-results=500&amp;v=1'/>
+        <author>
+            <name>Test User</name>
+            <email>test.user@gmail.com</email>
+        </author>
+        <generator version='1.0' uri='http://www.google.com/m8/feeds'>Contacts</generator>
+        <openSearch:totalResults>4</openSearch:totalResults>
+        <openSearch:startIndex>1</openSearch:startIndex>
+        <openSearch:itemsPerPage>500</openSearch:itemsPerPage>
+        <entry>
+            <id>http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/base/12345</id>
+            <updated>2011-02-28T03:44:41.326Z</updated>
+            <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/contact/2008#contact'/>
+            <title type='text'>contact with no email address</title>
+            <link rel='http://schemas.google.com/contacts/2008/rel#edit-photo' type='image/*' href='http://www.google.com/m8/feeds/photos/media/test.user%40gmail.com/12345/67890?v=1'/>
+            <link rel='self' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full/12345?v=1'/>
+            <link rel='edit' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full/12345/1298864681326000?v=1'/>
+        </entry>
+        <entry>
+            <id>http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/base/11c8813a8b63d118</id>
+            <updated>2011-01-11T05:58:28.579Z</updated>
+            <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/contact/2008#contact'/>
+            <title type='text'>Test User</title>
+            <link rel='http://schemas.google.com/contacts/2008/rel#edit-photo' type='image/*' href='http://www.google.com/m8/feeds/photos/media/test.user%40gmail.com/11c8813a8b63d118/67890?v=1'/>
+            <link rel='self' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full/11c8813a8b63d118?v=1'/>
+            <link rel='edit' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full/11c8813a8b63d118/1294725508579000?v=1'/>
+            <gd:email rel='http://schemas.google.com/g/2005#home' address='someone@somewhere.com' primary='true'/>
+        </entry>
+        <entry>
+            <id>http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/base/2828521d8ba497e2</id>
+            <updated>2011-02-28T03:50:08.642Z</updated>
+            <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/contact/2008#contact'/>
+            <title type='text'>Funny char in email addy</title>
+            <link rel='http://schemas.google.com/contacts/2008/rel#edit-photo' type='image/*' href='http://www.google.com/m8/feeds/photos/media/test.user%40gmail.com/2828521d8ba497e2/67890?v=1'/>
+            <link rel='self' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full/2828521d8ba497e2?v=1'/>
+            <link rel='edit' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full/2828521d8ba497e2/1298865008642000?v=1'/>
+            <gd:email rel='http://schemas.google.com/g/2005#home' address='funny_©har@skippinet.com.au' primary='true'/>
+        </entry>
+        <entry>
+            <id>http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/base/7e81e29b8ba22fb0</id>
+            <updated>2011-02-28T03:43:18.796Z</updated>
+            <category scheme='http://schemas.google.com/g/2005#kind' term='http://schemas.google.com/contact/2008#contact'/>
+            <title type='text'>Mark with funny ©haracter</title>
+            <link rel='http://schemas.google.com/contacts/2008/rel#edit-photo' type='image/*' href='http://www.google.com/m8/feeds/photos/media/test.user%40gmail.com/7e81e29b8ba22fb0/67890?v=1'/>
+            <link rel='self' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full/7e81e29b8ba22fb0?v=1'/>
+            <link rel='edit' type='application/atom+xml' href='http://www.google.com/m8/feeds/contacts/test.user%40gmail.com/full/7e81e29b8ba22fb0/1298864598796000?v=1'/>
+            <gd:email rel='http://schemas.google.com/g/2005#home' address='someone@somewhere.com' primary='true'/>
+        </entry>
+    </feed>

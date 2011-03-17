@@ -1,0 +1,4 @@
+GET /me/groups?access_token=12345678
+accept-encoding: gzip, deflate
+user-agent: Python-httplib2/$Rev$
+

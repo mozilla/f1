@@ -1,0 +1,147 @@
+< 220 mx.google.com ESMTP 19sm3001031ibx.1
+> ehlo [192.168.0.9]
+< 250 mx.google.com at your service, [58.160.65.179]
++ SIZE 35651584
++ 8BITMIME
++ STARTTLS
++ ENHANCEDSTATUSCODES
+> STARTTLS
+< 220 2.0.0 Ready to start TLS
+> ehlo [192.168.0.9]
+< 250 mx.google.com at your service, [58.160.65.179]
++ SIZE 35651584
++ 8BITMIME
++ AUTH LOGIN PLAIN XOAUTH
++ ENHANCEDSTATUSCODES
+> AUTH XOAUTH 12345678
+< 235 2.7.0 Accepted
+> mail FROM:<test@gmail.com> size=6188
+< 250 2.1.0 OK 19sm3001031ibx.1
+> rcpt TO:<test2@gmail.com>
+< 250 2.1.5 OK 19sm3001031ibx.1
+> data
+< 354 Go ahead 19sm3001031ibx.1
+> MIME-Version: 1.0
++ Content-Type: multipart/alternative; charset="utf-8";
++ 	boundary="===============1261888117=="
++ Content-Transfer-Encoding: base64
++ Subject: test
++ From: "Test User" <test@gmail.com>
++ To: "Another Test User" <test2@gmail.com>
++ 
++ --===============1261888117==
++ MIME-Version: 1.0
++ Content-Transfer-Encoding: 7bit
++ Content-Type: text/plain; charset="utf-8"
++ 
++ test
++ 
++ *Slashdot: News for nerds, stuff that matters*
++ 
++ http://slashdot.org/
++ 
++ 
++ 
++ -- 
++ shared via Mozilla F1 for Firefox -- http://f1.mozillamessaging.com/
++ :: share links with the people that matter to you ::
++ 
++ --===============1261888117==
++ Content-Type: multipart/related; boundary="===============1016404657=="
++ MIME-Version: 1.0
++ 
++ --===============1016404657==
++ MIME-Version: 1.0
++ Content-Transfer-Encoding: 7bit
++ Content-Type: text/html; charset="utf-8"
++ 
++ <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
++     "http://www.w3.org/TR/html4/loose.dtd">
++ <html lang="en">
++ <head>
++     <title>test</title>
++ </head>
++ <body style="font-family:Helvetica Neue,Helvetica,Arial,sans-serif;max-width:460px;line-height:21px;display:block;">
++     <div class="message" style="font-size:14px;">
++         test
++     </div>
++     <div class="share" style="margin:21px 0 42px 0;">
++         <div class="link">
++             <a target="_blank" style="color:#00A0FF;font-size:16px;" href="http://slashdot.org/">Slashdot: News for nerds, stuff that matters</a>
++         </div>
++         <table style="border:none;border-collapse:collapse;margin:10px 0;width:100%;">
++         <tbody><tr>
++         <td style="border-left: 1px solid #666;vertical-align:top;">
++         </td>
++         <td style="width:1%">
++             <a target="_blank" style="color:#00A0FF;font-size:16px;" href="http://slashdot.org/">
++             <img src="cid:thumbnail" style="padding:1px;border:1px solid #ccc;margin:5px;"/></a>
++         </td>
++         </tr></tbody>
++         </table>
++     </div>
++     <div class="footer" style="font-size:12px;color:#444;">
++         shared via <a target="_blank" style="color:#006AAA;font-weight:bold;text-decoration:none;" title="Share links with the people that matter to you" href="http://f1.mozillamessaging.com/">Mozilla F1</a> for Firefox  &mdash; <span style="color:#666;">"share links with the people that matter to you"</span>
++     </div>
++ </body>
++ </html>
++ 
++ --===============1016404657==
++ Content-Type: image/png
++ MIME-Version: 1.0
++ Content-Transfer-Encoding: base64
++ Content-Id: <thumbnail>
++ Content-Disposition: inline; filename=thumbnail.png
++ 
++ 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
++ AABJRU5ErkJggg==
++ --===============1016404657==--
++ --===============1261888117==--
++ .
+< 250 2.0.0 OK 1299809086 19sm3001031ibx.1

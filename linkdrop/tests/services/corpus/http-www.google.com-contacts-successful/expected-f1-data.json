@@ -1,0 +1,40 @@
+{
+    "error": null,
+    "result": {
+        "entry": [
+            {
+                "displayName": "contact with no email address"
+            },
+            {
+                "displayName": "Test User",
+                "emails": [
+                    {
+                        "primary": "true",
+                        "value": "someone@somewhere.com"
+                    }
+                ]
+            },
+            {
+                "displayName": "Funny char in email addy",
+                "emails": [
+                    {
+                        "primary": "true",
+                        "value": "funny_\u00a9har@skippinet.com.au"
+                    }
+                ]
+            },
+            {
+                "displayName": "Mark with funny \u00a9haracter",
+                "emails": [
+                    {
+                        "primary": "true",
+                        "value": "someone@somewhere.com"
+                    }
+                ]
+            }
+        ],
+        "itemsPerPage": "500",
+        "startIndex": "1",
+        "totalResults": "4"
+    }
+}
