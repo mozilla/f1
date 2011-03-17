@@ -45,6 +45,10 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       var domain = services.domains[account.accounts[0].domain];
       return domain ? domain.type : '';
     },
+    domainIcon: function (domain) {
+      var svc = services.domains[domain];
+      return svc && svc.iconUrl ? svc.iconUrl : '';
+    },
     domainName: function (account) {
       var domain = services.domains[account.accounts[0].domain];
       return domain ? domain.name : '';

@@ -27,8 +27,8 @@
 
 'use strict';
 
-define([ 'blade/object', 'storage'],
-function (object,         storage) {
+define([ 'blade/object', 'storage', 'dispatch'],
+function (object,         storage,   dispatch) {
 
   var newHotness = parseFloat(navigator.userAgent.split('Firefox/')[1]) >= 4,
       store = storage(),
@@ -285,6 +285,41 @@ function (object,         storage) {
       }
     }
   }
+  
+  var share_apps = store.share_apps;
+  if (share_apps) {
+    share_apps = JSON.parse(share_apps);
+  } else {
+    share_apps = {}
+  }
+
+  for (prop in share_apps) {
+    if (share_apps.hasOwnProperty(prop)) {
+      svcs.domains[prop] = new SvcBase(share_apps[prop].name, share_apps[prop]);
+      svcs.domainList.push(prop);
+    }
+  }
+
+  // make a call to get webapp enabled services
+  function installedServices(apps) {
+    dump("got apps "+JSON.stringify(apps)+"\n");
+    store['share_apps'] = [];
+    // we have a bunch of manifest objects now, add to our services
+    for (var i=0; i < apps.length; i++) {
+      // each service may have more than one service
+      var app_svcs = apps[i].manifest.experimental.services;
+      for (var s=0; s < app_svcs.length; s++) {
+        var svc = app_svcs[s];
+        if (svc.suite == 'share') {
+          svc.name = apps[i].manifest.name;
+          share_apps[svc.domain] = svc;
+        }
+      }
+    }
+    store.share_apps = JSON.stringify(share_apps);
+  }
+  dispatch.sub('installedServices', installedServices);
+  dispatch.pub('getInstalledServices');
 
   return svcs;
 });

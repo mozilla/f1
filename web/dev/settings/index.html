@@ -153,7 +153,7 @@
 
 <script id="addTemplate" type="text/template">
   <li class="hbox {isNew [}newItem{]}">
-    <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name}
+    <div class="accountType overflow boxFlex">{!iconUrl[}<span class="icon {type}"></span>{]}{iconUrl[}<img src="{iconUrl}"/>{]} {name}
       {isNew [}<span class="new">new!</span>{]}
       <div class="multipleSignOut {!enableSignOut[}hidden{]}">Additional accounts require <a href="{signOutUrl}" target="_blank">logout</a></div>
     </div>
@@ -164,7 +164,7 @@
 <script id="accountTemplate" type="text/template">
   {.acct accounts[0]}
   <li class="hbox">
-    <div class="accountType overflow boxFlex"><span class="icon {domainType(_)}"></span> {domainName(_)} <span class="username">({accountName(displayName, acct)})</span></div>
+    <div class="accountType overflow boxFlex">{!domainIcon(acct.domain)[}<span class="icon {domainType(_)}"></span>{]}{domainIcon(acct.domain)[}<img src="{domainIcon(acct.domain)}"/>{]} {domainName(_)} <span class="username">({accountName(displayName, acct)})</span></div>
     <button class="config remove" data-domain="{acct.domain}" data-userid="{acct.userid}" data-username="{acct.username}">remove <span class="remove"></span></button>
   </li>
 </script>

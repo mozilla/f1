@@ -70,6 +70,11 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
 
   Cu.import("resource://gre/modules/AddonManager.jsm");
 
+  try {
+    Cu.import("resource://openwebapps/modules/api.js");
+    // if webapps installed, we have access to FFRepoImplService
+  } catch(e) {}
+
   function getButton() {
     return document.getElementById(buttonId);
   }
@@ -730,6 +735,24 @@ var FFSHARE_EXT_ID = "ffshare@mozilla.org";
         }
       );
       return previews;
+    },
+
+    getInstalledServices: function() {
+      dump("getInstalledServices called\n");
+      if (FFRepoImplService) {
+        dump("getInstalledServices called\n");
+        var win = this.browser.contentWindow.wrappedJSObject;
+        FFRepoImplService.findServices('share.send', function(svcs) {
+
+          win.postMessage(JSON.stringify({
+              topic: 'installedServices',
+              data: svcs
+            }), win.location.protocol + "//" + win.location.host);
+
+        });
+      } else {
+        dump("webapps are not installed\n");
+      }
     },
 
     getShareState: function() {

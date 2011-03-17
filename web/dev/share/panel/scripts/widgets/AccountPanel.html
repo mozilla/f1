@@ -1,6 +1,7 @@
 <div class="hbox {svc.type} user">
     <span class="arrow"></span>
-    <span class="icon {svc.type}"></span>
+    {!svc.iconUrl[}<span class="icon {svc.type}"></span>{]}
+    {svc.iconUrl[}<img src="{svc.iconUrl}"/>{]}
     <h3 class="boxFlex overflow">{svc.name}</h3>
     <span class="username">{displayName}</span>
 </div>
