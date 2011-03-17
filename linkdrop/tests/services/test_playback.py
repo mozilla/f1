@@ -1,3 +1,4 @@
+import sys
 import os
 import glob
 import unittest
@@ -55,6 +56,12 @@ class SmtpReplayer(SMTP, ProtocolReplayer):
     def _get_next_comms(self):
         result = []
         line = self.next_playback
+        if line.startswith("E "):
+            # a recorded exception - reconstitute it...
+            exc_info = json.loads(line[2:])
+            module = sys.modules[exc_info['module']] if exc_info['module'] else __builtins__
+            exc_class = getattr(module, exc_info['name'])
+            raise exc_class(*tuple(exc_info['args']))
         if not line.startswith("< ") and not line.startswith("> "):
             # hrm - this implies something is wrong maybe?
             raise RuntimeError("strange: %r" % (line,))

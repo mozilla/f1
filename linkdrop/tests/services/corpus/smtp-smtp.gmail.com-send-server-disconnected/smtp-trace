@@ -1,0 +1,23 @@
+< 220 mx.google.com ESMTP 25sm1848097wfb.22
+> ehlo [192.168.0.9]
+< 250 mx.google.com at your service, [58.160.65.179]
++ SIZE 35651584
++ 8BITMIME
++ STARTTLS
++ ENHANCEDSTATUSCODES
+> STARTTLS
+< 220 2.0.0 Ready to start TLS
+> ehlo [192.168.0.9]
+< 250 mx.google.com at your service, [58.160.65.179]
++ SIZE 35651584
++ 8BITMIME
++ AUTH LOGIN PLAIN XOAUTH
++ ENHANCEDSTATUSCODES
+> AUTH XOAUTH R0VUIGh0dHBzOi8vbWFpbC5nb29nbGUuY29tL21haWwvYi9za2lwcHkuaGFtbW9uZC50ZXN0QGdtYWlsLmNvbS9zbXRwLyBvYXV0aF9jb25zdW1lcl9rZXk9Imxpbmtkcm9wLmNhcmF2ZW8uY29tIixvYXV0aF9ub25jZT0iNzYxNzMyMjAiLG9hdXRoX3NpZ25hdHVyZT0iQ3EzZmFUNyUyQjJ4VDF0Q0JYNTBXMnUlMkY4b1BGVSUzRCIsb2F1dGhfc2lnbmF0dXJlX21ldGhvZD0iSE1BQy1TSEExIixvYXV0aF90aW1lc3RhbXA9IjEzMDAzMjU5NjMiLG9hdXRoX3Rva2VuPSIxJTJGeFh4ZEJJRGpxMVBoaFhzQnBYU1FUemNYTHZDN3RYNHJMX2ZWaHhQOTJKQSIsb2F1dGhfdmVyc2lvbj0iMS4wIg==
+< 235 2.7.0 Accepted
+> mail FROM:<skippy.hammond.test@gmail.com> size=6054
+< 250 2.1.0 OK 25sm1848097wfb.22
+> rcpt TO:<mhammond@skippinet.com.au>
+< 250 2.1.5 OK 25sm1848097wfb.22
+> data
+E {"args": ["Connection unexpectedly closed"], "name": "SMTPServerDisconnected", "module": "smtplib"}

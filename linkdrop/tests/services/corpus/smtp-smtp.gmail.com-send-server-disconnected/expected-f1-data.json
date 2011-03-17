@@ -1,0 +1,7 @@
+{
+    "error": {
+        "message": "Connection unexpectedly closed",
+        "provider": "smtp.gmail.com"
+    },
+    "result": null
+}
