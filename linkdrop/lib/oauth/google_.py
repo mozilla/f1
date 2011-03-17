@@ -258,8 +258,12 @@ class SMTPRequestorImpl(SMTP, ProtocolCapturingBase):
         try:
             errcode, errmsg = SMTP.getreply(self)
         except Exception, exc:
-            erepr = {'module': exc.__module__, 'name': exc.__name__, 'args': exc.args}
-            self._record.append("E " + json.dumps(erepr))
+            try:
+                module = getattr(exc, '__module__', None)
+                erepr = {'module': module, 'name': exc.__class__.__name__, 'args': exc.args}
+                self._record.append("E " + json.dumps(erepr))
+            except Exception:
+                log.exception("failed to serialize an SMTP exception")
             raise
 
         msg = "\n+ ".join(errmsg.splitlines()) + "\n"
@@ -317,11 +321,6 @@ class api():
         else:
             to_ = Header(to_[1], 'utf-8').encode()
 
-        server = SMTPRequestor(self.host, self.port)
-        # in the app:main set debug = true to enable
-        if asbool(config.get('debug', False)):
-            server.set_debuglevel(True)
-        
         subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
         title = options.get('title', options.get('link', options.get('shorturl', '')))
         description = options.get('description', '')[:280]
@@ -385,7 +384,12 @@ class api():
         msg.attach(part1)
         msg.attach(part2)
 
+        server = None
         try:
+            server = SMTPRequestor(self.host, self.port)
+            # in the app:main set debug = true to enable
+            if asbool(config.get('debug', False)):
+                server.set_debuglevel(True)
             try:
                 try:
                     server.starttls()
@@ -403,11 +407,16 @@ class api():
                                  "status": err[0]
                                 }
                         break
-                except smtplib.SMTPException, exc:
-                    server.save_capture("smtp exception")
+                except smtplib.SMTPResponseException, exc:
+                    server.save_capture("smtp response exception")
                     error = {"provider": self.host,
                              "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
                              "status": exc.smtp_code
+                            }
+                except smtplib.SMTPException, exc:
+                    server.save_capture("smtp exception")
+                    error = {"provider": self.host,
+                             "message": str(exc),
                             }
                 except UnicodeEncodeError, exc:
                     server.save_capture("unicode error")
@@ -415,16 +424,27 @@ class api():
                 except ValueError, exc:
                     server.save_capture("ValueError sending email")
                     error = {"provider": self.host,
-                             "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
-                             "status": exc.smtp_code
+                             "message": str(exc),
                             }
             finally:
-                server.quit()
+                try:
+                    server.quit()
+                except smtplib.SMTPServerDisconnected:
+                    # an error above may have already disconnected, so we can
+                    # ignore the error while quiting.
+                    pass
         except smtplib.SMTPResponseException, exc:
-            server.save_capture("rejected")
+            if server is not None:
+                server.save_capture("early smtp response exception")
             error={"provider": self.host,
                    "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
                    "status": exc.smtp_code
+                   }
+        except smtplib.SMTPException, exc:
+            if server is not None:
+                server.save_capture("early smtp exception")
+            error={"provider": self.host,
+                   "message": str(exc),
                    }
         if error is None:
             result = {"status": "message sent"}
