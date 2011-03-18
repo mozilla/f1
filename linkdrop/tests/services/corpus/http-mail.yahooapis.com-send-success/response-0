@@ -1,0 +1,15 @@
+HTTP/1.1 200 OK
+status: 200
+x-response-time: 230
+x-ywsc-debug: {"system.hostname":"web121413.mail.ne1.yahoo.com","request.time.total":230}
+age: 1
+vary: Accept-Encoding
+server: YTS/1.19.5
+x-server-timestamp: 1300410865
+connection: keep-alive
+cache-control: private
+date: Fri, 18 Mar 2011 01:14:25 GMT
+p3p: policyref="http://info.yahoo.com/w3c/p3p.xml", CP="CAO DSP COR CUR ADM DEV TAI PSA PSD IVAi IVDi CONi TELo OTPi OUR DELi SAMi OTRi UNRi PUBi IND PHY ONL UNI PUR FIN COM NAV INT DEM CNT STA POL HEA PRE LOC GOV"
+content-type: application/json; charset=UTF-8
+
+{"result":{"mid":"1_697_AK9aimIAAGVaTYKx8QZyXwiYxQc","uid":5},"error":null,"id":"jsonrpc"}

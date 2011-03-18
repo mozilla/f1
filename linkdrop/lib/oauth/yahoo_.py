@@ -25,7 +25,6 @@ import urlparse
 
 from openid.extensions import ax
 import oauth2 as oauth
-import httplib2
 import json
 import copy
 from rfc822 import AddressList
@@ -43,6 +42,7 @@ from linkdrop.lib.oauth.oid_extensions import UIRequest
 from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attributes, attributes
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
 from linkdrop.lib.oauth.base import get_oauth_config, OAuthKeysException
+from linkdrop.lib.protocap import HttpRequestor
 
 YAHOO_OAUTH = 'https://api.login.yahoo.com/oauth/v2/get_token'
 
@@ -144,8 +144,13 @@ class api():
         oauth_request.sign_request(self.sigmethod, self.consumer, self.oauth_token)
         headers.update(oauth_request.to_header())
 
-        resp, content = httplib2.Http().request(url, 'POST', headers=headers, body=postdata)
-        response = json.loads(content)
+        client = HttpRequestor()
+        resp, content = client.request(url, 'POST', headers=headers, body=postdata)
+        try:
+            response = json.loads(content)
+        except ValueError:
+            client.save_capture("non-json yahoo response")
+            raise
         result = error = None
         if 'id' in response:
             # this is a good thing
@@ -158,9 +163,11 @@ class api():
                 })
             return response['result'], error
         elif 'error' in response:
+            client.save_capture("yahoo error")
             error = copy.copy(response['error'])
             error.update({ 'provider': domain, 'status': int(resp['status']) })
         else:
+            client.save_capture("unexpected response")
             error = {'provider': domain,
                      'message': "unexpected yahoo response: %r"% (response,),
                      'status': int(resp['status']) 
@@ -182,12 +189,18 @@ class api():
         oauth_request.sign_request(self.sigmethod, self.consumer, self.oauth_token)
         headers.update(oauth_request.to_header())
 
-        resp, content = httplib2.Http().request(url, method, headers=headers, body=body)
-        data = content and json.loads(content) or resp
+        client = HttpRequestor()
+        resp, content = client.request(url, method, headers=headers, body=body)
+        try:
+            data = content and json.loads(content) or resp
+        except ValueError:
+            client.save_capture("non json restcall response")
+            raise
 
         result = error = None
         status = int(resp['status'])
         if status < 200 or status >= 300:
+            client.save_capture("failed restcall response")
             error = data
         else:
             result = data

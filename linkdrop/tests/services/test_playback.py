@@ -193,6 +193,24 @@ class FacebookReplayTestCase(ServiceReplayTestCase):
         raise AssertionError(req_type)
 
 
+class YahooReplayTestCase(ServiceReplayTestCase):
+    def getDefaultRequest(self, req_type):
+        if req_type=="send" or req_type=="contacts":
+            account = {"oauth_token": "foo", "oauth_token_secret": "bar",
+                       "profile": {
+                       "verifiedEmail": "me@yahoo.com",
+                       "displayName": "me",
+                       }
+                      }
+            return {'domain': 'yahoo.com',
+                    'to': 'you@example.com',
+                    'account': json.dumps(account),
+                   }
+        if req_type=="auth":
+            return {'domain': 'yahoo.com', 'username': 'foo', 'userid': 'bar'}
+        raise AssertionError(req_type)
+
+
 class GoogleReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
         if req_type=="send":
@@ -227,6 +245,8 @@ class GoogleReplayTestCase(ServiceReplayTestCase):
 def setupReplayers():
     import linkdrop.lib.oauth.facebook_
     linkdrop.lib.oauth.facebook_.HttpRequestor = HttpReplayer
+    import linkdrop.lib.oauth.yahoo_
+    linkdrop.lib.oauth.yahoo_.HttpRequestor = HttpReplayer
     import linkdrop.lib.oauth.google_
     linkdrop.lib.oauth.google_.SMTPRequestor = SmtpReplayer
     linkdrop.lib.oauth.google_.OAuth2Requestor = HttpReplayer
@@ -240,7 +260,10 @@ def teardownReplayers():
     assert not HttpReplayer.to_playback, HttpReplayer.to_playback
     assert not SmtpReplayer.to_playback, SmtpReplayer.to_playback
     import linkdrop.lib.protocap
+    import linkdrop.lib.oauth.facebook_
     linkdrop.lib.oauth.facebook_.HttpRequestor = linkdrop.lib.protocap.HttpRequestor
+    import linkdrop.lib.oauth.yahoo_
+    linkdrop.lib.oauth.yahoo_.HttpRequestor = linkdrop.lib.protocap.HttpRequestor
     import linkdrop.lib.protocap
     import linkdrop.lib.oauth.google_
     linkdrop.lib.oauth.google_.SMTPRequestor = linkdrop.lib.oauth.google_.SMTPRequestorImpl
@@ -253,6 +276,7 @@ host_to_test = {
     'graph.facebook.com' : FacebookReplayTestCase,
     'www.google.com': GoogleReplayTestCase,
     'smtp.gmail.com': GoogleReplayTestCase,
+    'mail.yahooapis.com': YahooReplayTestCase,
 }
 
 def queueForReplay(canned):
