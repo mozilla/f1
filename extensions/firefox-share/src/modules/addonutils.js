@@ -45,8 +45,10 @@ const EXPORTED_SYMBOLS = ["loadStylesheet", "getString"];
 
 function loadStylesheet(win, uri) {
     let document = win.document;
-    let pi = document.createProcessingInstruction("xml-stylesheet", "href=\""+uri+"\" type=\"text/css\"");
-    document.insertBefore(pi,document.firstChild);
+    let pi = document.createProcessingInstruction(
+      "xml-stylesheet", "href=\"" + uri + "\" type=\"text/css\"");
+    document.insertBefore(pi, document.firstChild);
+    return pi;
 }
 
 /* l10n support. See https://github.com/Mardak/restartless/examples/l10nDialogs */

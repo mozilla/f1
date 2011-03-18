@@ -57,14 +57,18 @@ function installOverlay(win) {
 
   let document = win.document;
 
-  // load our stylesheet, not sure how to unload
+  // Load our stylesheet and register an unloader that removes it again.
   dump("running on "+xulRuntime.OS+"\n");
+  let pi;
   if (xulRuntime.OS === "windows") {
     // XXX not sure what xulRuntime.OS will be on windows
-    loadStylesheet(win, "resource://ffshare/chrome/skin/windows/overlay.css");
+    pi = loadStylesheet(win, "resource://ffshare/chrome/skin/windows/overlay.css");
   } else {
-    loadStylesheet(win, "resource://ffshare/chrome/skin/overlay.css");
+    pi = loadStylesheet(win, "resource://ffshare/chrome/skin/overlay.css");
   }
+  unloaders.push(function () {
+    win.document.removeChild(pi);
+  });
 
   // ********************************************************************
   // create our commandset
