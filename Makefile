@@ -1,9 +1,11 @@
 version := 0.3.2
+PYTHON := python
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
 srcdir=$(TOPSRCDIR)/extensions/firefox-share/src/
 objdir=$(TOPSRCDIR)/extensions/firefox-share/dist/
+dist_dir=$(TOPSRCDIR)/dist
 stage_dir=$(objdir)/stage
 xpi_dir=$(TOPSRCDIR)/web/dev
 web_dir=$(TOPSRCDIR)/web/dev
@@ -74,5 +76,9 @@ $(static_dir):
 clean:
 	rm -rf $(objdir)
 	rm -rf $(static_dir)
+	rm -rf $(dist_dir)
 
-.PHONY: xpi clean
+dist:
+	$(PYTHON) setup.py sdist --formats gztar,zip
+
+.PHONY: xpi clean dist
