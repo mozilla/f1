@@ -43,7 +43,7 @@
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-let EXPORTED_SYMBOLS = ["InjectorInit"];
+const EXPORTED_SYMBOLS = ["InjectorInit"];
 
 const ALL_GROUP_CONSTANT = "___all___";
 let refreshed;
