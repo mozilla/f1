@@ -1,4 +1,4 @@
-include README.md Makefile LICENSE
+include README.md Makefile LICENSE f1.spec
 include *.ini
 recursive-include apache *
 recursive-include extensions *
