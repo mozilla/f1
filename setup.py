@@ -33,10 +33,10 @@ VERSION='0.3.2'
 setup(
     name='linkdrop',
     version=VERSION,
-    description='',
-    author='',
-    author_email='',
-    url='',
+    description='F1 is a browser extension that allows you to share links in a fast and fun way.',
+    author='Mozilla Messaging',
+    author_email='linkdrop@googlegroups.com',
+    url='http://f1.mozillamessaging.com/',
     install_requires=[
         "Pylons>=1.0",
         "docutils",

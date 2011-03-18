@@ -81,4 +81,7 @@ clean:
 dist:
 	$(PYTHON) setup.py sdist --formats gztar,zip
 
-.PHONY: xpi clean dist
+rpm:	
+	$(PYTHON) setup.py bdist_rpm
+
+.PHONY: xpi clean dist rpm
