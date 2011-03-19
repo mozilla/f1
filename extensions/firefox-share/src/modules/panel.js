@@ -49,6 +49,8 @@ const SHARE_START = 1;
 const SHARE_ERROR = 2;
 const SHARE_FINISHED = 3;
 
+const NS_XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
 const EXPORTED_SYMBOLS = ["sharePanel"];
 
 function mixin(target, source, override) {
@@ -476,7 +478,7 @@ sharePanel.prototype = {
     let img = new this.window.Image();
     img.onload = function () {
 
-      let canvas = self.document.createElement("canvas"),
+      let canvas = self.document.createElementNS(NS_XUL, "canvas"),
           win = self.browser.contentWindow.wrappedJSObject,
           w = img.width,
           h = img.height,
