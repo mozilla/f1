@@ -81,7 +81,7 @@ function sharePanel(window, ffshare) {
   this.document = window.document;
   this.ffshare = ffshare;
 
-  this.button = this.document.getElementById('ffshare-toolbar-button');
+  this.button = this.document.getElementById('share-button');
   this.browser = this.document.getElementById('share-browser');
   this.panel = this.document.getElementById('share-popup');
 
