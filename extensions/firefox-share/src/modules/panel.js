@@ -655,7 +655,7 @@ sharePanel.prototype = {
           callback: function () {
             let nb = self.gBrowser.getNotificationBox();
             nb.removeNotification(nb.getNotificationWithValue("mozilla-f1-share-error"));
-            window.setTimeout(function () {
+            self.window.setTimeout(function () {
               ffshare.togglePanel();
             }, 0);
           }
@@ -677,7 +677,7 @@ sharePanel.prototype = {
       // Only a final successful share should be passing this value
       if (success) {
         button.setAttribute("status", SHARE_STATUS[SHARE_FINISHED]);
-        window.setTimeout(function () {
+        this.window.setTimeout(function () {
           button.setAttribute("status", SHARE_STATUS[status]);
         }, 2900);
       } else {
