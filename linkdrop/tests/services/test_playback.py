@@ -138,12 +138,19 @@ class ServiceReplayTestCase(TestController):
                 assert got==exp_header_val, (got, exp_header_val)
             return
 
-        # No expected-f1-response.json - to the expected-f1-data thang...
+        # No expected-f1-response.json - do the expected-f1-data thang...
         assert response.status_int==200, response.status
         try:
             got = json.loads(response.body)
         except ValueError:
             raise AssertionError("non-json response: %r" % (response.body,))
+        # do a little massaging of the data to avoid too much noise.
+        # if there is a 'debug_message' in the error, nuke it.
+        if got['error']:
+            try:
+                del got['error']['debug_message']
+            except KeyError:
+                pass
         try:
             with open(os.path.join(canned.path, "expected-f1-data.json")) as f:
                 expected = json.load(f)
@@ -277,6 +284,7 @@ host_to_test = {
     'www.google.com': GoogleReplayTestCase,
     'smtp.gmail.com': GoogleReplayTestCase,
     'mail.yahooapis.com': YahooReplayTestCase,
+    'social.yahooapis.com': YahooReplayTestCase,
 }
 
 def queueForReplay(canned):
