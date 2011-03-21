@@ -41,7 +41,7 @@ from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
 from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attributes, attributes
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
-from linkdrop.lib.oauth.base import get_oauth_config, OAuthKeysException
+from linkdrop.lib.oauth.base import get_oauth_config, OAuthKeysException, ServiceUnavailableException
 from linkdrop.lib.protocap import HttpRequestor
 
 YAHOO_OAUTH = 'https://api.login.yahoo.com/oauth/v2/get_token'
@@ -124,7 +124,18 @@ class api():
         self.consumer_secret = self.config.get('consumer_secret')
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
         self.sigmethod = oauth.SignatureMethod_HMAC_SHA1()
-         
+
+    def _maybe_throw_response_exception(self, resp, content):
+        # maybe throw one of our internal response exceptions based on the
+        # service response.
+        status = int(resp.status)
+        if status == 404:
+            # this is some bizarre temporary error - see the
+            # send-404-not-on-accelerator response capture for an example...
+            raise ServiceUnavailableException(debug_message=content)
+        if status >= 500:
+            raise ServiceUnavailableException(debug_message=content)
+
     def jsonrpc(self, url, method, args, options={}):
         headers = {
             'Content-Type': 'application/json',
@@ -146,6 +157,7 @@ class api():
 
         client = HttpRequestor()
         resp, content = client.request(url, 'POST', headers=headers, body=postdata)
+        self._maybe_throw_response_exception(resp, content)
         try:
             response = json.loads(content)
         except ValueError:
@@ -191,6 +203,7 @@ class api():
 
         client = HttpRequestor()
         resp, content = client.request(url, method, headers=headers, body=body)
+        self._maybe_throw_response_exception(resp, content)
         try:
             data = content and json.loads(content) or resp
         except ValueError:
@@ -202,6 +215,7 @@ class api():
         if status < 200 or status >= 300:
             client.save_capture("failed restcall response")
             error = data
+            error['status'] = status
         else:
             result = data
 
