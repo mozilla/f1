@@ -45,7 +45,7 @@ class TimedMetricsCollector(object):
         self.parent_collector = parent_collector
         self.init_data = init_data
         self.tracked = False
-        self.started = time.clock()
+        self.started = time.time()
 
     def track(self, id, **data):
         assert not self.tracked
@@ -53,7 +53,7 @@ class TimedMetricsCollector(object):
         if self.init_data is not None:
             data.update(self.init_data)
         assert 'took' not in data, data
-        data['took'] = time.clock() - self.started
+        data['took'] = time.time() - self.started
         self.parent_collector.track(None, id, **data)
 
 

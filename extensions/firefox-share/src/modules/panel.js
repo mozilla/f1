@@ -1,5 +1,5 @@
 /* ***** BEGIN LICENSE BLOCK *****
- * Version: MPL 1.1
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
  * 1.1 (the "License"); you may not use this file except in compliance with
@@ -14,12 +14,28 @@
  * The Original Code is Raindrop.
  *
  * The Initial Developer of the Original Code is
- * Mozilla Messaging, Inc..
- * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Mozilla Foundation.
+ * Portions created by the Initial Developer are Copyright (C) 2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- **/
+ *	Anant Narayanan <anant@kix.in>
+ *	Shane Caraveo <shanec@mozillamessaging.com>
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
+
 const {classes: Cc, interfaces: Ci, utils: Cu} = Components;
 Cu.import("resource://ffshare/modules/progress.js");
 Cu.import("resource://gre/modules/Services.jsm");
@@ -32,6 +48,10 @@ const SHARE_DONE = 0;
 const SHARE_START = 1;
 const SHARE_ERROR = 2;
 const SHARE_FINISHED = 3;
+
+const NS_XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
+const EXPORTED_SYMBOLS = ["sharePanel"];
 
 function mixin(target, source, override) {
   //TODO: consider ES5 getters and setters in here.
@@ -61,7 +81,7 @@ function sharePanel(window, ffshare) {
   this.document = window.document;
   this.ffshare = ffshare;
 
-  this.button = this.document.getElementById('ffshare-toolbar-button');
+  this.button = this.document.getElementById('share-button');
   this.browser = this.document.getElementById('share-browser');
   this.panel = this.document.getElementById('share-popup');
 
@@ -454,13 +474,11 @@ sharePanel.prototype = {
    * originating from the share UI in content-space
    */
   generateBase64Preview: function (imgUrl) {
-    // XXX TODO this is broken
-    try {
     let self = this;
-    let img = new this.browser.contentWindow.Image();
+    let img = new this.window.Image();
     img.onload = function () {
 
-      let canvas = self.gBrowser.contentDocument.createElement("canvas"),
+      let canvas = self.document.createElementNS(NS_XUL, "canvas"),
           win = self.browser.contentWindow.wrappedJSObject,
           w = img.width,
           h = img.height,
@@ -496,9 +514,6 @@ sharePanel.prototype = {
 
     };
     img.src = imgUrl;
-    } catch(e) {
-      dump("generateBase64Preview: "+e+"\n");
-    }
   },
 
   _validURL: function(url) {
@@ -642,7 +657,7 @@ sharePanel.prototype = {
           callback: function () {
             let nb = self.gBrowser.getNotificationBox();
             nb.removeNotification(nb.getNotificationWithValue("mozilla-f1-share-error"));
-            window.setTimeout(function () {
+            self.window.setTimeout(function () {
               ffshare.togglePanel();
             }, 0);
           }
@@ -664,7 +679,7 @@ sharePanel.prototype = {
       // Only a final successful share should be passing this value
       if (success) {
         button.setAttribute("status", SHARE_STATUS[SHARE_FINISHED]);
-        window.setTimeout(function () {
+        this.window.setTimeout(function () {
           button.setAttribute("status", SHARE_STATUS[status]);
         }, 2900);
       } else {
@@ -674,7 +689,8 @@ sharePanel.prototype = {
   },
 
   /**
-   * Called when we only want to hide the panel and preserve the shareState information
+   * Called when we only want to hide the panel and preserve the shareState
+   * information
    */
   hide: function () {
     this.panel.hidePopup();
@@ -739,5 +755,3 @@ sharePanel.prototype = {
     this.panel.openPopup(anchor, position, 0, 0, false, false);
   }
 };
-
-let EXPORTED_SYMBOLS = ["sharePanel"];

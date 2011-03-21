@@ -46,7 +46,7 @@ function loadIntoWindow(win) {
   try {
     dump("install addon\n");
     unloaders = installOverlay(win);
-    unloaders.push.apply(startAddon(win));
+    unloaders.push.apply(unloaders, installFFShareIntoWindow(win));
   } catch(e) {
     dump("load error "+e+"\n");
   }
@@ -65,19 +65,25 @@ function eachWindow(callback) {
 }
 
 function runOnLoad(window, callback) {
-  window.addEventListener("load", function() {
-    window.removeEventListener("load", arguments.callee, false);
+  window.addEventListener("load", function onLoad() {
+    window.removeEventListener("load", onLoad, false);
     callback(window);
   }, false);
 }
 
-function windowWatcher(win, topic) {
-  if (topic === "domwindowopened") {
+function windowWatcher(subject, topic) {
+  if (topic !== "domwindowopened") {
+    return;
+  }
+  let win = subject.QueryInterface(Ci.nsIDOMWindow);
+  // We don't know the type of the window at this point yet, only when
+  // the load event has been fired.
+  runOnLoad(win, function (win) {
     let doc = win.document.documentElement;
     if (doc.getAttribute("windowtype") == "navigator:browser") {
-        runOnLoad(win, loadIntoWindow);
+      loadIntoWindow(win);
     }
-  }
+  });
 }
 
 function registerResource(installPath, name) {
@@ -121,10 +127,9 @@ function startup(data, reason) AddonManager.getAddonByID(data.id, function(addon
 
     Services.ww.registerNotification(windowWatcher);
     unloaders.push(function() Services.ww.unregisterNotification(windowWatcher));
-})
+});
 
-function shutdown(data, reason)
-{
+function shutdown(data, reason) {
     if (reason == APP_SHUTDOWN) return;
 
     let id = getAddonShortName(data.id);
@@ -134,10 +139,8 @@ function shutdown(data, reason)
     unloaders.forEach(function(unload) unload && unload());
 }
 
-function install()
-{
+function install() {
 }
 
-function uninstall()
-{
+function uninstall() {
 }

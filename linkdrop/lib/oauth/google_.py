@@ -41,13 +41,13 @@ import oauth2 as oauth
 #from oauth2.clients.smtp import SMTP
 import smtplib
 import base64
+from rfc822 import AddressList
 import gdata.contacts
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.header import Header
-from email.utils import parseaddr
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
@@ -257,18 +257,28 @@ class api():
             from_email = '"%s" <%s>' % (Header(fullname, 'utf-8').encode(), Header(from_, 'utf-8').encode(),)
 
         url = "https://mail.google.com/mail/b/%s/smtp/" % from_
-        to_ = options.get('to', None)
-        if not to_ or not '@' in to_:
+        # 'to' parsing
+        address_list = AddressList(options.get('to', ''))
+        if len(address_list)==0:
             return None, {
                 "provider": self.host,
-                "message": "recipient address is invalid",
+                "message": "recipient address must be specified",
                 "status": 0
             }
-        to_ = parseaddr(to_)
-        if to_[0]:
-            to_ = '"%s" <%s>' % (Header(to_[0], 'utf-8').encode(), Header(to_[1], 'utf-8').encode())
-        else:
-            to_ = Header(to_[1], 'utf-8').encode()
+        to_headers = []
+        for addr in address_list:
+            if not addr[1] or not '@' in addr[1]:
+                return None, {
+                    "provider": self.host,
+                    "message": "recipient address '%s' is invalid" % (addr[1],),
+                    "status": 0
+                }
+            if addr[0]:
+                to_ = '"%s" <%s>' % (Header(addr[0], 'utf-8').encode(), Header(addr[1], 'utf-8').encode())
+            else:
+                to_ = Header(addr[1], 'utf-8').encode()
+            to_headers.append(to_)
+        assert to_headers # we caught all cases where it could now be empty.
 
         server = SMTP(self.host, self.port)
         # in the app:main set debug = true to enable
@@ -283,7 +293,8 @@ class api():
         msg.set_charset('utf-8')
         msg.add_header('Subject', Header(subject, 'utf-8').encode())
         msg.add_header('From', from_email)
-        msg.add_header('To', to_)
+        for to_ in to_headers:
+            msg.add_header('To', to_)
 
         c.safeHTML = safeHTML
         c.options = options
@@ -292,12 +303,10 @@ class api():
         c.longurl = options.get('link')
         c.shorturl = options.get('shorturl')
 
-
         # reset to unwrapped for html email, they will be escaped
         c.from_name = fullname
         c.subject = subject
         c.from_header = from_
-        c.to_header = to_
         c.title = title
         c.description = description
         c.message = message
@@ -327,7 +336,6 @@ class api():
         c.from_name = literal(fullname)
         c.subject = literal(subject)
         c.from_header = literal(from_)
-        c.to_header = literal(to_)
         c.title = literal(title)
         c.description = literal(description)
         c.message = literal(message)
@@ -347,7 +355,7 @@ class api():
                 try:
                     server.ehlo_or_helo_if_needed()
                     server.authenticate(url, self.consumer, self.oauth_token)
-                    server.sendmail(from_, to_, msg.as_string())
+                    server.sendmail(from_, to_headers, msg.as_string())
                 except smtplib.SMTPRecipientsRefused, exc:
                     for to_, err in exc.recipients.items():
                         error = {"provider": self.host,
