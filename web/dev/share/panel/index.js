@@ -364,8 +364,11 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       delete store.accountAdded;
     }
 
-    //Inform extension the content size has changed.
-    dispatch.pub('sizeToContent');
+    //Inform extension the content size has changed, but use a delay,
+    //to allow any reflow/adjustments.
+    setTimeout(function () {
+      dispatch.pub('sizeToContent');
+    }, 100);
   }
 
   function updateAccounts(accounts) {
