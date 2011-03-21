@@ -1,0 +1,5 @@
+{
+    "protocol": "http", 
+    "reason": "failed restcall response", 
+    "uri": "http://social.yahooapis.com/v1/user/ABKBGPOIGN7Q3ABMM6QJMA3H2Q/contacts"
+}

@@ -1,0 +1,5 @@
+{
+    "reason": "status update with revoked access token", 
+    "uri": "https://graph.facebook.com/me/feed?access_token=163981616966631%7C3bc557f2260a2f9857edaa61-100001556529144%7CGmTVeDKXz5roDH9wdu2IBjfuGFk",
+    "protocol": "http"
+}

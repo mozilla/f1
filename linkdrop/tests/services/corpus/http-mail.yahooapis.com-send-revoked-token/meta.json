@@ -1,0 +1,5 @@
+{
+    "protocol": "http", 
+    "reason": "yahoo error", 
+    "uri": "http://mail.yahooapis.com/ws/mail/v1.1/jsonrpc"
+}

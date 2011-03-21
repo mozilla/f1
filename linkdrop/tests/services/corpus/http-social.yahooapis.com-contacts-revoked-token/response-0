@@ -1,0 +1,13 @@
+HTTP/1.1 401 Authorization Required
+status: 401
+via: HTTP/1.1 r1.ycpi.aue.yahoo.net (YahooTrafficServer/1.19.5 [cMsSf ])
+age: 0
+vary: Accept-Encoding
+server: YTS/1.19.5
+connection: keep-alive
+cache-control: private
+date: Sun, 20 Mar 2011 22:38:41 GMT
+content-type: application/json
+www-authenticate: OAuth oauth_problem="token_expired", realm="yahooapis.com"
+
+{"error":{"lang":"en-US","description":"Please provide valid credentials. OAuth oauth_problem=\"token_expired\", realm=\"yahooapis.com\""}}

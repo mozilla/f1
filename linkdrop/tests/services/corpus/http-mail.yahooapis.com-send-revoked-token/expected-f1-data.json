@@ -1,0 +1,9 @@
+{
+    "error": {
+        "description": "*",
+        "lang": "*",
+        "provider": "yahoo.com",
+        "status": 401
+    },
+    "result": null
+}
