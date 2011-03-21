@@ -42,7 +42,7 @@ from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 from linkdrop.lib.shortener import shorten_link
-from linkdrop.lib.oauth.base import OAuthKeysException
+from linkdrop.lib.oauth.base import OAuthKeysException, ServiceUnavailableException
 
 log = logging.getLogger(__name__)
 
@@ -184,8 +184,17 @@ Site provided description of the shared item, not supported by all services.
                      'message': "not logged in or no user account for that domain",
                      'status': 401
             }
-            
             metrics.track(request, 'send-oauth-keys-missing', domain=domain)
+            timer.track('send-error', error=error)
+            return {'result': result, 'error': error}
+        except ServiceUnavailableException, e:
+            error = {'provider': domain,
+                     'message': "The service is temporarily unavailable - please try again later.",
+                     'status': 503
+            }
+            if e.debug_message:
+                error['debug_message'] = e.debug_message
+            metrics.track(request, 'send-service-unavailable', domain=domain)
             timer.track('send-error', error=error)
             return {'result': result, 'error': error}
 

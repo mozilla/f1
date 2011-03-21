@@ -22,6 +22,10 @@ class OAuthKeysException(Exception):
 class AccessException(Exception):
     pass
 
+class ServiceUnavailableException(Exception):
+    def __init__(self, debug_message=None):
+        self.debug_message = debug_message
+
 def get_oauth_config(provider):
     key = 'oauth.'+provider+'.'
     keylen = len(key)
