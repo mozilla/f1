@@ -144,13 +144,6 @@ class ServiceReplayTestCase(TestController):
             got = json.loads(response.body)
         except ValueError:
             raise AssertionError("non-json response: %r" % (response.body,))
-        # do a little massaging of the data to avoid too much noise.
-        # if there is a 'debug_message' in the error, nuke it.
-        if got['error']:
-            try:
-                del got['error']['debug_message']
-            except KeyError:
-                pass
         try:
             with open(os.path.join(canned.path, "expected-f1-data.json")) as f:
                 expected = json.load(f)
@@ -159,6 +152,17 @@ class ServiceReplayTestCase(TestController):
             print "The F1 response was:"
             print json.dumps(got, sort_keys=True, indent=4)
             raise AssertionError("expected-f1-data.json is missing")
+        # do a little massaging of the data to avoid too much noise.
+        for top in ["error", "result"]:
+            sub = expected.get(top)
+            if sub is None:
+                continue
+            for subname, subval in sub.items():
+                if subval=="*":
+                    # indicates any value is acceptable.
+                    assert subname in got[top], "no attribute [%r][%r]" % (top, subname)
+                    del got[top][subname]
+                    del expected[top][subname]
         assert_dicts_equal(got, expected)
 
     def getResponse(self, req_type, request):
