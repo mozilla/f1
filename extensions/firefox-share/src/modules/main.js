@@ -44,7 +44,7 @@ Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://ffshare/modules/progress.js");
 
 const NS_XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-const buttonId = 'ffshare-toolbar-button';
+const SHARE_BUTTON_ID = "share-button";
 
 const EXPORTED_SYMBOLS = ["installFFShareIntoWindow"];
 
@@ -73,7 +73,7 @@ function error(msg) {
 }
 
 function sendJustInstalledEvent(win, url) {
-  var buttonNode = win.document.getElementById(buttonId);
+  var buttonNode = win.document.getElementById(SHARE_BUTTON_ID);
   //Button may not be there if customized and removed from toolbar.
   if (buttonNode) {
     var tab = win.gBrowser.loadOneTab(url, { referrerURI: null,
@@ -125,7 +125,7 @@ function openAndReuseOneTabPerURL(url) {
             // Focus *this* browser-window
             browserWin.focus();
 
-            buttonNode = browserWin.document.getElementById(buttonId);
+            buttonNode = browserWin.document.getElementById(SHARE_BUTTON_ID);
             //Button may not be there if customized and removed from toolbar.
             if (buttonNode) {
               buttonNode.setAttribute("firstRun", "true");
@@ -219,11 +219,14 @@ FFShare.prototype = {
 
     canShareURI: function (aURI) {
       var command = this.window.document.getElementById("cmd_toggleSharePage");
+      let button = this.window.document.getElementById(SHARE_BUTTON_ID);
       try {
         if (this.isValidURI(aURI)) {
           command.removeAttribute("disabled");
+          button.hidden = false;
         } else {
           command.setAttribute("disabled", "true");
+          button.hidden = true;
         }
       } catch (e) {
         throw e;

@@ -22,23 +22,19 @@
  * */
 @namespace xul url(http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul);
 
-#ffshare-toolbar-button > label {
-  display: none;
-}
-
-#ffshare-toolbar-button > image {
+#share-button {
   list-style-image: url("resource://ffshare/chrome/skin/toolbar-button.png");
   width: auto;
   height: auto;
 }
-#ffshare-toolbar-button[firstRun] > image {
+#share-button[firstRun] {
   list-style-image: url("resource://ffshare/chrome/skin/toolbar-button-glow.png");
 }
 
-#ffshare-toolbar-button[status="start"] > image {
+#share-button[status="start"] {
   list-style-image: url("resource://ffshare/chrome/skin/status-sharing.png");
 }
 
-#ffshare-toolbar-button[status="finished"] > image {
+#share-button[status="finished"] {
   list-style-image: url("resource://ffshare/chrome/skin/status-shared.png");
 }
