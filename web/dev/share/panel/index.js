@@ -34,12 +34,12 @@ require({
 
 define([ "require", "jquery", "blade/object", "blade/fn", "rdapi", "oauth",
         "blade/jig", "blade/url", "placeholder", "AutoComplete", "dispatch", "accounts",
-         "storage", "services", "shareOptions", "widgets/PageInfo", "rssFeed",
+         "storage", "services", "shareOptions", "widgets/PageInfo",
          "widgets/DebugPanel", "widgets/AccountPanel", "dotCompare",
          "jquery-ui-1.8.7.min", "jquery.textOverflow"],
 function (require,   $,        object,         fn,         rdapi,   oauth,
           jig,         url,        placeholder,   AutoComplete,   dispatch,   accounts,
-          storage,   services,   shareOptions,   PageInfo,           rssFeed,
+          storage,   services,   shareOptions,   PageInfo,
           DebugPanel,           AccountPanel,           dotCompare) {
 
   var actions = services.domains,
@@ -532,12 +532,11 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         //Check that accounts are still available, but do it in the
         //background.
         accounts();
+
+        //Tell the extension that the size of the content may have changed.
+        dispatch.pub('sizeToContent');
       }
     }, false);
 
-    //Get the most recent feed item, not important to do it last.
-    rssFeed(function (title, link) {
-      $('#rssLink').attr('href', link).text(title);
-    });
   });
 });
