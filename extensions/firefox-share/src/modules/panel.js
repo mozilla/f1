@@ -42,6 +42,11 @@ Cu.import("resource://gre/modules/Services.jsm");
 Cu.import("resource://gre/modules/PlacesUtils.jsm");
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+try {
+  Cu.import("resource://openwebapps/modules/api.js");
+  // if webapps installed, we have access to FFRepoImplService
+} catch(e) {}
+
 const FFSHARE_EXT_ID = "ffshare@mozilla.org";
 const SHARE_STATUS = ["", "start", "", "finished"];
 const SHARE_DONE = 0;
@@ -560,6 +565,24 @@ sharePanel.prototype = {
       }
     );
     return previews;
+  },
+
+  getInstalledServices: function() {
+    dump("getInstalledServices called\n");
+    if (FFRepoImplService) {
+      dump("getInstalledServices called\n");
+      var win = this.browser.contentWindow.wrappedJSObject;
+      FFRepoImplService.findServices('share.send', function(svcs) {
+
+        win.postMessage(JSON.stringify({
+            topic: 'installedServices',
+            data: svcs
+          }), win.location.protocol + "//" + win.location.host);
+
+      });
+    } else {
+      dump("webapps are not installed\n");
+    }
   },
 
   getShareState: function() {
