@@ -1,0 +1,20 @@
+{
+    "error": null,
+    "result": {
+        "entry": [
+            {
+                "displayName": "Test Test",
+                "emails": [
+                    {
+                        "primary": false,
+                        "value": "test@test.com"
+                    }
+                ],
+                "nickname": "test"
+            }
+        ],
+        "itemsPerPage": 1,
+        "startIndex": 0,
+        "totalResults": 1
+    }
+}

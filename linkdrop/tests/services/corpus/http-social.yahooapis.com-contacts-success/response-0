@@ -1,0 +1,71 @@
+HTTP/1.1 200 OK
+status: 200
+x-yahoo-social-contactsrev: 3
+via: HTTP/1.1 r1.ycpi.aue.yahoo.net (YahooTrafficServer/1.19.5 [cMsSf ])
+content-location: http://social.yahooapis.com/v1/user/xxx/contacts
+-content-encoding: gzip
+age: 0
+x-yahoo-social-host: ws151.socdir.sp2.yahoo.com
+vary: Authorization,Accept-Encoding
+server: YTS/1.19.5
+connection: keep-alive
+etag: eccbc87e4b5ce2fe28308fd9f2a7baf3-gzip
+cache-control: private
+date: Mon, 21 Mar 2011 05:58:46 GMT
+p3p: policyref="http://info.yahoo.com/w3c/p3p.xml", CP="CAO DSP COR CUR ADM DEV TAI PSA PSD IVAi IVDi CONi TELo OTPi OUR DELi SAMi OTRi UNRi PUBi IND PHY ONL UNI PUR FIN COM NAV INT DEM CNT STA POL HEA PRE LOC GOV"
+content-type: application/json; charset="utf-8"
+
+{"contacts":{
+    "start":0,
+    "count":1,
+    "total":1,
+    "uri":"http://social.yahooapis.com/v1/user/xxx/contacts",
+    "contact":[{
+        "uri":"http://social.yahooapis.com/v1/user/xxx/contact/1",
+        "created":"2011-03-21T05:50:36Z",
+        "updated":"2011-03-21T05:50:36Z",
+        "isConnection":false,
+        "id":1,
+        "fields":[{
+            "uri":"http://social.yahooapis.com/v1/user/xxx/contact/1/nickname/2",
+            "created":"2011-03-21T05:50:36Z",
+            "updated":"2011-03-21T05:50:36Z",
+            "id":2,
+            "type":"nickname",
+            "value":"test",
+            "editedBy":"OWNER",
+            "flags":[],
+            "categories":[]
+            },{
+            "uri":"http://social.yahooapis.com/v1/user/xxx/contact/1/email/3",
+            "created":"2011-03-21T05:50:36Z",
+            "updated":"2011-03-21T05:50:36Z",
+            "id":3,
+            "type":"email",
+            "value":"test@test.com",
+            "editedBy":"OWNER",
+            "flags":[],
+            "categories":[]
+            },{
+            "uri":"http://social.yahooapis.com/v1/user/xxx/contact/1/name/1",
+            "created":"2011-03-21T05:50:36Z",
+            "updated":"2011-03-21T05:50:36Z",
+            "id":1,
+            "type":"name",
+            "value":{
+                "givenName":"Test",
+                "middleName":"",
+                "familyName":"Test",
+                "prefix":"",
+                "suffix":"",
+                "givenNameSound":"",
+                "familyNameSound":""
+            },
+            "editedBy":"OWNER",
+            "flags":[],
+            "categories":[]
+            }
+        ],
+        "categories":[]
+    }]}
+}

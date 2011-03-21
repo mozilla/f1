@@ -1,0 +1,5 @@
+{
+    "protocol": "http", 
+    "reason": "automatic success save", 
+    "uri": "http://social.yahooapis.com/v1/user/xxx/contacts"
+}
