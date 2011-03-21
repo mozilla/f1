@@ -21,7 +21,7 @@
  * Contributor(s):
  * */
 
-/*jslint plusplus: false, indent: 2 */
+/*jslint plusplus: false, indent: 2, nomen: false */
 /*global require: false, define: false, location: true, window: false, alert: false,
   document: false, setTimeout: false, localStorage: false */
 "use strict";
@@ -73,6 +73,52 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   }
   window.updateChromeStatus = updateChromeStatus;
 
+  function _showStatus(statusId, shouldCloseOrMessage) {
+    if (shouldCloseOrMessage === true) {
+      setTimeout(function () {
+        dispatch.pub('success', {
+          domain: sendData.domain,
+          username: sendData.username,
+          userid: sendData.userid,
+          url: options.url,
+          service: services.domains[sendData.domain].name
+        });
+        $('div.status').addClass('hidden');
+      }, 2000);
+    } else if (shouldCloseOrMessage) {
+      $('#' + statusId + 'Message').text(shouldCloseOrMessage);
+    }
+
+    //Tell the extension that the size of the content may have changed.
+    dispatch.pub('sizeToContent');
+  }
+
+  function showStatus(statusId, shouldCloseOrMessage) {
+    $('div.status').addClass('hidden');
+    $('#clickBlock').removeClass('hidden');
+    $('#' + statusId).removeClass('hidden');
+
+    if (!okStatusIds[statusId]) {
+      updateChromeStatus(SHARE_ERROR, statusId, shouldCloseOrMessage);
+    }
+    _showStatus(statusId, shouldCloseOrMessage);
+  }
+  //Make it globally visible for debug purposes
+  window.showStatus = showStatus;
+
+  function resetStatusDisplay() {
+    $('#clickBlock').addClass('hidden');
+    $('div.status').addClass('hidden');
+    //Be sure form field placeholders are up to date.
+    placeholder();
+  }
+
+  function cancelStatus() {
+    // clear any existing status
+    updateChromeStatus(SHARE_DONE);
+    resetStatusDisplay();
+  }
+
   function shareStateUpdate(shareState) {
     var status = null;
     if (shareState && shareState.status) {
@@ -98,53 +144,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     //dispatch.pub('optionsChanged', shareState.options);
   }
   dispatch.sub('shareState', shareStateUpdate);
-
-  function showStatus (statusId, shouldCloseOrMessage) {
-    $('div.status').addClass('hidden');
-    $('#clickBlock').removeClass('hidden');
-    $('#' + statusId).removeClass('hidden');
-
-    if (!okStatusIds[statusId]) {
-      updateChromeStatus(SHARE_ERROR, statusId, shouldCloseOrMessage);
-    }
-    _showStatus(statusId, shouldCloseOrMessage);
-  }
-
-  function _showStatus(statusId, shouldCloseOrMessage) {
-    if (shouldCloseOrMessage === true) {
-      setTimeout(function () {
-        dispatch.pub('success', {
-          domain: sendData.domain,
-          username: sendData.username,
-          userid: sendData.userid,
-          url: options.url,
-          service: services.domains[sendData.domain].name
-        });
-        $('div.status').addClass('hidden');
-      }, 2000);
-    } else if (shouldCloseOrMessage) {
-      $('#' + statusId + 'Message').text(shouldCloseOrMessage);
-    }
-
-    //Tell the extension that the size of the content may have changed.
-    dispatch.pub('sizeToContent');
-  };
-
-  //Make it globally visible for debug purposes
-  window.showStatus = showStatus;
-
-  function resetStatusDisplay() {
-    $('#clickBlock').addClass('hidden');
-    $('div.status').addClass('hidden');
-    //Be sure form field placeholders are up to date.
-    placeholder();
-  }
-
-  function cancelStatus() {
-    // clear any existing status
-    updateChromeStatus(SHARE_DONE);
-    resetStatusDisplay();
-  }
 
   function showStatusShared() {
     // if no sendData, we're in debug mode, default to twitter to show the
