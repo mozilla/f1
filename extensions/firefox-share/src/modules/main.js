@@ -382,7 +382,7 @@ FFShare.prototype = {
         // THIS CAN BE REMOVED some time after the 0.8.1 add-on release.
         // Only show it if the user previously installed F1, indicated by having
         // a previous_version value.
-        openAndReuseOneTabPerURL("http://mozillalabs.com/messaging/2011/03/10/mozilla-f1-faster-more/");
+        openAndReuseOneTabPerURL("http://mozillalabs.com/messaging/2011/03/22/mozilla-f1-finding-a-new-home/");
       }
     },
 
