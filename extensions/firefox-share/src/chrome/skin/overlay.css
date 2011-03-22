@@ -27,6 +27,11 @@
   width: auto;
   height: auto;
 }
+
+#share-button[checked] {
+  list-style-image: url("resource://ffshare/chrome/skin/toolbar-button-active.png");
+}
+
 #share-button[firstRun] {
   list-style-image: url("resource://ffshare/chrome/skin/toolbar-button-glow.png");
 }
