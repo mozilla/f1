@@ -658,7 +658,7 @@ sharePanel.prototype = {
             let nb = self.gBrowser.getNotificationBox();
             nb.removeNotification(nb.getNotificationWithValue("mozilla-f1-share-error"));
             self.window.setTimeout(function () {
-              ffshare.togglePanel();
+              self.ffshare.togglePanel();
             }, 0);
           }
         }];
