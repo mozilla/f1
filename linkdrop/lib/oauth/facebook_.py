@@ -36,7 +36,7 @@ import logging
 
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
-from linkdrop.lib.oauth.base import OAuth2
+from linkdrop.lib.oauth.base import OAuth2, OAuthKeysException
 from linkdrop.lib.protocap import HttpRequestor
 
 domain = 'facebook.com'
@@ -165,6 +165,8 @@ class responder(OAuth2):
 class api():
      def __init__(self, account):
           self.access_token = account.get('oauth_token')
+          if not self.access_token:
+               raise OAuthKeysException()
      
      def _make_error(self, client, data, resp):
           # Facebook makes error handling fun!  So much for standards.

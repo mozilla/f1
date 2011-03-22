@@ -139,6 +139,13 @@ Site provided description of the shared item, not supported by all services.
             return {'result': result, 'error': error}
 
         provider = get_provider(domain)
+        if provider is None:
+            error = {
+                'message': "'domain' is invalid",
+                'code': constants.INVALID_PARAMS
+            }
+            return {'result': result, 'error': error}
+
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
         if account_data is not None:

@@ -290,7 +290,7 @@ class api():
         self.config = get_oauth_config(domain)
         self.account = account
         try:
-            self.oauth_token = oauth.Token(key=str(account.get('oauth_token')), secret=str(account.get('oauth_token_secret')))
+            self.oauth_token = oauth.Token(key=account.get('oauth_token'), secret=account.get('oauth_token_secret'))
         except ValueError, e:
             # missing oauth tokens, raise our own exception
             raise OAuthKeysException(str(e))

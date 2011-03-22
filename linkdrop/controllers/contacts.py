@@ -102,6 +102,12 @@ Name of the group to return.
             metrics.track(request, 'contacts-unauthed', domain=domain)
             return {'result': None, 'error': error}
         provider = get_provider(domain)
+        if provider is None:
+            error = {
+                'message': "'domain' is invalid",
+                'code': constants.INVALID_PARAMS
+            }
+            return {'result': None, 'error': error}
 
         # even if we have a session key, we must have an account for that
         # user for the specified domain.
