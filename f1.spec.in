@@ -1,19 +1,14 @@
 %define __python /usr/bin/python
 
-%{!?python_sitearch: %define python_sitearch %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib(1)")}
-%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")}
-
-%define name python-mozilla-f1
-
-Name:           %{name} 
-Version:        0.3.2dev
+Name:           python-mozilla-f1
+Version:        %%version%%
 Release:        1%{?dist}
 Summary:        Share Links Fast.
 
 Group:          Applications/Internet
 License:        MPL
 URL:            http://f1.mozillamessaging.com/
-Source0:        dist/linkdrop-%{version}.tar.gz
+Source0:        linkdrop-%{version}.tar.gz
 BuildArch:	    noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -37,15 +32,14 @@ CFLAGS="%{optflags}" %{__python} -c 'import setuptools; execfile("setup.py")' bu
 
 %install
 rm -rf %{buildroot}
-%{__python} -c 'import setuptools; execfile("setup.py")' install --skip-build --root %{buildroot}
+%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
 
 %clean
 rm -rf %{buildroot}
 
-%files
+%files -f INSTALLED_FILES
 %defattr(-,root,root,-)
 %doc README.md LICENSE PKG-INFO docs/
-%{python_sitelib}/*
 
 %changelog
 * Fri Mar 18 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.2dev-1

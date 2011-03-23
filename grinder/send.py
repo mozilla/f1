@@ -34,6 +34,8 @@ connectionDefaults = HTTPPluginControl.getConnectionDefaults()
 
 # Decode gzipped responses
 connectionDefaults.useContentEncoding = 1
+# in ms
+connectionDefaults.setTimeout(60000)
 
 httpUtilities = HTTPPluginControl.getHTTPUtilities()
 
@@ -81,47 +83,36 @@ connectionDefaults.defaultHeaders = \
 
 request1 = HTTPRequest()
 
-# Here are the "helper functions" used by the actual test.
-def getCSRF():
+def authService():
     threadContext = HTTPPluginControl.getThreadHTTPClientContext()
     CookieModule.discardAllCookies(threadContext)
-    result = request1.GET(linkdrop_host + '/api/account/get')
-    assert result.getStatusCode()==200, result
-    csrf = linkdrop = None
-    for cookie in CookieModule.listAllCookies(threadContext):
-        if cookie.name == "linkdrop":
-            linkdrop = cookie
-        if cookie.name == "csrf":
-            csrf = cookie.value
-    assert csrf and linkdrop
-    return csrf, linkdrop
-
-getCSRF = Test(2, "get CSRF").wrap(getCSRF)
-
-def authService(csrf):
     # Call authorize requesting we land back on /account/get - after
     # a couple of redirects for auth, we should wind up with the data from
     # account/get - which should now include our account info.
     result = request1.POST(linkdrop_host + '/api/account/authorize',
-      ( NVPair('csrftoken', csrf),
+      (
         NVPair('domain', linkdrop_service),
         NVPair('end_point_success', '/api/account/get'),
-        NVPair('end_point_auth_failure', '/send/auth.html#oauth_failure'), ),
+        NVPair('end_point_auth_failure', '/current/send/auth.html#oauth_failure'), ),
       ( NVPair('Content-Type', 'application/x-www-form-urlencoded'), ))
     assert result.getStatusCode()==200, result
     data = json_loads(result.getText())
     assert data, 'account/get failed to return data'
     userid = data[0]['accounts'][0]['userid']
-    return userid
+    for cookie in CookieModule.listAllCookies(threadContext):
+        if cookie.name == "linkdrop":
+            linkdrop_cookie = cookie
+    assert linkdrop_cookie
+    return userid, linkdrop_cookie
 
 authService = Test(3, "auth %s" % linkdrop_service).wrap(authService)
 
-def send(userid, csrf, domain=linkdrop_service, message="take that!"):
+def send(userid, domain=linkdrop_service, message="take that!"):
     """POST send."""
+    assert userid, 'userid id set'
     result = request1.POST(linkdrop_host + '/api/send',
       ( NVPair('domain', domain),
         NVPair('userid', userid),
-        NVPair('csrftoken', csrf),
         # NOTE: no 'link' as we don't want to hit bitly in these tests
         # (and if we ever decide we do, we must not use the bitly production
         # userid and key!)
@@ -145,7 +136,6 @@ getStatic = Test(5, "Static request").wrap(getStatic)
 class TestRunner:
     """A TestRunner instance is created for each worker thread."""
     def __init__(self):
-        self.csrf = None
         self.linkdrop_cookie = None
         self.userid = None
 
@@ -153,15 +143,19 @@ class TestRunner:
         if linkdrop_static_per_send:
             for i in range(0,linkdrop_static_per_send):
                 getStatic(linkdrop_static_url)
-        if self.csrf is None or \
-           (sends_per_oauth and grinder.getRunNumber() % sends_per_oauth==0):
-            self.csrf, self.linkdrop_cookie = getCSRF()
-            self.userid = authService(self.csrf)
+            
+        if (sends_per_oauth and grinder.getRunNumber() % sends_per_oauth==0):
+            self.linkdrop_cookie = None
+            self.userid = None
+
+        if self.userid is None:
+            self.userid, self.linkdrop_cookie = authService()
+        
         # cookies are reset by the grinder each test run - re-inject the
         # linkdrop session cookie.
         threadContext = HTTPPluginControl.getThreadHTTPClientContext()
         CookieModule.addCookie(self.linkdrop_cookie, threadContext)
-        send(self.userid, self.csrf)
+        send(self.userid)
 
     # wrap the work in a grinder 'Test' - the unit where stats are collected.
     doit = Test(1, "send with oauth").wrap(doit)
