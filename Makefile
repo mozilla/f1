@@ -1,5 +1,7 @@
-version := 0.3.2
 PYTHON := python
+version := $(shell $(PYTHON) setup.py --version)
+tag := $(shell grep tag_build setup.cfg  | cut -d= -f2 | xargs echo )
+
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
@@ -74,11 +76,15 @@ clean:
 	rm -rf $(objdir)
 	rm -rf $(static_dir)
 	rm -rf $(dist_dir)
+	rm -f f1.spec
 
-dist:
+dist:   f1.spec
 	$(PYTHON) setup.py sdist --formats gztar,zip
 
-rpm:
+rpm:	f1.spec
 	$(PYTHON) setup.py bdist_rpm
+	
+f1.spec: f1.spec.in Makefile
+	@cat f1.spec.in | sed -e"s/%%version%%/$(version)$(tag)/g" > f1.spec
 
 .PHONY: xpi clean dist rpm
