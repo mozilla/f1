@@ -14,7 +14,7 @@ webbuild_dir=$(TOPSRCDIR)/tools/webbuild
 requirejs_dir=$(webbuild_dir)/requirejs
 
 xpi_name := ffshare.xpi
-xpi_files := chrome.manifest chrome install.rdf defaults modules
+xpi_files := bootstrap.js chrome install.rdf modules
 dep_files := Makefile $(shell find $(srcdir) -type f)
 
 SLINK = ln -sf
@@ -30,14 +30,14 @@ xpi: $(xpi_dir)/$(xpi_name)
 $(xpi_dir):
 	mkdir -p $(xpi_dir)
 
-stage_files = $(stage_dir)/defaults $(stage_dir)/chrome $(stage_dir)/install.rdf $(stage_dir)/chrome.manifest $(stage_dir)/modules
+stage_files = $(stage_dir)/chrome $(stage_dir)/install.rdf $(stage_dir)/bootstrap.js $(stage_dir)/modules
 
 $(stage_dir):
 	mkdir -p $(stage_dir)
 	$(MAKE) $(stage_files)
 
-$(stage_dir)/chrome.manifest: $(srcdir)/chrome.manifest
-	$(SLINK) $(srcdir)/chrome.manifest $(stage_dir)/chrome.manifest
+$(stage_dir)/bootstrap.js: $(srcdir)/bootstrap.js
+	$(SLINK) $(srcdir)/bootstrap.js $(stage_dir)/bootstrap.js
 
 $(stage_dir)/install.rdf: $(srcdir)/install.rdf
 	$(SLINK) $(srcdir)/install.rdf $(stage_dir)/install.rdf
@@ -47,9 +47,6 @@ $(stage_dir)/chrome: $(srcdir)/chrome
 
 $(stage_dir)/modules: $(srcdir)/modules
 	$(SLINK) $(srcdir)/modules $(stage_dir)/modules
-
-$(stage_dir)/defaults: $(srcdir)/defaults
-	$(SLINK) $(srcdir)/defaults $(stage_dir)/defaults
 
 $(xpi_dir)/$(xpi_name): $(xpi_dir) $(stage_dir) $(dep_files)
 	rm -f $(xpi_dir)/$(xpi_name)
@@ -81,7 +78,7 @@ clean:
 dist:
 	$(PYTHON) setup.py sdist --formats gztar,zip
 
-rpm:	
+rpm:
 	$(PYTHON) setup.py bdist_rpm
 
 .PHONY: xpi clean dist rpm

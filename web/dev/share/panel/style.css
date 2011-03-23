@@ -347,16 +347,6 @@ header a.new {
           border-radius: 5px;
 }
 
-#newsBox {
-  background-color: #D4DDE5;
-  border-top: 1px solid #A6AFB6;
-  margin-top: -1px;
-}
-
-#newsBox a {
-  color: #535F6D;
-}
-
 /*
     generic styles for account panels
 */
