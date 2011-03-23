@@ -258,8 +258,7 @@ class OpenIDResponder():
             log.debug('Handling OpenID login')
         
         # Load default parameters that all Auth Responders take
-        session['end_point_success'] = request.POST.get('end_point_success', self.config.get('oauth_success'))
-        fail_uri = session['end_point_auth_failure'] = request.POST.get('end_point_auth_failure', self.config.get('oauth_failure'))
+        fail_uri = self.config.get('oauth_failure')
         openid_url = request.POST.get('openid_identifier')
         
         # Let inherited consumers alter the openid identifier if desired
