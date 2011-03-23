@@ -80,6 +80,8 @@ clean:
 
 dist:   f1.spec
 	$(PYTHON) setup.py sdist --formats gztar,zip
+	# This is so Hudson can get stable urls to this tarball
+	ln -sf linkdrop-$(version)($tag).tar.gz dist/linkdrop-current.tar.gz
 
 rpm:	f1.spec
 	$(PYTHON) setup.py bdist_rpm
