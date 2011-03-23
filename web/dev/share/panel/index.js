@@ -315,7 +315,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
     //Figure out what accounts we do have
     accounts.forEach(function (account) {
-      var domain = account.accounts[0].domain,
+      // protect against old style account data
+      if (typeof(account.profile) === 'undefined') return;
+
+      var domain = account.profile.accounts[0].domain,
           data, PanelCtor;
 
       if (domain && actions[domain]) {
@@ -382,7 +385,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       //Collect any UI overrides used for AccountPanel based on the services
       //the user has configured.
       accounts.forEach(function (account) {
-        var domain = account.accounts[0].domain,
+        // protect against old style account data
+        if (typeof(account.profile) === 'undefined') return;
+
+        var domain = account.profile.accounts[0].domain,
             overlays = actions[domain].overlays,
             overlay = overlays && overlays['widgets/AccountPanel'];
         if (overlay && !processedDomains[domain]) {

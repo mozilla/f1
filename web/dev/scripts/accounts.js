@@ -52,23 +52,12 @@ function (storage,   dispatch,   rdapi,   services) {
         accounts: function (ok, error) {
           // accounts now simply provides existing accounts retreived during
           // the oauth dances
-          var accountCache = fromJson(store.accountCache) || [],
-              serviceCache = fromJson(store.serviceCache);
-
-          if (!serviceCache) {
-            // fetch now, let the response call ok
-            // Set up serviceCache.  This should only ever happen
-            // if the local store is cleared (e.g. first run, cleared cookies)
-            impl.fetch(ok, error);
-            return;
-          }
-
-          serviceCache = serviceCache || [];
+          var serviceCache = fromJson(store.serviceCache) || [];
 
           //Call ok callback with current knowledge. If there is a change in the
-          //account info, then the fetch will trigger changed event later.
+          //account info, then the changed event will be triggered later.
           if (ok) {
-            ok(accountCache, serviceCache);
+            ok(serviceCache);
           }
         },
 
@@ -76,34 +65,14 @@ function (storage,   dispatch,   rdapi,   services) {
           // XXX TODO
           // get the account and push it into localstore, don't overwrite, we
           // get one account at a time here
-          // We write into accountCache to have account.fetch continue to work.
-          // We also write into serviceCache which will be used by api calls
+          // We write into serviceCache which will be used by api calls
           // to send the auth keys
-          var accountCache = fromJson(store.accountCache) || [],
-              serviceCache = fromJson(store.serviceCache),
+          var serviceCache = fromJson(store.serviceCache) || [],
               existing = false,
               profile, p, a, acct;
 
-          // move the profile into accountCache
-          profile = account_data.profile;
-          for (p = 0; p < accountCache.length; p++) {
-            acct = accountCache[p].accounts[0];
-            if (isCacheMatch(acct, account_data.domain, account_data.userid,
-                             account_data.username)) {
-              accountCache[p] = profile;
-              existing = true;
-              break;
-            }
-          }
-          if (!existing) {
-            accountCache.push(profile);
-          }
-          store.accountCache = JSON.stringify(accountCache);
-
-          // we store the entire object in serviceCache, at some point in the
-          // future we will remove accountCache
+          // we store the entire object in serviceCache
           if (serviceCache) {
-            existing = false;
             for (a = 0; a < serviceCache.length; a++) {
               if (isCacheMatch(serviceCache[a], account_data.domain,
                                account_data.userid, account_data.username)) {
@@ -112,8 +81,6 @@ function (storage,   dispatch,   rdapi,   services) {
                 break;
               }
             }
-          } else {
-            serviceCache = [];
           }
           if (!existing) {
             serviceCache.push(account_data);
@@ -122,37 +89,8 @@ function (storage,   dispatch,   rdapi,   services) {
           impl.changed();
         },
 
-        // remove this once there is time enough for all users
-        // to have been migrated over to the new cache.
-        fetch: function (ok, error) {
-          rdapi('account/get/full', {
-            success: function (json) {
-              if (json.error) {
-                json = [];
-              }
-
-              store.serviceCache = JSON.stringify(json);
-              var accountCache = [], svc, p;
-              for (p = 0; p < json.length; p++) {
-                accountCache.push(json[p].profile);
-
-                // clear the contacts cache
-                // remove this clearCache call when 3.6 is removed.
-                svc = services.domains[json[p].domain];
-                svc.clearCache(store);
-              }
-              store.accountCache = JSON.stringify(accountCache);
-              if (ok) {
-                ok(accountCache, json);
-              }
-            },
-            error: error || function () {}
-          });
-        },
-
         remove: function (domain, userid, username) {
-          var accountCache = fromJson(store.accountCache),
-              serviceCache = fromJson(store.serviceCache),
+          var serviceCache = fromJson(store.serviceCache),
               i, cache, a, p, s, svc;
 
           if (serviceCache) {
@@ -163,20 +101,6 @@ function (storage,   dispatch,   rdapi,   services) {
               }
             }
             store.serviceCache = JSON.stringify(serviceCache);
-          }
-
-          // eventually we will deprecate accountCache
-          if (accountCache) {
-            for (p = 0; p < accountCache.length; p++) {
-              s = accountCache[p].accounts;
-              for (a = 0; a < s.length; a++) {
-                if (isCacheMatch(s[a], domain, userid, username)) {
-                  accountCache.splice(p, 1);
-                  break;
-                }
-              }
-            }
-            store.accountCache = JSON.stringify(accountCache);
           }
 
           // clear the contacts cache
@@ -321,15 +245,6 @@ function (storage,   dispatch,   rdapi,   services) {
   };
 
   /**
-   * Fetch accounts stored on server.
-   * DEPRECATED, interim use for auto-adding accounts that
-   * users have already configured
-   */
-  accounts.fetch = function (ok, error) {
-    impl.fetch(ok, error);
-  };
-
-  /**
    * Get a full service account record
    * @param {string} domain
    * @param {string} userid
@@ -344,7 +259,6 @@ function (storage,   dispatch,   rdapi,   services) {
    * info is no longer valid/expired.
    */
   accounts.clear = function () {
-    delete store.accountCache;
     delete store.serviceCache;
   };
 
