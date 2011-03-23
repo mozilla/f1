@@ -175,15 +175,15 @@ function installOverlay(win) {
   let popup = document.getElementById('menu_FilePopup');
   let place = document.getElementById('menu_sendLink').nextSibling;
 
-  let menu = document.createElementNS(NS_XUL, 'menuitem');
+  let menu = document.createElementNS(NS_XUL, 'menuseparator');
+  menu.setAttribute('id', 'menu_ffshare_separator');
+  popup.insertBefore(menu, place);
+
+  menu = document.createElementNS(NS_XUL, 'menuitem');
   menu.setAttribute('id', 'menu_ffshare');
   menu.setAttribute('label', getString("ffshareMenu.label"));
   menu.setAttribute('command', 'cmd_toggleSharePage');
 
-  popup.insertBefore(menu, place);
-
-  menu = document.createElementNS(NS_XUL, 'menuseparator');
-  menu.setAttribute('id', 'menu_ffshare_separator');
   popup.insertBefore(menu, place);
 
   unloaders.push(function() {
