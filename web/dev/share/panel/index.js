@@ -21,7 +21,7 @@
  * Contributor(s):
  * */
 
-/*jslint plusplus: false, indent: 2 */
+/*jslint plusplus: false, indent: 2, nomen: false */
 /*global require: false, define: false, location: true, window: false, alert: false,
   document: false, setTimeout: false, localStorage: false */
 "use strict";
@@ -34,21 +34,33 @@ require({
 
 define([ "require", "jquery", "blade/object", "blade/fn", "rdapi", "oauth",
         "blade/jig", "blade/url", "placeholder", "AutoComplete", "dispatch", "accounts",
-         "storage", "services", "shareOptions", "widgets/PageInfo", "rssFeed",
-         "widgets/DebugPanel", "widgets/AccountPanel",
+         "storage", "services", "shareOptions", "widgets/PageInfo",
+         "widgets/DebugPanel", "widgets/AccountPanel", "dotCompare",
          "jquery-ui-1.8.7.min", "jquery.textOverflow"],
 function (require,   $,        object,         fn,         rdapi,   oauth,
           jig,         url,        placeholder,   AutoComplete,   dispatch,   accounts,
-          storage,   services,   shareOptions,   PageInfo,           rssFeed,
-          DebugPanel,           AccountPanel) {
+          storage,   services,   shareOptions,   PageInfo,
+          DebugPanel,           AccountPanel,           dotCompare) {
 
-  var showStatus,
-    actions = services.domains,
+  var actions = services.domains,
     options = shareOptions(),
     bodyDom, timer, pageInfo, sendData, showNew,
     accountPanels = [],
-    hashReload = false,
-    store = storage();
+    store = storage(),
+    SHARE_DONE = 0,
+    SHARE_START = 1,
+    SHARE_ERROR = 2,
+    okStatusIds = {
+      statusSettings: true,
+      statusSharing: true,
+      statusShared: true
+    },
+    isGreaterThan076 = dotCompare(store.extensionVersion, "0.7.7") > -1;
+
+  function hide() {
+    dispatch.pub('hide');
+  }
+  window.hideShare = hide;
 
   function close() {
     dispatch.pub('close');
@@ -56,38 +68,82 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   //For debug tab purpose, make it global.
   window.closeShare = close;
 
-  showStatus = function (statusId, shouldCloseOrMessage) {
-    $('div.status').addClass('hidden');
-    $('#clickBlock').removeClass('hidden');
-    $('#' + statusId).removeClass('hidden');
+  function updateChromeStatus(status, statusId, message) {
+    dispatch.pub('updateStatus', [status, statusId, message, options.url]);
+  }
+  window.updateChromeStatus = updateChromeStatus;
 
+  function _showStatus(statusId, shouldCloseOrMessage) {
     if (shouldCloseOrMessage === true) {
       setTimeout(function () {
         dispatch.pub('success', {
           domain: sendData.domain,
           username: sendData.username,
-          userid: sendData.userid
+          userid: sendData.userid,
+          url: options.url,
+          service: services.domains[sendData.domain].name
         });
         $('div.status').addClass('hidden');
       }, 2000);
     } else if (shouldCloseOrMessage) {
       $('#' + statusId + 'Message').text(shouldCloseOrMessage);
-      hashReload = true;
     }
 
     //Tell the extension that the size of the content may have changed.
     dispatch.pub('sizeToContent');
-  };
+  }
 
+  function showStatus(statusId, shouldCloseOrMessage) {
+    $('div.status').addClass('hidden');
+    $('#clickBlock').removeClass('hidden');
+    $('#' + statusId).removeClass('hidden');
+
+    if (!okStatusIds[statusId]) {
+      updateChromeStatus(SHARE_ERROR, statusId, shouldCloseOrMessage);
+    }
+    _showStatus(statusId, shouldCloseOrMessage);
+  }
   //Make it globally visible for debug purposes
   window.showStatus = showStatus;
 
-  function cancelStatus() {
+  function resetStatusDisplay() {
     $('#clickBlock').addClass('hidden');
     $('div.status').addClass('hidden');
     //Be sure form field placeholders are up to date.
     placeholder();
   }
+
+  function cancelStatus() {
+    // clear any existing status
+    updateChromeStatus(SHARE_DONE);
+    resetStatusDisplay();
+  }
+
+  function shareStateUpdate(shareState) {
+    var status = null;
+    if (shareState && shareState.status) {
+      // remove the status number
+      status = shareState.status.slice(1);
+    }
+    if (status && status[0]) {
+      _showStatus.apply(null, status);
+    } else {
+      //clear all status, but if settings config needs to be shown, show it.
+      cancelStatus();
+      accounts(
+        function (accts) {
+          if (!accts || !accts.length) {
+            showStatus('statusSettings');
+          }
+        }, function (err) {
+          showStatus('statusSettings');
+        }
+      );
+    }
+    // we could switch to handling options this way:
+    //dispatch.pub('optionsChanged', shareState.options);
+  }
+  dispatch.sub('shareState', shareStateUpdate);
 
   function showStatusShared() {
     // if no sendData, we're in debug mode, default to twitter to show the
@@ -160,12 +216,15 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         } else {
           store.lastSelection = actions[sendData.domain].type;
           showStatusShared();
-        }
+          //Be sure to delete sessionRestore data
+          accountPanels.forEach(function (panel) {
+            panel.clearSavedData();
+          });
 
-        //Be sure to delete sessionRestore data
-        accountPanels.forEach(function (panel) {
-          panel.clearSavedData();
-        });
+          // notify on successful send for components that want to do
+          // work, like save any new contacts.
+          dispatch.pub('sendComplete', sendData);
+        }
       },
       error: function (xhr, textStatus, err) {
         if (xhr.status === 403) {
@@ -179,6 +238,8 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           reAuth();
         } else if (xhr.status === 503) {
           showStatus('statusServerBusy');
+        } else if (xhr.status === 0) {
+          showStatus('statusServerError');
         } else {
           showStatus('statusError', err);
         }
@@ -197,6 +258,13 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         shortenData;
 
     sendData.account = JSON.stringify(svcData);
+
+    // hide the panel now, but only if the extension can show status
+    // itself (0.7.7 or greater)
+    updateChromeStatus(SHARE_START);
+    if (isGreaterThan076) {
+      hide();
+    }
 
     //First see if a bitly URL is needed.
     if (svcConfig.shorten && shortenPrefs) {
@@ -296,13 +364,19 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       delete store.accountAdded;
     }
 
-    //Inform extension the content size has changed.
-    dispatch.pub('sizeToContent');
+    //Inform extension the content size has changed, but use a delay,
+    //to allow any reflow/adjustments.
+    setTimeout(function () {
+      dispatch.pub('sizeToContent');
+    }, 100);
   }
 
   function updateAccounts(accounts) {
     var panelOverlays = [],
-        panelOverlayMap = {};
+        panelOverlayMap = {},
+        //Only do one overlay request per domain. This can be removed
+        //when requirejs is updated to 0.23.0 or later.
+        processedDomains = {};
 
     if ((accounts && accounts.length)) {
       //Collect any UI overrides used for AccountPanel based on the services
@@ -311,9 +385,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         var domain = account.accounts[0].domain,
             overlays = actions[domain].overlays,
             overlay = overlays && overlays['widgets/AccountPanel'];
-        if (overlay) {
+        if (overlay && !processedDomains[domain]) {
           panelOverlays.push(overlay);
           panelOverlayMap[domain] = overlay;
+          processedDomains[domain] = true;
         }
       });
 
@@ -371,7 +446,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     }
 
     //Listen to sendMessage events from the AccountPanels
-    $(document).bind('sendMessage', function (evt, data) {
+    dispatch.sub('sendMessage', function (data) {
       sendMessage(data);
     });
 
@@ -381,7 +456,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         cancelStatus();
       })
       .delegate('.statusErrorCloseButton', 'click', function (evt) {
-        close();
+        cancelStatus();
       })
       .delegate('.statusResetErrorButton', 'click', function (evt) {
         location.reload();
@@ -389,7 +464,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       .delegate('nav .close', 'click', close);
 
     $('#authOkButton').click(function (evt) {
-      oauth(sendData.domain, function (success) {
+      oauth(sendData.domain, false, function (success) {
         if (success) {
           accounts.clear();
           accounts();
@@ -445,28 +520,25 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
     window.addEventListener("hashchange", function () {
       var now = (new Date()).getTime();
-      if (hashReload || now - refreshStamp > refreshInterval) {
+      if (now - refreshStamp > refreshInterval) {
         //Force contact with the server via the true argument.
         location.reload(true);
-        hashReload = false;
       } else {
+        // XXX we could move to pure post message, see shareStateUpdate
         options = shareOptions();
 
-        //Be sure to clear any status messages
-        cancelStatus();
-
+        dispatch.pub('getShareState', null);
         dispatch.pub('optionsChanged', options);
         checkBase64Preview();
 
         //Check that accounts are still available, but do it in the
         //background.
         accounts();
+
+        //Tell the extension that the size of the content may have changed.
+        dispatch.pub('sizeToContent');
       }
     }, false);
 
-    //Get the most recent feed item, not important to do it last.
-    rssFeed(function (title, link) {
-      $('#rssLink').attr('href', link).text(title);
-    });
   });
 });

@@ -1,3 +1,142 @@
+
+/*
+ jQuery UI autocomplete styles
+*/
+.ui-autocomplete.ui-widget-content {
+    background-color: white;
+    border: 1px solid #A6AFB6;
+    color: #222222;
+}
+
+/* Fix the height of the autocomplete */
+.ui-autocomplete {
+  max-height: 85px;
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  position: absolute;
+  cursor: default;
+}
+
+.ui-menu {
+	list-style:none;
+	padding: 2px;
+	margin: 0;
+	display:block;
+	float: left;
+}
+.ui-menu .ui-menu {
+	margin-top: -3px;
+}
+.ui-menu .ui-menu-item {
+	margin:0;
+	padding: 0;
+	zoom: 1;
+	float: left;
+	clear: left;
+	width: 100%;
+}
+.ui-menu .ui-menu-item a {
+	text-decoration:none;
+	display:block;
+	padding:.2em .4em;
+	line-height:1.5;
+	zoom:1;
+}
+.ui-menu .ui-menu-item a.ui-state-hover,
+.ui-menu .ui-menu-item a.ui-state-active {
+	font-weight: normal;
+	margin: -1px;
+}
+
+
+/* Interaction states
+----------------------------------*/
+.ui-autocomplete .ui-state-default,
+.ui-widget-content .ui-state-default,
+.ui-widget-header .ui-state-default {
+}
+.ui-autocomplete .ui-state-default a,
+.ui-state-default a:link,
+.ui-state-default a:visited {
+  text-decoration: none;
+}
+
+.ui-autocomplete .ui-state-hover,
+.ui-widget-content .ui-state-hover,
+.ui-widget-header .ui-state-hover,
+.ui-state-focus,
+.ui-widget-content .ui-state-focus,
+.ui-widget-header .ui-state-focus {
+  border: 1px solid #535F6D;
+  background-color: #535F6D;
+  color: white;
+}
+
+.ui-autocomplete .ui-state-hover a,
+.ui-state-hover a:hover {
+  text-decoration: none;
+}
+
+.ui-autocomplete .ui-state-active,
+.ui-widget-content .ui-state-active,
+.ui-widget-header .ui-state-active {
+  border: 1px solid #535F6D;
+  background-color: #535F6D;
+  color: white;
+}
+
+.ui-autocomplete .ui-state-active a,
+.ui-state-active a:link,
+.ui-state-active a:visited {
+  color: white;
+  text-decoration: none;
+}
+
+.ui-autocomplete .ui-widget :active {
+  outline: none;
+}
+
+.AutoCompleteRefresh {
+  position: absolute;
+  right: 0;
+  display: none;
+  border-color: #A6AFB6;
+  border-style: solid;
+  border-width: 0 1px 1px 1px;
+  margin: 0;
+  padding: 2px;
+  background: white;
+  line-height: 24px;
+  z-index: 100;
+}
+
+.addressing .AutoCompleteRefresh {
+  top: 26px;
+}
+
+.addressing .toSection .AutoCompleteRefresh {
+  top: 45px;
+}
+
+.AutoCompleteRefresh button {
+  float: right;
+}
+
+.addressing .AutoCompleteSpinner {
+  position: absolute;
+  top: 6px;
+  right: 3px;
+  width: 16px;
+  height: 16px;
+  background-image: url('/share/i/loader.gif');
+  z-index: 200;
+}
+
+.addressing .toSection .AutoCompleteSpinner {
+  top: 25px;
+}
+
 * {
   padding: 0;
   margin: 0;
@@ -208,16 +347,6 @@ header a.new {
           border-radius: 5px;
 }
 
-#newsBox {
-  background-color: #D4DDE5;
-  border-top: 1px solid #A6AFB6;
-  margin-top: -1px;
-}
-
-#newsBox a {
-  color: #535F6D;
-}
-
 /*
     generic styles for account panels
 */
@@ -266,8 +395,12 @@ img.avatar {
 }
 
 .shareTypeSection {
-    padding: 2px 0 5px;
-    height: 52px;
+  padding: 2px 0 5px;
+  height: 52px;
+}
+
+.widgets-AccountPanel .addressing {
+  position: relative;
 }
 
 .hidden {
@@ -464,7 +597,7 @@ body .toSection input[type="text"] {
     border-top: 1px solid #CCCCCC;
 }
 
-.widgets-AccountPanel button.share:focus {
+.widgets-AccountPanel button:focus {
   box-shadow: 0 0 0 3px rgba(0, 162, 255, 0.25);
 }
 
@@ -752,6 +885,7 @@ div.status td {
 
 #statusCaptcha {
   line-height: normal;
+  background-color: #f2f2f2;
 }
 
 div.captcha-wrap {

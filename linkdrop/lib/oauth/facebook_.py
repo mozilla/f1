@@ -222,7 +222,14 @@ class api():
                }
           resp, content = httplib2.Http().request(url, method=method, headers=headers, body=body)
 
-          data = json.loads(content)
+          try:
+               data = json.loads(content)
+          except ValueError, e:
+               # json decode error, just call _make_error
+               # XXX we want to log the request/response here so we can figure
+               # out how to reproduce these errors.
+               return None, self._make_error({'exception': str(e)}, resp)
+
           result = error = None
           if 'id' in data:
                result = data
@@ -259,7 +266,6 @@ class api():
                     body[yours] = options[ours]
 
           return self.rawcall(url, body, "POST")
-
 
      def getcontacts(self, start=0, page=25, group=None):
           # for twitter we get only those people who we follow and who follow us

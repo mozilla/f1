@@ -30,19 +30,6 @@
       <div id="accounts">
       </div>
 
-      <div id="newsBox">
-          <section id="news" class="hbox boxFlex headline">
-              <div>
-                  <span class="icon rss"></span>
-              </div>
-              <div class="boxFlex">
-                  <h3>Latest from the F1 team</h3>
-                  <div class="story">&ldquo;<a id="rssLink" href="#" target="_blank">Updating...</a>&rdquo;</div>
-
-              </div>
-          </section>
-      </div>
-
     </div>
 
   </div>
@@ -98,7 +85,8 @@
     <table>
       <tr>
         <td>
-          We're really sorry, F1 done goofed up. <span id="statusErrorMessage"></span>
+          We're sorry, there was an error sending your share.
+          <span id="statusErrorMessage"></span>
           <button class="statusButton statusErrorButton">ok</button>
         </td>
       </tr>
@@ -119,8 +107,7 @@
   </div>
 
   <div id="statusCaptcha" class="status hidden intermediate captcha">
-    <div class="captcha-wrap vbox boxFlex center">
-      <div>
+    <table><tr><td>
       <form name="captchaForm" onsubmit="document.getElementById('captchaButton').click();return false;" class="hbox boxFlex">
         <div><img id="captchaImage" class="captchaImage"/></div>
         <div>
@@ -132,8 +119,7 @@
           <div class="subtext">(sorry, sometimes email providers require this)</div>
         </div>
       </form>
-      </div>
-    </div>
+    </td></tr></table>
   </div>
 
   <div id="statusToError" class="status hidden error">

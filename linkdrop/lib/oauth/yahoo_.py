@@ -42,7 +42,7 @@ from linkdrop.lib.oauth.oid_extensions import OAuthRequest
 from linkdrop.lib.oauth.oid_extensions import UIRequest
 from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attributes, attributes
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
-from linkdrop.lib.oauth.base import get_oauth_config
+from linkdrop.lib.oauth.base import get_oauth_config, OAuthKeysException
 
 YAHOO_OAUTH = 'https://api.login.yahoo.com/oauth/v2/get_token'
 
@@ -115,7 +115,11 @@ class api():
     def __init__(self, account):
         self.config = get_oauth_config(domain)
         self.account = account
-        self.oauth_token = oauth.Token(key=account.get('oauth_token'), secret=account.get('oauth_token_secret'))
+        try:
+            self.oauth_token = oauth.Token(key=account.get('oauth_token'), secret=account.get('oauth_token_secret'))
+        except ValueError, e:
+            # missing oauth tokens, raise our own exception
+            raise OAuthKeysException(str(e))
         self.consumer_key = self.config.get('consumer_key')
         self.consumer_secret = self.config.get('consumer_secret')
         self.consumer = oauth.Consumer(key=self.consumer_key, secret=self.consumer_secret)
@@ -197,16 +201,30 @@ class api():
         from_email = from_ = profile.get('verifiedEmail')
         fullname = profile.get('displayName', None)
 
-        to_addrs = AddressList(options['to'])
+        address_list = AddressList(options.get('to', ''))
+        if len(address_list)==0:
+            return None, {
+                "provider": domain,
+                "message": "recipient address must be specified",
+                "status": 0
+            }
+        to_ = []
+        for addr in address_list:
+            if not addr[1] or not '@' in addr[1]:
+                return None, {
+                    "provider": domain,
+                    "message": "recipient address '%s' is invalid" % (addr[1],),
+                    "status": 0
+                }
+            # expect normal email address formats, parse them
+            to_.append({'name': addr[0], 'email': addr[1]})
+
+        assert to_ # we caught all cases where it could now be empty.
+
         subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
         title = options.get('title', options.get('link', options.get('shorturl', '')))
         description = options.get('description', '')[:280]
         
-        to_ = []
-        for a in to_addrs.addresslist:
-            # expect normal email address formats, parse them
-            to_.append({'name': a[0], 'email': a[1]})
-
         c.safeHTML = safeHTML
         c.options = options
 
@@ -219,7 +237,6 @@ class api():
         c.from_name = fullname
         c.subject = subject
         c.from_header = from_
-        c.to_header = to_
         c.title = title
         c.description = description
         c.message = message
@@ -232,7 +249,6 @@ class api():
         c.from_name = literal(fullname)
         c.subject = literal(subject)
         c.from_header = literal(from_)
-        c.to_header = literal(to_)
         c.title = literal(title)
         c.description = literal(description)
         c.message = literal(message)

@@ -1,0 +1,240 @@
+ <!-- ***** BEGIN LICENSE BLOCK *****
+   - Version: MPL 1.1
+   -
+   - The contents of this file are subject to the Mozilla Public License Version
+   - 1.1 (the "License"); you may not use this file except in compliance with
+   - the License. You may obtain a copy of the License at
+   - http://www.mozilla.org/MPL/
+   -
+   - Software distributed under the License is distributed on an "AS IS" basis,
+   - WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+   - for the specific language governing rights and limitations under the
+   - License.
+   -
+   - The Original Code is Raindrop.
+   -
+   - The Initial Developer of the Original Code is
+   - Mozilla Messaging, Inc..
+   - Portions created by the Initial Developer are Copyright (C) 2009
+   - the Initial Developer. All Rights Reserved.
+   -
+   - Contributor(s):
+   - -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raindrop API</title>
+    <link type="text/css" rel="stylesheet" href="/0.3.2/rdapi/index.css">
+    <script src="/0.3.2/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+    <script>
+        'use strict';
+        /*global require: false */
+        require({
+                paths: {
+                    'index': '/0.3.2/rdapi/scripts/index',
+                }
+            },
+            ['index']
+        );
+    </script>
+</head>
+<body>
+    <div id="listing">
+
+        <div class="header">
+            <h1 id="topHeading">Raindrop API</h1>
+            <p>This is the Raindrop API explorer. Read the important <a href="#Notes">Notes</a> first.</p>
+        </div>
+
+        <div id="toc">
+        </div>
+
+        <div id="content">
+            <div class="sectionContent">
+                <!-- The name attribute for Notes is added after we fill in the content,
+                     otherwise Firefox has a weird box calculation problem. -->
+                <h1 class="section"><a id="NotesTitle" href="#Notes">Notes</a></h1>
+
+                <p><a href="http://en.wikipedia.org/wiki/JSON">JSON</a> is used for all API responses.
+                The request arguments are normally <a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.1">form-urlencoded</a>
+                arguments (<b>Content-Type: application/x-www-form-urlencoded; charset=UTF-8</b>), except
+                for APIs that only accept a request body. In those cases, the request body should be JSON,
+                and the Content-Type for the request should be <b>application/json; charset=UTF-8</b>. Note that UTF-8
+                should be used as the charset.</p>
+
+                <div class="method">
+                    <h2><a id="StandardResponseTitle" href="#StandardResponse">Notes: Standard Response</a></h2>
+                    <p>The success version of the Standard Response is used by a few APIs for success responses. Other APIs use
+                    a specific success object that relates to the API. See the specific API call for more information.</p>
+
+                    <p>The error version of the Standard Response is used by <b>all APIs</b> to indicate error responses.</p>
+
+                    <p>A <b>success response</b> will be an object with the following properties (only used by some APIs):</p>
+                    <ul>
+                        <li><b>ids</b> (array): Any IDs affected by the API call. May be empty</li>
+                        <li><b>result</b> (boolean): Value of true</li>
+                        <li><b>error</b> (object): null</li>
+                    </ul>
+
+                    <p>An <b>error response</b> will be an object with the following properties (this is the error response
+                    returned from all APIs):</p>
+                    <ul>
+                        <li><b>ids</b> (array): Any IDs affected by the API call. May be empty</li>
+                        <li><b>result</b> (object): null if the API call has an error</li>
+                        <li><b>error</b> (object): An object with the following properties:
+                            <ul>
+                                <li><b>name</b> (string): an error type name</li>
+                                <li><b>message</b> (string): An English description of the error</li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+               <div class="method">
+                    <h2><a id="ConversationTitle" href="#Conversation">Notes: Conversation Object</a></h2>
+                    <p class="required">TODO</p>
+                </div>
+                <div class="method">
+                    <h2><a id="MessageTitle" href="#Message">Notes: Message Object</a></h2>
+                    <p class="required">TODO</p>
+                </div>
+                <div class="method">
+                    <h2><a id="AttachmentTitle" href="#Attachment">Notes: Attachment Object</a></h2>
+                    <p class="required">TODO</p>
+                </div>
+             </div>
+        </div>
+    </div>
+    <div id="play">
+        <p id="playInstructions">Use a "Try It" link to try an API in this area.</p>
+    </div>
+
+    <form class="apiCall" action="#">
+        <h3 class="apiUrl"></h3>
+        <select class="apiUrlExpand hidden">
+            <option value=''>Change URL</option>
+            <ul class="apiUrlChoices hidden">
+            </ul>
+        </select>
+
+        <div class="parameterUrl hidden">
+            <h4>URL Parameters</h4>
+            <table>
+                <tbody class="urlParams"></tbody>
+            </table>
+        </div>
+        <div class="request">
+            <h4>Request Parameters</h4>
+            <table>
+                <tbody class="requestParams"></tbody>
+            </table>
+        </div>
+        <div class="body">
+            <h4>Request Body</h4>
+            <textarea class="requestBody"></textarea>
+        </div>
+        <button name="submit">Submit</button>
+        <button class="apiCallClose">close</button>
+        <div class="output"></div>
+    </form>
+
+    <div class="methodContent template" id="methodContent">
+        <p>{^doc}</p>
+
+        {is(routes.length) [}
+            <div class="section">
+                <h3>URL</h3>
+                <ul>
+                    {routes [}
+                        <li>{}</li>
+                    {]}
+                </ul>
+            </div>
+        {]}
+
+        {and(urlargs, urlargs.length) [}
+            <div class="section">
+                <h3>URL Arguments</h3>
+                <ul>
+                    {urlargs[}
+                        <li><b class="{required [}required{]}">{name}</b> ({type}): {doc}</li>
+                    {]}
+                </ul>
+            </div>
+        {]}
+
+        {and(queryargs, queryargs.length) [}
+            <div class="section">
+                <h3>Parameters</h3>
+                <ul>
+                    {queryargs[}
+                        <li><b class="{required [}required{]}">{name}</b> ({type}): {doc}</li>
+                    {]}
+                </ul>
+            </div>
+        {]}
+
+        {is(body) [}
+            <div class="section">
+                {body [}
+                    <h3>Request Body <span class="type">({type})</span></h3>
+                    <p>{doc}</p>
+                {]}
+
+                {examplebody [}
+                    <b>Example</b>:
+                    <pre class="sampleBodyPre">{prettyJson(_)}</pre>
+                {]}
+            </div>
+        {]}
+
+        {response [}
+            <div class="section">
+                <h3>Response <span class="type">({type})</span></h3>
+                <p>{^addApiHyperlinks(doc)}</p>
+            </div>
+        {]}
+    </div>
+
+    <div class="tocItem template" id="sectionToc">
+        <a class="sectionToc" href="#{section}">{section}</a>
+        {methods [}
+            <a class="methodToc" href="#{link}">{name}</a>
+        {]}
+    </div>
+
+    <div class="sectionContent template" id="sectionContent">
+        <h1 class="section"><a href="#{section}" name="{section}">{section}</a></h1>
+        <p>{^doc}</p>
+        {methods [}
+            <div class="method">
+                <a class="try" href="#try:{link}">Try It!</a>
+                <h2><a href="#{link}" name="{link}">{section}: {name}</a></h2>
+                {^content}
+            </div>
+        {]}
+    </div>
+
+    <div class="jsonResult template" id="jsonResult">
+        {#jsonBranch}
+    </div>
+
+    <script class="template" id="jsonBranch" type="text/template">
+        {. _rdApiType getType(_)}
+        {eq(_rdApiType, 'object') [}
+            <span class="brace">&#123;</span> <button class="expander">&#9660;</button> <ul class="object">
+                {eachProp(_) [}
+                    <li><span class="prop">{prop}</span> : {#jsonBranch value}</li>
+                {]}
+            </ul> <span class="brace">&#125;</span>
+        {] eq(_rdApiType, 'array') [}
+            <span class="bracket">[</span> <button class="expander">&#9660;</button> <ol class="array">
+                {_ [}
+                    <li>{#jsonBranch}</li>
+                {]}
+            </ol> <span class="bracket">]</span>
+        {] [}
+            <span class="value">{formatSimpleType(_)}</span>
+        {]}
+    </script>
+</body>
+</html>

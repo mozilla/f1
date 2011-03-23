@@ -119,6 +119,11 @@ hr {
   background-image: url("i/f1Logo.png");
   background-repeat: no-repeat;
   background-position: 0 -9px;
+  line-height: 80px;
+  font-size: 15px;
+  font-weight: bold;
+  padding: 0 0 0 185px;
+  color: #00a0ff;
 }
 
 #header.row button.download {

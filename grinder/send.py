@@ -31,6 +31,10 @@ from HTTPClient import NVPair
 from HTTPClient import Cookie, CookieModule, CookiePolicyHandler
 
 connectionDefaults = HTTPPluginControl.getConnectionDefaults()
+
+# Decode gzipped responses
+connectionDefaults.useContentEncoding = 1
+
 httpUtilities = HTTPPluginControl.getHTTPUtilities()
 
 log = grinder.logger.output
@@ -118,6 +122,10 @@ def send(userid, csrf, domain=linkdrop_service, message="take that!"):
       ( NVPair('domain', domain),
         NVPair('userid', userid),
         NVPair('csrftoken', csrf),
+        # NOTE: no 'link' as we don't want to hit bitly in these tests
+        # (and if we ever decide we do, we must not use the bitly production
+        # userid and key!)
+        # NVPair('link', "http://www.google.com/%s" % grinder.getRunNumber() ),
         NVPair('message', message), ),
       ( NVPair('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8'), ))
     assert result.getStatusCode()==200, result
@@ -127,9 +135,9 @@ def send(userid, csrf, domain=linkdrop_service, message="take that!"):
 send = Test(4, "Send message").wrap(send)
 
 def getStatic(url="/share/"):
-	result = request1.POST(linkdrop_host + url)
-	assert result.getStatusCode()==200, result
-	return result
+    result = request1.GET(linkdrop_host + url)
+    assert result.getStatusCode()==200, result
+    return result
 
 getStatic = Test(5, "Static request").wrap(getStatic)
 
@@ -139,11 +147,12 @@ class TestRunner:
     def __init__(self):
         self.csrf = None
         self.linkdrop_cookie = None
+        self.userid = None
 
     def doit(self):
-	if linkdrop_static_per_send:
-	    for i in range(0,linkdrop_static_per_send):
-            	getStatic(linkdrop_static_url)
+        if linkdrop_static_per_send:
+            for i in range(0,linkdrop_static_per_send):
+                getStatic(linkdrop_static_url)
         if self.csrf is None or \
            (sends_per_oauth and grinder.getRunNumber() % sends_per_oauth==0):
             self.csrf, self.linkdrop_cookie = getCSRF()
@@ -160,6 +169,3 @@ class TestRunner:
     def __call__(self):
         """This method is called for every run performed by the worker thread."""
         TestRunner.doit(self)
-
-
-

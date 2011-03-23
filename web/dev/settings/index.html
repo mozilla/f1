@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>F1: Config</title>
+  <title>Mozilla F1: Configuration</title>
   <link rel="stylesheet" type="text/css" href="/dev/settings/style.css">
 
   <!-- DNS prefetching for common services -->
@@ -9,11 +9,39 @@
   <link rel="dns-prefetch" href="https://www.google.com">
   <link rel="dns-prefetch" href="https://twitter.com">
 
+  <!-- https://github.com/mozilla/f1/wiki/Page-Meta-Properties -->
+  <!-- Prevent people from sharing this page, instead share the main page -->
+
+  <link rel="shortlink" href="http://bit.ly/mozillaF1"/>
+  <link rel="canonical" href="http://f1.mozillamessaging.com/"/>
+
+  <meta property="og:title" content="Mozilla F1"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:url" content="http://f1.mozillamessaging.com/"/>
+  <meta property="og:image" content="http://f1.mozillamessaging.com/i/f1LogoVert.png"/>
+  <meta property="og:site_name" content="Mozilla F1"/>
+  <meta property="og:description"
+        content="F1 is a browser extension that allows you to share links in a
+                 fast and fun way. Share links from within the browser, from any
+                 webpage, using the same services you already know and love."/>
+
+  <meta property="fb:app_id" content="173375079345318,146290642084944"/>
+
+  <meta name="title" content="Mozilla F1"/>
+  <meta name="description"
+        content="F1 is a browser extension that allows you to share links in a
+                 fast and fun way. Share links from within the browser, from any
+                 webpage, using the same services you already know and love."/>
+
+  <meta name="application-url" content="http://f1.mozillamessaging.com/"/>
+
+  <link rel="image_src" href="http://f1.mozillamessaging.com/i/f1LogoVert.png"/>
+
   <script data-main="/dev/settings/index.js" src="/dev/scripts/requireplugins-jquery.js" charset="utf-8"></script>
 </head>
 <body>
 
-<a id="feedback" href="http://feedback.mozillalabs.com/forums/68185-messaging-add-ons" target="_blank">Feedback</a>
+<a id="feedback" href="http://feedback.mozillalabs.com/forums/107731-mozilla-f1" target="_blank">Feedback</a>
 
 <div id="wrapper">
 
@@ -26,10 +54,10 @@
   </div>
 
   <!-- Start status messages -->
-  <div id="statusError" class="status hidden error">
-    We're really sorry, F1 done goofed up. <span class="message"></span>
-    <button class="statusButton statusErrorButton">ok</button>
+  <div id="statusOAuthFailed" class="status hidden error">
+    Sorry, we couldn't connect to your account. Please try again.
   </div>
+
   <!-- End status messages -->
 
   <ul id="tabs" class="clearfix">
@@ -67,7 +95,7 @@
 
       <div id="advanced" class="panel hidden">
         <h1>Bit.ly configuration</h1>
-        <span class="micro"><input id="bitlyCheckbox" type="checkbox"> <label for="bitly">Use personal bit.ly account</label></span>
+        <span class="micro"><input id="bitlyCheckbox" type="checkbox"> <label for="bitlyCheckbox">Use personal bit.ly account</label></span>
           <form id="shortenForm">
             <ul>
               <li class="hbox">
@@ -96,18 +124,6 @@
               </li>
             </ul>
           </form>
-          </li>
-
-        <h1>Other options</h1>
-        <ul>
-          <li class="hbox">
-            <div class="overflow boxFlex">
-            <span class="key">Refresh account data (e.g. contacts for autocompletion).</span>
-            </div>
-            <button class="refresh" name="refresh">refresh</button>
-          </li>
-        </ul>
-
       </div>
   </div>
 
@@ -137,7 +153,10 @@
 
 <script id="addTemplate" type="text/template">
   <li class="hbox {isNew [}newItem{]}">
-    <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name} {isNew [}<span class="new">new!</span>{]}</div>
+    <div class="accountType overflow boxFlex"><span class="icon {type}"></span> {name}
+      {isNew [}<span class="new">new!</span>{]}
+      <div class="multipleSignOut {!enableSignOut[}hidden{]}">Additional accounts require <a href="{signOutUrl}" target="_blank">logout</a></div>
+    </div>
     <button class="config auth" data-domain="{domain}">add <span class="add"></span></button>
   </li>
 </script>
