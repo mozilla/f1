@@ -292,19 +292,31 @@ header a.new {
   background-image: -moz-linear-gradient(top, #d4dde5 0%, #c6d1da 100%);
 }
 
+#pageInfo .thumbContainer {
+  /* Set to be the max values for .thumbnail img */
+  width: 90px;
+  height: 60px;
+  overflow:hidden;
+}
+
 #pageInfo .thumbnail {
+  margin: 0 auto;
+}
+
+#pageInfo .thumbnail img {
+  border: none;
+  margin: 0 auto;
+
+  /* See .thumbContainer styles if these values changed. */
+  max-width: 90px;
+  max-height: 60px;
+  display: block;
+
   border: 1px solid #a6afb6;
 
   -webkit-box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
      -moz-box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
           box-shadow: 1px 1px 0 rgba(255,255,255, 0.5);
-}
-
-#pageInfo .thumbnail img {
-  border: none;
-  max-width: 90px;
-  max-height: 60px;
-  display: block;
 }
 
 #pageInfo .shareInfo {
