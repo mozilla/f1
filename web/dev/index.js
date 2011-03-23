@@ -55,7 +55,7 @@ function (require,   $,        hashDispatch) {
         //Initialize fancybox for the video
         $('.fancybox').fancybox({
             'type': 'iframe',
-            href: 'http://player.vimeo.com/video/19715573?title=0&amp;byline=0&amp;portrait=0&amp;autoplay=true',
+            href: 'http://player.vimeo.com/video/21374067?title=0&amp;byline=0&amp;portrait=0&amp;autoplay=true',
             width: 700,
             height: 468,
             autoScale: false,
