@@ -49,6 +49,8 @@ const SHARE_START = 1;
 const SHARE_ERROR = 2;
 const SHARE_FINISHED = 3;
 
+const NS_XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
+
 const EXPORTED_SYMBOLS = ["sharePanel"];
 
 function mixin(target, source, override) {
@@ -79,7 +81,7 @@ function sharePanel(window, ffshare) {
   this.document = window.document;
   this.ffshare = ffshare;
 
-  this.button = this.document.getElementById('ffshare-toolbar-button');
+  this.button = this.document.getElementById('share-button');
   this.browser = this.document.getElementById('share-browser');
   this.panel = this.document.getElementById('share-popup');
 
@@ -476,7 +478,7 @@ sharePanel.prototype = {
     let img = new this.window.Image();
     img.onload = function () {
 
-      let canvas = self.document.createElement("canvas"),
+      let canvas = self.document.createElementNS(NS_XUL, "canvas"),
           win = self.browser.contentWindow.wrappedJSObject,
           w = img.width,
           h = img.height,
@@ -655,8 +657,8 @@ sharePanel.prototype = {
           callback: function () {
             let nb = self.gBrowser.getNotificationBox();
             nb.removeNotification(nb.getNotificationWithValue("mozilla-f1-share-error"));
-            window.setTimeout(function () {
-              ffshare.togglePanel();
+            self.window.setTimeout(function () {
+              self.ffshare.togglePanel();
             }, 0);
           }
         }];
@@ -677,7 +679,7 @@ sharePanel.prototype = {
       // Only a final successful share should be passing this value
       if (success) {
         button.setAttribute("status", SHARE_STATUS[SHARE_FINISHED]);
-        window.setTimeout(function () {
+        this.window.setTimeout(function () {
           button.setAttribute("status", SHARE_STATUS[status]);
         }, 2900);
       } else {

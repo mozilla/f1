@@ -44,7 +44,7 @@ Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://ffshare/modules/addonutils.js");
 
 const NS_XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-const buttonId = 'ffshare-toolbar-button';
+const SHARE_BUTTON_ID = 'share-button';
 
 const EXPORTED_SYMBOLS = ["installOverlay"];
 
@@ -175,15 +175,15 @@ function installOverlay(win) {
   let popup = document.getElementById('menu_FilePopup');
   let place = document.getElementById('menu_sendLink').nextSibling;
 
-  let menu = document.createElementNS(NS_XUL, 'menuitem');
+  let menu = document.createElementNS(NS_XUL, 'menuseparator');
+  menu.setAttribute('id', 'menu_ffshare_separator');
+  popup.insertBefore(menu, place);
+
+  menu = document.createElementNS(NS_XUL, 'menuitem');
   menu.setAttribute('id', 'menu_ffshare');
   menu.setAttribute('label', getString("ffshareMenu.label"));
   menu.setAttribute('command', 'cmd_toggleSharePage');
 
-  popup.insertBefore(menu, place);
-
-  menu = document.createElementNS(NS_XUL, 'menuseparator');
-  menu.setAttribute('id', 'menu_ffshare_separator');
   popup.insertBefore(menu, place);
 
   unloaders.push(function() {
@@ -194,71 +194,17 @@ function installOverlay(win) {
 
 
   // ********************************************************************
-  // create the toolbar button, this gets fancy, should be easier
+  // create the urlbar button
 
-
-
-  // We clone an existing button because creating a new one from scratch
-  // does not seem to work (perhaps some missing properties?)
-  let button = document.createElementNS(NS_XUL, 'toolbarbutton');
-  
-  let toolbox = document.getElementById("navigator-toolbox");
-  // at startup, we must modify BrowserToolbarPalette, after load, we must
-  // use toolbox.palette
-  let palette = document.getElementById('BrowserToolbarPalette') || toolbox.palette;
-  
-  // Setup label and tooltip
-  button.setAttribute("id", buttonId);
-  button.setAttribute("type",  "checkbox");
-  button.setAttribute("label",  getString("ffshareToolbarButton.label"));
-  button.setAttribute("tooltipText",  getString("ffshareToolbarButton.tooltip"));
-  button.setAttribute("class",  "toolbarbutton-1 chromeclass-toolbar-additional");
-  button.setAttribute("command",  "cmd_toggleSharePage");
-  
-  palette.appendChild(button);
-
-  // move to location specified in prefs
-  let toolbarId = Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".toolbarid", "nav-bar");
-  let beforeId = Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".toolbarbefore", "urlbar-container");
-  let toolbar = toolbarId && document.getElementById(toolbarId);
-  if (toolbar) {
-      let curSet  = toolbar.currentSet.split(",");
-
-      if (curSet.indexOf(buttonId) === -1) {
-        //Insert our ID before the URL bar ID.
-        let pos = curSet.indexOf(beforeId) || curSet.length;
-        curSet.splice(pos, 0, buttonId);
-        let set = curSet.join(",");
-
-        toolbar.setAttribute("currentset", set);
-        toolbar.currentSet = set;
-        document.persist(toolbar.id, "currentset");
-        try {
-          BrowserToolboxCustomizeDone(true);
-        }
-        catch (e) {}
-      }
-
-  }
-
-  // we must redeclare our vars in the unload...
+  let button = document.createElementNS(NS_XUL, "image");
+  button.id = SHARE_BUTTON_ID;
+  button.className = "urlbar-icon";
+  button.setAttribute("onclick", "ffshare.togglePanel();");
+  let urlbarIcons = document.getElementById("urlbar-icons");
+  urlbarIcons.insertBefore(button, urlbarIcons.firstChild);
   unloaders.push(function() {
-      let toolbox = document.getElementById("navigator-toolbox");
-      let toolbarId = Application.prefs.getValue("extensions." + FFSHARE_EXT_ID + ".toolbarid", "nav-bar");
-      let toolbar = toolbarId && document.getElementById(toolbarId);
-      
-      let curSet  = toolbar.currentSet.split(",");
-      let pos = curSet.indexOf(buttonId);
-      if (pos !== -1) {
-          curSet.splice(pos, 1);
-          let set = curSet.join(",");
-
-          toolbar.setAttribute("currentset", set);
-          toolbar.currentSet = set;
-          document.persist(toolbar.id, "currentset");
-      }
-      let palette = document.getElementById('BrowserToolbarPalette') || toolbox.palette;
-      palette.removeChild(button);
+    urlbarIcons.removeChild(button);
   });
+
   return unloaders;
 }
