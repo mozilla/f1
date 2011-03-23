@@ -1,0 +1,65 @@
+{
+  "version": "1.0",
+  "name": "f1demo",
+  "description": "F1 widget demo",
+  "launch_path": "/apps/demo/",
+  "icons": {
+    "48": "/apps/demo/f1logo-48.png"
+  },
+  "experimental": {
+    "services": [
+      {
+        "suite": "share",
+        "method": "send",
+        "frame": "http://linkdrop.caraveo.com:5000/apps/demo/service.html",
+        "domain": "f1demotest.com",
+        "iconUrl": "/favicon.png",
+        "features": {
+          "direct": true,
+          "subject": false,
+          "counter": true
+        },
+        "shareTypes": [{
+          "type": "public",
+          "name": "public"
+        }, {
+          "type": "direct",
+          "name": "direct message",
+          "showTo": true,
+          "toLabel": "type in name of recipient"
+        }],
+        "textLimit": 140,
+        "shorten": true,
+        "serviceUrl": "http://twitter.com",
+        "revokeUrl": "http://twitter.com/settings/connections",
+        "signOutUrl": "http://twitter.com/logout"
+      },
+      {
+        "suite": "contacts",
+        "method": "get",
+        "frame": "http://linkdrop.caraveo.com:5000/apps/demo/service.html"
+      }
+    ],
+    "widgets": [
+      {
+        "suite": "share",
+        "method": "configure",
+        "frame": "http://linkdrop.caraveo.com:5000/apps/demo/configure.html"
+      },
+      {
+        "suite": "share",
+        "method": "send",
+        "frame": "http://linkdrop.caraveo.com:5000/apps/demo/send.html"
+      }
+    ]
+  },
+  "developer": {
+    "name": "Mozilla Messaging Labs",
+    "url": "http://mozillalabs.com/messaging"
+  },
+  "installs_allowed_from": [
+    "https://appstore.mozillalabs.com",
+    "http://linkdrop.caraveo.com:5000"
+  ],
+  "default_locale": "en"
+}

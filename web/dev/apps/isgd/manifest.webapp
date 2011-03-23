@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "name": "is.gd",
+  "description": "is.gd support for F1",
+  "launch_path": "/apps/isgd/",
+  "icons": {
+    "16": "/img/icon-16.png",
+    "48": "/img/icon-48.png",
+    "128": "/img/icon-128.png"
+  },
+  "experimental": {
+    "services": [
+      {
+        "suite": "shortener",
+        "method": "get",
+        "frame": "http://linkdrop.caraveo.com:5000/apps/isgd/service.html"
+      }
+      
+    ]
+  },
+  "developer": {
+    "name": "Mozilla Messaging Labs",
+    "url": "http://mozillalabs.com/messaging"
+  },
+  "installs_allowed_from": [
+    "https://appstore.mozillalabs.com",
+    "http://linkdrop.caraveo.com:5000"
+  ],
+  "default_locale": "en"
+}

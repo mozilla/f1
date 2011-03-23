@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title><!-- Insert your title here --></title>
+  <script src="jquery-1.5.min.js" charset="utf-8"></script>
+  <script>
+$(document).ready(function() {
+    var whitelist = [];
+    function callbackFn() {}
+    
+    navigator.services.shortener.get(
+        whitelist,
+        callbackFn,
+        "http://f1.mozillamessaging.com",
+        function ok(json) {
+            dump(json+"\n");
+            $("#data").text(JSON.stringify(json));
+        },
+        function error(xhr, textStatus, errorThrown) {
+            dump(errorThrown+"\n");
+        });
+});
+  </script>
+</head>
+<body>
+    <div id="data"></div>
+</body>
+</html>

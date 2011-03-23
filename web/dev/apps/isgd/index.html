@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>is.gd webapp</title>
+  <script src="jquery-1.5.min.js" charset="utf-8"></script>
+  <script>
+function installCallback(result) {
+    // great - display a message, or redirect to a launch page
+}
+
+function errorCallback(result) {
+    // whoops - result.code and result.message have details
+}
+$(document).ready(function() {
+  $("#appInstall").click(function(evt) {
+    navigator.apps.install({
+        url: "http://linkdrop.caraveo.com:5000/apps/isgd/manifest.webapp",
+        onsuccess: installCallback,
+        onerror: errorCallback
+    });
+  });
+  
+  function getInstalledCallback(data) {
+    $("#status").text(JSON.stringify(data));
+  }
+  
+  navigator.apps.amInstalled(getInstalledCallback);
+  
+});
+  </script>
+</head>
+<body>
+    <!-- Insert your content here -->
+    <button id="appInstall">Install is.gd support</button>
+    <div id="status"></button>
+</body>
+</html>

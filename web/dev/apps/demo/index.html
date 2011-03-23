@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>demo share webapp</title>
+  <script src="jquery-1.5.min.js" charset="utf-8"></script>
+  <script>
+function installCallback(result) {
+    // great - display a message, or redirect to a launch page
+    $("#status").text(JSON.stringify(result));
+}
+
+function errorCallback(result) {
+    // whoops - result.code and result.message have details
+    $("#status").text(JSON.stringify(result));
+}
+$(document).ready(function() {
+  $("#appInstall").click(function(evt) {
+    navigator.apps.install({
+        url: "http://linkdrop.caraveo.com:5000/apps/demo/manifest.webapp",
+        onsuccess: installCallback,
+        onerror: errorCallback
+    });
+  });
+  
+  function getInstalledCallback(data) {
+    $("#status").text(JSON.stringify(data));
+  }
+  
+  navigator.apps.amInstalled(getInstalledCallback);
+  
+});
+  </script>
+</head>
+<body>
+    <!-- Insert your content here -->
+    <button id="appInstall">Install demo share service</button>
+    <div id="status"></button>
+</body>
+</html>

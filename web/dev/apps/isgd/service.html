@@ -1,0 +1,33 @@
+<script src="jquery-1.5.min.js"></script>
+<script>
+var shortener = {
+
+  get: function(url, callback, errorCb) {
+    var shortenData = {
+        format: 'json',
+        url: url,
+    };
+    $.ajax({
+      url: 'http://is.gd/create.php',
+      type: 'GET',
+      data: shortenData,
+      success: function (json) {
+        if (callback)
+            callback(JSON.parse(json));
+      },
+      error: function (xhr, textStatus, errorThrown) {
+        if (errorCb)
+            errorCb(xhr, textStatus, errorThrown);
+      }
+    });
+  },
+  
+}
+</script>
+<script>
+    //$(document).ready(function() {
+    //   shortener.get("http://f1.mozillamessaging.com", function(json) {
+    //    dump(JSON.stringify(json)+"\n");
+    //   }, null); 
+    //});
+</script>
