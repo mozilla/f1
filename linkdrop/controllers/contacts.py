@@ -30,10 +30,11 @@ from pylons.controllers.util import abort, redirect
 from pylons.decorators import jsonify
 from pylons.decorators.util import get_pylons
 
+from linkoauth import get_provider
+from linkoauth.base import OAuthKeysException
+
 from linkdrop.lib.base import BaseController, render
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
-from linkdrop.lib.oauth import get_provider
-from linkdrop.lib.oauth.base import OAuthKeysException
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 

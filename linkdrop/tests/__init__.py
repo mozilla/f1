@@ -19,16 +19,20 @@ import pylons.test
 
 __all__ = ['environ', 'url', 'TestController']
 
+
+# ugly hack to get back the original app
+wsgiapp = pylons.test.pylonsapp.wrap_app.app[(None, '/api')].orig_app
+
 # Invoke websetup with the current config file
-SetupCommand('setup-app').run([pylons.test.pylonsapp.config['__file__']])
+config_file = wsgiapp.config['__file__'] + '#api'
+SetupCommand('setup-app').run([config_file])
 
 environ = {}
 
 class TestController(TestCase):
 
     def __init__(self, *args, **kwargs):
-        wsgiapp = pylons.test.pylonsapp
         config = wsgiapp.config
-        self.app = TestApp(wsgiapp)
+        self.app = TestApp(pylons.test.pylonsapp)
         url._push_object(URLGenerator(config['routes.map'], environ))
         TestCase.__init__(self, *args, **kwargs)

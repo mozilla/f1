@@ -36,8 +36,9 @@ from pylons.controllers.core import HTTPException
 from linkdrop.lib.base import BaseController, render
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg, get_redirect_response
 from linkdrop.lib.metrics import metrics
-from linkdrop.lib.oauth import get_provider
-from linkdrop.lib.oauth.base import AccessException
+
+from linkoauth import get_provider
+from linkoauth.base import AccessException
 
 log = logging.getLogger(__name__)
 
@@ -59,7 +60,7 @@ OAuth authorization api.
         if domain == 'full':
             return [p for p in [session[k] for k in keys] if p]
         return [p for p in [session[k].get('profile') for k in keys] if p]
-        
+
     def signout(self):
         domain = request.params.get('domain')
         username = request.params.get('username')
@@ -106,7 +107,7 @@ OAuth authorization api.
         provider = request.POST['domain']
         log.info("authorize request for %r", provider)
         service = get_provider(provider)
-        return service.responder().request_access()
+        return service.responder().request_access(request)
 
     # this is not a rest api
     def verify(self, *args, **kw):
@@ -116,11 +117,11 @@ OAuth authorization api.
 
         auth = service.responder()
         try:
-            user = auth.verify()
+            user = auth.verify(request, url)
             account = user['profile']['accounts'][0]
             if not user.get('oauth_token') and not user.get('oauth_token_secret'):
                 raise Exception('Unable to get OAUTH access')
-            
+
             acct = self._get_or_create_account(provider, str(account['userid']), account['username'])
             acct['profile'] = user['profile']
             acct['oauth_token'] = user.get('oauth_token', None)

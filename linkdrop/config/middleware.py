@@ -60,10 +60,11 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     config = load_environment(global_conf, app_conf)
 
     # The Pylons WSGI app
-    app = PylonsApp(config=config)
+    orig_app = app = PylonsApp(config=config)
 
     # Routing/Session/Cache Middleware
     app = RoutesMiddleware(app, config['routes.map'], singleton=False)
+
     if asbool(config.get('session_middleware', True)):
         # if we've configured beaker as a filter in the ini file, don't
         # include it a second time here, it's unecessary.
@@ -89,5 +90,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         # Serve static files
         static_app = StaticURLParser(config['pylons.paths']['static_files'])
         app = Cascade([static_app, app])
+
     app.config = config
+    app.orig_app = orig_app
     return app
