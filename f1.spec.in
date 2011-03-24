@@ -1,5 +1,3 @@
-%define __python /usr/bin/python
-
 Name:           python-mozilla-f1
 Version:        %%version%%
 Release:        1%{?dist}
