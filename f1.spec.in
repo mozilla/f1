@@ -13,6 +13,7 @@ BuildArch:	    noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  python%{pyver}-devel python%{pyver}-setuptools
+BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /usr/bin/sed, /usr/bin/awk
 
 #XXX More are needed
 BuildRequires:  python%{pyver}-paste-deploy, python%{pyver}-paste-script
@@ -33,11 +34,14 @@ CFLAGS="%{optflags}" %{__python} -c 'import setuptools; execfile("setup.py")' bu
 %install
 rm -rf %{buildroot}
 %{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+%{__install} -m 755 -d %{buildroot}%{_var}/www/f1
+rsync -a web/ %{buildroot}%{_var}/www/f1/
 
 %clean
 rm -rf %{buildroot}
 
 %files -f INSTALLED_FILES
+%{_var}/www/f1
 %defattr(-,root,root,-)
 %doc README.md LICENSE PKG-INFO docs/
 
