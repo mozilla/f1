@@ -123,7 +123,7 @@ sharePanel.prototype = {
     );
   },
 
-  shutdown: function () {
+  unload: function () {
     Services.obs.removeObserver(this, 'content-document-global-created');
     let webProgress = this.browser.webProgress;
     webProgress.removeProgressListener(this.stateProgressListener);
