@@ -1,0 +1,14 @@
+HTTP/1.1 200 OK
+status: 200
+x-cnection: close
+content-location: https://graph.facebook.com/me/groups?access_token=12345678
+x-powered-by: HPHP
+expires: Sat, 01 Jan 2000 00:00:00 GMT
+x-fb-server: 10.36.49.106
+etag: "1050253aec7b29caff644806927dabfa81406eee"
+pragma: no-cache
+cache-control: private, no-cache, no-store, must-revalidate
+date: Tue, 08 Mar 2011 05:39:48 GMT
+content-type: text/javascript; charset=UTF-8
+
+{"data":[]}

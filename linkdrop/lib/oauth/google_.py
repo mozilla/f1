@@ -27,11 +27,15 @@ A Google responder that authenticates against Google using OpenID, or optionally
 can use OpenId+OAuth hybrid protocol to request access to Google Apps using OAuth2.
 
 """
+import os
 import urlparse
 import re
 from openid.extensions import ax, pape
 from openid.consumer import consumer
 from openid import oidutil
+import json
+import logging
+log = logging.getLogger(__name__)
 
 from openid.consumer.discover import DiscoveryFailure
 from openid.message import Message, OPENID_NS, OPENID2_NS, OPENID1_NS, \
@@ -60,6 +64,7 @@ from linkdrop.lib.oauth.oid_extensions import UIRequest
 from linkdrop.lib.oauth.openidconsumer import ax_attributes, alternate_ax_attributes, attributes
 from linkdrop.lib.oauth.openidconsumer import OpenIDResponder
 from linkdrop.lib.oauth.base import get_oauth_config, OAuthKeysException
+from linkdrop.lib.protocap import ProtocolCapturingBase, OAuth2Requestor
 
 GOOGLE_OAUTH = 'https://www.google.com/accounts/OAuthGetAccessToken'
 
@@ -231,6 +236,52 @@ class SMTP(smtplib.SMTP):
             raise smtplib.SMTPResponseException(code, resp)
         return code, resp
 
+# A "protocol capturing" SMTP class - should move into its own module
+# once we get support for other SMTP servers...
+class SMTPRequestorImpl(SMTP, ProtocolCapturingBase):
+    pc_protocol = "smtp"
+    def __init__(self, host, port):
+        self._record = []
+        self.pc_host = host
+        SMTP.__init__(self, host, port)
+        ProtocolCapturingBase.__init__(self)
+
+    def pc_get_host(self):
+        return self.pc_host
+
+    def send(self, str):
+        msg = "> " + "\n+ ".join(str.splitlines()) + "\n"
+        self._record.append(msg)
+        SMTP.send(self, str)
+
+    def getreply(self):
+        try:
+            errcode, errmsg = SMTP.getreply(self)
+        except Exception, exc:
+            try:
+                module = getattr(exc, '__module__', None)
+                erepr = {'module': module, 'name': exc.__class__.__name__, 'args': exc.args}
+                self._record.append("E " + json.dumps(erepr))
+            except Exception:
+                log.exception("failed to serialize an SMTP exception")
+            raise
+
+        msg = "\n+ ".join(errmsg.splitlines()) + "\n"
+        self._record.append("< %d %s" % (errcode, msg))
+        return errcode, errmsg
+
+    def sendmail(self, *args, **kw):
+        SMTP.sendmail(self, *args, **kw)
+        if asbool(config.get('protocol_capture_success')):
+            self.save_capture("automatic success save")
+
+    def _save_capture(self, dirname):
+        with open(os.path.join(dirname, "smtp-trace"), "wb") as f:
+            f.writelines(self._record)
+        self._record = []
+        return None
+
+SMTPRequestor = SMTPRequestorImpl
 
 class api():
     def __init__(self, account):
@@ -239,7 +290,7 @@ class api():
         self.config = get_oauth_config(domain)
         self.account = account
         try:
-            self.oauth_token = oauth.Token(key=str(account.get('oauth_token')), secret=str(account.get('oauth_token_secret')))
+            self.oauth_token = oauth.Token(key=account.get('oauth_token'), secret=account.get('oauth_token_secret'))
         except ValueError, e:
             # missing oauth tokens, raise our own exception
             raise OAuthKeysException(str(e))
@@ -279,11 +330,6 @@ class api():
                 to_ = Header(addr[1], 'utf-8').encode()
             to_headers.append(to_)
         assert to_headers # we caught all cases where it could now be empty.
-
-        server = SMTP(self.host, self.port)
-        # in the app:main set debug = true to enable
-        if asbool(config.get('debug', False)):
-            server.set_debuglevel(True)
 
         subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
         title = options.get('title', options.get('link', options.get('shorturl', '')))
@@ -346,41 +392,67 @@ class api():
         msg.attach(part1)
         msg.attach(part2)
 
+        server = None
         try:
+            server = SMTPRequestor(self.host, self.port)
+            # in the app:main set debug = true to enable
+            if asbool(config.get('debug', False)):
+                server.set_debuglevel(True)
             try:
                 try:
                     server.starttls()
                 except smtplib.SMTPException:
-                    logger.info("smtp server does not support TLS")
+                    log.info("smtp server does not support TLS")
                 try:
                     server.ehlo_or_helo_if_needed()
                     server.authenticate(url, self.consumer, self.oauth_token)
                     server.sendmail(from_, to_headers, msg.as_string())
                 except smtplib.SMTPRecipientsRefused, exc:
+                    server.save_capture("rejected recipients")
                     for to_, err in exc.recipients.items():
                         error = {"provider": self.host,
                                  "message": err[1],
                                  "status": err[0]
                                 }
                         break
-                except smtplib.SMTPException, exc:
+                except smtplib.SMTPResponseException, exc:
+                    server.save_capture("smtp response exception")
                     error = {"provider": self.host,
                              "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
                              "status": exc.smtp_code
+                            }
+                except smtplib.SMTPException, exc:
+                    server.save_capture("smtp exception")
+                    error = {"provider": self.host,
+                             "message": str(exc),
                             }
                 except UnicodeEncodeError, exc:
+                    server.save_capture("unicode error")
                     raise
                 except ValueError, exc:
+                    server.save_capture("ValueError sending email")
                     error = {"provider": self.host,
-                             "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
-                             "status": exc.smtp_code
+                             "message": str(exc),
                             }
             finally:
-                server.quit()
+                try:
+                    server.quit()
+                except smtplib.SMTPServerDisconnected:
+                    # an error above may have already disconnected, so we can
+                    # ignore the error while quiting.
+                    pass
         except smtplib.SMTPResponseException, exc:
+            if server is not None:
+                server.save_capture("early smtp response exception")
             error={"provider": self.host,
                    "message": "%s: %s" % (exc.smtp_code, exc.smtp_error),
                    "status": exc.smtp_code
+                   }
+        except smtplib.SMTPException, exc:
+            if server is not None:
+                server.save_capture("early smtp exception")
+            error={"provider": self.host,
+                   "message": str(exc),
                    }
         if error is None:
             result = {"status": "message sent"}
@@ -430,10 +502,11 @@ class api():
             url = url + "&group=%s" % (gid,)
 
         # itemsPerPage, startIndex, totalResults
-        client = oauth.Client(self.consumer, self.oauth_token)
-        resp, content = client.request(url, method)
+        requestor = OAuth2Requestor(self.consumer, self.oauth_token)
+        resp, content = requestor.request(url, method)
 
         if int(resp.status) != 200:
+            requestor.save_capture("contact fetch failure")
             error={"provider": domain,
                    "message": content,
                    "status": int(resp.status)

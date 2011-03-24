@@ -6,10 +6,10 @@ try:
 except ImportError:
     from cgi import parse_qs
 import json
-import httplib2
 import oauth2 as oauth
 import logging
 
+from linkdrop.lib.protocap import HttpRequestor
 from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
@@ -21,6 +21,10 @@ class OAuthKeysException(Exception):
 
 class AccessException(Exception):
     pass
+
+class ServiceUnavailableException(Exception):
+    def __init__(self, debug_message=None):
+        self.debug_message = debug_message
 
 def get_oauth_config(provider):
     key = 'oauth.'+provider+'.'
@@ -62,12 +66,14 @@ class OAuth1():
         oauth_request = oauth.Request.from_consumer_and_token(self.consumer,
             http_url=self.request_token_url, parameters=params)
         oauth_request.sign_request(self.sigmethod, self.consumer, None)
-        resp, content = httplib2.Http.request(client, self.request_token_url, method='GET',
+        client = HttpRequestor()
+        resp, content = client.request(self.request_token_url, method='GET',
             headers=oauth_request.to_header())
             
         if resp['status'] != '200':
+            client.save_capture("oauth1 request_access failure")
             raise AccessException("Error status: %r", resp['status'])
-        
+
         request_token = oauth.Token.from_string(content)
         
         session['token'] = content
@@ -138,9 +144,10 @@ class OAuth2():
                 client_secret=self.app_secret, code=code,
                 redirect_uri=return_to)
         
-        client = httplib2.Http()
+        client = HttpRequestor()
         resp, content = client.request(access_url)
         if resp['status'] != '200':
+            client.save_capture("oauth2 verify failure")
             raise Exception("Error status: %s" % (resp['status'],))
 
         access_token = parse_qs(content)['access_token'][0]

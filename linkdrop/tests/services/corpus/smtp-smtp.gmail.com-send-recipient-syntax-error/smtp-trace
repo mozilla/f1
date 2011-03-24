@@ -1,0 +1,23 @@
+< 220 mx.google.com ESMTP wt14sm2727478icb.16
+> ehlo [192.168.0.9]
+< 250 mx.google.com at your service, [58.160.65.179]
++ SIZE 35651584
++ 8BITMIME
++ STARTTLS
++ ENHANCEDSTATUSCODES
+> STARTTLS
+< 220 2.0.0 Ready to start TLS
+> ehlo [192.168.0.9]
+< 250 mx.google.com at your service, [58.160.65.179]
++ SIZE 35651584
++ 8BITMIME
++ AUTH LOGIN PLAIN XOAUTH
++ ENHANCEDSTATUSCODES
+> AUTH XOAUTH 12345678=
+< 235 2.7.0 Accepted
+> mail FROM:<test@gmail.com> size=6044
+< 250 2.1.0 OK wt14sm2727478icb.16
+> rcpt TO:<@you>
+< 555 5.5.2 Syntax error. wt14sm2727478icb.16
+> rset
+< 250 2.1.5 Flushed wt14sm2727478icb.16

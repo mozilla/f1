@@ -1,0 +1,3 @@
+Note that this response was received directly after revoking the tokens for
+F1 via the Yahoo web interface.  Not clear yet if this is reproducible or if
+the 500 is just a coincidence...

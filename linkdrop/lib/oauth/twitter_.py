@@ -33,7 +33,7 @@ from urllib2 import URLError
 from pylons import config, request, response, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
-from linkdrop.lib.oauth.base import OAuth1, get_oauth_config
+from linkdrop.lib.oauth.base import OAuth1, get_oauth_config, OAuthKeysException
 
 from twitter.oauth import OAuth
 from twitter.api import Twitter, TwitterHTTPError
@@ -125,6 +125,9 @@ class api():
     def __init__(self, account=None, oauth_token=None, oauth_token_secret=None):
         self.oauth_token = account and account.get('oauth_token') or oauth_token
         self.oauth_token_secret = account and account.get('oauth_token_secret') or oauth_token_secret
+        if not self.oauth_token or not self.oauth_token_secret:
+            raise OAuthKeysException()
+
         self.config = get_oauth_config(domain)
 
     def api(self):

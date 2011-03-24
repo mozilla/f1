@@ -1,0 +1,16 @@
+HTTP/1.1 200 OK
+status: 200
+x-cnection: close
+content-location: https://graph.facebook.com/me?access_token=1234&fields=id%2Cfirst_name%2Clast_name%2Cname%2Clink%2Cbirthday%2Cemail%2Cwebsite%2Cverified%2Cpicture%2Cgender%2Ctimezone
+x-powered-by: HPHP
+set-cookie: datr=1234; expires=Thu, 07-Mar-2013 05:39:46 GMT; path=/; domain=.facebook.com; httponly
+expires: Sat, 01 Jan 2000 00:00:00 GMT
+x-fb-server: 10.36.7.130
+etag: "1234"
+pragma: no-cache
+cache-control: private, no-cache, no-store, must-revalidate
+date: Tue, 08 Mar 2011 05:39:46 GMT
+p3p: CP="Facebook does not have a P3P policy. Learn why here: http://fb.me/p3p"
+content-type: text/javascript; charset=UTF-8
+
+{"id":"1234","first_name":"First","last_name":"Last","name":"First Last","link":"http:\/\/www.facebook.com\/profile.php?id=1234","gender":"male","timezone":11,"picture":"http:\/\/b.static.ak.fbcdn.net\/rsrc.php\/v1\/yo\/r\/1234.gif"}

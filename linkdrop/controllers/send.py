@@ -42,7 +42,7 @@ from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 from linkdrop.lib.shortener import shorten_link
-from linkdrop.lib.oauth.base import OAuthKeysException
+from linkdrop.lib.oauth.base import OAuthKeysException, ServiceUnavailableException
 
 log = logging.getLogger(__name__)
 
@@ -112,6 +112,7 @@ Site provided description of the shared item, not supported by all services.
     def send(self):
         result = {}
         error = None
+        acct = None
         domain = request.POST.get('domain')
         message = request.POST.get('message', '')
         username = request.POST.get('username')
@@ -128,8 +129,15 @@ Site provided description of the shared item, not supported by all services.
             }
             return {'result': result, 'error': error}
         provider = get_provider(domain)
+        if provider is None:
+            error = {
+                'message': "'domain' is invalid",
+                'code': constants.INVALID_PARAMS
+            }
+            return {'result': result, 'error': error}
 
-        acct = json.loads(account_data)
+        if account_data:
+            acct = json.loads(account_data)
         if not acct:
             metrics.track(request, 'send-noaccount', domain=domain)
             error = {'provider': domain,
@@ -163,15 +171,24 @@ Site provided description of the shared item, not supported by all services.
                      'message': "not logged in or no user account for that domain",
                      'status': 401
             }
-            
             metrics.track(request, 'send-oauth-keys-missing', domain=domain)
+            timer.track('send-error', error=error)
+            return {'result': result, 'error': error}
+        except ServiceUnavailableException, e:
+            error = {'provider': domain,
+                     'message': "The service is temporarily unavailable - please try again later.",
+                     'status': 503
+            }
+            if e.debug_message:
+                error['debug_message'] = e.debug_message
+            metrics.track(request, 'send-service-unavailable', domain=domain)
             timer.track('send-error', error=error)
             return {'result': result, 'error': error}
 
         if error:
             timer.track('send-error', error=error)
             assert not result
-            log.error("send failure: %r %r %r", username, userid, error)
+            #log.error("send failure: %r %r %r", username, userid, error)
         else:
             # create a new record in the history table.
             assert result

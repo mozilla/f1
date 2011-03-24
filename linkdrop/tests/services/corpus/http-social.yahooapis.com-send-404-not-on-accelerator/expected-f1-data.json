@@ -1,0 +1,9 @@
+{
+    "error": {
+        "debug_message": "*",
+        "message": "The service is temporarily unavailable - please try again later.",
+        "provider": "yahoo.com",
+        "status": 503
+    },
+    "result": {}
+}

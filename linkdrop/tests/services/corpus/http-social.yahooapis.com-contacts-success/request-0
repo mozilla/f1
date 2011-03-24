@@ -1,0 +1,7 @@
+GET /v1/user/xxx/contacts
+accept-encoding: gzip, deflate
+content-type: application/json
+accept: application/json
+authorization: OAuth realm="", oauth_nonce="123", oauth_timestamp="1300687115", oauth_consumer_key="xxx--", oauth_signature_method="HMAC-SHA1", oauth_version="1.0", oauth_token="xxx", oauth_signature="yyy"
+user-agent: Python-httplib2/$Rev$
+

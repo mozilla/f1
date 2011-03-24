@@ -33,7 +33,7 @@ from pylons.decorators.util import get_pylons
 from linkdrop.lib.base import BaseController, render
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
 from linkdrop.lib.oauth import get_provider
-from linkdrop.lib.oauth.base import OAuthKeysException
+from linkdrop.lib.oauth.base import OAuthKeysException, ServiceUnavailableException
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 
@@ -94,8 +94,16 @@ Name of the group to return.
         maxResults = int(request.POST.get('maxresults','25'))
         account_data = request.POST.get('account', None)
         provider = get_provider(domain)
+        if provider is None:
+            error = {
+                'message': "'domain' is invalid",
+                'code': constants.INVALID_PARAMS
+            }
+            return {'result': None, 'error': error}
 
-        acct = json.loads(account_data)
+        acct = None
+        if account_data:
+            acct = json.loads(account_data)
         if not acct:
             metrics.track(request, 'contacts-noaccount', domain=domain)
             error = {'provider': domain,
@@ -114,4 +122,13 @@ Name of the group to return.
             }
             result = None
             metrics.track(request, 'contacts-oauth-keys-missing', domain=domain)
+        except ServiceUnavailableException, e:
+            error = {'provider': domain,
+                     'message': "The service is temporarily unavailable - please try again later.",
+                     'status': 503
+            }
+            if e.debug_message:
+                error['debug_message'] = e.debug_message
+            result = None
+            metrics.track(request, 'contacts-service-unavailable', domain=domain)
         return {'result': result, 'error': error}

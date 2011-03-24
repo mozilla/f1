@@ -1,0 +1,4 @@
+GET /oauth/access_token?client_secret=1234&code=5678&client_id=1234&redirect_uri=http%3A//linkdrop.caraveo.com%3A5000/api/account/verify%3Fprovider%3Dfacebook.com
+accept-encoding: gzip, deflate
+user-agent: Python-httplib2/$Rev$
+
