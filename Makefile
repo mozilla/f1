@@ -61,8 +61,8 @@ $(static_dir):
 	rsync -av $(web_dir)/ $(static_dir)/
 
 	perl -i -pe "s:VERSION='[^']+':VERSION='$(version)':" $(TOPSRCDIR)/setup.py
-	perl -i -pe 's:/dev/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/staging.ini
-	perl -i -pe 's:/dev/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/production.ini
+	perl -i -pe 's:/[^/]+/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/staging.ini
+	perl -i -pe 's:/[^/]+/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/production.ini
 
 	find $(static_dir) -name \*.html | xargs perl -i -pe 's:/dev/:/$(version)/:go'
 	perl -i -pe 's:/dev/:/$(version)/:go' $(static_dir)/scripts/oauth.js
@@ -85,7 +85,7 @@ dist:   f1.spec
 
 rpm:	f1.spec
 	$(PYTHON) setup.py bdist_rpm
-	
+
 f1.spec: f1.spec.in Makefile
 	@cat f1.spec.in | sed -e"s/%%version%%/$(version)$(tag)/g" > f1.spec
 
