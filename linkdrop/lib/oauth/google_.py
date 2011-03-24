@@ -53,7 +53,7 @@ from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.header import Header
 
-from pylons import config, request, response, session, tmpl_context as c, url
+from pylons import config, request, response, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
 from linkdrop.lib.base import render

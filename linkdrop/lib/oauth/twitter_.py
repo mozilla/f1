@@ -30,7 +30,7 @@ import oauth2 as oauth
 import logging
 from urllib2 import URLError
 
-from pylons import config, request, response, session, tmpl_context as c, url
+from pylons import config, request, response, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
 from linkdrop.lib.oauth.base import OAuth1, get_oauth_config, OAuthKeysException

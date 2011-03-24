@@ -27,7 +27,7 @@ import sys
 import inspect
 from docutils import core
 
-from pylons import request, response, session, tmpl_context as c, url
+from pylons import request, response, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 
 from linkdrop.lib.base import BaseController, render

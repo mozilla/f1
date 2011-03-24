@@ -32,7 +32,7 @@ from urlparse import urlparse
 from paste.deploy.converters import asbool
 import hashlib
 
-from pylons import config, request, response, session
+from pylons import config, request, response
 from pylons.controllers.util import abort, redirect
 from pylons.decorators.util import get_pylons
 
@@ -112,8 +112,6 @@ Site provided description of the shared item, not supported by all services.
     def send(self):
         result = {}
         error = None
-        # If we don't have a key in our session we bail early with a
-        # 401
         domain = request.POST.get('domain')
         message = request.POST.get('message', '')
         username = request.POST.get('username')
@@ -129,15 +127,6 @@ Site provided description of the shared item, not supported by all services.
                 'code': constants.INVALID_PARAMS
             }
             return {'result': result, 'error': error}
-        keys = session.get('account_keys', '').split(',')
-        if not keys:
-            error = {'provider': domain,
-                     'message': "no user session exists, auth required",
-                     'status': 401
-            }
-            metrics.track(request, 'send-unauthed', domain=domain)
-            return {'result': result, 'error': error}
-
         provider = get_provider(domain)
         if provider is None:
             error = {
@@ -146,18 +135,7 @@ Site provided description of the shared item, not supported by all services.
             }
             return {'result': result, 'error': error}
 
-        # even if we have a session key, we must have an account for that
-        # user for the specified domain.
-        if account_data is not None:
-            acct = json.loads(account_data)
-        else:
-            # support for old account data in session store
-            acct = None
-            for k in keys:
-                a = session.get(k)
-                if a and a.get('domain') == domain and (a.get('username')==username or a.get('userid')==userid):
-                    acct = a
-                    break
+        acct = json.loads(account_data)
         if not acct:
             metrics.track(request, 'send-noaccount', domain=domain)
             error = {'provider': domain,

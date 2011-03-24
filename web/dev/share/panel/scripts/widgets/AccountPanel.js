@@ -75,11 +75,12 @@ function (object,         Widget,         $,        template,
       },
 
       onCreate: function () {
-        var name = this.account.displayName,
+        var profile = this.account.profile,
+            name = profile.displayName,
             userName, savedOptions;
 
         //Set up the svcAccount property
-        this.svcAccount = this.account.accounts[0];
+        this.svcAccount = profile.accounts[0];
         this.storeId = 'AccountPanel-' + this.svcAccount.domain;
 
         //Set up memory store for when user switches tabs, their messages for
@@ -104,7 +105,7 @@ function (object,         Widget,         $,        template,
         }
 
         //Set up the photo property
-        this.photo = this.account.photos && this.account.photos[0] && this.account.photos[0].value;
+        this.photo = profile.photos && profile.photos[0] && profile.photos[0].value;
 
         //Set up nicer display name
         // XXX for email services, we should show the email account, but we

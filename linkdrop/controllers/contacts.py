@@ -25,7 +25,7 @@ import logging
 import urllib, cgi, json, sys
 from urlparse import urlparse
 
-from pylons import config, request, response, session, tmpl_context as c, url
+from pylons import config, request, response, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.decorators import jsonify
 from pylons.decorators.util import get_pylons
@@ -92,15 +92,7 @@ Name of the group to return.
         group = request.POST.get('group', None)
         startIndex = int(request.POST.get('startindex','0'))
         maxResults = int(request.POST.get('maxresults','25'))
-        keys = session.get('account_keys', '').split(',')
         account_data = request.POST.get('account', None)
-        if not keys:
-            error = {'provider': domain,
-                     'message': "no user session exists, auth required",
-                     'status': 401
-            }
-            metrics.track(request, 'contacts-unauthed', domain=domain)
-            return {'result': None, 'error': error}
         provider = get_provider(domain)
         if provider is None:
             error = {
@@ -109,18 +101,7 @@ Name of the group to return.
             }
             return {'result': None, 'error': error}
 
-        # even if we have a session key, we must have an account for that
-        # user for the specified domain.
-        if account_data is not None:
-            acct = json.loads(account_data)
-        else:
-            # support for old accounts in the session store
-            acct = None
-            for k in keys:
-                a = session.get(k)
-                if a and a.get('domain') == domain and (not username or a.get('username')==username and not userid or a.get('userid')==userid):
-                    acct = a
-                    break
+        acct = json.loads(account_data)
         if not acct:
             metrics.track(request, 'contacts-noaccount', domain=domain)
             error = {'provider': domain,

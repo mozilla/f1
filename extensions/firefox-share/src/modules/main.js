@@ -44,7 +44,7 @@ Cu.import("resource://gre/modules/AddonManager.jsm");
 Cu.import("resource://ffshare/modules/progress.js");
 
 const NS_XUL = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
-const buttonId = 'ffshare-toolbar-button';
+const SHARE_BUTTON_ID = "share-button";
 
 const EXPORTED_SYMBOLS = ["installFFShareIntoWindow"];
 
@@ -73,7 +73,7 @@ function error(msg) {
 }
 
 function sendJustInstalledEvent(win, url) {
-  var buttonNode = win.document.getElementById(buttonId);
+  var buttonNode = win.document.getElementById(SHARE_BUTTON_ID);
   //Button may not be there if customized and removed from toolbar.
   if (buttonNode) {
     var tab = win.gBrowser.loadOneTab(url, { referrerURI: null,
@@ -125,7 +125,7 @@ function openAndReuseOneTabPerURL(url) {
             // Focus *this* browser-window
             browserWin.focus();
 
-            buttonNode = browserWin.document.getElementById(buttonId);
+            buttonNode = browserWin.document.getElementById(SHARE_BUTTON_ID);
             //Button may not be there if customized and removed from toolbar.
             if (buttonNode) {
               buttonNode.setAttribute("firstRun", "true");
@@ -163,7 +163,7 @@ function openAndReuseOneTabPerURL(url) {
 
 function FFShare(win) {
     this.window = win;
-    
+
     // Hang on, the window may not be fully loaded yet
     let self = this;
     function checkWindow() {
@@ -219,11 +219,14 @@ FFShare.prototype = {
 
     canShareURI: function (aURI) {
       var command = this.window.document.getElementById("cmd_toggleSharePage");
+      let button = this.window.document.getElementById(SHARE_BUTTON_ID);
       try {
         if (this.isValidURI(aURI)) {
           command.removeAttribute("disabled");
+          button.hidden = false;
         } else {
           command.setAttribute("disabled", "true");
+          button.hidden = true;
         }
       } catch (e) {
         throw e;
@@ -235,7 +238,7 @@ FFShare.prototype = {
       return (aURI && (aURI.schemeIs('http') || aURI.schemeIs('https') ||
                        aURI.schemeIs('file') || aURI.schemeIs('ftp')));
     },
-    
+
     installAPI: function() {
         // Inject code into content
         tmp = {};
@@ -254,13 +257,13 @@ FFShare.prototype = {
         tmp.InjectorInit(self.window);
         self.window.injector.register(ffapi);
     },
-    
+
     init: function() {
         let tmp = {};
-        
+
         Cu.import("resource://ffshare/modules/panel.js", tmp);
         this.sharePanel = new tmp.sharePanel(this.window, this);
-        
+
         // Load FUEL to access Application and setup preferences
         let Application = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
         this.prefs = {
@@ -284,7 +287,7 @@ FFShare.prototype = {
                 "extensions." + FFSHARE_EXT_ID + ".previous_version",
                 ""
             ),
-            
+
             // Cannot rename firstRun to first_install since it would mess
             // up already deployed clients, would pop a new F1 window on
             // an upgrade vs. fresh install.
@@ -304,7 +307,7 @@ FFShare.prototype = {
         } else if (this.prefs.system === 'staging') {
           this.prefs.share_url = 'https://f1-staging.mozillamessaging.com/share/panel/';
         }
-      
+
         if (this.prefs.system === 'dev') {
           this.prefs.frontpage_url = 'http://linkdrop.caraveo.com:5000/';
         } else if (this.prefs.system === 'staging') {
@@ -315,14 +318,14 @@ FFShare.prototype = {
         AddonManager.getAddonByID(FFSHARE_EXT_ID, function (addon) {
             self.onInstallUpgrade(addon.version);
         });
-      
+
         try {
             this.canShareProgressListener = new LocationChangeProgressListener(this);
             this.window.gBrowser.addProgressListener(this.canShareProgressListener);
         } catch (e) {
             error(e);
         }
-        
+
         this.onContextMenuItemShowing = function(e) {
             self._onContextMenuItemShowing(e);
         }
@@ -338,7 +341,7 @@ FFShare.prototype = {
         this.window.addEventListener('tabviewshow', this.tabViewShowListener, false);
         this.window.addEventListener('tabviewhide', this.tabViewHideListener, false);
     },
-    
+
     unload: function() {
         try {
             this.window.gBrowser.removeProgressListener(this.canShareProgressListener);
@@ -353,8 +356,10 @@ FFShare.prototype = {
         this.window.removeEventListener('tabviewhide', this.tabViewHideListener, false);
         this.tabViewShowListener = null;
         this.tabViewHideListener = null;
+
+        this.sharePanel.unload();
     },
-    
+
     onInstallUpgrade: function (version) {
       this.version = version;
 
@@ -363,6 +368,7 @@ FFShare.prototype = {
         return;
       }
       let Application = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
+      let showUpgradeTab = !!this.prefs.previous_version;
 
       this.prefs.previous_version = version;
       Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".previous_version", version);
@@ -373,6 +379,12 @@ FFShare.prototype = {
         this.prefs.firstRun = false;
         Application.prefs.setValue("extensions." + FFSHARE_EXT_ID + ".first-install", false);
         openAndReuseOneTabPerURL(this.prefs.frontpage_url);
+      } else if (showUpgradeTab) {
+        // For old users of F1, let them know of the UI change to URL bar.
+        // THIS CAN BE REMOVED some time after the 0.8.1 add-on release.
+        // Only show it if the user previously installed F1, indicated by having
+        // a previous_version value.
+        openAndReuseOneTabPerURL("http://mozillalabs.com/messaging/2011/03/22/mozilla-f1-finding-a-new-home/");
       }
     },
 
@@ -474,7 +486,7 @@ FFShare.prototype = {
       p.appendChild(p.removeChild(keyset));
 
     },
-    
+
     onTabViewShow: function (event) {
       // Triggered by TabView (panorama). Always hide it if being shown.
       if (this.window.document.getElementById('share-popup').state === 'open') {

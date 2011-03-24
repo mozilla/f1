@@ -30,7 +30,7 @@ import copy
 from rfc822 import AddressList
 import logging
 
-from pylons import config, request, response, session, tmpl_context as c, url
+from pylons import config, request, response, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from paste.deploy.converters import asbool
 

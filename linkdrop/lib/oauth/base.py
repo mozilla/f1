@@ -51,8 +51,6 @@ class OAuth1():
         self.sigmethod = oauth.SignatureMethod_HMAC_SHA1()
 
     def request_access(self):
-        session['end_point_success'] = request.POST.get('end_point_success', self.config.get('oauth_success'))
-        session['end_point_auth_failure'] = request.POST.get('end_point_auth_failure', self.config.get('oauth_failure'))
         force_login = request.POST.get('force_login') and True
 
         # Create the consumer and client, make the request
@@ -95,13 +93,13 @@ class OAuth1():
         request_token = oauth.Token.from_string(session['token'])
         verifier = request.GET.get('oauth_verifier')
         if not verifier:
-            redirect(session.get('end_point_auth_failure',self.config.get('oauth_failure')))
+            redirect(self.config.get('oauth_failure'))
 
         request_token.set_verifier(verifier)
         client = oauth.Client(self.consumer, request_token)
         resp, content = client.request(self.access_token_url, "POST")
         if resp['status'] != '200':
-            redirect(session.get('end_point_auth_failure',self.config.get('oauth_failure')))
+            redirect(self.config.get('oauth_failure'))
 
         access_token = dict(urlparse.parse_qsl(content))
         return self._get_credentials(access_token)
@@ -122,10 +120,6 @@ class OAuth2():
         self.scope = self.config.get('scope', None)
 
     def request_access(self):
-        session['end_point_success'] = request.POST.get('end_point_success', self.config.get('oauth_success'))
-        session['end_point_auth_failure'] = request.POST.get('end_point_auth_failure', self.config.get('oauth_failure'))
-        session.save()
-
         return_to = url(controller='account', action="verify", provider=self.provider,
                            qualified=True)
 

@@ -65,19 +65,25 @@ function eachWindow(callback) {
 }
 
 function runOnLoad(window, callback) {
-  window.addEventListener("load", function() {
-    window.removeEventListener("load", arguments.callee, false);
+  window.addEventListener("load", function onLoad() {
+    window.removeEventListener("load", onLoad, false);
     callback(window);
   }, false);
 }
 
-function windowWatcher(win, topic) {
-  if (topic === "domwindowopened") {
+function windowWatcher(subject, topic) {
+  if (topic !== "domwindowopened") {
+    return;
+  }
+  let win = subject.QueryInterface(Ci.nsIDOMWindow);
+  // We don't know the type of the window at this point yet, only when
+  // the load event has been fired.
+  runOnLoad(win, function (win) {
     let doc = win.document.documentElement;
     if (doc.getAttribute("windowtype") == "navigator:browser") {
-        runOnLoad(win, loadIntoWindow);
+      loadIntoWindow(win);
     }
-  }
+  });
 }
 
 function registerResource(installPath, name) {
