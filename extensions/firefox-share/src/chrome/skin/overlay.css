@@ -20,76 +20,26 @@
  *
  * Contributor(s):
  * */
+@namespace xul url(http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul);
 
-#ffshare-toolbar-button {
-  list-style-image: url("chrome://ffshare/skin/toolbar-button.png");
-  -moz-image-region: rect(0px, 35px, 23px, 0px);
-}
-#ffshare-toolbar-button[disabled="true"],
-#ffshare-toolbar-button[disabled="true"]:active {
-  -moz-image-region: rect(23px, 35px, 46px, 0px);
-}
-#ffshare-toolbar-button:active {
-  -moz-image-region: rect(46px, 35px, 69px, 0px);
-}
-#ffshare-toolbar-button[checked="true"] {
-  background: none;
-  border-color: transparent;
-  -moz-image-region: rect(46px, 35px, 69px, 0px);
-}
-#ffshare-toolbar-button[firstRun] {
-  list-style-image: url("chrome://ffshare/skin/toolbar-button-glow.png");
-  -moz-image-region: rect(0px, 35px, 23px, 0px);
-}
-#ffshare-toolbar-button[status="start"] {
-  list-style-image: url("chrome://ffshare/skin/status-sharing.png");
+#share-button {
+  list-style-image: url("resource://ffshare/chrome/skin/toolbar-button.png");
+  width: auto;
+  height: auto;
 }
 
-.ffshare-panel {
-  width: 441px; /* note this value hard-coded in overlay.js */
-  min-width: 441px !important;
-  min-height: 234px !important;
+#share-button[checked] {
+  list-style-image: url("resource://ffshare/chrome/skin/toolbar-button-active.png");
 }
 
-.ffshare-browser {
-  width: 400px; /* note this value tied to ffshare-panel width as well */
-  height: 100%;
+#share-button[firstRun] {
+  list-style-image: url("resource://ffshare/chrome/skin/toolbar-button-glow.png");
 }
 
-.ffshare-tabbed {
-  position: relative;
-  top: 0;
-  left: 0;
-  float: left;
-}
-/* Popup Bounding Box */
-
-.doorhanger-rtl {
-  -moz-appearance: none;
-  -moz-window-shadow: none;
-  background-color: transparent;
-  margin-top: -10px;
-  margin-left: -16px;
-  min-width: 280px;
-  -moz-border-image: url(chrome://browser/skin/hud-panel.png) 26 10 22 50 / 26px 18px 22px 50px repeat;
+#share-button[status="start"] {
+  list-style-image: url("resource://ffshare/chrome/skin/status-sharing.png");
 }
 
-.doorhanger-ltr {
-  -moz-appearance: none;
-  -moz-window-shadow: none;
-  background-color: transparent;
-  margin-top: -10px;
-  margin-right: -16px;
-  min-width: 280px;
-  -moz-border-image: url(chrome://browser/skin/hud-panel.png) 26 50 22 10 / 26px 50px 22px 18px repeat;
-}
-
-.doorhanger-rtl .doorhanger-inner {
-  margin: 4px 6px 2px -30px;
-  color: #fff;
-}
-
-.doorhanger-ltr .doorhanger-inner {
-  margin: 4px -33px 2px 6px;
-  color: #fff;
+#share-button[status="finished"] {
+  list-style-image: url("resource://ffshare/chrome/skin/status-shared.png");
 }

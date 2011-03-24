@@ -1,3 +1,10 @@
-include linkdrop/config/deployment.ini_tmpl
-recursive-include linkdrop/public *
-recursive-include linkdrop/templates *
+include README.md Makefile LICENSE f1.spec
+include *.ini
+recursive-include apache *
+recursive-include extensions *
+recursive-include linkdrop *
+recursive-include grinder *
+recursive-include docs *
+recursive-include tools *
+recursive-include web *
+recursive-include wsgi *

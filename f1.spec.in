@@ -1,0 +1,46 @@
+%define __python /usr/bin/python
+
+Name:           python-mozilla-f1
+Version:        %%version%%
+Release:        1%{?dist}
+Summary:        Share Links Fast.
+
+Group:          Applications/Internet
+License:        MPL
+URL:            http://f1.mozillamessaging.com/
+Source0:        linkdrop-%{version}.tar.gz
+BuildArch:	    noarch
+BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildRequires:  python-devel python-setuptools
+
+#XXX More are needed
+BuildRequires:  python-paste-deploy, python-paste-script
+#Requires:
+
+%description
+F1 is a browser extension that allows you to share links
+in a fast and fun way. Share links from within the browser,
+from any webpage, using the same services you already know
+and love. F1 is made by Mozilla Messaging. 
+
+%prep
+%setup -q -n linkdrop-%{version}
+
+%build
+CFLAGS="%{optflags}" %{__python} -c 'import setuptools; execfile("setup.py")' build
+
+%install
+rm -rf %{buildroot}
+%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+
+%clean
+rm -rf %{buildroot}
+
+%files -f INSTALLED_FILES
+%defattr(-,root,root,-)
+%doc README.md LICENSE PKG-INFO docs/
+
+%changelog
+* Fri Mar 18 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.2dev-1
+- Initial spec file

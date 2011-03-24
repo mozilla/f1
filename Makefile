@@ -1,9 +1,13 @@
-version := 0.3.2
+PYTHON := python
+version := $(shell $(PYTHON) setup.py --version)
+tag := $(shell grep tag_build setup.cfg  | cut -d= -f2 | xargs echo )
+
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
 srcdir=$(TOPSRCDIR)/extensions/firefox-share/src/
 objdir=$(TOPSRCDIR)/extensions/firefox-share/dist/
+dist_dir=$(TOPSRCDIR)/dist
 stage_dir=$(objdir)/stage
 xpi_dir=$(TOPSRCDIR)/web/dev
 web_dir=$(TOPSRCDIR)/web/dev
@@ -12,7 +16,7 @@ webbuild_dir=$(TOPSRCDIR)/tools/webbuild
 requirejs_dir=$(webbuild_dir)/requirejs
 
 xpi_name := ffshare.xpi
-xpi_files := chrome.manifest chrome install.rdf defaults modules
+xpi_files := bootstrap.js chrome install.rdf modules
 dep_files := Makefile $(shell find $(srcdir) -type f)
 
 SLINK = ln -sf
@@ -28,14 +32,14 @@ xpi: $(xpi_dir)/$(xpi_name)
 $(xpi_dir):
 	mkdir -p $(xpi_dir)
 
-stage_files = $(stage_dir)/defaults $(stage_dir)/chrome $(stage_dir)/install.rdf $(stage_dir)/chrome.manifest $(stage_dir)/modules
+stage_files = $(stage_dir)/chrome $(stage_dir)/install.rdf $(stage_dir)/bootstrap.js $(stage_dir)/modules
 
 $(stage_dir):
 	mkdir -p $(stage_dir)
 	$(MAKE) $(stage_files)
 
-$(stage_dir)/chrome.manifest: $(srcdir)/chrome.manifest
-	$(SLINK) $(srcdir)/chrome.manifest $(stage_dir)/chrome.manifest
+$(stage_dir)/bootstrap.js: $(srcdir)/bootstrap.js
+	$(SLINK) $(srcdir)/bootstrap.js $(stage_dir)/bootstrap.js
 
 $(stage_dir)/install.rdf: $(srcdir)/install.rdf
 	$(SLINK) $(srcdir)/install.rdf $(stage_dir)/install.rdf
@@ -45,9 +49,6 @@ $(stage_dir)/chrome: $(srcdir)/chrome
 
 $(stage_dir)/modules: $(srcdir)/modules
 	$(SLINK) $(srcdir)/modules $(stage_dir)/modules
-
-$(stage_dir)/defaults: $(srcdir)/defaults
-	$(SLINK) $(srcdir)/defaults $(stage_dir)/defaults
 
 $(xpi_dir)/$(xpi_name): $(xpi_dir) $(stage_dir) $(dep_files)
 	rm -f $(xpi_dir)/$(xpi_name)
@@ -60,8 +61,8 @@ $(static_dir):
 	rsync -av $(web_dir)/ $(static_dir)/
 
 	perl -i -pe "s:VERSION='[^']+':VERSION='$(version)':" $(TOPSRCDIR)/setup.py
-	perl -i -pe 's:/dev/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/staging.ini
-	perl -i -pe 's:/dev/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/production.ini
+	perl -i -pe 's:/[^/]+/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/staging.ini
+	perl -i -pe 's:/[^/]+/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/production.ini
 
 	find $(static_dir) -name \*.html | xargs perl -i -pe 's:/dev/:/$(version)/:go'
 	perl -i -pe 's:/dev/:/$(version)/:go' $(static_dir)/scripts/oauth.js
@@ -74,5 +75,18 @@ $(static_dir):
 clean:
 	rm -rf $(objdir)
 	rm -rf $(static_dir)
+	rm -rf $(dist_dir)
+	rm -f f1.spec
 
-.PHONY: xpi clean
+dist:   f1.spec
+	$(PYTHON) setup.py sdist --formats gztar,zip
+	# This is so Hudson can get stable urls to this tarball
+	ln -sf linkdrop-$(version)$(tag).tar.gz dist/linkdrop-current.tar.gz
+
+rpm:	f1.spec
+	$(PYTHON) setup.py bdist_rpm
+
+f1.spec: f1.spec.in Makefile
+	@cat f1.spec.in | sed -e"s/%%version%%/$(version)$(tag)/g" > f1.spec
+
+.PHONY: xpi clean dist rpm
