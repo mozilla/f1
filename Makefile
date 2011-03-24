@@ -1,3 +1,15 @@
+APPNAME = server-shared-send
+DEPS = server-share-core
+VIRTUALENV = virtualenv
+NOSE = bin/nosetests -s --with-xunit
+TESTS = linkdrop/tests
+PYTHON = bin/python
+EZ = bin/easy_install
+COVEROPTS = --cover-html --cover-html-dir=html --with-coverage --cover-package=linkdrop
+COVERAGE = bin/coverage
+PYLINT = bin/pylint
+PKGS = linkdrop
+
 version := 0.3.2
 PYTHON := python
 ifeq ($(TOPSRCDIR),)
@@ -81,4 +93,16 @@ dist:
 rpm:
 	$(PYTHON) setup.py bdist_rpm
 
-.PHONY: xpi clean dist rpm
+build:
+	$(VIRTUALENV) --no-site-packages --distribute .
+	$(PYTHON) build.py $(APPNAME) $(DEPS)
+	$(EZ) nose
+	$(EZ) WebTest
+	$(EZ) Funkload
+	$(EZ) pylint
+	$(EZ) coverage
+
+test:
+	$(NOSE) $(TESTS)
+
+.PHONY: xpi clean dist rpm build test

@@ -46,8 +46,7 @@ setup(
         "python-dateutil",
         "python-openid",
         "python-memcached",
-        "gdata", # google api support
-        "twitter>=1.4.2"
+        "linkoauth",
     ],
     setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),
