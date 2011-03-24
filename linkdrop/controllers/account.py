@@ -107,7 +107,7 @@ OAuth authorization api.
         provider = request.POST['domain']
         log.info("authorize request for %r", provider)
         service = get_provider(provider)
-        return service.responder().request_access(request)
+        return service.responder().request_access(request, url, session)
 
     # this is not a rest api
     def verify(self, *args, **kw):
@@ -117,7 +117,7 @@ OAuth authorization api.
 
         auth = service.responder()
         try:
-            user = auth.verify(request, url)
+            user = auth.verify(request, url, session)
             account = user['profile']['accounts'][0]
             if not user.get('oauth_token') and not user.get('oauth_token_secret'):
                 raise Exception('Unable to get OAUTH access')
