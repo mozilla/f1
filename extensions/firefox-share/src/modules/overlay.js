@@ -60,8 +60,7 @@ function installOverlay(win) {
   // Load our stylesheet and register an unloader that removes it again.
   dump("running on "+xulRuntime.OS+"\n");
   let pi;
-  if (xulRuntime.OS === "windows") {
-    // XXX not sure what xulRuntime.OS will be on windows
+  if (xulRuntime.OS === "WINNT") {
     pi = loadStylesheet(win, "resource://ffshare/chrome/skin/windows/overlay.css");
   } else {
     pi = loadStylesheet(win, "resource://ffshare/chrome/skin/overlay.css");
@@ -75,7 +74,7 @@ function installOverlay(win) {
 
   let commandset = document.createElementNS(NS_XUL, 'commandset');
   commandset.setAttribute('id', 'shareCommandset');
-  
+
   let command = document.createElementNS(NS_XUL, 'command');
   command.setAttribute('id', 'cmd_toggleSharePage');
   command.setAttribute('oncommand', "ffshare.togglePanel();");
@@ -107,7 +106,7 @@ function installOverlay(win) {
 
   let context = document.getElementById('contentAreaContextMenu');
   let place = document.getElementById('context-sendpage').nextSibling;
-  
+
   let el = document.createElementNS(NS_XUL, 'menuseparator');
   el.setAttribute('id', 'context-ffshare-separator');
   context.insertBefore(el, place);
@@ -117,9 +116,9 @@ function installOverlay(win) {
   el.setAttribute('label', getString("ffshareContext.label"));
   el.setAttribute('command', 'cmd_toggleSharePage');
   context.insertBefore(el, place);
-  
+
   place = document.getElementById('context-sep-selectall').nextSibling;
-  
+
   el = document.createElementNS(NS_XUL, 'menuitem');
   el.setAttribute('id', 'context-selected-ffshare');
   el.setAttribute('label', getString("ffshareContext.label"));
@@ -142,14 +141,14 @@ function installOverlay(win) {
 
   // ********************************************************************
   // create the share panel/doorhanger
-  
+
   let panel = document.createElementNS(NS_XUL, 'panel');
   panel.setAttribute('id', 'share-popup');
   panel.setAttribute('type', 'arrow');
   panel.setAttribute('noautohide', 'true');
   panel.setAttribute('class', 'ffshare-panel');
   panel.setAttribute('level', 'parent');
-  
+
   let browser = document.createElementNS(NS_XUL, 'browser');
   browser.setAttribute('id', 'share-browser');
   browser.setAttribute('type', 'content');
@@ -159,10 +158,10 @@ function installOverlay(win) {
   browser.setAttribute('contextmenu', 'contentAreaContextMenu');
   browser.setAttribute('class', 'ffshare-browser');
   panel.appendChild(browser);
-  
+
   let popupset = document.getElementById('mainPopupSet');
   popupset.appendChild(panel);
-  
+
   unloaders.push(function() {
       let popupset = document.getElementById('mainPopupSet');
       popupset.removeChild(document.getElementById('share-popup'));
