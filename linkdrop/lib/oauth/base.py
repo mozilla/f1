@@ -67,7 +67,7 @@ class OAuth1():
             http_url=self.request_token_url, parameters=params)
         oauth_request.sign_request(self.sigmethod, self.consumer, None)
         client = HttpRequestor()
-        resp, content = client.request(client, self.request_token_url, method='GET',
+        resp, content = client.request(self.request_token_url, method='GET',
             headers=oauth_request.to_header())
             
         if resp['status'] != '200':
