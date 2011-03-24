@@ -32,6 +32,8 @@ from pylons.wsgiapp import PylonsApp
 from routes.middleware import RoutesMiddleware
 
 from linkdrop.config.environment import load_environment
+from linkoauth.util import setup_config
+
 
 def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
     """Create a Pylons WSGI application and return it
@@ -91,6 +93,7 @@ def make_app(global_conf, full_stack=True, static_files=True, **app_conf):
         static_app = StaticURLParser(config['pylons.paths']['static_files'])
         app = Cascade([static_app, app])
 
+    setup_config(config)
     app.config = config
     app.orig_app = orig_app
     return app
