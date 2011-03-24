@@ -1,4 +1,6 @@
-Name:           python-mozilla-f1
+%{!?pyver:  %global pyver %( %{__python} -V 2>&1 | awk '{print $2}' | cut -d. -f1-2 | sed -e's!\\.!!g' )}
+
+Name:           python%{pyver}-mozilla-f1
 Version:        %%version%%
 Release:        1%{?dist}
 Summary:        Share Links Fast.
@@ -10,10 +12,10 @@ Source0:        linkdrop-%{version}.tar.gz
 BuildArch:	    noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:  python-devel python-setuptools
+BuildRequires:  python%{pyver}-devel python%{pyver}-setuptools
 
 #XXX More are needed
-BuildRequires:  python-paste-deploy, python-paste-script
+BuildRequires:  python%{pyver}-paste-deploy, python%{pyver}-paste-script
 #Requires:
 
 %description
