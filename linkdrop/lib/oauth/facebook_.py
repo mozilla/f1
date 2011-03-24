@@ -35,7 +35,7 @@ import random
 import copy
 import logging
 
-from pylons import config, request, response, session, tmpl_context as c, url
+from pylons import config, request, response, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from linkdrop.lib.oauth.base import OAuth2
 

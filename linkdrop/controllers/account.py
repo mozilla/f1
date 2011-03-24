@@ -27,7 +27,7 @@ from datetime import datetime
 from uuid import uuid1
 import hashlib
 
-from pylons import config, request, response, session, tmpl_context as c, url
+from pylons import config, request, response, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.decorators import jsonify
 from pylons.decorators.util import get_pylons
@@ -51,54 +51,11 @@ OAuth authorization api.
 """
     __api_controller__ = True # for docs
 
-    # for testing...
-    @api_response
-    @json_exception_response
-    def get(self, domain=None):
-        keys = [k for k in session.get('account_keys', '').split(',') if k]
-        if domain == 'full':
-            return [p for p in [session[k] for k in keys] if p]
-        return [p for p in [session[k].get('profile') for k in keys] if p]
-        
-    def signout(self):
-        domain = request.params.get('domain')
-        username = request.params.get('username')
-        userid = request.params.get('userid')
-        if domain and username or userid:
-            try:
-                keys = [k for k in session.get('account_keys', '').split(',') if k]
-                rem_keys = keys[:]
-                for k in keys:
-                    acct = session[k]
-                    if acct['domain']==domain and \
-                       (not username or acct['username']==username) and \
-                       (not userid or acct['userid']==userid):
-                        session.pop(k)
-                        rem_keys.remove(k)
-                session['account_keys'] = ','.join(rem_keys)
-            except:
-                log.exception('failed to signout from domain %s', domain)
-                session.clear()
-        else:
-            session.clear()
-        session.save()
-
-    def _get_or_create_account(self, domain, userid, username):
+    def _create_account(self, domain, userid, username):
         acct_hash = hashlib.sha1("%s#%s" % ((username or '').encode('utf-8'), (userid or '').encode('utf-8'))).hexdigest()
-        keys = [k for k in session.get('account_keys', '').split(',') if k]
-        # Find or create an account
-        for k in keys:
-            acct = session[k]
-            if acct['domain']==domain and acct['userid']==userid:
-                metrics.track(request, 'account-auth', domain=domain,
-                              acct_id=acct_hash)
-                break
-        else:
-            acct = dict(key=str(uuid1()), domain=domain, userid=userid,
-                        username=username)
-            metrics.track(request, 'account-create', domain=domain, acct_id=acct_hash)
-            keys.append(acct['key'])
-            session['account_keys'] = ','.join(keys)
+        acct = dict(key=str(uuid1()), domain=domain, userid=userid,
+                    username=username)
+        metrics.track(request, 'account-create', domain=domain, acct_id=acct_hash)
         return acct
 
     # this is not a rest api
@@ -121,14 +78,12 @@ OAuth authorization api.
             if not user.get('oauth_token') and not user.get('oauth_token_secret'):
                 raise Exception('Unable to get OAUTH access')
             
-            acct = self._get_or_create_account(provider, str(account['userid']), account['username'])
+            acct = self._create_account(provider, str(account['userid']), account['username'])
             acct['profile'] = user['profile']
             acct['oauth_token'] = user.get('oauth_token', None)
             if 'oauth_token_secret' in user:
                 acct['oauth_token_secret'] = user['oauth_token_secret']
             acct['updated'] = datetime.now().isoformat()
-            session[acct['key']] = acct
-            session.save()
         except AccessException, e:
             self._redirectException(e)
         # lib/oauth/*.py throws redirect exceptions in a number of places and
@@ -139,11 +94,11 @@ OAuth authorization api.
         except Exception, e:
             log.exception('failed to verify the %s account', provider)
             self._redirectException(e)
-        resp = get_redirect_response(session.get('end_point_success', config.get('oauth_success')))
+        resp = get_redirect_response(config.get('oauth_success'))
         resp.set_cookie('account_tokens', urllib.quote(json.dumps(acct)))
         raise resp.exception
 
     def _redirectException(self, e):
         err = urllib.urlencode([('error',str(e))])
-        url = session.get('end_point_auth_failure',config.get('oauth_failure')).split('#')
+        url = config.get('oauth_failure').split('#')
         return redirect('%s?%s#%s' % (url[0], err, url[1]))

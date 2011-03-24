@@ -73,11 +73,13 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       $(function () {
         var html = '';
 
-        json.forEach(function (item) {
-          html += jig('#accountTemplate', item);
+        json.forEach(function (account) {
+          // protect against old style account data
+          if (typeof(account.profile) === 'undefined') return;
+          html += jig('#accountTemplate', account.profile);
 
           // remember which accounts already have an entry
-          existingAccounts[item.accounts[0].domain] = true;
+          existingAccounts[account.profile.accounts[0].domain] = true;
         });
 
         //Generate UI for each list.
