@@ -112,6 +112,7 @@ Site provided description of the shared item, not supported by all services.
     def send(self):
         result = {}
         error = None
+        acct = None
         domain = request.POST.get('domain')
         message = request.POST.get('message', '')
         username = request.POST.get('username')
@@ -135,7 +136,8 @@ Site provided description of the shared item, not supported by all services.
             }
             return {'result': result, 'error': error}
 
-        acct = json.loads(account_data)
+        if account_data:
+            acct = json.loads(account_data)
         if not acct:
             metrics.track(request, 'send-noaccount', domain=domain)
             error = {'provider': domain,
@@ -186,7 +188,7 @@ Site provided description of the shared item, not supported by all services.
         if error:
             timer.track('send-error', error=error)
             assert not result
-            log.error("send failure: %r %r %r", username, userid, error)
+            #log.error("send failure: %r %r %r", username, userid, error)
         else:
             # create a new record in the history table.
             assert result

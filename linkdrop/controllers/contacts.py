@@ -101,7 +101,9 @@ Name of the group to return.
             }
             return {'result': None, 'error': error}
 
-        acct = json.loads(account_data)
+        acct = None
+        if account_data:
+            acct = json.loads(account_data)
         if not acct:
             metrics.track(request, 'contacts-noaccount', domain=domain)
             error = {'provider': domain,
