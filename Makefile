@@ -3,8 +3,7 @@ version := $(shell $(PYTHON) setup.py --version)
 tag := $(shell grep tag_build setup.cfg  | cut -d= -f2 | xargs echo )
 
 NOSETESTS := nosetests
-NOSETESTS_ARGS := --with-xunit
-COVERAGE  := coverage
+NOSETESTS_ARGS := --with-xunit --with-coverage --cover-package=linkdrop
 
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
@@ -94,7 +93,7 @@ f1.spec: f1.spec.in Makefile
 	@cat f1.spec.in | sed -e"s/%%version%%/$(version)$(tag)/g" > f1.spec
 
 test:
-	$(COVERAGE) run `which $(NOSETESTS)` $(NOSETESTS_ARGS)
+	$(NOSETESTS) $(NOSETESTS_ARGS)
 	$(COVERAGE) xml
 
 .PHONY: xpi clean dist rpm test
