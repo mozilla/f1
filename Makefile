@@ -2,6 +2,10 @@ PYTHON := python
 version := $(shell $(PYTHON) setup.py --version)
 tag := $(shell grep tag_build setup.cfg  | cut -d= -f2 | xargs echo )
 
+NOSETESTS := nosetests
+NOSETESTS_ARGS := --with-xunit
+COVERAGE  := coverage
+
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
@@ -89,4 +93,8 @@ rpm:	f1.spec
 f1.spec: f1.spec.in Makefile
 	@cat f1.spec.in | sed -e"s/%%version%%/$(version)$(tag)/g" > f1.spec
 
-.PHONY: xpi clean dist rpm
+test:
+	$(COVERAGE) run `which $(NOSETESTS)` $(NOSETESTS_ARGS)
+	$(COVERAGE) xml
+
+.PHONY: xpi clean dist rpm test
