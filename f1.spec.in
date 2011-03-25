@@ -13,7 +13,7 @@ BuildArch:	    noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  python%{pyver}-devel python%{pyver}-setuptools
-BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /usr/bin/sed, /usr/bin/awk
+BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /bin/sed, /usr/bin/awk
 
 #XXX More are needed
 BuildRequires:  python%{pyver}-paste-deploy, python%{pyver}-paste-script
