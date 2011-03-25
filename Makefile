@@ -3,7 +3,8 @@ version := $(shell $(PYTHON) setup.py --version)
 tag := $(shell grep tag_build setup.cfg  | cut -d= -f2 | xargs echo )
 
 NOSETESTS := nosetests
-NOSETESTS_ARGS := --with-xunit --with-coverage --cover-package=linkdrop
+NOSETESTS_ARGS := --with-xunit --with-coverage --cover-package=linkdrop --cover-erase
+COVERAGE := coverage
 
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
