@@ -41,6 +41,7 @@ setup(
         "Pylons>=1.0",
         "docutils",
         "nose",
+        "coverage",
         "httplib2",
         "oauth2",
         "python-dateutil",
