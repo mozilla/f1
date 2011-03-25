@@ -1,10 +1,20 @@
-PYTHON := python
-version := $(shell $(PYTHON) setup.py --version)
-tag := $(shell grep tag_build setup.cfg  | cut -d= -f2 | xargs echo )
-
-NOSETESTS := nosetests
-NOSETESTS_ARGS := --with-xunit --with-coverage --cover-package=linkdrop --cover-erase
+APPNAME = server-shared-send
+DEPS = server-share-core
+VIRTUALENV = virtualenv
+NOSE = nosetests
+NOSETESTS_ARGS = --with-xunit --with-coverage --cover-package=linkdrop --cover-erase
+TESTS = linkdrop/tests
+PYTHON = bin/python
+version = $(shell $(PYTHON) setup.py --version)
+tag = $(shell grep tag_build setup.cfg  | cut -d= -f2 | xargs echo )
+EZ = bin/easy_install
+COVEROPTS = --cover-html --cover-html-dir=html --with-coverage --cover-package=linkdrop
 COVERAGE := coverage
+PYLINT = bin/pylint
+PKGS = linkdrop
+
+version := 0.3.2
+#PYTHON := python
 
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
@@ -93,8 +103,17 @@ rpm:	f1.spec
 f1.spec: f1.spec.in Makefile
 	@cat f1.spec.in | sed -e"s/%%version%%/$(version)$(tag)/g" > f1.spec
 
+build:
+	$(VIRTUALENV) --no-site-packages --distribute .
+	$(PYTHON) build.py $(APPNAME) $(DEPS)
+	$(EZ) nose
+	$(EZ) WebTest
+	$(EZ) Funkload
+	$(EZ) pylint
+	$(EZ) coverage
+
 test:
-	$(NOSETESTS) $(NOSETESTS_ARGS)
+	$(NOSETESTS) $(NOSETESTS_ARGS) $(TESTS)
 	$(COVERAGE) xml
 
-.PHONY: xpi clean dist rpm test
+.PHONY: xpi clean dist rpm build test

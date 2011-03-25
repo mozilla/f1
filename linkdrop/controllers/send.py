@@ -36,13 +36,14 @@ from pylons import config, request, response
 from pylons.controllers.util import abort, redirect
 from pylons.decorators.util import get_pylons
 
+from linkoauth import get_provider
+from linkoauth.base import OAuthKeysException, ServiceUnavailableException
+
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
-from linkdrop.lib.oauth import get_provider
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 from linkdrop.lib.shortener import shorten_link
-from linkdrop.lib.oauth.base import OAuthKeysException, ServiceUnavailableException
 
 log = logging.getLogger(__name__)
 
@@ -171,6 +172,7 @@ Site provided description of the shared item, not supported by all services.
                      'message': "not logged in or no user account for that domain",
                      'status': 401
             }
+
             metrics.track(request, 'send-oauth-keys-missing', domain=domain)
             timer.track('send-error', error=error)
             return {'result': result, 'error': error}
