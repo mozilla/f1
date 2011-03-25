@@ -1,5 +1,9 @@
 *.pyc
+*.egg-info
 bin
 include
 lib
+web/current
+data
+env
 ShareCore.egg-info
