@@ -27,7 +27,7 @@ from datetime import datetime
 from uuid import uuid1
 import hashlib
 
-from pylons import config, request, response, tmpl_context as c, url
+from pylons import config, request, response, session, tmpl_context as c, url
 from pylons.controllers.util import abort, redirect
 from pylons.decorators import jsonify
 from pylons.decorators.util import get_pylons
@@ -78,7 +78,7 @@ OAuth authorization api.
             account = user['profile']['accounts'][0]
             if not user.get('oauth_token') and not user.get('oauth_token_secret'):
                 raise Exception('Unable to get OAUTH access')
-            
+
             acct = self._create_account(provider, str(account['userid']), account['username'])
             acct['profile'] = user['profile']
             acct['oauth_token'] = user.get('oauth_token', None)
