@@ -104,7 +104,7 @@ f1.spec: f1.spec.in Makefile
 	@cat f1.spec.in | sed -e"s/%%version%%/$(version)$(tag)/g" > f1.spec
 
 build:
-	$(VIRTUALENV) --no-site-packages --distribute .
+	$(VIRTUALENV) --python $(PYTHON) --no-site-packages --distribute .
 	$(PYTHON) build.py $(APPNAME) $(DEPS)
 	$(EZ) nose
 	$(EZ) WebTest
