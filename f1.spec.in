@@ -1,6 +1,6 @@
 %{!?pyver:  %global pyver %( %{__python} -V 2>&1 | awk '{print $2}' | cut -d. -f1-2 | sed -e's!\\.!!g' )}
 
-Name:           python%{pyver}-mozilla-f1
+Name:           mozilla-f1-python%{pyver}
 Version:        %%version%%
 Release:        1%{?dist}
 Summary:        Share Links Fast.
