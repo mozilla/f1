@@ -36,7 +36,7 @@ class HttpReplayer(ProtocolReplayer):
         return httplib2.Response(resp), content
 
 
-from linkdrop.lib.oauth.google_ import SMTP
+from linkoauth.google_ import SMTP
 class SmtpReplayer(SMTP, ProtocolReplayer):
     to_playback = None
     def __init__(self, *args, **kw):
@@ -254,15 +254,15 @@ class GoogleReplayTestCase(ServiceReplayTestCase):
 
 
 def setupReplayers():
-    import linkdrop.lib.oauth.facebook_
-    linkdrop.lib.oauth.facebook_.HttpRequestor = HttpReplayer
-    import linkdrop.lib.oauth.yahoo_
-    linkdrop.lib.oauth.yahoo_.HttpRequestor = HttpReplayer
-    import linkdrop.lib.oauth.google_
-    linkdrop.lib.oauth.google_.SMTPRequestor = SmtpReplayer
-    linkdrop.lib.oauth.google_.OAuth2Requestor = HttpReplayer
-    import linkdrop.lib.oauth.base
-    linkdrop.lib.oauth.base.HttpRequestor = HttpReplayer
+    import linkoauth.facebook_
+    linkoauth.facebook_.HttpRequestor = HttpReplayer
+    import linkoauth.yahoo_
+    linkoauth.yahoo_.HttpRequestor = HttpReplayer
+    import linkoauth.google_
+    linkoauth.google_.SMTPRequestor = SmtpReplayer
+    linkoauth.google_.OAuth2Requestor = HttpReplayer
+    import linkoauth.base
+    linkoauth.base.HttpRequestor = HttpReplayer
     HttpReplayer.to_playback = []
     SmtpReplayer.to_playback = None
 
@@ -270,17 +270,17 @@ def setupReplayers():
 def teardownReplayers():
     assert not HttpReplayer.to_playback, HttpReplayer.to_playback
     assert not SmtpReplayer.to_playback, SmtpReplayer.to_playback
-    import linkdrop.lib.protocap
-    import linkdrop.lib.oauth.facebook_
-    linkdrop.lib.oauth.facebook_.HttpRequestor = linkdrop.lib.protocap.HttpRequestor
-    import linkdrop.lib.oauth.yahoo_
-    linkdrop.lib.oauth.yahoo_.HttpRequestor = linkdrop.lib.protocap.HttpRequestor
-    import linkdrop.lib.protocap
-    import linkdrop.lib.oauth.google_
-    linkdrop.lib.oauth.google_.SMTPRequestor = linkdrop.lib.oauth.google_.SMTPRequestorImpl
-    linkdrop.lib.oauth.google_.OAuth2Requestor = linkdrop.lib.protocap.OAuth2Requestor
-    import linkdrop.lib.oauth.base
-    linkdrop.lib.oauth.base.HttpRequestor = linkdrop.lib.protocap.HttpRequestor
+    import linkoauth.protocap
+    import linkoauth.facebook_
+    linkoauth.facebook_.HttpRequestor = linkoauth.protocap.HttpRequestor
+    import linkoauth.yahoo_
+    linkoauth.yahoo_.HttpRequestor = linkoauth.protocap.HttpRequestor
+    import linkoauth.protocap
+    import linkoauth.google_
+    linkoauth.google_.SMTPRequestor = linkoauth.google_.SMTPRequestorImpl
+    linkoauth.google_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
+    import linkoauth.base
+    linkoauth.base.HttpRequestor = linkoauth.protocap.HttpRequestor
 
 
 host_to_test = {
