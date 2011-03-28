@@ -1,9 +1,9 @@
 APPNAME = server-shared-send
 DEPS = server-share-core
 VIRTUALENV = virtualenv
-NOSE = nosetests
-NOSETESTS_ARGS = --with-xunit --with-coverage --cover-package=linkdrop --cover-erase
-TESTS = linkdrop/tests
+NOSE = bin/nosetests
+NOSETESTS_ARGS = -s --with-xunit --with-coverage --cover-package=linkdrop,linkoauth --cover-erase
+TESTS = linkdrop/tests deps/server-share-core/linkoauth/tests
 PYTHON = bin/python
 version = $(shell $(PYTHON) setup.py --version)
 tag = $(shell grep tag_build setup.cfg  | cut -d= -f2 | xargs echo )
@@ -113,7 +113,7 @@ build:
 	$(EZ) coverage
 
 test:
-	$(NOSETESTS) $(NOSETESTS_ARGS) $(TESTS)
+	$(NOSE) $(NOSETESTS_ARGS) $(TESTS)
 	$(COVERAGE) xml
 
 .PHONY: xpi clean dist rpm build test
