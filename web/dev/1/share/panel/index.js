@@ -34,17 +34,17 @@ require({
 
 define([ "require", "jquery", "blade/object", "blade/fn", "rdapi", "oauth",
         "blade/jig", "blade/url", "placeholder", "AutoComplete", "dispatch", "accounts",
-         "storage", "services", "shareOptions", "widgets/PageInfo",
+         "storage", "services", "widgets/PageInfo",
          "widgets/DebugPanel", "widgets/AccountPanel", "dotCompare",
          "jquery-ui-1.8.7.min", "jquery.textOverflow"],
 function (require,   $,        object,         fn,         rdapi,   oauth,
           jig,         url,        placeholder,   AutoComplete,   dispatch,   accounts,
-          storage,   services,   shareOptions,   PageInfo,
+          storage,   services,   PageInfo,
           DebugPanel,           AccountPanel,           dotCompare) {
 
   var actions = services.domains,
-    options = shareOptions(),
-    bodyDom, timer, pageInfo, sendData, showNew,
+    options, bodyDom, timer, pageInfo, sendData, showNew,
+    onFirstShareState = null,
     accountPanels = [],
     store = storage(),
     SHARE_DONE = 0,
@@ -55,7 +55,21 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       statusSharing: true,
       statusShared: true
     },
-    isGreaterThan076 = dotCompare(store.extensionVersion, "0.7.7") > -1;
+    isGreaterThan076 = dotCompare(store.extensionVersion, "0.7.7") > -1,
+    // If it has been more than a day,
+    // refresh the UI, record a timestamp for it.
+    refreshStamp = (new Date()).getTime(),
+    //1 day.
+    refreshInterval = 1 * 24 * 60 * 60 * 1000;
+
+  function checkBase64Preview() {
+    //Ask extension to generate base64 data if none available.
+    //Useful for sending previews in email.
+    var preview = options.previews && options.previews[0];
+    if (accounts.length && preview && preview.http_url && !preview.base64) {
+      dispatch.pub('generateBase64Preview', preview.http_url);
+    }
+  }
 
   function hide() {
     dispatch.pub('hide');
@@ -120,28 +134,50 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   }
 
   function shareStateUpdate(shareState) {
-    var status = null;
-    if (shareState && shareState.status) {
-      // remove the status number
-      status = shareState.status.slice(1);
-    }
-    if (status && status[0]) {
-      _showStatus.apply(null, status);
+    var now = (new Date()).getTime(),
+        status;
+    if (now - refreshStamp > refreshInterval) {
+      //Force contact with the server via the true argument.
+      location.reload(true);
     } else {
-      //clear all status, but if settings config needs to be shown, show it.
-      cancelStatus();
-      accounts(
-        function (accts) {
-          if (!accts || !accts.length) {
-            showStatus('statusSettings');
-          }
-        }, function (err) {
-          showStatus('statusSettings');
+
+      options = shareState.options;
+      // TODO: figure out if we can avoid this call if this is just
+      // an error update.
+      checkBase64Preview();
+
+      if (onFirstShareState) {
+        onFirstShareState();
+        onFirstShareState = null;
+      } else {
+        dispatch.pub('optionsChanged', options);
+
+        // just a status update.
+        status = null;
+        if (shareState && shareState.status) {
+          // remove the status number
+          status = shareState.status.slice(1);
         }
-      );
+        if (status && status[0]) {
+          _showStatus.apply(null, status);
+        } else {
+          //clear all status, but if settings config needs to be shown, show it.
+          cancelStatus();
+          accounts(
+            function (accts) {
+              if (!accts || !accts.length) {
+                showStatus('statusSettings');
+              }
+            }, function (err) {
+              showStatus('statusSettings');
+            }
+          );
+        }
+
+        //Tell the extension that the size of the content may have changed.
+        dispatch.pub('sizeToContent');
+      }
     }
-    // we could switch to handling options this way:
-    //dispatch.pub('optionsChanged', shareState.options);
   }
   dispatch.sub('shareState', shareStateUpdate);
 
@@ -179,15 +215,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       panel.saveData();
     });
     showStatus('statusAuth');
-  }
-
-  function checkBase64Preview() {
-    //Ask extension to generate base64 data if none available.
-    //Useful for sending previews in email.
-    var preview = options.previews && options.previews[0];
-    if (accounts.length && preview && preview.http_url && !preview.base64) {
-      dispatch.pub('generateBase64Preview', preview.http_url);
-    }
   }
 
   // This method assumes the sendData object has already been set up.
@@ -316,7 +343,9 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     //Figure out what accounts we do have
     accounts.forEach(function (account) {
       // protect against old style account data
-      if (typeof(account.profile) === 'undefined') return;
+      if (typeof(account.profile) === 'undefined') {
+        return;
+      }
 
       var domain = account.profile.accounts[0].domain,
           data, PanelCtor;
@@ -386,7 +415,9 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       //the user has configured.
       accounts.forEach(function (account) {
         // protect against old style account data
-        if (typeof(account.profile) === 'undefined') return;
+        if (typeof(account.profile) === 'undefined') {
+          return;
+        }
 
         var domain = account.profile.accounts[0].domain,
             overlays = actions[domain].overlays,
@@ -435,116 +466,93 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     }
   }
 
-  $(function () {
-    //Set the type of system as a class on the UI to show/hide things in
-    //dev vs. production
-    if (options.prefs.system) {
-      $(document.documentElement).addClass(options.prefs.system);
-    }
-    if (options.ui === 'sidebar') {
-      $("#panelHeader").text('');
-      $("#closeLink").addClass('hidden');
-    }
+  // Set up initialization work for the first share state passing.
+  onFirstShareState = function () {
+    // Wait until DOM ready to start the DOM work.
+    $(function () {
+      //Set the type of system as a class on the UI to show/hide things in
+      //dev vs. production
+      if (options.prefs.system) {
+        $(document.documentElement).addClass(options.prefs.system);
+      }
+      if (options.ui === 'sidebar') {
+        $("#panelHeader").text('');
+        $("#closeLink").addClass('hidden');
+      }
 
-    //Show the new link if appropriate.
-    if (showNew) {
-      $('#newLink').removeClass('hidden');
-    }
+      //Show the new link if appropriate.
+      if (showNew) {
+        $('#newLink').removeClass('hidden');
+      }
 
-    //Listen to sendMessage events from the AccountPanels
-    dispatch.sub('sendMessage', function (data) {
-      sendMessage(data);
-    });
-
-    bodyDom = $('body');
-    bodyDom
-      .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
-        cancelStatus();
-      })
-      .delegate('.statusErrorCloseButton', 'click', function (evt) {
-        cancelStatus();
-      })
-      .delegate('.statusResetErrorButton', 'click', function (evt) {
-        location.reload();
-      })
-      .delegate('nav .close', 'click', close);
-
-    $('#authOkButton').click(function (evt) {
-      oauth(sendData.domain, false, function (success) {
-        if (success) {
-          accounts.clear();
-          accounts();
-        } else {
-          showStatus('statusOAuthFailed');
-        }
+      //Listen to sendMessage events from the AccountPanels
+      dispatch.sub('sendMessage', function (data) {
+        sendMessage(data);
       });
-    });
 
-    $('#captchaButton').click(function (evt) {
-      cancelStatus();
-      $('#clickBlock').removeClass('hidden');
-      sendData.HumanVerification = $('#captcha').attr('value');
-      sendData.HumanVerificationImage = $('#captchaImage').attr('src');
-      sendMessage(sendData);
-    });
+      bodyDom = $('body');
+      bodyDom
+        .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
+          cancelStatus();
+        })
+        .delegate('.statusErrorCloseButton', 'click', function (evt) {
+          cancelStatus();
+        })
+        .delegate('.statusResetErrorButton', 'click', function (evt) {
+          location.reload();
+        })
+        .delegate('nav .close', 'click', close);
 
-    //Set up default handler for account changes triggered from other
-    //windows, or updates to expired cache.
-    accounts.onChange();
+      $('#authOkButton').click(function (evt) {
+        oauth(sendData.domain, false, function (success) {
+          if (success) {
+            accounts.clear();
+            accounts();
+          } else {
+            showStatus('statusOAuthFailed');
+          }
+        });
+      });
 
-    //Only bother with localStorage enabled storage.
-    if (storage.type === 'memory') {
-      showStatus('statusEnableLocalStorage');
-      return;
-    }
+      $('#captchaButton').click(function (evt) {
+        cancelStatus();
+        $('#clickBlock').removeClass('hidden');
+        sendData.HumanVerification = $('#captcha').attr('value');
+        sendData.HumanVerificationImage = $('#captchaImage').attr('src');
+        sendMessage(sendData);
+      });
 
-    //Show the page info at the top.
-    pageInfo = new PageInfo({
-      options: options
-    }, $('.sharebox')[0], 'prepend');
+      //Set up default handler for account changes triggered from other
+      //windows, or updates to expired cache.
+      accounts.onChange();
 
-    //Fetch the accounts.
-    accounts(
-      updateAccounts,
+      //Only bother with localStorage enabled storage.
+      if (storage.type === 'memory') {
+        showStatus('statusEnableLocalStorage');
+        return;
+      }
 
-      //Error handler for account fetch
-      function (xhr, textStatus, err) {
-        if (xhr.status === 503) {
-          showStatus('statusServerBusyClose');
-        } else {
-          showStatus('statusServerError', err);
+      //Show the page info at the top.
+      pageInfo = new PageInfo({
+        options: options
+      }, $('.sharebox')[0], 'prepend');
+
+      //Fetch the accounts.
+      accounts(
+        updateAccounts,
+
+        //Error handler for account fetch
+        function (xhr, textStatus, err) {
+          if (xhr.status === 503) {
+            showStatus('statusServerBusyClose');
+          } else {
+            showStatus('statusServerError', err);
+          }
         }
-      }
-    );
+      );
+    });
+  };
 
-    // watch for hash changes, update options and trigger
-    // update event. However, if it has been more than a day,
-    // refresh the UI.
-    var refreshStamp = (new Date()).getTime(),
-        //1 day.
-        refreshInterval = 1 * 24 * 60 * 60 * 1000;
-
-    window.addEventListener("hashchange", function () {
-      var now = (new Date()).getTime();
-      if (now - refreshStamp > refreshInterval) {
-        //Force contact with the server via the true argument.
-        location.reload(true);
-      } else {
-        // XXX we could move to pure post message, see shareStateUpdate
-        options = shareOptions();
-
-        dispatch.pub('getShareState', null);
-        dispatch.pub('optionsChanged', options);
-        checkBase64Preview();
-
-        //Check that accounts are still available, but do it in the
-        //background.
-        accounts();
-
-        //Tell the extension that the size of the content may have changed.
-        dispatch.pub('sizeToContent');
-      }
-    }, false);
-
-  });
+  // Trigger a call for the first share state.
+  dispatch.pub('getShareState', null);
 });
