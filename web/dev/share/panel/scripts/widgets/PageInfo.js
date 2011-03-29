@@ -48,10 +48,10 @@ function (object,         Widget,         fn,      $,        dispatch,
             opts = this.options;
 
         root.find('.thumb').attr('src', jigFuncs.thumb(opts));
-        root.find('.title').html(opts.title);
+        root.find('.title').text(opts.title);
         root.find('.description').text(opts.description);
-        root.find('.url').html(jigFuncs.cleanLink(opts.url));
-        root.find('.shorturl').html(jigFuncs.cleanLink(opts.shortUrl));
+        root.find('.url').text(jigFuncs.cleanLink(opts.url));
+        root.find('.shorturl').text(jigFuncs.cleanLink(opts.shortUrl));
 
         //Update text overflow.
         $(".overflow", this.node).textOverflow();
