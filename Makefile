@@ -2,7 +2,8 @@ APPNAME = server-shared-send
 DEPS = server-share-core
 VIRTUALENV = virtualenv
 NOSE = bin/nosetests
-NOSETESTS_ARGS = -s --with-xunit --with-coverage --cover-package=linkdrop,linkoauth --cover-erase
+NOSETESTS_ARGS = -s
+NOSETESTS_ARGS_C = -s --with-xunit --with-coverage --cover-package=linkdrop,linkoauth --cover-erase
 TESTS = linkdrop/tests deps/server-share-core/linkoauth/tests
 PYTHON = bin/python
 version = $(shell $(PYTHON) setup.py --version)
@@ -12,6 +13,8 @@ COVEROPTS = --cover-html --cover-html-dir=html --with-coverage --cover-package=l
 COVERAGE := coverage
 PYLINT = bin/pylint
 PKGS = linkdrop
+
+version := 0.3.2
 
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
@@ -111,6 +114,9 @@ build:
 
 test:
 	$(NOSE) $(NOSETESTS_ARGS) $(TESTS)
+
+coverage:
+	$(NOSE) $(NOSETESTS_ARGS_C) $(TESTS)
 	$(COVERAGE) xml
 
-.PHONY: xpi clean dist rpm build test
+.PHONY: xpi clean dist rpm build test coverage
