@@ -39,7 +39,7 @@ import subprocess
 
 
 CURDIR = os.path.dirname(__file__)
-REPO_ROOT = 'git@github.com:mozilla/%s.git'
+REPO_ROOT = 'git://github.com/mozilla/%s.git'
 PYTHON = sys.executable
 
 
