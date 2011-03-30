@@ -554,5 +554,5 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   };
 
   // Trigger a call for the first share state.
-  dispatch.pub('getShareState', null);
+  dispatch.pub('panelReady', null);
 });
