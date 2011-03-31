@@ -42,6 +42,7 @@ setup(
         "docutils",
         "nose",
         "coverage",
+        "mock",
         "httplib2",
         "oauth2",
         "python-dateutil",
