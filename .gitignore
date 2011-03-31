@@ -1,6 +1,13 @@
 *.pyc
 *.egg-info
+.coverage
+coverage.xml
+nosetests.xml
 bin
+build
+deps
+dist
+htmlcov
 include
 lib
 web/current
