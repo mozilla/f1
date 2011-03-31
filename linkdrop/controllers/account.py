@@ -52,7 +52,7 @@ OAuth authorization api.
 
     def _create_account(self, domain, userid, username):
         acct_hash = hashlib.sha1(
-            "%s#%s" % ((username or '').encode('utf-8')
+            "%s#%s" % ((username or '').encode('utf-8'),
                        (userid or '').encode('utf-8'))).hexdigest()
         acct = dict(key=str(uuid1()), domain=domain, userid=userid,
                     username=username)
