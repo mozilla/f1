@@ -27,11 +27,9 @@ import sys
 import inspect
 from docutils import core
 
-from pylons import request, response, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect
-
-from linkdrop.lib.base import BaseController, render
-from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
+from linkdrop.lib.base import BaseController
+from linkdrop.lib.helpers import json_exception_response
+from linkdrop.lib.helpers import api_response, api_entry
 from pylons import config
 
 log = logging.getLogger(__name__)
@@ -90,8 +88,8 @@ class DocsController(BaseController):
 API Documentation
 =================
 
-Returns structured information about the Raindrop API, for use in user interfaces
-that want to show an API reference.
+Returns structured information about the Raindrop API, for use in user
+interfaces that want to show an API reference.
 
 """
     __api_controller__ = True # for docs
@@ -105,30 +103,33 @@ docs/index
 
 Returns a json object containing documentation
 """,
-        response={'type': 'object', 'doc': 'An object that describes the API methods and parameters.'}
+        response={'type': 'object',
+                  'doc': ('An object that describes the API '
+                          'methods and parameters.')}
     )
 
     def index(self):
         # iterate through our routes and get the controller classes
-        import linkdrop.controllers
         mapper = config['routes.map']
         module_names = {}
         for m in mapper.matchlist:
             module_name = m.defaults.get('controller', None)
             if not module_name:
                 continue
-            
+
             if module_name in module_names:
                 # we've already got docs for this controller, just backfill
                 # some additional data
-                action = module_names[module_name]['methods'].get(m.defaults['action'], None)
+                action = module_names[module_name]['methods'].get(
+                    m.defaults['action'], None)
                 if action:
                     action.setdefault('routes',[]).append(m.routepath)
                 continue
-            
-            # this is the first hit for this controller
-            # import the module and create all documentation for the controller,
-            # we'll backfill some data from Routes as we process more mappings
+
+            # this is the first hit for this controller import the
+            # module and create all documentation for the controller,
+            # we'll backfill some data from Routes as we process more
+            # mappings
             module = getmodule(module_name)
             if not module:
                 continue
@@ -137,7 +138,7 @@ Returns a json object containing documentation
             class_ = getclass(module, classname)
             if not class_:
                 continue
-            
+
             doc = inspect.getdoc(class_)
             doc = doc and reST_to_html_fragment(doc)
             class_data = {
@@ -160,5 +161,5 @@ Returns a json object containing documentation
             action = class_data['methods'].get(m.defaults['action'], None)
             if action:
                 action.setdefault('routes',[]).append(m.routepath)
-            
+
         return module_names

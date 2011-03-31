@@ -43,10 +43,12 @@ class ErrorController(BaseController):
         """Render the error document"""
         request = self._py_object.request
         resp = request.environ.get('pylons.original_response')
-        content = literal(resp.body) or cgi.escape(request.GET.get('message', ''))
+        content = (literal(resp.body) or
+                   cgi.escape(request.GET.get('message', '')))
         page = error_document_template % \
             dict(prefix=request.environ.get('SCRIPT_NAME', ''),
-                 code=cgi.escape(request.GET.get('code', str(resp.status_int))),
+                 code=cgi.escape(request.GET.get('code',
+                                                 str(resp.status_int))),
                  message=content)
         return page
 
@@ -64,4 +66,5 @@ class ErrorController(BaseController):
         """
         request = self._py_object.request
         request.environ['PATH_INFO'] = '/%s' % path
-        return PkgResourcesParser('pylons', 'pylons')(request.environ, self.start_response)
+        return PkgResourcesParser('pylons', 'pylons')(
+            request.environ, self.start_response)

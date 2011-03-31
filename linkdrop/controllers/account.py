@@ -22,19 +22,17 @@
 #
 
 import logging
-import urllib, cgi, json
+import urllib, json
 from datetime import datetime
 from uuid import uuid1
 import hashlib
 
-from pylons import config, request, response, session, tmpl_context as c, url
-from pylons.controllers.util import abort, redirect
-from pylons.decorators import jsonify
-from pylons.decorators.util import get_pylons
+from pylons import config, request, session, url
+from pylons.controllers.util import redirect
 from pylons.controllers.core import HTTPException
 
-from linkdrop.lib.base import BaseController, render
-from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg, get_redirect_response
+from linkdrop.lib.base import BaseController
+from linkdrop.lib.helpers import get_redirect_response
 from linkdrop.lib.metrics import metrics
 
 from linkoauth import get_provider
@@ -53,10 +51,13 @@ OAuth authorization api.
     __api_controller__ = True # for docs
 
     def _create_account(self, domain, userid, username):
-        acct_hash = hashlib.sha1("%s#%s" % ((username or '').encode('utf-8'), (userid or '').encode('utf-8'))).hexdigest()
+        acct_hash = hashlib.sha1(
+            "%s#%s" % ((username or '').encode('utf-8')
+                       (userid or '').encode('utf-8'))).hexdigest()
         acct = dict(key=str(uuid1()), domain=domain, userid=userid,
                     username=username)
-        metrics.track(request, 'account-create', domain=domain, acct_id=acct_hash)
+        metrics.track(request, 'account-create', domain=domain,
+                      acct_id=acct_hash)
         return acct
 
     # this is not a rest api
@@ -76,10 +77,13 @@ OAuth authorization api.
         try:
             user = auth.verify(request, url, session)
             account = user['profile']['accounts'][0]
-            if not user.get('oauth_token') and not user.get('oauth_token_secret'):
+            if (not user.get('oauth_token')
+                and not user.get('oauth_token_secret')):
                 raise Exception('Unable to get OAUTH access')
 
-            acct = self._create_account(provider, str(account['userid']), account['username'])
+            acct = self._create_account(provider,
+                                        str(account['userid']),
+                                        account['username'])
             acct['profile'] = user['profile']
             acct['oauth_token'] = user.get('oauth_token', None)
             if 'oauth_token_secret' in user:
@@ -87,10 +91,12 @@ OAuth authorization api.
             acct['updated'] = datetime.now().isoformat()
         except AccessException, e:
             self._redirectException(e)
-        # lib/oauth/*.py throws redirect exceptions in a number of places and
-        # we don't want those "exceptions" to be logged as errors.
+        # lib/oauth/*.py throws redirect exceptions in a number of
+        # places and we don't want those "exceptions" to be logged as
+        # errors.
         except HTTPException, e:
-            log.info("account verification for %s caused a redirection: %s", provider, e)
+            log.info("account verification for %s caused a redirection: %s",
+                     provider, e)
             raise
         except Exception, e:
             log.exception('failed to verify the %s account', provider)
