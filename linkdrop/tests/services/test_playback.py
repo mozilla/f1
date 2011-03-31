@@ -1,18 +1,19 @@
 import sys
 import os
 import glob
-import unittest
 import httplib
 import httplib2
 import json
 import socket
 from pprint import pformat
 
-from linkdrop.tests import *
+from linkdrop.tests import TestController
+from linkdrop.tests import url
 
 def assert_dicts_equal(got, expected):
     if got != expected:
-        raise AssertionError("\n%s\n!=\n%s" % (pformat(got), pformat(expected)))
+        raise AssertionError("\n%s\n!=\n%s" % (pformat(got),
+                                               pformat(expected)))
 
 # Somewhat analogous to a protocap.ProtocolCapturingBase object - but
 # instead of capturing, it replays an earlier capture.
@@ -59,7 +60,8 @@ class SmtpReplayer(SMTP, ProtocolReplayer):
         if line.startswith("E "):
             # a recorded exception - reconstitute it...
             exc_info = json.loads(line[2:])
-            module = sys.modules[exc_info['module']] if exc_info['module'] else __builtins__
+            module = (sys.modules[exc_info['module']]
+                      if exc_info['module'] else __builtins__)
             exc_class = getattr(module, exc_info['name'])
             raise exc_class(*tuple(exc_info['args']))
         if not line.startswith("< ") and not line.startswith("> "):
@@ -100,7 +102,8 @@ class CannedRequest(object):
     def __init__(self, path):
         meta_filename = os.path.join(path, "meta.json")
         self.path = path
-        self.protocol, self.host, self.req_type, self.comments = os.path.basename(path).split("-", 3)
+        (self.protocol, self.host,
+         self.req_type, self.comments) = os.path.basename(path).split("-", 3)
         with open(meta_filename) as f:
             self.meta = json.load(f)
 
@@ -122,18 +125,21 @@ def genCanned(glob_pattern="*"):
 
 class ServiceReplayTestCase(TestController):
     def checkResponse(self, canned, response):
-        # First look for an optional 'expected-f1-response.json' which allows
-        # custom status and headers to be specified.
+        # First look for an optional 'expected-f1-response.json' which
+        # allows custom status and headers to be specified.
         try:
-            with open(os.path.join(canned.path, "expected-f1-response.json")) as f:
+            with open(os.path.join(canned.path,
+                                   "expected-f1-response.json")) as f:
                 expected = json.load(f)
         except IOError:
-            # No expected-f1-response - assume this means a 200 is expected and
-            # expected-f1-data.json has what we want.
+            # No expected-f1-response - assume this means a 200 is
+            # expected and expected-f1-data.json has what we want.
             pass
         else:
-            assert response.status_int==expected['status'], (response.status_int, expected['status'])
-            for exp_header_name, exp_header_val in expected.get('headers', {}).iteritems():
+            assert response.status_int==expected['status'], (
+                response.status_int, expected['status'])
+            for exp_header_name, exp_header_val in expected.get(
+                'headers', {}).iteritems():
                 got = response.headers.get(exp_header_name, None)
                 assert got==exp_header_val, (got, exp_header_val)
             return
@@ -160,7 +166,8 @@ class ServiceReplayTestCase(TestController):
             for subname, subval in sub.items():
                 if subval=="*":
                     # indicates any value is acceptable.
-                    assert subname in got[top], "no attribute [%r][%r]" % (top, subname)
+                    assert subname in got[top], ("no attribute [%r][%r]"
+                                                 % (top, subname))
                     del got[top][subname]
                     del expected[top][subname]
         assert_dicts_equal(got, expected)
@@ -172,21 +179,24 @@ class ServiceReplayTestCase(TestController):
         elif req_type=="contacts":
             # send the 'contacts' request.
             domain = request.pop('domain')
-            response = self.app.post(url(controller='contacts', action='get', domain=domain),
+            response = self.app.post(url(controller='contacts',
+                                         action='get', domain=domain),
                                      params=request)
         elif req_type=="auth":
-            # this is a little gross - we need to hit "authorize" direct, then
-            # assume we got redirected to the service, which then redirected us
-            # back to 'verify'
+            # this is a little gross - we need to hit "authorize"
+            # direct, then assume we got redirected to the service,
+            # which then redirected us back to 'verify'
             request['end_point_auth_failure'] = "/failure"
             request['end_point_auth_success'] = "/success"
-            response = self.app.post(url(controller='account', action='authorize'),
+            response = self.app.post(url(controller='account',
+                                         action='authorize'),
                                      params=request)
             assert response.status_int == 302
             # and even more hacky...
             request['provider'] = request.pop('domain')
             request['code'] = "the_code"
-            response = self.app.get(url(controller='account', action='verify'),
+            response = self.app.get(url(controller='account',
+                                        action='verify'),
                                      params=request)
         else:
             raise AssertionError(req_type)
@@ -197,10 +207,12 @@ class FacebookReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
         if req_type=="send" or req_type=="contacts":
             return {'domain': 'facebook.com',
-                    'account': '{"oauth_token": "foo", "oauth_token_secret": "bar"}',
+                    'account': ('{"oauth_token": "foo", '
+                                '"oauth_token_secret": "bar"}'),
                    }
         if req_type=="auth":
-            return {'domain': 'facebook.com', 'username': 'foo', 'userid': 'bar'}
+            return {'domain': 'facebook.com', 'username': 'foo',
+                    'userid': 'bar'}
         raise AssertionError(req_type)
 
 

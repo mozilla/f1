@@ -26,7 +26,7 @@ class TestContactsInvalidParams(TestController):
         for elt in except_for:
             del result[elt]
         return result
-        
+
     def checkContacts(self, request,
                   expected_message=None,
                   expected_code=constants.INVALID_PARAMS,
@@ -39,7 +39,7 @@ class TestContactsInvalidParams(TestController):
         response = self.app.post(url(controller='contacts', action='get',
                                      domain=domain),
                                  params=request)
-        
+
         assert response.status_int==expected_http_code, response.status_int
         try:
             got = json.loads(response.body)
