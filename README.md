@@ -21,25 +21,25 @@ Some directory explanations:
     git clone https://github.com/mozilla/f1.git
     cd f1
 
-### Setup a virtual environment (optional, recommended):
+### Setup dependencies:
 
-    sudo easy_install virtualenv
-    virtualenv env
-    source env/bin/activate
+    make build
 
-### Dependency installation
+If you get this error on Mac OS X:
 
-    python setup.py develop
+    /Developer/SDKs/MacOSX10.4u.sdk/usr/include/stdarg.h:4:25: error: stdarg.h: No such file or directory
 
-### Make a config file as follows::
+It could be because the default version of GCC is too high. If you do
 
-    # **skip this step for now**
-    # paster make-config f1 config.ini
+    ls -la /usr/bin/gcc
 
-### Tweak the config file as appropriate and then setup the application::
+And it points to gcc-4.2, then change it to point to gcc-4.0 (warning affects all gcc calls from then on):
 
-    # **skip this step for now**
-    # paster setup-app config.ini
+    sudo rm /usr/bin/gcc
+    sudo ln -s /usr/bin/gcc-4.0 /usr/bin/gcc
+
+Info taken from [this web site](http://blog.coredumped.org/2009/09/snow-leopard-and-lxml.html)
+
 
 ### Running f1
 
@@ -64,6 +64,4 @@ To test: Once that is done, you can bypass normal access to your domain by addin
 
 Update development.ini and add your key/secret for the google configuration, restart paster.
 
-Then in the web browser, hit f1 with http://your.host.com.  
-
-
+Then in the web browser, hit f1 with http://your.host.com.
