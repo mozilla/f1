@@ -13,8 +13,6 @@ COVERAGE := coverage
 PYLINT = bin/pylint
 PKGS = linkdrop
 
-version := 0.3.2
-
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
