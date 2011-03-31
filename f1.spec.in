@@ -1,7 +1,6 @@
 %define f1_name_prefix mozilla-f1-
 
-# build with --define 'use_python_version 2.6' to pick what python to build against if not the system def
-ault
+# build with --define 'use_python_version 2.6' to pick what python to build against if not the system default
 %{!?use_python_version: %global use_python_version %{nil}}
 
 %if "%{use_python_version}" != ""
@@ -9,8 +8,7 @@ ault
   %global python_version %{use_python_version}
 %else
   %global pyver %{nil}
-  %{!?python_version: %global python_version %(%{__python} -c "import sys; sys.stdout.write(sys.version[:
-3])")}
+  %{!?python_version: %global python_version %(%{__python} -c "import sys; sys.stdout.write(sys.version[:3])")}
 %endif
 
 %global python_sitelib /lib/python%{python_version}/site-packages
