@@ -4,7 +4,10 @@ import json
 
 from linkdrop.lib import constants
 
-from linkdrop.tests import *
+#from linkdrop.tests import *
+from linkdrop.tests import TestController
+from linkdrop.tests import testable_services
+from linkdrop.tests import url
 from nose.tools import eq_
 
 
@@ -24,14 +27,14 @@ class TestSendInvalidParams(TestController):
         for elt in except_for:
             del result[elt]
         return result
-        
+
     def checkSend(self, request,
                   expected_message=None,
                   expected_code=constants.INVALID_PARAMS,
                   expected_status=None,
                   expected_http_code=200):
-
-        assert expected_message or expected_code or expected_status # you must give *something* to check!
+        # you must give *something* to check!
+        assert expected_message or expected_code or expected_status
         response = self.app.post(url(controller='send', action='send'),
                                  params=request)
 

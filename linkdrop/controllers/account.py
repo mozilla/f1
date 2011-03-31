@@ -78,10 +78,12 @@ OAuth authorization api.
         try:
             user = auth.verify(request, url, session)
             account = user['profile']['accounts'][0]
-            if not user.get('oauth_token') and not user.get('oauth_token_secret'):
+            if (not user.get('oauth_token')
+                and not user.get('oauth_token_secret')):
                 raise Exception('Unable to get OAUTH access')
 
-            acct = self._create_account(provider, str(account['userid']),
+            acct = self._create_account(provider,
+                                        str(account['userid']),
                                         account['username'])
             acct['profile'] = user['profile']
             acct['oauth_token'] = user.get('oauth_token', None)
@@ -90,8 +92,9 @@ OAuth authorization api.
             acct['updated'] = datetime.now().isoformat()
         except AccessException, e:
             self._redirectException(e)
-        # lib/oauth/*.py throws redirect exceptions in a number of places and
-        # we don't want those "exceptions" to be logged as errors.
+        # lib/oauth/*.py throws redirect exceptions in a number of
+        # places and we don't want those "exceptions" to be logged as
+        # errors.
         except HTTPException, e:
             log.info("account verification for %s caused a redirection: %s",
                      provider, e)

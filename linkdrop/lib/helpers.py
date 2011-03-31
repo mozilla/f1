@@ -32,7 +32,6 @@ from decorator import decorator
 import pprint
 from xml.sax.saxutils import escape
 import json
-from webhelpers.html import literal
 from webob.exc import status_map
 
 import logging
@@ -68,38 +67,40 @@ class StrippingParser(sgmllib.SGMLParser):
     valid_tags = ('b', 'a', 'i', 'br', 'p')
 
     from htmlentitydefs import entitydefs # replace entitydefs from sgmllib
-    
+    entitydefs # make pyflakes happy
+
     def __init__(self):
         sgmllib.SGMLParser.__init__(self)
         self.result = ""
-        self.endTagList = [] 
-        
+        self.endTagList = []
+
     def handle_data(self, data):
         if data:
             self.result = self.result + data
 
     def handle_charref(self, name):
         self.result = "%s&#%s;" % (self.result, name)
-        
+
     def handle_entityref(self, name):
-        if self.entitydefs.has_key(name): 
+        if self.entitydefs.has_key(name):
             x = ';'
         else:
             # this breaks unstandard entities that end with ';'
             x = ''
         self.result = "%s&%s%s" % (self.result, name, x)
-    
+
     def unknown_starttag(self, tag, attrs):
         """ Delete all tags except for legal ones """
-        if tag in self.valid_tags:       
+        if tag in self.valid_tags:
             self.result = self.result + '<' + tag
             for k, v in attrs:
-                if string.lower(k[0:2]) != 'on' and string.lower(v[0:10]) != 'javascript':
+                if (string.lower(k[0:2]) != 'on'
+                    and string.lower(v[0:10]) != 'javascript'):
                     self.result = '%s %s="%s"' % (self.result, k, v)
             endTag = '</%s>' % tag
-            self.endTagList.insert(0,endTag)    
+            self.endTagList.insert(0,endTag)
             self.result = self.result + '>'
-                
+
     def unknown_endtag(self, tag):
         if tag in self.valid_tags:
             self.result = "%s</%s>" % (self.result, tag)
@@ -109,8 +110,8 @@ class StrippingParser(sgmllib.SGMLParser):
     def cleanup(self):
         """ Append missing closing tags """
         for j in range(len(self.endTagList)):
-                self.result = self.result + self.endTagList[j]    
-        
+                self.result = self.result + self.endTagList[j]
+
 
 def safeHTML(s):
     """ Strip illegal HTML tags from string s """
@@ -166,7 +167,8 @@ def api_response(func, *args, **kwargs):
                     r += "<%s>%s</%s>" % (k, escape("%s"%v), k)
             return r
         pylons.response.headers['Content-Type'] = 'text/xml'
-        return '<?xml version="1.0" encoding="UTF-8"?>' + ser({'response': data}).encode('utf-8')
+        return ('<?xml version="1.0" encoding="UTF-8"?>'
+                + ser({'response': data}).encode('utf-8'))
     pylons.response.headers['Content-Type'] = 'application/json'
     res = json.dumps(data)
     #import sys;print >> sys.stderr, res
@@ -203,7 +205,8 @@ def api_entry(**kw):
                 if opts:
                     line = "%s (%s)" % (line, ','.join(opts),)
                 args.append(line)
-            d += "Request Arguments\n-----------------\n\n%s\n\n" % '\n'.join(args)
+            d += ("Request Arguments\n-----------------\n\n%s\n\n"
+                  % '\n'.join(args))
             if 'bodyargs' in kw:
                 assert 'body' not in kw, "can't specify body and bodyargs"
                 for m in kw['bodyargs']:
@@ -215,17 +218,21 @@ def api_entry(**kw):
                     if opts:
                         line = "%s (%s)" % (line, ','.join(opts),)
                     args.append(line)
-                d = d+ "**Request Body**: A JSON object with the following fields:"
+                d = d+ ("**Request Body**: A JSON object with the "
+                        "following fields:")
                 d = d+ "\n".join(args)
             elif 'body' in kw:
-                d = d+ "**Request Body**:  %(type)-10s %(doc)s\n\n" % kw['body']
+                d = d+ ("**Request Body**:  %(type)-10s %(doc)s\n\n"
+                        % kw['body'])
             if 'response' in kw:
-                d = d+ "**Response Body**: %(type)-10s %(doc)s\n\n" % kw['response']
+                d = d+ ("**Response Body**: %(type)-10s %(doc)s\n\n"
+                        % kw['response'])
             f.__doc__ = doc + d
         return f
     return decorate
 
-def api_arg(name, type=None, required=False, default=None, allowed=None, doc=None):
+def api_arg(name, type=None, required=False, default=None, allowed=None,
+            doc=None):
     return {
         'name': name,
         'type': type,
@@ -253,22 +260,37 @@ http://portablecontacts.net/draft-spec.html
 
 """,
         urlargs=[
-            api_arg('user', 'string', True, None, ['me'], 'User to query'),
-            api_arg('group', 'string', True, None, ['all', 'self'], 'Group to query'),
-            api_arg('id', 'integer', False, None, None, 'Contact ID to return'),
+            api_arg('user', 'string', True, None, ['me'],
+                    'User to query'),
+            api_arg('group', 'string', True, None, ['all', 'self'],
+                    'Group to query'),
+            api_arg('id', 'integer', False, None, None,
+                    'Contact ID to return'),
             ],
         queryargs=[
             # name, type, required, default, allowed, doc
-            api_arg('filterBy', 'string', False, None, None, 'Field name to query'),
-            api_arg('filterOp', 'string', False, None, ['equals', 'contains', 'startswith', 'present'], 'Filter operation'),
-            api_arg('filterValue', 'string', False, None, None, 'A value to compare using filterOp (not used with present)'),
-            api_arg('startIndex', 'int', False, 0, None, 'The start index of the query, used for paging'),
-            api_arg('count', 'int', False, 20, None, 'The number of results to return, used with paging'),
-            api_arg('sortBy', 'string', False, 'ascending', ['ascending','descending'], 'A list of conversation ids'),
-            api_arg('sortOrder', 'string', False, 'ascending', ['ascending','descending'], 'A list of conversation ids'),
-            api_arg('fields', 'list', False, None, None, 'A list of fields to return'),
+            api_arg('filterBy', 'string', False, None, None,
+                    'Field name to query'),
+            api_arg('filterOp', 'string', False, None,
+                    ['equals', 'contains', 'startswith', 'present'],
+                    'Filter operation'),
+            api_arg('filterValue', 'string', False, None, None,
+                    'A value to compare using filterOp (not used with present)'),
+            api_arg('startIndex', 'int', False, 0, None,
+                    'The start index of the query, used for paging'),
+            api_arg('count', 'int', False, 20, None,
+                    'The number of results to return, used with paging'),
+            api_arg('sortBy', 'string', False, 'ascending',
+                    ['ascending','descending'],
+                    'A list of conversation ids'),
+            api_arg('sortOrder', 'string', False, 'ascending',
+                    ['ascending','descending'], 'A list of conversation ids'),
+            api_arg('fields', 'list', False, None, None,
+                    'A list of fields to return'),
         ],
-        response={'type': 'object', 'doc': 'An object that describes the API methods and parameters.'}
+        response={'type': 'object',
+                  'doc': ('An object that describes the API methods '
+                          'and parameters.')}
     )
     def foo():
         pass

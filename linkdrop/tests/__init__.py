@@ -7,7 +7,6 @@ command.
 This module initializes the application via ``websetup`` (`paster
 setup-app`) and provides the base testing objects.
 """
-from paste.deploy import loadapp
 from paste.script.appinstall import SetupCommand
 from pylons import url
 from routes.util import URLGenerator
@@ -21,7 +20,8 @@ testable_services = ["google.com", "yahoo.com", "facebook.com", "twitter.com",
                      "linkedin.com"]
 
 # Invoke websetup with the current config file
-SetupCommand('setup-app').run([pylons.test.pylonsapp.application.wrap_app.app.config['__file__']])
+SetupCommand('setup-app').run(
+    [pylons.test.pylonsapp.application.wrap_app.app.config['__file__']])
 
 # oh, this is just insane - re-enable all 'linkdrop' child loggers
 # due to http://bugs.python.org/issue11424 and the fact we have a logger
