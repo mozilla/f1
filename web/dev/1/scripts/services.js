@@ -22,17 +22,15 @@
  * */
 
 /*jslint indent: 2 */
-/*global define: false, window: false, location: true, localStorage: false,
+/*global define: false, window: false, location: true,
   opener: false, setTimeout: false, navigator: false */
 
 'use strict';
 
-define([ 'blade/object', 'storage'],
-function (object,         storage) {
+define([ 'blade/object'],
+function (object) {
 
-  var newHotness = parseFloat(navigator.userAgent.split('Firefox/')[1]) >= 4,
-      store = storage(),
-      svcs, prop;
+  var svcs, prop;
 
   function SvcBase(name, options) {
     if (!name) {
@@ -54,29 +52,6 @@ function (object,         storage) {
   }
   SvcBase.constructor = SvcBase;
   SvcBase.prototype = {
-    clearCache: function (store) {
-      //This first delete is only needed for 3.6 support.
-      //Remove the call in accounts.js when it is removed.
-      delete store[this.type + 'Contacts'];
-    },
-    //This method can be removed once 3.6 support is dropped.
-    getContacts: function (store) {
-      if (store[this.type + 'Contacts']) {
-        var contacts = JSON.parse(store[this.type + 'Contacts']);
-        return contacts;
-      }
-      return null;
-    },
-    //This method can be removed once 3.6 support is dropped.
-    setContacts: function (store, contacts) {
-      store[this.type + 'Contacts'] = JSON.stringify(contacts);
-    },
-
-    // stub function that should not return data for non-mail services
-    // for the FF 3.6 extension.
-    get36FormattedContacts: function () {
-      return null;
-    }
   };
 
   /* common functionality for email based services */
@@ -275,14 +250,6 @@ function (object,         storage) {
   for (prop in svcs.domains) {
     if (svcs.domains.hasOwnProperty(prop)) {
       svcs.domainList.push(prop);
-
-      // Clear out the old contacts model.
-      // TODO: Remove this once the 3.6 add-on/UI is finally
-      // shut off.
-      if (newHotness) {
-        delete store[svcs.domains[prop].type + 'Contacts'];
-        delete store.contactsModelVersion;
-      }
     }
   }
 

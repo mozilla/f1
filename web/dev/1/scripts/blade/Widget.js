@@ -13,8 +13,8 @@
  * dojo._toDom()
  */
 
-define([ 'require', './object', './jig', 'module'],
-function (require,   object,     jig,     module) {
+define([ 'require', './object', './fn', './jig', 'module'],
+function (require,   object,     fn,     jig,     module) {
 
     var tempNode,
         baseAttrName = 'data-' + module.id.replace(/\//g, '-') + '-' +
@@ -35,29 +35,53 @@ function (require,   object,     jig,     module) {
             init: function (data, relNode, position) {
                 object.mixin(this, data, true);
 
+                var asyncCreate, onFinishCreate;
+
                 //Start widget lifecycle
                 if (this.onCreate) {
-                    this.onCreate();
+                    asyncCreate = this.onCreate();
                 }
 
-                if (this.template) {
-                    this.node = this.render();
-                    if (this.onRender) {
-                        this.onRender(relNode);
+                onFinishCreate = fn.bind(this, function () {
+                    if (this.template) {
+                        this.node = this.render();
+                        if (this.onRender) {
+                            this.onRender(relNode);
+                        }
                     }
-                }
 
-                if (relNode && this.node) {
-                    if (position === 'before') {
-                        relNode.parentNode.insertBefore(this.node, relNode);
-                    } else if (position === 'after') {
-                        relNode.parentNode.insertBefore(this.node, relNode.nextSibling);
-                    } else if (position === 'prepend' && relNode.firstChild) {
-                        relNode.insertBefore(this.node, relNode.firstChild);
-                    } else {
-                        relNode.appendChild(this.node);
+                    if (relNode && this.node) {
+                        if (position === 'before') {
+                            relNode.parentNode.insertBefore(this.node, relNode);
+                        } else if (position === 'after') {
+                            relNode.parentNode.insertBefore(this.node, relNode.nextSibling);
+                        } else if (position === 'prepend' && relNode.firstChild) {
+                            relNode.insertBefore(this.node, relNode.firstChild);
+                        } else {
+                            relNode.appendChild(this.node);
+                        }
                     }
+                });
+
+                if (asyncCreate) {
+                    asyncCreate.then(onFinishCreate);
+                } else {
+                    onFinishCreate();
                 }
+            },
+
+            // poor man promise thingy for now.
+            makeCreateCallback: function () {
+                return {
+                    then: function (callback) {
+                        this.onThen = callback;
+                    },
+                    resolve: function () {
+                        if (this.onThen) {
+                            this.onThen();
+                        }
+                    }
+                };
             },
 
             render: function (relativeNode) {

@@ -36,7 +36,10 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
       this.svcAccount = svcAccount;
 
       this.callbacks = [];
-      this.lastUpdated = this.fromStore().lastUpdated;
+      this.fromStore(fn.bind(this, function (data) {
+        this.lastUpdated = data;
+      }));
+
       // Time check is one day.
       this.timeCheck = 24 * 60 * 60 * 1000;
 
@@ -70,9 +73,11 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
     /**
      * Retrieves stored contacts. Should only be used internally or by subclasses.
      */
-    fromStore: function () {
+    fromStore: function (callback) {
       var acct = this.svcAccount;
-      return accounts.getData(acct.domain, acct.userid, acct.username, 'contacts') || {};
+      accounts.getData(acct.domain, acct.userid, acct.username, 'contacts', function (data) {
+        callback(data || {});
+      });
     },
 
     /**
@@ -112,13 +117,16 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
      */
     notify: function (callback) {
       this.callbacks.push(callback);
-      this.contacts = this.fromStore().list;
+      this.fromStore(fn.bind(this, function (data) {
 
-      if (!this.contacts || this.needFetch()) {
-        this.fetch();
-      } else {
-        this.notifyCallbacks();
-      }
+        this.contacts = data.list;
+
+        if (!this.contacts || this.needFetch()) {
+          this.fetch();
+        } else {
+          this.notifyCallbacks();
+        }
+      }));
     },
 
     fetch: function () {

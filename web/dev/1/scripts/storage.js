@@ -25,28 +25,81 @@
 /*global define: false, localStorage: false */
 "use strict";
 
-define([], function () {
-  var store = localStorage, type = 'localStorage';
+define(['dispatch'], function (dispatch) {
+  var internalStore = {},
+      callbacks = {},
+      store;
 
-  //Capability detect for localStorage. At least one add-on does weird things
-  //with it.
-  try {
-    store.tempVar = 'temp';
-    //Test reading.
-    if (store.tempVar === 'temp') {}
-    //Test deletion.
-    delete store.tempVar;
-  } catch (e) {
-    //Just use a simple in-memory object. Not as nice, but code will still work.
-    store = {};
-    type = 'memory';
+  // Temporary workaround to allow separate tab of settings to still have
+  // access to the chrome storage. Not a good idea to do long term.
+  if (opener && !opener.closed && opener.require &&
+      (store = opener.require('storage'))) {
+    return store;
   }
+
+  store = {
+    get: function (key, callback) {
+      var keyCallbacks;
+
+      if (key in internalStore) {
+        // favor internal storage when available.
+        callback(internalStore[key]);
+      } else {
+        // hold on to the callback until there is an answer.
+        keyCallbacks = callbacks[key];
+
+        if (!keyCallbacks) {
+          keyCallbacks = callbacks[key] = [];
+
+          // ask the real storage for it.
+          dispatch.pub('storeGet', key);
+        }
+
+        keyCallbacks.push(callback);
+      }
+    },
+
+    set: function (key, value) {
+      internalStore[key] = value;
+
+      dispatch.pub('storeSet', {
+        key: key,
+        value: value
+      });
+    },
+
+    remove: function (key) {
+      delete internalStore[key];
+      dispatch.pub('storeRemove', key);
+    }
+  };
+
+  dispatch.sub('storeGetReturn', function (data) {
+    var key = data.key,
+        value = data.value,
+        keyCallbacks = callbacks[key];
+
+    internalStore[key] = value;
+
+    if (keyCallbacks) {
+      keyCallbacks.forEach(function (callback) {
+        callback(value);
+      });
+
+      delete callbacks[key];
+    }
+
+  });
+
+  dispatch.sub('storeNotifyChange', function (data) {
+    internalStore[data.key] = data.value;
+  });
 
   function storage() {
     return store;
   }
 
-  storage.type = type;
+  storage.type = 'chrome';
 
   return storage;
 });

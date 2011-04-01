@@ -25,7 +25,7 @@
 /*global define: false, location: false */
 "use strict";
 
-define(['storage', 'blade/url'], function (storage, url) {
+define(['blade/url'], function (url) {
   var cache = {};
 
   function shareOptions(str) {
@@ -40,10 +40,9 @@ define(['storage', 'blade/url'], function (storage, url) {
     }
 
     var options = {},
-        store = storage(),
         vimeoCdnRegExp = /vimeocdn\.com\//,
         vimeoSourceRegExp = /clip_id=(\d+)/,
-        urlArgs, prop, source, videoId;
+        urlArgs, source, videoId;
 
     if (str) {
       urlArgs = url.queryToObject(str);
@@ -83,22 +82,6 @@ define(['storage', 'blade/url'], function (storage, url) {
       }
     }
     //END domain-specific hacks.
-
-    //Save the extension version in the localStorage, for use in
-    //other pages like settings.
-    if (options.version) {
-      store.extensionVersion = options.version;
-    }
-
-    //Save the preferences in localStorage, for use in
-    //other ppages like setting.
-    if (options.prefs) {
-      for (prop in options.prefs) {
-        if (options.prefs.hasOwnProperty(prop)) {
-          store['prefs.' + prop] = options.prefs[prop];
-        }
-      }
-    }
 
     cache[str] = options;
 
