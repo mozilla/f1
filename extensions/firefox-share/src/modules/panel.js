@@ -104,12 +104,12 @@ sharePanel.prototype = {
       }
     }, false);
     this.loadListener = function (evt) {
+      self.attachMessageListener();
       self.window.setTimeout(function () {
         self.sizeToContent();
       }, 0);
     };
     this.browser.addEventListener("load", this.loadListener, true);
-    Services.obs.addObserver(this, 'content-document-global-created', false);
 
     let webProgress = this.browser.webProgress;
     this.stateProgressListener = new StateProgressListener(this);
@@ -124,28 +124,12 @@ sharePanel.prototype = {
   },
 
   shutdown: function () {
-    Services.obs.removeObserver(this, 'content-document-global-created');
     let webProgress = this.browser.webProgress;
     webProgress.removeProgressListener(this.stateProgressListener);
     this.stateProgressListener = null;
   },
 
-  observe: function (aSubject, aTopic, aData) {
-    if (!aSubject.location.href) {
-      return;
-    }
-
-    // is this window a child of OUR XUL window?
-    let mainWindow = aSubject.QueryInterface(Ci.nsIInterfaceRequestor)
-            .getInterface(Ci.nsIWebNavigation)
-            .QueryInterface(Ci.nsIDocShellTreeItem)
-            .rootTreeItem.QueryInterface(Ci.nsIInterfaceRequestor)
-            .getInterface(Ci.nsIDOMWindow);
-    mainWindow = mainWindow.wrappedJSObject ? mainWindow.wrappedJSObject : mainWindow;
-    if (mainWindow !== this.panel.ownerDocument.defaultView) {
-      return;
-    }
-
+  attachMessageListener: function () {
     // listen for messages now
     let self = this;
     let contentWindow = this.browser.contentWindow;
