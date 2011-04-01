@@ -123,7 +123,7 @@ sharePanel.prototype = {
     );
   },
 
-  shutdown: function () {
+  unload: function () {
     let webProgress = this.browser.webProgress;
     webProgress.removeProgressListener(this.stateProgressListener);
     this.stateProgressListener = null;
