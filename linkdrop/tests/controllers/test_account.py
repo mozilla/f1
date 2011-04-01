@@ -19,6 +19,7 @@
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
+#    Rob Miller <rmiller@mozilla.com>
 #
 
 from linkdrop.controllers import account
