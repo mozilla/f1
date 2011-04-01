@@ -95,14 +95,15 @@ except OSError, e:
 
 # Check what the symlink might already point to
 # and update if needed
-try:
-    lver = os.readlink(linkdir)
-except OSError, e:
-    lver = None
-    if e.errno != 2: # file does not exist
-        raise
+if hasattr(os, "readlink"):
+    try:
+        lver = os.readlink(linkdir)
+    except OSError, e:
+        lver = None
+        if e.errno != 2: # file does not exist
+            raise
 
-if lver != VERSION:
-    if lver:
-        os.unlink(linkdir)
-    os.symlink(realdir, linkdir)
+    if lver != VERSION:
+        if lver:
+            os.unlink(linkdir)
+        os.symlink(realdir, linkdir)

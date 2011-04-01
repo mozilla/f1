@@ -1,17 +1,29 @@
+ifeq ($(OS),Windows_NT)
+BIN_DIR = Scripts
+else
+BIN_DIR = bin
+endif
+
 APPNAME = server-shared-send
 DEPS = server-share-core
 VIRTUALENV = virtualenv
-NOSE = bin/nosetests
+NOSE = $(BIN_DIR)/nosetests
 NOSETESTS_ARGS = -s
 NOSETESTS_ARGS_C = -s --with-xunit --with-coverage --cover-package=linkdrop,linkoauth --cover-erase
 TESTS = linkdrop/tests deps/server-share-core/linkoauth/tests
-PYTHON = bin/python
+PYTHON = $(BIN_DIR)/python
 version = $(shell $(PYTHON) setup.py --version)
 tag = $(shell grep tag_build setup.cfg  | cut -d= -f2 | xargs echo )
-EZ = bin/easy_install
+
+# *sob* - just running easy_install on Windows prompts for UAC...
+ifeq ($(OS),Windows_NT)
+EZ = $(PYTHON) $(BIN_DIR)/easy_install-script.py
+else
+EZ = $(BIN_DIR)/easy_install
+endif
 COVEROPTS = --cover-html --cover-html-dir=html --with-coverage --cover-package=linkdrop
 COVERAGE := coverage
-PYLINT = bin/pylint
+PYLINT = $(BIN_DIR)/pylint
 PKGS = linkdrop
 
 ifeq ($(TOPSRCDIR),)

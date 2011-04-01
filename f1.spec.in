@@ -1,3 +1,4 @@
+%define f1_prefix /opt/mozilla.org/f1
 %define f1_name_prefix mozilla-f1-
 
 # build with --define 'use_python_version 2.6' to pick what python to build against if not the system default
@@ -46,11 +47,11 @@ and love. F1 is made by Mozilla Messaging.
 %setup -q -n linkdrop-%{version}
 
 %build
-CFLAGS="%{optflags}" %{__python} -c 'import setuptools; execfile("setup.py")' build
+CFLAGS="%{optflags}" %{__python}%{pyver} setup.py build
 
 %install
 rm -rf %{buildroot}
-%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+%{__python}%{pyver} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --prefix %{f1_prefix} --record=INSTALLED_FILES
 %{__install} -m 755 -d %{buildroot}%{_var}/www/f1
 rsync -a web/ %{buildroot}%{_var}/www/f1/
 
