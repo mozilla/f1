@@ -83,7 +83,7 @@ function (object,         Contacts,     $,      accounts,   fn) {
         if (newContacts.length) {
           // update storage of manually entered contacts.
           accounts.getData(acct.domain, acct.userid, acct.username,
-            'enteredContacts', function (storedContacts) {
+            'enteredContacts', fn.bind(this, function (storedContacts) {
 
             storedContacts = storedContacts || [];
 
@@ -96,7 +96,7 @@ function (object,         Contacts,     $,      accounts,   fn) {
             this.toStore({
               list: this.contacts
             });
-          });
+          }));
         }
       },
 
@@ -105,7 +105,7 @@ function (object,         Contacts,     $,      accounts,   fn) {
             acct = this.svcAccount;
 
         accounts.getData(acct.domain, acct.userid, acct.username,
-          'enteredContacts', function (storedContacts) {
+          'enteredContacts', fn.bind(this, function (storedContacts) {
 
             // convert server data to the right format.
             entries.forEach(function (entry) {
@@ -127,7 +127,7 @@ function (object,         Contacts,     $,      accounts,   fn) {
             }
 
             callback(data);
-          }
+          })
         );
       }
     };

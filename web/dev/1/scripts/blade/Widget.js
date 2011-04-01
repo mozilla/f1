@@ -65,23 +65,39 @@ function (require,   object,     fn,     jig,     module) {
 
                 if (asyncCreate) {
                     asyncCreate.then(onFinishCreate);
+                    this.asyncCreate = asyncCreate;
                 } else {
                     onFinishCreate();
                 }
             },
 
-            // poor man promise thingy for now.
+            // poor man deferred thingy for now. Not very robust or resistant
+            // to tampering, but all the code is friendly here. Swap out
+            // with a real promise implementation at some point.
             makeCreateCallback: function () {
-                return {
+                var p = {
+                    _callbacks: [],
                     then: function (callback) {
-                        this.onThen = callback;
+                        if ('value' in p) {
+                            callback(p.value);
+                        } else {
+                            p._callbacks.push(callback);
+                        }
                     },
-                    resolve: function () {
-                        if (this.onThen) {
-                            this.onThen();
+                    resolve: function (value) {
+                        if ('value' in p) {
+                            throw new Error ('Async widget already resolved');
+                        } else {
+                            // Setting the value
+                            p.value = value;
+                            p._callbacks.forEach(function (callback) {
+                               callback(value);
+                            });
                         }
                     }
                 };
+
+                return p;
             },
 
             render: function (relativeNode) {

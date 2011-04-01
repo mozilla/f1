@@ -6,6 +6,18 @@
         iframe {
             width: 350px;
             height: 500px;
+            display: block;
+            float: left;
+        }
+
+        #chromeActions {
+          float: left;
+          padding: 20px;
+        }
+
+        #chromeActions button {
+          display: block;
+          margin: 10px;
         }
     </style>
     <script data-main="chrome.js" src="../../1/scripts/requireplugins-jquery.js" charset="utf-8"></script>
@@ -15,8 +27,10 @@
 
     <iframe id="testFrame" src="../../blank.html"></iframe>
 
-    <form>
-
+    <form id="chromeActions">
+      <button id="reloadPanel">Reload Panel</button>
+      <button id="logStore">Log Data Store to Console</button>
+      <button id="clearStore">Clear Data Store</button>
 
     </form>
 </body>

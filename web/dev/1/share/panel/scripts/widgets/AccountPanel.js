@@ -92,7 +92,7 @@ function (object,         Widget,         $,        template,
 
         //Check for saved data. Only use if the URL
         //and the account match
-        store.get(this.storeId, function (savedOptions) {
+        store.get(this.storeId, fn.bind(this, function (savedOptions) {
           if (savedOptions) {
             savedOptions = JSON.parse(savedOptions);
 
@@ -147,7 +147,7 @@ function (object,         Widget,         $,        template,
 
           // indicate async creation is done.
           onFinishCreate.resolve();
-        });
+        }));
 
         // return onFinishCreate to indicate this is an async creation
         return onFinishCreate;

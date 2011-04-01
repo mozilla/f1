@@ -33,7 +33,8 @@
  */
 define(['jquery'], function ($) {
 
-  var origin = location.protocol + "//" + location.host;
+  var origin = location.protocol + "//" + location.host,
+      wins = [];
 
   return {
     sub: function (topic, callback, win, targetOrigin) {
@@ -72,10 +73,37 @@ define(['jquery'], function ($) {
 
     pub: function (topic, data, win) {
       win = win || window;
-      win.postMessage(JSON.stringify({
+      var text = JSON.stringify({
         topic: topic,
         data: data
-      }), origin);
+      }),
+      i, otherWin, len = wins.length;
+
+      // Notify primary target.
+      win.postMessage(text, origin);
+
+      // notify other windows too, can go away if settings work is done
+      // in share panel.
+      if (len) {
+        for (i = 0; i < len; i++) {
+          otherWin = wins[i];
+
+          if (!otherWin || otherWin.closed) {
+            wins.splice(i, 1);
+            i -= 1;
+          } else {
+            otherWin.postMessage(text, origin);
+          }
+        }
+      }
+    },
+
+    // Used by settings page so that it can get all the same disptaches as
+    // the share panel, important since data storage is primarily accessed and
+    // data update events triggred in the share panel window. This code can
+    // go away if the settings work is done in the share panel.
+    trackWindow: function (win) {
+      wins.push(win);
     }
   };
 });

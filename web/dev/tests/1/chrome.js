@@ -33,9 +33,39 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
   }, false);
 
   var sub = dispatch.sub,
-      testWindow,
-      dataStore = {},
+      testWindow, chrome,
+      dataStore = (localStorage.chromeTestStore &&
+                   JSON.parse(localStorage.chromeTestStore)) || {},
       origin = location.protocol + "//" + location.host;
+
+  // expose the data store for inspection in firebug
+  window.dataStore = dataStore;
+
+
+  chrome = {
+    saveStore: function () {
+      localStorage.chromeTestStore = JSON.stringify(dataStore);
+    },
+
+    logStore: function () {
+      console.log('Chrome dataStore: ', dataStore);
+    },
+
+    clearStore: function () {
+      delete localStorage.chromeTestStore;
+      dataStore = {};
+    },
+
+    loadPanel: function () {
+      testWindow.location = '../../1/share/panel/#test';
+    },
+
+    reloadPanel: function () {
+      testWindow.location.reload(true);
+    }
+
+  };
+
 
   // Helpers that deal with the target window subscriptions.
   function targetPub(topic, data) {
@@ -84,22 +114,23 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
         });
       },
 
-      storeSet: function (key, value) {
-        dataStore[key] = value;
+      storeSet: function (data) {
+        dataStore[data.key] = data.value;
+        chrome.saveStore();
         targetPub('storeNotifyChange', {
-          key: key,
-          value: value
+          key: data.key,
+          value: data.value
         });
       },
 
       storeRemove: function (key) {
         delete dataStore[key];
+        chrome.saveStore();
         targetPub('storeNotifyChange', {
           key: key,
           value: null
         });
       }
-
     },
     prop;
 
@@ -119,7 +150,7 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
           } else {
             // actually quite a few of these, uncomment if you want a play
             // by play of topics going through the testWindow.
-            // sconsole.log("Unhandled topic: " + message.topic, message.data);
+            console.log("Unhandled topic: " + message.topic, message.data);
           }
         }
       }
@@ -131,6 +162,31 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
     testWindow = $('#testFrame')[0].contentWindow;
 
     // load the share panel
-    testWindow.location = '../../1/share/panel/#test';
+    chrome.loadPanel();
+
+    // bind some event listeners, these just bind button IDs to trigger
+    // the same-named method on this chrome module.
+    $('body').delegate('#chromeActions button', 'click', function (evt) {
+      var id = evt.target.id;
+      if (id && chrome[id]) {
+        chrome[id]();
+      }
+
+      evt.preventDefault();
+    });
   }, false);
+
+  // There is a chance it is already ready (particularly in webkit),
+  // so try to grab it now.
+  testWindow = $('#testFrame');
+  if (testWindow && (testWindow = testWindow[0])) {
+    testWindow = testWindow.contentWindow;
+    chrome.loadPanel();
+  } else {
+    testWindow = null;
+  }
+
+  // Return a module, then accessible via commandline as
+  // require('chrome')
+  return chrome;
 });

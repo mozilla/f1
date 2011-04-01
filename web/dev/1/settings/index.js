@@ -354,5 +354,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
               '&output=json&' +
               'q=http%3A%2F%2Fmozillalabs.com%2Fmessaging%2Ffeed%2F';
     $('head')[0].appendChild(node);
+
+    // Make sure this window gets all events, particularly related to storage.
+    // This can go away if the settings work is done inside the share panel.
+    // Use a setTimeout because the opener could be reloading, for instance,
+    // after an account is added.
+    if (opener && !opener.closed && opener.require) {
+      setTimeout(function () {
+        opener.require('dispatch').trackWindow(window);
+      }, 1000);
+    }
   });
 });

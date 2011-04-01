@@ -353,6 +353,52 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     store.get('lastSelection', function (lastSelection) {
       store.get('accountAdded', function (accountAdded) {
 
+        var asyncCount = 0,
+            asyncConstructionDone = false,
+            accountPanel;
+
+        // Finishes account creation. Actually runs *after* the work done
+        // below this function. Need a function callback since AccountPanel
+        // construction is async.
+        function finishCreate() {
+          asyncCount -= 1;
+
+          // Could still be waiting for other async creations. If so, wait.
+          if (asyncCount > 0 || !asyncConstructionDone) {
+            return;
+          }
+
+          // add the account panels now
+          accountsDom.append(fragment);
+
+          //Add debug panel if it is allowed.
+          if (options.prefs.system === 'dev') {
+            debugPanel = new DebugPanel({}, accountsDom[0]);
+          }
+
+          checkBase64Preview();
+
+          //If no matching accounts match the last selection clear it.
+          if (lastSelectionMatch < 0 && !accountAdded && lastSelection) {
+            store.remove('lastSelection');
+            lastSelectionMatch = 0;
+          }
+
+          // which domain was last active?
+          $("#accounts").accordion({ active: lastSelectionMatch });
+
+          //Reset the just added state now that accounts have been configured one time.
+          if (accountAdded) {
+            store.remove('accountAdded');
+          }
+
+          //Inform extension the content size has changed, but use a delay,
+          //to allow any reflow/adjustments.
+          setTimeout(function () {
+            dispatch.pub('sizeToContent');
+          }, 100);
+        }
+
         //Figure out what accounts we do have
         accounts.forEach(function (account) {
           // protect against old style account data
@@ -375,45 +421,33 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
             // Get the contructor function for the panel.
             PanelCtor = require(panelOverlayMap[domain] || 'widgets/AccountPanel');
 
-            accountPanels.push(new PanelCtor({
+            accountPanel = new PanelCtor({
               options: options,
               account: account,
               svc: data
-            }, fragment));
+            }, fragment);
+
+            // if an async creation, then wait until all are created before
+            // proceeding with UI construction.
+            if (accountPanel.asyncCreate) {
+              asyncCount += 1;
+              accountPanel.asyncCreate.then(finishCreate);
+            }
+
+            accountPanels.push(accountPanel);
           }
 
           i++;
         });
 
-        // add the account panels now
-        accountsDom.append(fragment);
+        asyncConstructionDone = true;
 
-        //Add debug panel if it is allowed.
-        if (options.prefs.system === 'dev') {
-          debugPanel = new DebugPanel({}, accountsDom[0]);
+        // The async creation could have finished if all the data values
+        // for the account panels were already cached. If so, then finish
+        // out the UI construction.
+        if (!asyncCount) {
+          finishCreate();
         }
-
-        checkBase64Preview();
-
-        //If no matching accounts match the last selection clear it.
-        if (lastSelectionMatch < 0 && !accountAdded && lastSelection) {
-          store.remove('lastSelection');
-          lastSelectionMatch = 0;
-        }
-
-        // which domain was last active?
-        $("#accounts").accordion({ active: lastSelectionMatch });
-
-        //Reset the just added state now that accounts have been configured one time.
-        if (accountAdded) {
-          store.remove('accountAdded');
-        }
-
-        //Inform extension the content size has changed, but use a delay,
-        //to allow any reflow/adjustments.
-        setTimeout(function () {
-          dispatch.pub('sizeToContent');
-        }, 100);
       });
     });
   }

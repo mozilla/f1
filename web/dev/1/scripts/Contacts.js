@@ -133,7 +133,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
       var acct = this.svcAccount;
 
       accounts.getService(acct.domain, acct.userid,
-        acct.username, function (svcData) {
+        acct.username, fn.bind(this, function (svcData) {
 
         rdapi('contacts/' + acct.domain, {
           type: 'POST',
@@ -169,7 +169,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
             this.notifyCallbacks();
           })
         });
-      });
+      }));
     },
 
     notifyCallbacks: function () {
