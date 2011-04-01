@@ -356,6 +356,8 @@ FFShare.prototype = {
         this.window.removeEventListener('tabviewhide', this.tabViewHideListener, false);
         this.tabViewShowListener = null;
         this.tabViewHideListener = null;
+
+        this.sharePanel.unload();
     },
 
     onInstallUpgrade: function (version) {
