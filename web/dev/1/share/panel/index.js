@@ -281,50 +281,54 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     // get any shortener prefs before trying to send.
     store.get('shortenPrefs', function (shortenPrefs) {
 
-      var svcData = accounts.getService(data.domain, data.userid, data.username),
-          svcConfig = services.domains[data.domain],
-          shortenData;
+      accounts.getService(data.domain, data.userid, data.username,
+        function (svcData) {
 
-      sendData.account = JSON.stringify(svcData);
+          var svcConfig = services.domains[data.domain],
+              shortenData;
 
-      // hide the panel now, but only if the extension can show status
-      // itself (0.7.7 or greater)
-      updateChromeStatus(SHARE_START);
-      hide();
+          sendData.account = JSON.stringify(svcData);
 
-      //First see if a bitly URL is needed.
-      if (svcConfig.shorten && shortenPrefs) {
-        shortenData = {
-          format: 'json',
-          longUrl: sendData.link
-        };
+          // hide the panel now, but only if the extension can show status
+          // itself (0.7.7 or greater)
+          updateChromeStatus(SHARE_START);
+          hide();
 
-        // Unpack the user prefs
-        shortenPrefs = JSON.parse(shortenPrefs);
+          //First see if a bitly URL is needed.
+          if (svcConfig.shorten && shortenPrefs) {
+            shortenData = {
+              format: 'json',
+              longUrl: sendData.link
+            };
 
-        if (shortenPrefs) {
-          object.mixin(shortenData, shortenPrefs, true);
-        }
+            // Unpack the user prefs
+            shortenPrefs = JSON.parse(shortenPrefs);
 
-        // Make sure the server does not try to shorten.
-        delete sendData.shorten;
+            if (shortenPrefs) {
+              object.mixin(shortenData, shortenPrefs, true);
+            }
 
-        $.ajax({
-          url: 'http://api.bitly.com/v3/shorten',
-          type: 'GET',
-          data: shortenData,
-          dataType: 'json',
-          success: function (json) {
-            sendData.shorturl = json.data.url;
+            // Make sure the server does not try to shorten.
+            delete sendData.shorten;
+
+            $.ajax({
+              url: 'http://api.bitly.com/v3/shorten',
+              type: 'GET',
+              data: shortenData,
+              dataType: 'json',
+              success: function (json) {
+                sendData.shorturl = json.data.url;
+                callSendApi();
+              },
+              error: function (xhr, textStatus, errorThrown) {
+                showStatus('statusShortenerError', errorThrown);
+              }
+            });
+          } else {
             callSendApi();
-          },
-          error: function (xhr, textStatus, errorThrown) {
-            showStatus('statusShortenerError', errorThrown);
           }
-        });
-      } else {
-        callSendApi();
-      }
+        }
+      );
     });
   }
 

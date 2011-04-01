@@ -92,7 +92,11 @@ define(['dispatch'], function (dispatch) {
   });
 
   dispatch.sub('storeNotifyChange', function (data) {
-    internalStore[data.key] = data.value;
+    if (data.value === null) {
+      delete internalStore[data.key];
+    } else {
+      internalStore[data.key] = data.value;
+    }
   });
 
   function storage() {

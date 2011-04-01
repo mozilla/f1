@@ -130,38 +130,45 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
     },
 
     fetch: function () {
-      var acct = this.svcAccount,
-          svcData = accounts.getService(acct.domain, acct.userid, acct.username);
+      var acct = this.svcAccount;
 
-      rdapi('contacts/' + acct.domain, {
-        type: 'POST',
-        data: {
-          username: acct.username,
-          userid: acct.userid,
-          startindex: 0,
-          maxresults: 500,
-          account: JSON.stringify(svcData)
-        },
-        //Only wait for 10 seconds, then give up.
-        timeout: 10000,
-        success: fn.bind(this, function (json) {
-          //Transform data to a form usable by the front end.
-          if (json && !json.error) {
-            var entries = json.result.entry;
+      accounts.getService(acct.domain, acct.userid,
+        acct.username, function (svcData) {
 
-            this.contacts = this.getFormattedContacts(entries);
-            this.lastUpdated = (new Date()).getTime();
+        rdapi('contacts/' + acct.domain, {
+          type: 'POST',
+          data: {
+            username: acct.username,
+            userid: acct.userid,
+            startindex: 0,
+            maxresults: 500,
+            account: JSON.stringify(svcData)
+          },
+          //Only wait for 10 seconds, then give up.
+          timeout: 10000,
+          success: fn.bind(this, function (json) {
+            //Transform data to a form usable by the front end.
+            if (json && !json.error) {
+              var entries = json.result.entry;
 
-            this.toStore({
-              list: this.contacts
-            });
-          }
-        }),
-        error: fn.bind(this, function (xhr, textStatus, errorThrown) {
-          // does not matter what the error is, just eat it and hide
-          // the UI showing a wait.
-          this.notifyCallbacks();
-        })
+              this.getFormattedContacts(entries,
+                fn.bind(this, function (contacts) {
+                  this.contacts = contacts;
+                  this.lastUpdated = (new Date()).getTime();
+
+                  this.toStore({
+                    list: this.contacts
+                  });
+                })
+              );
+            }
+          }),
+          error: fn.bind(this, function (xhr, textStatus, errorThrown) {
+            // does not matter what the error is, just eat it and hide
+            // the UI showing a wait.
+            this.notifyCallbacks();
+          })
+        });
       });
     },
 
@@ -188,9 +195,11 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
     /**
      * Translates contact data from server into a format used on the client.
      * @param {Array} entries
-     * @returns {Array}
+     * @param {Function} callback called once contacts are formatted. Could
+     * involve asyn operations. The callback will receive an array of contacts.
+     *
      */
-    getFormattedContacts: function (entries) {
+    getFormattedContacts: function (entries, callback) {
       var data = [];
       entries.forEach(function (entry) {
         if (entry.accounts && entry.accounts.length) {
@@ -204,7 +213,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
           });
         }
       });
-      return data;
+      callback(data);
     },
 
     /**
