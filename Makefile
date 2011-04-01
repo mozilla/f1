@@ -110,8 +110,8 @@ dist:   f1.spec
 rpm:	f1.spec
 	$(PYTHON) setup.py bdist_rpm
 
-f1.spec: f1.spec.in Makefile
-	@cat f1.spec.in | sed -e"s/%%version%%/$(version)$(tag)/g" > f1.spec
+f1.spec: f1.spec.in Makefile tools/makespec
+	tools/makespec $(version)$(tag) linkdrop.egg-info/requires.txt < f1.spec.in > f1.spec
 
 build:
 	$(VIRTUALENV) --no-site-packages --distribute .
