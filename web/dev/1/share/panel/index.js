@@ -23,8 +23,14 @@
 
 /*jslint plusplus: false, indent: 2, nomen: false */
 /*global require: false, define: false, location: true, window: false, alert: false,
-  document: false, setTimeout: false, localStorage: false */
+  document: false, setTimeout: false, localStorage: false, parent: false */
 "use strict";
+
+// Allow tests to plug into the page by notify them if this is a test.
+if (location.hash === '#test') {
+  parent.postMessage(JSON.stringify({topic: 'registerForTests'}),
+                     location.protocol + "//" + location.host);
+}
 
 require({
   paths: {
