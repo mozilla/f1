@@ -113,7 +113,7 @@ class responder(OAuth1):
         profile['accounts'] = [account]
 
         result_data = {'profile': profile,
-                       'oauth_token': access_token['oauth_token'], 
+                       'oauth_token': access_token['oauth_token'],
                        'oauth_token_secret': access_token['oauth_token_secret']}
         result, error = api(oauth_token=access_token['oauth_token'],
                    oauth_token_secret=access_token['oauth_token_secret']).profile()
@@ -173,6 +173,7 @@ class api():
             # insert the url if it is not already in the message
             longurl = options.get('link')
             shorturl = options.get('shorturl')
+            share_type = options.get('shareType', None)
             if shorturl:
                 # if the long url is in the message body, replace it with
                 # the short url, otherwise just make sure shorturl is in
@@ -185,9 +186,10 @@ class api():
                 # some reason we dont have a short url, add the long url
                 message += " %s" % longurl
 
-            direct = options.get('to', None)
-            if direct:
-                result = self.api().direct_messages.new(text=message, user=direct)
+            # Comment out direct = options.get('to', None)
+            if share_type == 'direct':
+                raise Exception("NOT IMPLEMENTED")
+                # result = self.api().direct_messages.new(text=message, user=direct)
             else:
                 result = self.api().statuses.update(status=message)
             result[domain] = result['id']
@@ -200,7 +202,7 @@ class api():
                 'message': e.args[0]
             }
         return result, error
-    
+
     def profile(self):
         result = error = None
         try:
