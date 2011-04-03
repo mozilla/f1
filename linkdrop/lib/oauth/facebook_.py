@@ -65,7 +65,7 @@ def extract_fb_data(data):
      #import sys; print >> sys.stderr, data
      # Setup the normalized poco contact object
      nick = None
-     
+
      # Setup the nick and preferred username to the last portion of the
      # FB link URL if its not their ID
      # if a user sets up their personal link, they get a url that looks like:
@@ -114,9 +114,9 @@ def extract_fb_data(data):
           if part:
                name[val] = part
      name['formatted'] = data.get('name')
-     
+
      profile['name'] = name
-     
+
      # facebook gives us an absolute url, these work and redirect to their CDN
      profile['photos'] = [
             {'type':"thumbnail", 'value':"https://graph.facebook.com/" + data['id'] + "/picture?type=square"},
@@ -127,7 +127,7 @@ def extract_fb_data(data):
      for k, v in profile.items():
           if not v or (isinstance(v, list) and not v[0]):
                del profile[k]
-     
+
      return profile
 
 
@@ -149,17 +149,17 @@ class responder(OAuth2):
                raise Exception("Error status: %r", resp['status'])
 
           fb_profile = json.loads(content)
-          
+
           profile = extract_fb_data(fb_profile)
           result_data = {'profile': profile,
                          'oauth_token': access_token}
-          
+
           return result_data
 
 class api():
      def __init__(self, account):
           self.access_token = account.get('oauth_token')
-     
+
      def _make_error(self, data, resp):
           # Facebook makes error handling fun!  So much for standards.
           # handle the various error mechanisms they deliver and hope
@@ -199,7 +199,7 @@ class api():
                error = {
                     'message': data.get('error_msg', 'it\'s an error, kthx'),
                }
-          # who knows, some other abberation 
+          # who knows, some other abberation
           else:
                error = {
                     'message': "expectedly, an unexpected facebook error: %r"% (data,),
@@ -253,9 +253,11 @@ class api():
           'source': 'source'
      }
      def sendmessage(self, message, options={}):
-          direct = options.get('to', None)
-          if direct:
-               url = "https://graph.facebook.com/%s/feed" % (direct,)
+          # Comment out for now direct = options.get('to', None)
+          share_type = options.get('shareType', None)
+          if share_type == 'groupWall':
+                raise Exception("NOT IMPLEMENTED")
+               # url = "https://graph.facebook.com/%s/feed" % (direct,)
           else:
                url = config.get("oauth.facebook.com.feed", "https://graph.facebook.com/me/feed")
           body = {
@@ -274,7 +276,7 @@ class api():
           result, error = self.rawcall(url)
           if error:
                return result, error
-          
+
           groups = []
           for group in result['data']:
                groups.append({
