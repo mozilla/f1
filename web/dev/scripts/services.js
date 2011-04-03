@@ -124,19 +124,20 @@ function (object,         storage) {
         features: {
           //TODO: remove direct when old UI is no longer in use,
           //or remove it from use.
-          direct: true,
+          // Comment out until we can work out some kinks.
+          //direct: true,
           subject: false,
           counter: true
         },
         shareTypes: [{
           type: 'public',
           name: 'public'
-        }, {
+        } /* Comment out until we can work out some kinks , {
           type: 'direct',
           name: 'direct message',
           showTo: true,
           toLabel: 'type in name of recipient'
-        }],
+        } */],
         textLimit: 140,
         shorten: true,
         serviceUrl: 'http://twitter.com',
