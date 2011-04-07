@@ -47,6 +47,11 @@ class TestSendController(TestController):
         self.controller = send.SendController()
         self.real_send = self.controller.send.undecorated.undecorated
 
+    def tearDown(self):
+        self.req_patcher.stop()
+        self.gprov_patcher.stop()
+        self.metrics_patcher.stop()
+
     def _setup_domain(self, domain=None):
         if domain is None:
             domain = self.domain
