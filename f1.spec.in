@@ -7,15 +7,17 @@
 %if "%{use_python_version}" != ""
   %global pyver %( echo %{use_python_version} | sed -e's/\\.//g' )
   %global python_version %{use_python_version}
+  %global pyver_sys %pyver
 %else
   %global pyver %{nil}
   %{!?python_version: %global python_version %(%{__python} -c "import sys; sys.stdout.write(sys.version[:3])")}
+  %global pyver_sys %( echo %{python_version} | sed -e's/\\.//g' )
 %endif
 
 %global python_sitelib /lib/python%{python_version}/site-packages
 %global python_sitearch /%{_lib}/python%{python_version}/site-packages
 
-Name:           %{f1_name_prefix}python%{pyver}
+Name:           %{f1_name_prefix}python%{pyver_sys}
 Version:        %%version%%
 Release:        1%{?dist}
 Summary:        Share Links Fast.
@@ -31,11 +33,10 @@ BuildRequires:  python%{pyver}-devel python%{pyver}-setuptools
 BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /bin/sed, /usr/bin/awk
 BuildRequires:  python%{pyver}-paste-deploy, python%{pyver}-paste-script
 
-#XXX Versions need to come from setup.oy
 Requires: 	python%{pyver}
-Requires:	%{f1_name_prefix}python%{pyver}-twitter
-Requires:	%{f1_name_prefix}python%{pyver}-gdata
-Requires:	%{f1_name_prefix}python%{pyver}-oauth2
+
+%%buildrequires%%
+%%requires%%
 
 %description
 F1 is a browser extension that allows you to share links

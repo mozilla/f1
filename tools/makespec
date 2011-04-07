@@ -1,0 +1,44 @@
+#!/usr/bin/env perl
+
+use strict;
+
+my $version = shift;
+my $requires = shift;
+
+my $prefix = "%{f1_name_prefix}python%{pyver}-";
+
+my %requires;
+open (my $f, $requires);
+while (my $line = <$f>) {
+  chomp $line;
+  $line =~ s/^python-//g;
+  $line = lc ($line);
+  if ($line =~ />=|<=|==/) {
+    $line =~ /(.*)(>=|<=|==)(.*)/;
+    my ($name, $cmp, $version) = ($1, $2, $3);
+    $requires{"$name $cmp $version"} = 1;
+  }
+  else
+  {
+    $requires{$line} = 1;
+  }
+}
+
+print STDERR Dumper (\%requires); use Data::Dumper;
+
+my $requires = <<"EOF";
+# Automatically added from setup.py by $0
+EOF
+
+foreach my $req (sort keys %requires) {
+$requires .= <<"EOF";
+Requires: $prefix$req
+EOF
+}
+
+while (<>) {
+    s/%%version%%/$version/g;
+    s/%%buildrequires%%//g;
+    s/%%requires%%/$requires/g;
+    print;
+}
