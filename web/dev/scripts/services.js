@@ -158,7 +158,7 @@ function (object,         storage) {
         features: {
           //TODO: remove direct when old UI is no longer in use,
           //or remove it from use.
-          // Work out some direct kinks direct: true,
+          direct: true,
           subject: false,
           counter: true,
           medium: true
@@ -166,12 +166,12 @@ function (object,         storage) {
         shareTypes: [{
           type: 'wall',
           name: 'my wall'
-        }/* Work out group kinks , {
+        }, {
           type: 'groupWall',
           name: 'group wall',
           showTo: true,
           toLabel: 'type in the name of the group'
-        } */],
+        }],
         textLimit: 420,
         serviceUrl: 'http://facebook.com',
         revokeUrl: 'http://www.facebook.com/editapps.php?v=allowed',
@@ -237,7 +237,7 @@ function (object,         storage) {
         features: {
           //TODO: remove direct when old UI is no longer in use,
           //or remove it from use.
-          // Need to work out direct kinks direct: true,
+          direct: true,
           subject: true,
           counter: false
         },
@@ -248,12 +248,12 @@ function (object,         storage) {
           type: 'myConnections',
           name: 'connections only',
           specialTo: 'connections-only'
-        }/* Need to work out direct kinks , {
+        }, {
           type: 'contact',
           name: 'send message',
           showTo: true,
           toLabel: 'type in the name of the contact'
-        } */],
+        }],
         serviceUrl: 'http://linkedin.com',
         revokeUrl: 'http://linkedin.com/settings/connections',
         signOutUrl: 'https://www.linkedin.com/secure/login?session_full_logout=&trk=hb_signout',
