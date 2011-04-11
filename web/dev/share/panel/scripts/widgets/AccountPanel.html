@@ -46,6 +46,7 @@
               <input name="subject" placeholder="subject" type="text" value="{options.subject}" autocomplete="off"/>
             {]}
           {]}
+          <input type="hidden" name="shareType" value="{svc.shareTypes[0].type}">
         {]}
         <textarea class="message compose" placeholder="Type your message here, and we'll attach the link when you send." name="message">{options.message}</textarea>
         <div class="accountActions hbox">
