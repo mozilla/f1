@@ -253,8 +253,13 @@ class api():
           'source': 'source'
      }
      def sendmessage(self, message, options={}):
-          direct = options.get('to', None)
-          if direct:
+          share_type = options.get('shareType', None)
+          if share_type == 'groupWall':
+               direct = options.get('to', None)
+               if not direct:
+                    return None, {'code': 400,
+                                  'provider': domain,
+                                  'message': 'Wall name is missing'}
                url = "https://graph.facebook.com/%s/feed" % (direct,)
           else:
                url = config.get("oauth.facebook.com.feed", "https://graph.facebook.com/me/feed")
