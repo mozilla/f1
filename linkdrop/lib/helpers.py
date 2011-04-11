@@ -131,8 +131,6 @@ def json_exception_response(func, *args, **kwargs):
         raise
     except Exception, e:
         log.exception("%s(%s, %s) failed", func, args, kwargs)
-        #pylons = get_pylons(args)
-        #pylons.response.status_int = 500
         metrics.track(get_pylons(args).request, 'unhandled-exception',
                       function=func.__name__, error=e.__class__.__name__)
         return {
@@ -171,7 +169,6 @@ def api_response(func, *args, **kwargs):
                 + ser({'response': data}).encode('utf-8'))
     pylons.response.headers['Content-Type'] = 'application/json'
     res = json.dumps(data)
-    #import sys;print >> sys.stderr, res
     return res
 
 def api_entry(**kw):
