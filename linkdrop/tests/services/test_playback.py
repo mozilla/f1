@@ -4,9 +4,12 @@ import glob
 import unittest
 import httplib
 import httplib2
+import urllib
 import json
 import socket
+import rfc822
 from pprint import pformat
+from nose.tools import eq_
 
 from linkdrop.tests import *
 
@@ -27,10 +30,27 @@ class ProtocolReplayer(object):
 
 class HttpReplayer(ProtocolReplayer):
     to_playback = []
-    def request(self, *args, **kw):
-        fp = self.to_playback.pop(0)
+    def request(self, uri, method="GET", body=None, headers=None, **kw):
+        freq, fresp = self.to_playback.pop(0)
+        if freq is not None:
+            # We have an 'expected request' file - check it is what
+            # is actually being requested.
+            reqmethod, reqpath = freq.readline().strip().split(" ", 1)
+            eq_(method, reqmethod)
+            proto, rest = urllib.splittype(uri)
+            host, path = urllib.splithost(rest)
+            eq_(path, reqpath)
+            reqheaders = httplib.HTTPMessage(freq)
+            if headers is not None:
+                # only check the headers specified - additional headers
+                # may have been added by httplib but we can ignore them.
+                for hname, hval in headers.iteritems():
+                    eq_(hval, reqheaders[hname])
+            # finally check the content (ie, the body) is as expected.
+            reqcontent = freq.read()
+            eq_(body or '', reqcontent)
         resp = httplib.HTTPResponse(socket.socket())
-        resp.fp = fp
+        resp.fp = fresp
         resp.begin()
         content = resp.read()
         return httplib2.Response(resp), content
@@ -299,11 +319,20 @@ def queueForReplay(canned):
         # http playbacks can have multiple responses due to redirections...
         i = 0
         while True:
+            fname = os.path.join(canned.path, "request-%d" % (i,))
+            try:
+                freq = open(fname)
+                from dbgp.client import brk; brk()
+            except IOError:
+                freq = None
             fname = os.path.join(canned.path, "response-%d" % (i,))
             try:
-                HttpReplayer.to_playback.append(open(fname))
+                fresp = open(fname)
             except IOError:
+                fresp = None
+            if freq is None and fresp is None:
                 break
+            HttpReplayer.to_playback.append((freq, fresp))
             i += 1
     else:
         raise AssertionError(canned.protocol)
