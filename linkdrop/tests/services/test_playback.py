@@ -10,6 +10,7 @@ import socket
 import rfc822
 from pprint import pformat
 from nose.tools import eq_
+from nose import with_setup
 
 from linkdrop.tests import *
 
@@ -185,7 +186,8 @@ class ServiceReplayTestCase(TestController):
                     del expected[top][subname]
         assert_dicts_equal(got, expected)
 
-    def getResponse(self, req_type, request):
+    def getResponse(self, canned, request):
+        req_type = canned.req_type
         if req_type=="send":
             response = self.app.post(url(controller='send', action='send'),
                                     params=request)
@@ -340,15 +342,21 @@ def queueForReplay(canned):
 def runOne(canned):
     testClass = host_to_test[canned.host]
     test = testClass()
-    setupReplayers()
-    try:
-        queueForReplay(canned)
-        request = test.getDefaultRequest(canned.req_type)
-        response = test.getResponse(canned.req_type, request)
-        test.checkResponse(canned, response)
-    finally:
-        teardownReplayers()
+    queueForReplay(canned)
+    request = test.getDefaultRequest(canned.req_type)
+    response = test.getResponse(canned, request)
+    test.checkResponse(canned, response)
 
-def testAll():
-    for canned in genCanned():
-        yield runOne, canned
+# *sob* - this used to use a nose "test generator", but that technique
+# doesn't work well with discovery and only running one of the tests in
+# the corpus.
+# So we hack up the global namespace.  This allows you to say, eg,
+# % nosetests ... linkdrop/tests/services/test_playback.py:test_service_replay_http_www_google_com_auth_successful
+# to just run one specific test from the corpus.
+for canned in genCanned():
+    @with_setup(setupReplayers, teardownReplayers)
+    def decoratedRunOne(canned=canned):
+        runOne(canned)
+    name = "test_service_replay_" + os.path.basename(canned.path).replace("-", "_").replace(".", "_")
+    decoratedRunOne.__name__ = name
+    globals()[name] = decoratedRunOne
