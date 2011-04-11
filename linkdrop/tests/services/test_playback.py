@@ -219,6 +219,7 @@ class FacebookReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
         if req_type=="send" or req_type=="contacts":
             return {'domain': 'facebook.com',
+                    'shareType': 'wall',
                     'account': '{"oauth_token": "foo", "oauth_token_secret": "bar"}',
                    }
         if req_type=="auth":
