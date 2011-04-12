@@ -254,23 +254,41 @@ function (object,         Widget,         $,        template,
         return !this.counter || !this.counter.isOver();
       },
 
-      //Validates that any direct/to sending has a recipient. If not,
-      //then show an error, and disable the sharing button.
+      /**
+       * Validates that any direct/to sending has a recipient. If not,
+       * then show an error, and disable the sharing button.
+       */
       validateTo: function () {
         var toDom = $('[name="to"]', this.bodyNode),
             value = toDom.val().trim(),
             buttonNode = $('button.share', this.bodyNode)[0];
 
+        // Hide any existing error.
+        this.hideStatus();
+
         if (!value) {
           // Disable share, show error.
           buttonNode.setAttribute('disabled', 'disabled');
           toDom.addClass('inputError');
+
           this.showStatus('needRecipient');
         } else {
+
+          // Make sure all recipients are good.
+          try {
+            this.contacts.convert(value);
+          } catch (e) {
+            // Disable share with invalid recipient.
+            buttonNode.setAttribute('disabled', 'disabled');
+            toDom.addClass('inputError');
+            this.showStatus('invalidRecipient');
+            return;
+          }
+
           // Enable the share button, clear errors.
           buttonNode.removeAttribute('disabled');
           toDom.removeClass('inputError');
-          this.hideStatus('needRecipient');
+          this.hideStatus();
         }
       },
 

@@ -623,6 +623,7 @@ body .toSection input[type="text"] {
   min-height: 0;
   width: auto;
   font-size: inherit;
+  z-index: 0;
 }
 
 .widgets-AccountPanel div.status.error {
