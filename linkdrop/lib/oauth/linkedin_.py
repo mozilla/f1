@@ -64,7 +64,7 @@ class responder(OAuth1):
         li_profile = json.loads(content)
         profile = extract_li_data(li_profile)
         result_data = {'profile': profile,
-                       'oauth_token': access_token['oauth_token'],
+                       'oauth_token': access_token['oauth_token'], 
                        'oauth_token_secret': access_token['oauth_token_secret']}
         return result_data
 
@@ -90,11 +90,11 @@ class api():
         oauth_request.sign_request(self.sigmethod, self.consumer, self.oauth_token)
         headers = oauth_request.to_header()
         headers['x-li-format'] = 'json'
-
+        
         body = json.dumps(body)
         headers['Content-type'] = 'application/json'
         headers['Content-Length'] = str(len(body))
-
+        
         resp, content = httplib2.Http.request(client, url, method=method, headers=headers, body=body)
 
         data = content and json.loads(content) or resp
@@ -109,14 +109,16 @@ class api():
         return result, error
 
     def sendmessage(self, message, options={}):
-
-        share_type = options.get('shareType', None)
-        if share_type == 'contact':
-            raise Exception("NOT IMPLEMENTED")
+        share_type = str(options.get('shareType', ''))
 
         # TODO: this needs a bit work, it is not really "direct".
-        direct = options.get('to', 'anyone')
-        if direct in ('anyone', 'connections-only'):
+        if share_type in ('public', 'myConnections'):
+            direct = options.get('to', 'anyone')
+            if (share_type == 'public' and direct != 'anyone') or \
+               (share_type == 'myConnections' and direct != 'connections-only'):
+                return None, {'code': 400,
+                              'provider': 'linkedin',
+                              'message': 'Incorrect addressing for post'}
             url = "http://api.linkedin.com/v1/people/~/shares"
             body = {
                 "comment": message,
@@ -131,47 +133,50 @@ class api():
                 }
             }
         else:
-            raise Exception("NOT IMPLEMENTED")
             # we have to do a direct message, different api
-            #url = "http://api.linkedin.com/v1/people/~/mailbox"
-            #
-            #profile = self.account.get('profile', {})
-            #from_email = from_ = profile.get('verifiedEmail')
-            #fullname = profile.get('displayName', None)
-            #
-            #to_addrs = AddressList(options['to'])
-            #subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
-            #title = options.get('title', options.get('link', options.get('shorturl', '')))
-            #description = options.get('description', '')[:280]
-            #
-            #to_ = []
-            #for a in to_addrs.addresslist:
-            #    to_.append({'person': {'_path': '/people/'+a[1] }})
-            #
-            #c.safeHTML = safeHTML
-            #c.options = options
-            #
-            ## insert the url if it is not already in the message
-            #c.longurl = options.get('link')
-            #c.shorturl = options.get('shorturl')
-            #
-            ## get the title, or the long url or the short url or nothing
-            ## wrap these in literal for text email
-            #c.from_name = literal(fullname)
-            #c.subject = literal(subject)
-            #c.from_header = literal(from_)
-            #c.to_header = literal(to_)
-            #c.title = literal(title)
-            #c.description = literal(description)
-            #c.message = literal(message)
-            #
-            #text_message = render('/text_email.mako').encode('utf-8')
-            #
-            #body = {
-            #    'recipients': {'values': to_},
-            #    'subject': subject,
-            #    'body': text_message
-            #}
+            url = "http://api.linkedin.com/v1/people/~/mailbox"
+
+            profile = self.account.get('profile', {})
+            from_email = from_ = profile.get('verifiedEmail')
+            fullname = profile.get('displayName', None)
+
+            to_addrs = AddressList(options['to'])
+            subject = options.get('subject', config.get('share_subject', 'A web link has been shared with you'))
+            title = options.get('title', options.get('link', options.get('shorturl', '')))
+            description = options.get('description', '')[:280]
+
+            to_ = []
+            ids = [a[1] for a in to_addrs.addresslist]
+            if not ids:
+                return None, {'code': 400,
+                              'message': 'Missing contacts for direct messaging.'}
+            for id in ids:
+                to_.append({'person': {'_path': '/people/' + id}})
+
+            c.safeHTML = safeHTML
+            c.options = options
+            
+            # insert the url if it is not already in the message
+            c.longurl = options.get('link')
+            c.shorturl = options.get('shorturl')
+            
+            # get the title, or the long url or the short url or nothing
+            # wrap these in literal for text email
+            c.from_name = literal(fullname)
+            c.subject = literal(subject)
+            c.from_header = literal(from_)
+            c.to_header = literal(to_)
+            c.title = literal(title)
+            c.description = literal(description)
+            c.message = literal(message)
+    
+            text_message = render('/text_email.mako').encode('utf-8')
+            
+            body = { 
+                'recipients': {'values': to_},
+                'subject': subject,
+                'body': text_message
+            }
         return self.rawcall(url, body, method="POST")
 
     def getcontacts(self, start=0, page=25, group=None):
@@ -190,7 +195,7 @@ class api():
         contacts = []
         for entry in entries:
             contacts.append(extract_li_data(entry))
-
+            
         connectedto = {
             'entry': contacts,
             'itemsPerPage': result.get('_count', result.get('_total', 0)),
@@ -199,3 +204,4 @@ class api():
         }
 
         return connectedto, error
+

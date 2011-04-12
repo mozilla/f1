@@ -113,7 +113,7 @@ class responder(OAuth1):
         profile['accounts'] = [account]
 
         result_data = {'profile': profile,
-                       'oauth_token': access_token['oauth_token'],
+                       'oauth_token': access_token['oauth_token'], 
                        'oauth_token_secret': access_token['oauth_token_secret']}
         result, error = api(oauth_token=access_token['oauth_token'],
                    oauth_token_secret=access_token['oauth_token_secret']).profile()
@@ -186,10 +186,14 @@ class api():
                 # some reason we dont have a short url, add the long url
                 message += " %s" % longurl
 
-            # Comment out direct = options.get('to', None)
             if share_type == 'direct':
-                raise Exception("NOT IMPLEMENTED")
-                # result = self.api().direct_messages.new(text=message, user=direct)
+                direct = options.get('to', None)
+                if not direct:
+                    return None, \
+                            {'code': 400,
+                             'provider': domain,
+                             'message': 'Missing addressee for direct message'}
+                result = self.api().direct_messages.new(text=message, user=direct)
             else:
                 result = self.api().statuses.update(status=message)
             result[domain] = result['id']
@@ -202,7 +206,7 @@ class api():
                 'message': e.args[0]
             }
         return result, error
-
+    
     def profile(self):
         result = error = None
         try:
