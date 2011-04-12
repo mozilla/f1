@@ -39,7 +39,9 @@ import subprocess
 
 
 CURDIR = os.path.dirname(__file__)
-REPO_ROOT = 'https://github.com/mozilla/%s.git'
+REPOS = {'github': ('git', 'https://github.com/mozilla/%s.git'),
+         'mozilla': ('hg', 'https://hg.mozilla.org/services/%s')}
+
 PYTHON = sys.executable
 
 
@@ -74,22 +76,30 @@ def _envname(name):
     return name.upper().replace('-', '_')
 
 
-def _update_cmd(project, latest_tags=False):
+def _update_cmd(project, latest_tags=False, repo_type='git'):
     if latest_tags:
-        return 'git checkout -r "%s"' % get_latest_tag()
+        if repo_type == 'hg':
+            return 'hg up -r "%s"' % get_latest_tag()
+        else:
+            return 'git checkout -r "%s"' % get_latest_tag()
     else:
 
         # looking for an environ with a specific tag or rev
         rev = os.environ.get(_envname(project))
         if rev is not None:
-
             if not verify_tag(rev):
                 print('Unknown tag or revision: %s' % rev)
                 sys.exit(1)
 
-            return 'git checkout -r "%s"' % rev
-        return 'git checkout'
+            if repo_type == 'git':
+                return 'git checkout -r "%s"' % rev
+            else:
+                return 'hg up -r "%s"' % rev
 
+        if repo_type == 'git':
+            return 'git checkout'
+        else:
+            return 'hg up'
 
 def build_app(name, latest_tags, deps):
     # building deps first
@@ -113,16 +123,24 @@ def build_deps(deps, latest_tags):
             os.mkdir(deps_dir)
 
         for dep in deps:
-            repo = REPO_ROOT % dep
-            target = os.path.join(deps_dir, dep)
+            root, name = dep.split(':')
+            repo_type, repo_root = REPOS[root]
+            repo = repo_root % name
+            target = os.path.join(deps_dir, name)
             if os.path.exists(target):
                 os.chdir(target)
-                _run('git pull')
+                if repo_type == 'git':
+                    _run('git pull')
+                else:
+                    _run('hg pull')
             else:
-                _run('git clone %s %s' % (repo, target))
-                os.chdir(target)
+                if repo_type == 'git':
+                    _run('git clone %s %s' % (repo, target))
+                else:
+                    _run('hg clone %s %s' % (repo, target))
 
-            update_cmd = _update_cmd(dep, latest_tags)
+                os.chdir(target)
+            update_cmd = _update_cmd(dep, latest_tags, repo_type)
             _run(update_cmd)
             _run('%s setup.py develop' % PYTHON)
     finally:

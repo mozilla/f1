@@ -1,5 +1,5 @@
 APPNAME = server-shared-send
-DEPS = server-share-core
+DEPS = mozilla:server-core,github:server-share-core
 VIRTUALENV = virtualenv
 NOSE = bin/nosetests
 NOSETESTS_ARGS = -s
