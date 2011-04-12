@@ -205,6 +205,7 @@ def api_entry(**kw):
             d += ("Request Arguments\n-----------------\n\n%s\n\n"
                   % '\n'.join(args))
             if 'bodyargs' in kw:
+                args = []
                 assert 'body' not in kw, "can't specify body and bodyargs"
                 for m in kw['bodyargs']:
                     line = "  %(name)-20s %(type)-10s %(doc)s" % m
