@@ -22,25 +22,20 @@
 #
 
 import logging
-import datetime
 import json
-import urllib
-import sys
-import httplib2
 import copy
 from urlparse import urlparse
 from paste.deploy.converters import asbool
 import hashlib
 
-from pylons import config, request, response
-from pylons.controllers.util import abort, redirect
-from pylons.decorators.util import get_pylons
+from pylons import request
 
 from linkoauth import get_provider
 from linkoauth.base import OAuthKeysException, ServiceUnavailableException
 
 from linkdrop.lib.base import BaseController
-from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
+from linkdrop.lib.helpers import json_exception_response, api_response
+from linkdrop.lib.helpers import api_entry, api_arg
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 from linkdrop.lib.shortener import shorten_link
@@ -142,7 +137,8 @@ Site provided description of the shared item, not supported by all services.
         if not acct:
             metrics.track(request, 'send-noaccount', domain=domain)
             error = {'provider': domain,
-                     'message': "not logged in or no user account for that domain",
+                     'message': ("not logged in or no user "
+                                 "account for that domain"),
                      'status': 401
             }
             return {'result': result, 'error': error}
@@ -157,9 +153,14 @@ Site provided description of the shared item, not supported by all services.
             link_timer.track('link-shorten', short_url=shorturl)
             args['shorturl'] = shorturl
 
-        acct_hash = hashlib.sha1("%s#%s" % ((username or '').encode('utf-8'), (userid or '').encode('utf-8'))).hexdigest()
-        timer = metrics.start_timer(request, domain=domain, message_len=len(message),
-                                    long_url=longurl, short_url=shorturl, acct_id=acct_hash)
+        acct_hash = hashlib.sha1(
+            "%s#%s" % ((username or '').encode('utf-8'),
+                       (userid or '').encode('utf-8'))).hexdigest()
+        timer = metrics.start_timer(request, domain=domain,
+                                    message_len=len(message),
+                                    long_url=longurl,
+                                    short_url=shorturl,
+                                    acct_id=acct_hash)
         # send the item.
         try:
             result, error = provider.api(acct).sendmessage(message, args)
@@ -169,7 +170,8 @@ Site provided description of the shared item, not supported by all services.
             # XXX we need to handle this better, but if for some reason the
             # oauth values are bad we will get a ValueError raised
             error = {'provider': domain,
-                     'message': "not logged in or no user account for that domain",
+                     'message': ("not logged in or no user account "
+                                 "for that domain"),
                      'status': 401
             }
 
@@ -178,7 +180,8 @@ Site provided description of the shared item, not supported by all services.
             return {'result': result, 'error': error}
         except ServiceUnavailableException, e:
             error = {'provider': domain,
-                     'message': "The service is temporarily unavailable - please try again later.",
+                     'message': ("The service is temporarily unavailable "
+                                 "- please try again later."),
                      'status': 503
             }
             if e.debug_message:

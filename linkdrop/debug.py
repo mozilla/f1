@@ -21,7 +21,6 @@
 # Contributor(s):
 #
 
-import sys, os, time
 
 # Guard the import of cProfile such that 2.4 people without lsprof can still use
 # this script.
@@ -85,6 +84,7 @@ class ContextualProfile(Profile):
 # a quick change to call profiling
 def profile_wrapper(func):
     from decorator import decorator
+    _profiler = __builtin__.__dict__['_profiler'] # make pyflakes happy
     def wrap(_f, *args, **kwds):
         if _profiler:
             if not hasattr(_f, '_prof_wrapped'):
@@ -99,10 +99,11 @@ __builtin__.__dict__['_profiler'] = None
 __builtin__.__dict__['profile'] = profile_wrapper
 
 class ProfilerMiddleware():
-    """WSGI Middleware which profiles the subsequent handlers and outputs cachegrind files.
-    
+    """WSGI Middleware which profiles the subsequent handlers and outputs
+    cachegrind files.
+
     in development.ini:
-    
+
     [filter:profiler]
     enabled 0|1
     # type = line or call
@@ -117,9 +118,9 @@ class ProfilerMiddleware():
     grind = 0|1
     # where to save profile data
     dir /some/predetermined/path
-    
+
     Be sure apache has permission to write to profile_dir.
-    
+
     Repeated runs will produce new profile output, remember to clean out
     the profile directoy on occasion.
 
@@ -127,7 +128,7 @@ class ProfilerMiddleware():
     can use lsprofcalltree.py to convert profile data to kcachgrind format
     line profiling requires line_profiler: easy_install line_profiler
     """
-        
+
     def __init__(self, app, g_config, config):
         self.app = app
         self.profile_type = config.get('type', 'call')
@@ -138,8 +139,9 @@ class ProfilerMiddleware():
         self.profile_data_dir = config.get('dir', None)
 
     def __call__(self, environ, start_response):
-        """ 
-        Profile this request and output results in a cachegrind compatible format.
+        """
+        Profile this request and output results in a cachegrind
+        compatible format.
         """
         catch_response = []
         body = []
@@ -161,39 +163,41 @@ class ProfilerMiddleware():
             calltree_enabled = True
         except ImportError:
             calltree_enabled = False
-            
+
         import sys, os, time
 
         pstat_fn = None
         cg_fn = None
-        
+
         calltree_enabled = calltree_enabled and self.profile_grind
 
         if self.profile_data_dir:
             # XXX fixme, this should end up in a better location
             if not os.path.exists(self.profile_data_dir):
                 os.mkdir(self.profile_data_dir)
-            count = 1 
             path = environ.get('PATH_INFO', '/tmp')
             if path == '/':
                 path = 'root'
             path = path.strip("/").replace("/", "_")
             pid = os.getpid()
             t = time.time()
-            pstat_fn = os.path.join(self.profile_data_dir,"prof.out.%s.%d.%d" % (path, pid, t))
+            pstat_fn = os.path.join(self.profile_data_dir,
+                                    "prof.out.%s.%d.%d" % (path, pid, t))
             if calltree_enabled:
-                cg_fn = os.path.join(self.profile_data_dir,"cachegrind.out.%s.%d.%d" % (path, pid, t))
+                cg_fn = os.path.join(self.profile_data_dir,
+                                     "cachegrind.out.%s.%d.%d" %
+                                     (path, pid, t))
 
         if self.profile_type == 'line':
             import line_profiler
-            p = prof = line_profiler.LineProfiler()
+            p = line_profiler.LineProfiler()
             # line profiler aparently needs to be a builtin
             self.profile_builtin = True
             # line profiler has no get_stat, so converting to cachegrind
             # will not work
             calltree_enabled = False
         else:
-            p = prof = ContextualProfile()
+            p = ContextualProfile()
 
         if self.profile_builtin:
             __builtin__.__dict__['_profiler'] = p
@@ -205,7 +209,7 @@ class ProfilerMiddleware():
 
         try:
             if self.profile_builtin:
-                run_app()                
+                run_app()
             else:
                 p.runctx('run_app()', globals(), locals())
 
@@ -232,22 +236,22 @@ class ProfilerMiddleware():
 def make_profile_middleware(app, global_conf, **kw):
     """
     Wrap the application in a component that will profile each
-    request.  
+    request.
     """
     return ProfilerMiddleware(app, global_conf, kw)
 
 class DBGPMiddleware():
     """WSGI Middleware which loads the PyDBGP debugger.
-    
+
     in development.ini:
-    
+
     [DEFAULT]
     idekey         character key for use with dbgp proxy
     host           machine client debugger (e.g. Komodo IDE) or proxy runs on
     port           port the client debugger or proxy listens on
     breakonexcept  only start debugging when an uncaught exception occurs
     """
-        
+
     def __init__(self, app, config, idekey='', host='127.0.0.1', port='9000',
                  breakonexcept='0'):
         self.app = app
@@ -259,9 +263,9 @@ class DBGPMiddleware():
         self.brk = bool(int(breakonexcept))
 
     def __call__(self, environ, start_response):
-        """ 
+        """
         Debug this request.
-        """ 
+        """
         from dbgp import client
         if self.brk:
             # breaks on uncaught exceptions
@@ -287,11 +291,11 @@ class DBGPMiddleware():
         return self.app(environ, start_response)
 
 
-def make_dbgp_middleware(app, global_conf, idekey='', host='127.0.0.1', port='9000',
-                 breakonexcept='0'):
+def make_dbgp_middleware(app, global_conf, idekey='', host='127.0.0.1',
+                         port='9000', breakonexcept='0'):
     """
     Wrap the application in a component that will connect to a dbgp server
     for each request
     """
-    return DBGPMiddleware(app, global_conf, idekey, host, port, breakonexcept)
-
+    return DBGPMiddleware(app, global_conf, idekey, host, port,
+                          breakonexcept)

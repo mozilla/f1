@@ -31,7 +31,8 @@ class MetricsCollector(object):
         if not self.enabled:
             return
         data.update(self._get_distinct_attrs(distinct_ob))
-        data['when'] = time.time() # can be formatted externally for lower perf impact here.
+        # time can be formatted externally for lower perf impact here.
+        data['when'] = time.time()
         data['id'] = id
         self.consumer.consume(data)
 
@@ -67,7 +68,8 @@ class F1MetricsConsumer(MetricsConsumer):
     def consume(self, data):
         # gozer has requested a simple format of name=value, space sep'd and
         # strings quoted.
-        msg = " ".join(("%s=%r" % (n, v.encode("utf-8") if isinstance(v, unicode) else v)
+        msg = " ".join(("%s=%r" % (n, v.encode("utf-8")
+                                   if isinstance(v, unicode) else v)
                         for n, v in data.iteritems()))
         log.info("%s", msg)
 

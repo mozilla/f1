@@ -30,9 +30,21 @@ my $requires = <<"EOF";
 # Automatically added from setup.py by $0
 EOF
 
+# These are os-provided packages
+my %included = (
+  'coverage' => 1,
+  'httplib2' => 1,
+  'nose'     => 1,
+);
 foreach my $req (sort keys %requires) {
+  if (exists $included{$req}) {
+    $req = "python%{pyver}-$req";
+  }
+  else {
+    $req = $prefix . $req;
+  }
 $requires .= <<"EOF";
-Requires: $prefix$req
+Requires: $req
 EOF
 }
 

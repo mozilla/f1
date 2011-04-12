@@ -24,7 +24,7 @@
 import cgi
 import json
 import urllib
-from pylons import config, url
+from pylons import config
 
 import logging
 log = logging.getLogger('__name__')
@@ -33,12 +33,17 @@ def shorten_link(long_url):
     longUrl = cgi.escape(long_url.encode('utf-8'))
     bitly_userid= config.get('bitly.userid')
     bitly_key = config.get('bitly.key')
-    bitly_result = urllib.urlopen("http://api.bit.ly/v3/shorten?login=%(bitly_userid)s&apiKey=%(bitly_key)s&longUrl=%(longUrl)s&format=json" % locals()).read()
+    bitly_result = urllib.urlopen(
+        "http://api.bit.ly/v3/shorten?"
+        "login=%(bitly_userid)s&apiKey=%(bitly_key)s&"
+        "longUrl=%(longUrl)s&format=json" % dict(longUrl=longUrl,
+                                                 bitly_userid=bitly_userid,
+                                                 bitly_key=bitly_key)).read()
     shorturl = bitly_data = None
     try:
         bitly_data = json.loads(bitly_result)['data']
         shorturl = bitly_data["url"]
-    except (ValueError, TypeError), e:
+    except (ValueError, TypeError):
         # bitly_data may be a list if there is an error, resulting in TypeError
         # when getting the url
         pass
@@ -46,5 +51,4 @@ def shorten_link(long_url):
         # The index of ['url'] is going to fail - it isn't clear what we
         # should do, but we might as well capture in the logs why.
         log.error("unexpected bitly response: %r", bitly_result)
-
     return shorturl
