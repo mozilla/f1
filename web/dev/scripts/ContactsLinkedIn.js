@@ -21,32 +21,27 @@
  * Contributor(s):
  * */
 
-/*jslint indent: 2 */
-/*global define: false, localStorage: false */
+/*jslint indent: 2, regexp: false */
+/*global define: false */
 "use strict";
 
-define([], function () {
-  var store = localStorage, type = 'localStorage';
+define([ 'blade/object', 'Contacts'],
+function (object,         Contacts) {
 
-  //Capability detect for localStorage. At least one add-on does weird things
-  //with it.
-  try {
-    store.tempVar = 'temp';
-    //Test reading.
-    if (store.tempVar === 'temp') {}
-    //Test deletion.
-    delete store.tempVar;
-  } catch (e) {
-    //Just use a simple in-memory object. Not as nice, but code will still work.
-    store = {};
-    type = 'memory';
-  }
-
-  function storage() {
-    return store;
-  }
-
-  storage.type = type;
-
-  return storage;
+  /**
+   * Overrides the formatting of contacts and converting
+   * one of those formatted contacts into a user ID. Allow
+   * for the special 'connections-only' value.
+   */
+  return object(Contacts, null, function (parent) {
+    return {
+      findContact: function (to) {
+        if (to === 'connections-only') {
+          return to;
+        } else {
+          return parent(this, 'findContact', arguments);
+        }
+      }
+    };
+  });
 });
