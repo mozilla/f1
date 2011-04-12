@@ -170,6 +170,10 @@ function (object,         Widget,         $,        template,
           }
         }
 
+        // Hold onto nodes that are used frequently
+        this.toDom = $('[name="to"]', this.bodyNode);
+        this.shareButtonNode = $('button.share', this.bodyNode)[0];
+
         if (this.svc.shareTypes.length > 1) {
           //Insert a Select widget if it is desired.
           this.select = new Select({
@@ -203,7 +207,7 @@ function (object,         Widget,         $,        template,
         // Set up autocomplete and contacts used for autocomplete.
         // Since contacts can have a different
         // format/display per service, allow for service overrides.
-        acNode = $('[name="to"]', this.bodyNode)[0];
+        acNode = this.toDom[0];
         if (acNode) {
           require([this.contactsName], fn.bind(this, function (Contacts) {
             this.contacts = new Contacts(this.svc, this.svcAccount);
@@ -213,7 +217,7 @@ function (object,         Widget,         $,        template,
 
         //Create ellipsis for anything wanting ... overflow
         $(".overflow", this.node).textOverflow();
-      },
+     },
 
       //Tron Legacy soundtrack anyone?
       theGameHasChanged: function (data) {
@@ -235,7 +239,7 @@ function (object,         Widget,         $,        template,
 
         //Also clear up the form data.
         var root = $(this.bodyNode);
-        root.find('[name="to"]').val('');
+        this.toDom.val('');
         root.find('[name="subject"]').val('');
         root.find('[name="message"]').val('');
         if (this.svc.textLimit) {
@@ -259,37 +263,37 @@ function (object,         Widget,         $,        template,
        * then show an error, and disable the sharing button.
        */
       validateTo: function () {
-        var toDom = $('[name="to"]', this.bodyNode),
-            value = toDom.val().trim(),
-            buttonNode = $('button.share', this.bodyNode)[0];
+        var value = this.toDom.val().trim();
 
         // Hide any existing error.
-        this.hideStatus();
+        this.resetError();
 
         if (!value) {
           // Disable share, show error.
-          buttonNode.setAttribute('disabled', 'disabled');
-          toDom.addClass('inputError');
+          this.shareButtonNode.setAttribute('disabled', 'disabled');
+          this.toDom.addClass('inputError');
 
           this.showStatus('needRecipient');
         } else {
-
           // Make sure all recipients are good.
           try {
             this.contacts.convert(value);
           } catch (e) {
             // Disable share with invalid recipient.
-            buttonNode.setAttribute('disabled', 'disabled');
-            toDom.addClass('inputError');
+            this.shareButtonNode.setAttribute('disabled', 'disabled');
+            this.toDom.addClass('inputError');
             this.showStatus('invalidRecipient');
-            return;
           }
-
-          // Enable the share button, clear errors.
-          buttonNode.removeAttribute('disabled');
-          toDom.removeClass('inputError');
-          this.hideStatus();
         }
+      },
+
+      /**
+       * Clears the form of any error message, enables share button.
+       */
+      resetError: function () {
+        this.shareButtonNode.removeAttribute('disabled');
+        this.toDom.removeClass('inputError');
+        this.hideStatus();
       },
 
       startCounter: function () {
@@ -380,7 +384,7 @@ function (object,         Widget,         $,        template,
           }
         }
 
-        root.find('[name="to"]').val(opts.to);
+        this.toDom.val(opts.to);
         root.find('[name="subject"]').val(opts.subject);
         root.find('[name="message"]').val(opts.message);
 
@@ -460,9 +464,9 @@ function (object,         Widget,         $,        template,
         var shareType = this.getShareType(this.select.val());
         this.changeShareType(shareType);
 
-        //Clear up any error status
-        $('[name="to"]', this.bodyNode).removeClass('inputError');
-        this.hideStatus();
+        //Clear up any error status, make sure share button
+        //is enabled.
+        this.resetError();
       },
 
       onSubmit: function (evt) {
