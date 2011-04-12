@@ -178,7 +178,7 @@ def api_entry(**kw):
         if not hasattr(f, "__api"):
             f.__api = kw
         if not getattr(f, "__doc__") and 'doc' in kw:
-            doc = kw['doc']
+            doc = kw['doc'] + "\n"
             if 'name' in kw:
                 doc = kw['name'] + "\n" + "="*len(kw['name']) +"\n\n" + doc
             args = []
@@ -191,8 +191,8 @@ def api_entry(**kw):
                 if opts:
                     line = "%s (%s)" % (line, ','.join(opts),)
                 args.append(line)
-            d = "URL Arguments\n-------------\n\n%s\n\n" % '\n'.join(args)
             args = []
+            d = "URL Arguments\n-------------\n\n%s\n\n" % '\n'.join(args)
             for m in kw.get('queryargs', []):
                 line = "  %(name)-20s %(type)-10s %(doc)s" % m
                 opts = []
@@ -217,8 +217,8 @@ def api_entry(**kw):
                         line = "%s (%s)" % (line, ','.join(opts),)
                     args.append(line)
                 d = d+ ("**Request Body**: A JSON object with the "
-                        "following fields:")
-                d = d+ "\n".join(args)
+                        "following fields:\n")
+                d = d+ "\n".join(args) + "\n\n"
             elif 'body' in kw:
                 d = d+ ("**Request Body**:  %(type)-10s %(doc)s\n\n"
                         % kw['body'])
