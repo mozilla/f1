@@ -241,7 +241,7 @@ def api_arg(name, type=None, required=False, default=None, allowed=None,
     }
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
     @api_entry(
         name="contacts",
         body={'type': "json", 'doc': "A json object"},
