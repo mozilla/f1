@@ -45,6 +45,9 @@ function (object,         Widget,         $,        template,
       .delegate('.' + className + ' .shareType2', 'click', function (evt) {
         Widget.closest(module.id, evt, 'selectSecondShareType');
         evt.preventDefault();
+      })
+      .delegate('.' + className + ' [name="to"]', 'blur', function (evt) {
+        Widget.closest(module.id, evt, 'validateTo');
       });
   });
 
@@ -251,6 +254,26 @@ function (object,         Widget,         $,        template,
         return !this.counter || !this.counter.isOver();
       },
 
+      //Validates that any direct/to sending has a recipient. If not,
+      //then show an error, and disable the sharing button.
+      validateTo: function () {
+        var toDom = $('[name="to"]', this.bodyNode),
+            value = toDom.val().trim(),
+            buttonNode = $('button.share', this.bodyNode)[0];
+
+        if (!value) {
+          // Disable share, show error.
+          buttonNode.setAttribute('disabled', 'disabled');
+          toDom.addClass('inputError');
+          this.showStatus('needRecipient');
+        } else {
+          // Enable the share button, clear errors.
+          buttonNode.removeAttribute('disabled');
+          toDom.removeClass('inputError');
+          this.hideStatus('needRecipient');
+        }
+      },
+
       startCounter: function () {
         //Set up text counter
         if (!this.counter) {
@@ -269,6 +292,22 @@ function (object,         Widget,         $,        template,
         this.counter.updateLimit(this.options.shortUrl ?
                                  (this.svc.textLimit - (this.options.shortUrl.length + 1)) :
                                  this.svc.textLimit - this.urlSize);
+      },
+
+      /**
+       * Shows a status message near the share button.
+       * @param {String} className the class name of the status message element
+       * to show.
+       */
+      showStatus: function (className) {
+        $('.status.' + className, this.bodyNode).show();
+      },
+
+      /**
+       * Hides all status messages that show up near the share button.
+       */
+      hideStatus: function () {
+        $('.status', this.bodyNode).hide();
       },
 
       //The page options have changed, update the relevant HTML bits.
@@ -402,6 +441,10 @@ function (object,         Widget,         $,        template,
       onShareTypeChange: function (evt) {
         var shareType = this.getShareType(this.select.val());
         this.changeShareType(shareType);
+
+        //Clear up any error status
+        $('[name="to"]', this.bodyNode).removeClass('inputError');
+        this.hideStatus();
       },
 
       onSubmit: function (evt) {
