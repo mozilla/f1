@@ -212,12 +212,18 @@ function (object,         Widget,         $,        template,
           require([this.contactsName], fn.bind(this, function (Contacts) {
             this.contacts = new Contacts(this.svc, this.svcAccount);
             this.autoComplete = new AutoComplete(acNode, this.contacts);
+            // Listen for autocomplete selections, so that the error
+            // state is not set on a node after using the mouse to select
+            // an autocomplete option.
+            this.toDom.bind('autocompleteselect', fn.bind(this, function () {
+              this.resetError();
+            }));
           }));
         }
 
         //Create ellipsis for anything wanting ... overflow
         $(".overflow", this.node).textOverflow();
-     },
+      },
 
       //Tron Legacy soundtrack anyone?
       theGameHasChanged: function (data) {
