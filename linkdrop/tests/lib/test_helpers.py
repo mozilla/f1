@@ -128,3 +128,45 @@ class TestHelpers(TestController):
                'bawlp</response>')
         tools.eq_(res, xml)
         tools.eq_(response.headers['Content-Type'], 'text/xml')
+
+    def test_api_entry(self):
+        @helpers.api_entry(
+            doc="DOC",
+            queryargs=[
+                helpers.api_arg('qryarg1', 'string', True, None, None,
+                                "QryArg1 Doc"),
+                helpers.api_arg('qryarg2', 'boolean', False, True, None,
+                                "QryArg2 Doc"),
+                ],
+            bodyargs=[
+                helpers.api_arg('bodyarg1', 'string', True, None, None,
+                                'BodyArg1 Doc'),
+                helpers.api_arg('bodyarg2', 'boolean', False, True, None,
+                                'BodyArg2 Doc'),
+                ],
+            response={'type': 'list', 'doc': 'callargs list'},
+            name='NAME'
+            )
+        def api_fn(arg1, arg2, kwarg1=None, kwarg2=None):
+            return [(arg1, arg2), dict(kwarg1=kwarg1, kwarg2=kwarg2)]
+        res = api_fn(1, 2, kwarg1='foo', kwarg2='bar')
+        tools.eq_(res, [(1, 2), dict(kwarg1='foo', kwarg2='bar')])
+        tools.ok_(api_fn.__doc__.startswith('NAME\n===='))
+        tools.ok_("qryarg1              string     QryArg1 Doc (required)"
+                  in api_fn.__doc__)
+        tools.ok_("qryarg2              boolean    QryArg2 Doc (default=True)"
+                  in api_fn.__doc__)
+        tools.ok_("**Request Body**: A JSON object" in api_fn.__doc__)
+        tools.ok_("bodyarg1             string     BodyArg1 Doc (required)"
+                  in api_fn.__doc__)
+        tools.ok_("**Response Body**: list       callargs list"
+                  in api_fn.__doc__)
+
+        @helpers.api_entry(
+            doc="DOC",
+            body={'type': 'list', 'doc': 'body list'},
+            )
+        def api_fn2():
+            return
+        tools.ok_("**Request Body**:  list       body list"
+                  in api_fn2.__doc__)
