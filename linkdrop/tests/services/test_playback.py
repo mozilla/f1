@@ -7,7 +7,7 @@ import httplib2
 import urllib
 import json
 import socket
-import rfc822
+import email
 from pprint import pformat
 from nose.tools import eq_
 from nose import with_setup
@@ -17,6 +17,18 @@ from linkdrop.tests import *
 def assert_dicts_equal(got, expected):
     if got != expected:
         raise AssertionError("\n%s\n!=\n%s" % (pformat(got), pformat(expected)))
+
+
+def assert_payloads_equal(got, expected):
+    if isinstance(got, list):
+        eq_(len(got), len(expected))
+        # TODO: make recursive?  I doubt we need that though...
+        for i, (got_elt, expected_elt) in enumerate(zip(got, expected)):
+            eq_(got_elt.as_string(), expected_elt.as_string())
+    else:
+        assert isinstance(expected, list)
+        eq_(got, expected)
+
 
 # Somewhat analogous to a protocap.ProtocolCapturingBase object - but
 # instead of capturing, it replays an earlier capture.
@@ -41,15 +53,26 @@ class HttpReplayer(ProtocolReplayer):
             proto, rest = urllib.splittype(uri)
             host, path = urllib.splithost(rest)
             eq_(path, reqpath)
-            reqheaders = httplib.HTTPMessage(freq)
+            reqob = email.message_from_file(freq)
             if headers is not None:
+                gotheadersstr = "\r\n".join(["%s: %s" % (n, v) for n, v in headers.iteritems()])
+                gotob = email.message_from_string(gotheadersstr + "\r\n" + (body or ''))
+            else:
+                gotob = None
+            if headers is not None:
+                if 'content-type' in gotob:
+                    eq_(gotob.get_content_type(), reqob.get_content_type())
+                else:
+                    assert 'content-type' not in reqob
                 # only check the headers specified - additional headers
                 # may have been added by httplib but we can ignore them.
                 for hname, hval in headers.iteritems():
-                    eq_(hval, reqheaders[hname])
+                    if hname.lower() in ["content-length", "content-type"]:
+                        continue
+                    # otherwise the header must match exactly.    
+                    eq_(hval, reqob[hname])
             # finally check the content (ie, the body) is as expected.
-            reqcontent = freq.read()
-            eq_(body or '', reqcontent)
+            assert_payloads_equal(gotob.get_payload(), reqob.get_payload())
         resp = httplib.HTTPResponse(socket.socket())
         resp.fp = fresp
         resp.begin()
@@ -325,7 +348,6 @@ def queueForReplay(canned):
             fname = os.path.join(canned.path, "request-%d" % (i,))
             try:
                 freq = open(fname)
-                from dbgp.client import brk; brk()
             except IOError:
                 freq = None
             fname = os.path.join(canned.path, "response-%d" % (i,))
@@ -344,7 +366,13 @@ def runOne(canned):
     testClass = host_to_test[canned.host]
     test = testClass()
     queueForReplay(canned)
-    request = test.getDefaultRequest(canned.req_type)
+    try:
+        with open(os.path.join(canned.path, "f1-request.json")) as f:
+            request = json.load(f)
+        # and the handling of 'account' totally sucks - it is a string...
+        request['account'] = json.dumps(request['account'])
+    except IOError:
+        request = test.getDefaultRequest(canned.req_type)
     response = test.getResponse(canned, request)
     test.checkResponse(canned, response)
 
