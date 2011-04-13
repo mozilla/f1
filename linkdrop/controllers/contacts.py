@@ -30,8 +30,8 @@ from pylons.controllers.util import abort, redirect
 from pylons.decorators import jsonify
 from pylons.decorators.util import get_pylons
 
-from linkoauth.base import OAuthKeysException, ServiceUnavailableException
-from linkoauth.errors import DomainNotRegisteredError
+from linkoauth.errors import (OAuthKeysException, ServiceUnavailableException,
+                              DomainNotRegisteredError)
 from linkdrop.controllers import services
 
 from linkdrop.lib.base import BaseController, render
