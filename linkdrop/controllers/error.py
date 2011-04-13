@@ -29,6 +29,7 @@ from webhelpers.html.builder import literal
 
 from linkdrop.lib.base import BaseController
 
+
 class ErrorController(BaseController):
     """Generates error documents as and when they are required.
 

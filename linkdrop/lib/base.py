@@ -27,5 +27,6 @@ Provides the BaseController class for subclassing.
 """
 from pylons.controllers import WSGIController
 
+
 class BaseController(WSGIController):
     pass

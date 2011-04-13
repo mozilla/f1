@@ -29,9 +29,10 @@ from pylons import config
 import logging
 log = logging.getLogger('__name__')
 
+
 def shorten_link(long_url):
     longUrl = cgi.escape(long_url.encode('utf-8'))
-    bitly_userid= config.get('bitly.userid')
+    bitly_userid = config.get('bitly.userid')
     bitly_key = config.get('bitly.key')
     bitly_result = urllib.urlopen(
         "http://api.bit.ly/v3/shorten?"

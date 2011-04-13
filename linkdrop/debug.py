@@ -22,8 +22,8 @@
 #
 
 
-# Guard the import of cProfile such that 2.4 people without lsprof can still use
-# this script.
+# Guard the import of cProfile such that 2.4 people without lsprof can still
+# use this script.
 try:
     from cProfile import Profile
 except ImportError:
@@ -31,6 +31,7 @@ except ImportError:
         from lsprof import Profile
     except ImportError:
         from profile import Profile
+
 
 class ContextualProfile(Profile):
     """ A subclass of Profile that adds a context manager for Python
@@ -59,8 +60,8 @@ class ContextualProfile(Profile):
                 self.disable()
 
     def __call__(self, func):
-        """ Decorate a function to start the profiler on function entry and stop
-        it on function exit.
+        """ Decorate a function to start the profiler on function entry and
+        stop it on function exit.
         """
         def f(*args, **kwds):
             self.enable_by_count()
@@ -80,11 +81,13 @@ class ContextualProfile(Profile):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.disable_by_count()
 
+
 # avoid having to remove all @profile decorators if you want to do
 # a quick change to call profiling
 def profile_wrapper(func):
     from decorator import decorator
-    _profiler = __builtin__.__dict__['_profiler'] # make pyflakes happy
+    _profiler = __builtin__.__dict__['_profiler']  # make pyflakes happy
+
     def wrap(_f, *args, **kwds):
         if _profiler:
             if not hasattr(_f, '_prof_wrapped'):
@@ -97,6 +100,7 @@ def profile_wrapper(func):
 import __builtin__
 __builtin__.__dict__['_profiler'] = None
 __builtin__.__dict__['profile'] = profile_wrapper
+
 
 class ProfilerMiddleware():
     """WSGI Middleware which profiles the subsequent handlers and outputs
@@ -132,10 +136,10 @@ class ProfilerMiddleware():
     def __init__(self, app, g_config, config):
         self.app = app
         self.profile_type = config.get('type', 'call')
-        self.profile_print = bool(int(config.get('pprint','0')))
+        self.profile_print = bool(int(config.get('pprint', '0')))
         self.profile_sort = config.get('sort', 'time')
-        self.profile_grind = bool(int(config.get('grind','0')))
-        self.profile_builtin = bool(int(config.get('builtin','0')))
+        self.profile_grind = bool(int(config.get('grind', '0')))
+        self.profile_builtin = bool(int(config.get('builtin', '0')))
         self.profile_data_dir = config.get('dir', None)
 
     def __call__(self, environ, start_response):
@@ -145,10 +149,12 @@ class ProfilerMiddleware():
         """
         catch_response = []
         body = []
+
         def replace_start_response(status, headers, exc_info=None):
             catch_response.extend([status, headers])
             start_response(status, headers, exc_info)
             return body.append
+
         def run_app():
             app_iter = self.app(environ, replace_start_response)
             try:
@@ -164,7 +170,9 @@ class ProfilerMiddleware():
         except ImportError:
             calltree_enabled = False
 
-        import sys, os, time
+        import sys
+        import os
+        import time
 
         pstat_fn = None
         cg_fn = None
@@ -233,12 +241,14 @@ class ProfilerMiddleware():
                 data.close()
         return body
 
+
 def make_profile_middleware(app, global_conf, **kw):
     """
     Wrap the application in a component that will profile each
     request.
     """
     return ProfilerMiddleware(app, global_conf, kw)
+
 
 class DBGPMiddleware():
     """WSGI Middleware which loads the PyDBGP debugger.
@@ -274,9 +284,10 @@ class DBGPMiddleware():
             # breaks on the next executed line
             client.brk(self.host, self.port, self.idekey)
 
-            # we might want to do this, but you end up in some random middleware
-            # and it's not the best experience.  Instead, break here, go
-            # set some breakpoints where you want to debug, the continue
+            # we might want to do this, but you end up in some random
+            # middleware and it's not the best experience.  Instead, break
+            # here, go set some breakpoints where you want to debug, the
+            # continue
 
             #c = client.backendCmd(self.idekey)
             #c.stdin_enabled = 0
