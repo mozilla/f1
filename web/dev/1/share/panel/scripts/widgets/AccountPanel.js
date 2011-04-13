@@ -45,6 +45,9 @@ function (object,         Widget,         $,        template,
       .delegate('.' + className + ' .shareType2', 'click', function (evt) {
         Widget.closest(module.id, evt, 'selectSecondShareType');
         evt.preventDefault();
+      })
+      .delegate('.' + className + ' [name="to"]', 'blur', function (evt) {
+        Widget.closest(module.id, evt, 'validateTo');
       });
   });
 
@@ -176,6 +179,10 @@ function (object,         Widget,         $,        template,
           }
         }
 
+        // Hold onto nodes that are used frequently
+        this.toDom = $('[name="to"]', this.bodyNode);
+        this.shareButtonNode = $('button.share', this.bodyNode)[0];
+
         if (this.svc.shareTypes.length > 1) {
           //Insert a Select widget if it is desired.
           this.select = new Select({
@@ -209,11 +216,17 @@ function (object,         Widget,         $,        template,
         // Set up autocomplete and contacts used for autocomplete.
         // Since contacts can have a different
         // format/display per service, allow for service overrides.
-        acNode = $('[name="to"]', this.bodyNode)[0];
+        acNode = this.toDom[0];
         if (acNode) {
           require([this.contactsName], fn.bind(this, function (Contacts) {
             this.contacts = new Contacts(this.svc, this.svcAccount);
             this.autoComplete = new AutoComplete(acNode, this.contacts);
+            // Listen for autocomplete selections, so that the error
+            // state is not set on a node after using the mouse to select
+            // an autocomplete option.
+            this.toDom.bind('autocompleteselect', fn.bind(this, function () {
+              this.resetError();
+            }));
           }));
         }
 
@@ -241,7 +254,7 @@ function (object,         Widget,         $,        template,
 
         //Also clear up the form data.
         var root = $(this.bodyNode);
-        root.find('[name="to"]').val('');
+        this.toDom.val('');
         root.find('[name="subject"]').val('');
         root.find('[name="message"]').val('');
         if (this.svc.textLimit) {
@@ -258,6 +271,44 @@ function (object,         Widget,         $,        template,
 
       validate: function (sendData) {
         return !this.counter || !this.counter.isOver();
+      },
+
+      /**
+       * Validates that any direct/to sending has a recipient. If not,
+       * then show an error, and disable the sharing button.
+       */
+      validateTo: function () {
+        var value = this.toDom.val().trim();
+
+        // Hide any existing error.
+        this.resetError();
+
+        if (!value) {
+          // Disable share, show error.
+          this.shareButtonNode.setAttribute('disabled', 'disabled');
+          this.toDom.addClass('inputError');
+
+          this.showStatus('needRecipient');
+        } else {
+          // Make sure all recipients are good.
+          try {
+            this.contacts.convert(value);
+          } catch (e) {
+            // Disable share with invalid recipient.
+            this.shareButtonNode.setAttribute('disabled', 'disabled');
+            this.toDom.addClass('inputError');
+            this.showStatus('invalidRecipient');
+          }
+        }
+      },
+
+      /**
+       * Clears the form of any error message, enables share button.
+       */
+      resetError: function () {
+        this.shareButtonNode.removeAttribute('disabled');
+        this.toDom.removeClass('inputError');
+        this.hideStatus();
       },
 
       startCounter: function () {
@@ -278,6 +329,22 @@ function (object,         Widget,         $,        template,
         this.counter.updateLimit(this.options.shortUrl ?
                                  (this.svc.textLimit - (this.options.shortUrl.length + 1)) :
                                  this.svc.textLimit - this.urlSize);
+      },
+
+      /**
+       * Shows a status message near the share button.
+       * @param {String} className the class name of the status message element
+       * to show.
+       */
+      showStatus: function (className) {
+        $('.status.' + className, this.bodyNode).show();
+      },
+
+      /**
+       * Hides all status messages that show up near the share button.
+       */
+      hideStatus: function () {
+        $('.status', this.bodyNode).hide();
       },
 
       //The page options have changed, update the relevant HTML bits.
@@ -332,7 +399,7 @@ function (object,         Widget,         $,        template,
           }
         }
 
-        root.find('[name="to"]').val(opts.to);
+        this.toDom.val(opts.to);
         root.find('[name="subject"]').val(opts.subject);
         root.find('[name="message"]').val(opts.message);
 
@@ -411,6 +478,10 @@ function (object,         Widget,         $,        template,
       onShareTypeChange: function (evt) {
         var shareType = this.getShareType(this.select.val());
         this.changeShareType(shareType);
+
+        //Clear up any error status, make sure share button
+        //is enabled.
+        this.resetError();
       },
 
       onSubmit: function (evt) {

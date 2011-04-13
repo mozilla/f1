@@ -1,5 +1,4 @@
 import os
-import sys
 import re
 
 from paste import request
@@ -8,6 +7,7 @@ from paste import httpexceptions
 from paste.httpheaders import ETAG
 
 version_re = re.compile("/\d+.\d+.\d+/", re.U)
+
 
 class StaticURLParser(object):
     """
@@ -33,7 +33,9 @@ class StaticURLParser(object):
         if not path_info:
             return self.add_slash(environ, start_response)
         directory = "%s" % self.directory
-        if not path_info.startswith('/%s/' % self.version) and version_re.match(path_info) is None and directory == self.root_directory:
+        if (not path_info.startswith('/%s/' % self.version)
+            and version_re.match(path_info) is None
+            and directory == self.root_directory):
             directory = os.path.join(directory, self.version)
         if path_info == '/':
             # @@: This should obviously be configurable
@@ -50,8 +52,8 @@ class StaticURLParser(object):
             # @@: Cache?
             return self.__class__(full, root_directory=self.root_directory,
                                   version=self.version,
-                                  cache_max_age=self.cache_max_age)(environ,
-                                                                   start_response)
+                                  cache_max_age=self.cache_max_age)(
+                environ, start_response)
         if environ.get('PATH_INFO') and environ.get('PATH_INFO') != '/':
             return self.error_extra_path(environ, start_response)
         if_none_match = environ.get('HTTP_IF_NONE_MATCH')
@@ -63,7 +65,7 @@ class StaticURLParser(object):
                 ## ETAG.update(headers, '"%s"' % mytime)
                 ETAG.update(headers, mytime)
                 start_response('304 Not Modified', headers)
-                return [''] # empty body
+                return ['']  # empty body
 
         fa = self.make_app(full)
         if self.cache_max_age:
@@ -105,6 +107,7 @@ class StaticURLParser(object):
     def __repr__(self):
         return '<%s %r>' % (self.__class__.__name__, self.directory)
 
+
 def make_static(global_conf, document_root, cache_max_age=None, version="dev"):
     """
     Return a WSGI application that serves a directory (configured
@@ -116,4 +119,3 @@ def make_static(global_conf, document_root, cache_max_age=None, version="dev"):
         cache_max_age = int(cache_max_age)
     return StaticURLParser(
         document_root, cache_max_age=cache_max_age, version=version)
-

@@ -46,6 +46,7 @@
               <input name="subject" placeholder="subject" type="text" value="{options.subject}" autocomplete="off"/>
             {]}
           {]}
+          <input type="hidden" name="shareType" value="{svc.shareTypes[0].type}">
         {]}
         <textarea class="message compose" placeholder="Type your message here, and we'll attach the link when you send." name="message">{options.message}</textarea>
         <div class="accountActions hbox">
@@ -53,6 +54,12 @@
             {svc.features.counter [}
               <div class="counter"></div>
             {]}
+            <div class="status error needRecipient">
+                Please specify a recipient
+            </div>
+            <div class="status error invalidRecipient">
+                Cannot share with all recipients
+            </div>
           </div>
           <button class="share" type="submit">share</button>
         </div>

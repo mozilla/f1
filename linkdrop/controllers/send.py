@@ -22,25 +22,20 @@
 #
 
 import logging
-import datetime
 import json
-import urllib
-import sys
-import httplib2
 import copy
 from urlparse import urlparse
 from paste.deploy.converters import asbool
 import hashlib
 
-from pylons import config, request, response
-from pylons.controllers.util import abort, redirect
-from pylons.decorators.util import get_pylons
+from pylons import request
 
 from linkoauth import get_provider
 from linkoauth.base import OAuthKeysException, ServiceUnavailableException
 
 from linkdrop.lib.base import BaseController
-from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
+from linkdrop.lib.helpers import json_exception_response, api_response
+from linkdrop.lib.helpers import api_entry, api_arg
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 from linkdrop.lib.shortener import shorten_link
@@ -56,7 +51,7 @@ Send
 The 'send' namespace is used to send updates to our supported services.
 
 """
-    __api_controller__ = True # for docs
+    __api_controller__ = True  # for docs
 
     @api_response
     @json_exception_response
@@ -76,7 +71,8 @@ Domain of service to share to (google.com for gmail, facebook.com, twitter.com)
 Message entered by user
 """),
             api_arg('username', 'string', False, None, None, """
-Optional username, required if more than one account is configured for a domain.
+Optional username, required if more than one account is configured for """
+                    """a domain.
 """),
             api_arg('userid', 'string', False, None, None, """
 Optional userid, required if more than one account is configured for a domain.
@@ -108,8 +104,7 @@ Site provided description of the shared item, not supported by all services.
             api_arg('name', 'string', False, None, None, """
 """),
         ],
-        response={'type': 'list', 'doc': 'raw data list'}
-    )
+        response={'type': 'list', 'doc': 'raw data list'})
     def send(self):
         result = {}
         error = None
@@ -126,14 +121,14 @@ Site provided description of the shared item, not supported by all services.
         if not domain:
             error = {
                 'message': "'domain' is not optional",
-                'code': constants.INVALID_PARAMS
+                'code': constants.INVALID_PARAMS,
             }
             return {'result': result, 'error': error}
         provider = get_provider(domain)
         if provider is None:
             error = {
                 'message': "'domain' is invalid",
-                'code': constants.INVALID_PARAMS
+                'code': constants.INVALID_PARAMS,
             }
             return {'result': result, 'error': error}
 
@@ -142,8 +137,9 @@ Site provided description of the shared item, not supported by all services.
         if not acct:
             metrics.track(request, 'send-noaccount', domain=domain)
             error = {'provider': domain,
-                     'message': "not logged in or no user account for that domain",
-                     'status': 401
+                     'message': ("not logged in or no user "
+                                 "account for that domain"),
+                     'status': 401,
             }
             return {'result': result, 'error': error}
 
@@ -157,9 +153,14 @@ Site provided description of the shared item, not supported by all services.
             link_timer.track('link-shorten', short_url=shorturl)
             args['shorturl'] = shorturl
 
-        acct_hash = hashlib.sha1("%s#%s" % ((username or '').encode('utf-8'), (userid or '').encode('utf-8'))).hexdigest()
-        timer = metrics.start_timer(request, domain=domain, message_len=len(message),
-                                    long_url=longurl, short_url=shorturl, acct_id=acct_hash)
+        acct_hash = hashlib.sha1(
+            "%s#%s" % ((username or '').encode('utf-8'),
+                       (userid or '').encode('utf-8'))).hexdigest()
+        timer = metrics.start_timer(request, domain=domain,
+                                    message_len=len(message),
+                                    long_url=longurl,
+                                    short_url=shorturl,
+                                    acct_id=acct_hash)
         # send the item.
         try:
             result, error = provider.api(acct).sendmessage(message, args)
@@ -169,8 +170,9 @@ Site provided description of the shared item, not supported by all services.
             # XXX we need to handle this better, but if for some reason the
             # oauth values are bad we will get a ValueError raised
             error = {'provider': domain,
-                     'message': "not logged in or no user account for that domain",
-                     'status': 401
+                     'message': ("not logged in or no user account "
+                                 "for that domain"),
+                     'status': 401,
             }
 
             metrics.track(request, 'send-oauth-keys-missing', domain=domain)
@@ -178,8 +180,9 @@ Site provided description of the shared item, not supported by all services.
             return {'result': result, 'error': error}
         except ServiceUnavailableException, e:
             error = {'provider': domain,
-                     'message': "The service is temporarily unavailable - please try again later.",
-                     'status': 503
+                     'message': ("The service is temporarily unavailable "
+                                 "- please try again later."),
+                     'status': 503,
             }
             if e.debug_message:
                 error['debug_message'] = e.debug_message

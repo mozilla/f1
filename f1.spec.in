@@ -30,8 +30,8 @@ BuildArch:	    noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  python%{pyver}-devel python%{pyver}-setuptools
-BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /bin/sed, /usr/bin/awk
-BuildRequires:  python%{pyver}-paste-deploy, python%{pyver}-paste-script
+BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /bin/sed, /usr/bin/awk, /usr/bin/make
+BuildRequires:  %{f1_name_prefix}python%{pyver}-paste-deploy, %{f1_name_prefix}python%{pyver}-paste-script
 
 Requires: 	python%{pyver}
 
@@ -48,13 +48,21 @@ and love. F1 is made by Mozilla Messaging.
 %setup -q -n linkdrop-%{version}
 
 %build
+export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
 CFLAGS="%{optflags}" %{__python}%{pyver} setup.py build
 
 %install
+export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
 rm -rf %{buildroot}
 %{__python}%{pyver} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --prefix %{f1_prefix} --record=INSTALLED_FILES
 %{__install} -m 755 -d %{buildroot}%{_var}/www/f1
 rsync -a web/ %{buildroot}%{_var}/www/f1/
+
+#XXX: Not ready yet
+#%check
+#export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
+#%{__make} test NOSE="nosetests-%{python_version}" PYTHON="%{__python}%{pyver}"
+
 
 %clean
 rm -rf %{buildroot}

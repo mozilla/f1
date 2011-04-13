@@ -235,7 +235,8 @@ function (object) {
           return 'http://linkedin.com/' + account.username;
         },
         overlays: {
-          'widgets/AccountPanel': 'widgets/AccountPanelLinkedIn'
+          'widgets/AccountPanel': 'widgets/AccountPanelLinkedIn',
+          'Contacts': 'ContactsLinkedIn'
         }
       })
     },
