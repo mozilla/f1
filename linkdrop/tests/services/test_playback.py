@@ -10,10 +10,12 @@ from pprint import pformat
 from linkdrop.tests import TestController
 from linkdrop.tests import url
 
+
 def assert_dicts_equal(got, expected):
     if got != expected:
         raise AssertionError("\n%s\n!=\n%s" % (pformat(got),
                                                pformat(expected)))
+
 
 # Somewhat analogous to a protocap.ProtocolCapturingBase object - but
 # instead of capturing, it replays an earlier capture.
@@ -26,8 +28,10 @@ class ProtocolReplayer(object):
     def save_capture(self, reason=""):
         pass
 
+
 class HttpReplayer(ProtocolReplayer):
     to_playback = []
+
     def request(self, *args, **kw):
         fp = self.to_playback.pop(0)
         resp = httplib.HTTPResponse(socket.socket())
@@ -38,8 +42,11 @@ class HttpReplayer(ProtocolReplayer):
 
 
 from linkoauth.google_ import SMTP
+
+
 class SmtpReplayer(SMTP, ProtocolReplayer):
     to_playback = None
+
     def __init__(self, *args, **kw):
         self.next_playback = self.to_playback.readline()
         SMTP.__init__(self, *args, **kw)
@@ -49,9 +56,9 @@ class SmtpReplayer(SMTP, ProtocolReplayer):
         pass
 
     def set_debuglevel(self, debuglevel):
-        pass # don't want the print statements during testing.
+        pass  # don't want the print statements during testing.
 
-    def connect(self, host='localhost', port = 0):
+    def connect(self, host='localhost', port=0):
         return self.getreply()
 
     def _get_next_comms(self):
@@ -110,6 +117,7 @@ class CannedRequest(object):
     def __repr__(self):
         return "<canned request at '%s'>" % (self.path,)
 
+
 def genCanned(glob_pattern="*"):
     import linkdrop.tests.services
     corpus_dir = os.path.join(linkdrop.tests.services.__path__[0], 'corpus')
@@ -136,16 +144,16 @@ class ServiceReplayTestCase(TestController):
             # expected and expected-f1-data.json has what we want.
             pass
         else:
-            assert response.status_int==expected['status'], (
+            assert response.status_int == expected['status'], (
                 response.status_int, expected['status'])
             for exp_header_name, exp_header_val in expected.get(
                 'headers', {}).iteritems():
                 got = response.headers.get(exp_header_name, None)
-                assert got==exp_header_val, (got, exp_header_val)
+                assert got == exp_header_val, (got, exp_header_val)
             return
 
         # No expected-f1-response.json - do the expected-f1-data thang...
-        assert response.status_int==200, response.status
+        assert response.status_int == 200, response.status
         try:
             got = json.loads(response.body)
         except ValueError:
@@ -164,7 +172,7 @@ class ServiceReplayTestCase(TestController):
             if sub is None:
                 continue
             for subname, subval in sub.items():
-                if subval=="*":
+                if subval == "*":
                     # indicates any value is acceptable.
                     assert subname in got[top], ("no attribute [%r][%r]"
                                                  % (top, subname))
@@ -173,16 +181,16 @@ class ServiceReplayTestCase(TestController):
         assert_dicts_equal(got, expected)
 
     def getResponse(self, req_type, request):
-        if req_type=="send":
+        if req_type == "send":
             response = self.app.post(url(controller='send', action='send'),
                                     params=request)
-        elif req_type=="contacts":
+        elif req_type == "contacts":
             # send the 'contacts' request.
             domain = request.pop('domain')
             response = self.app.post(url(controller='contacts',
                                          action='get', domain=domain),
                                      params=request)
-        elif req_type=="auth":
+        elif req_type == "auth":
             # this is a little gross - we need to hit "authorize"
             # direct, then assume we got redirected to the service,
             # which then redirected us back to 'verify'
@@ -205,12 +213,12 @@ class ServiceReplayTestCase(TestController):
 
 class FacebookReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
-        if req_type=="send" or req_type=="contacts":
+        if req_type == "send" or req_type == "contacts":
             return {'domain': 'facebook.com',
                     'account': ('{"oauth_token": "foo", '
                                 '"oauth_token_secret": "bar"}'),
                    }
-        if req_type=="auth":
+        if req_type == "auth":
             return {'domain': 'facebook.com', 'username': 'foo',
                     'userid': 'bar'}
         raise AssertionError(req_type)
@@ -218,7 +226,7 @@ class FacebookReplayTestCase(ServiceReplayTestCase):
 
 class YahooReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
-        if req_type=="send" or req_type=="contacts":
+        if req_type == "send" or req_type == "contacts":
             account = {"oauth_token": "foo", "oauth_token_secret": "bar",
                        "profile": {
                        "verifiedEmail": "me@yahoo.com",
@@ -229,37 +237,33 @@ class YahooReplayTestCase(ServiceReplayTestCase):
                     'to': 'you@example.com',
                     'account': json.dumps(account),
                    }
-        if req_type=="auth":
+        if req_type == "auth":
             return {'domain': 'yahoo.com', 'username': 'foo', 'userid': 'bar'}
         raise AssertionError(req_type)
 
 
 class GoogleReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
-        if req_type=="send":
+        if req_type == "send":
             account = {"oauth_token": "foo", "oauth_token_secret": "bar",
-                       "profile": {"emails": [
-                                {'value': 'me@example.com'}
-                                ],
-                                "displayName": "Me",
+                       "profile": {"emails": [{'value': 'me@example.com'}],
+                                   "displayName": "Me",
                         },
                       }
             return {'domain': 'google.com',
-                    'account':json.dumps(account),
+                    'account': json.dumps(account),
                     'to': 'you@example.com',
                     }
-        if req_type=="contacts":
+        if req_type == "contacts":
             account = {"oauth_token": "foo", "oauth_token_secret": "bar",
-                       "profile": {"emails": [
-                                {'value': 'me@example.com'}
-                                ],
+                       "profile": {"emails": [{'value': 'me@example.com'}],
                                 "displayName": "Me",
                         },
                       }
             return {'username': 'me',
                     'userid': '123',
                     'keys': "1,2,3",
-                    'account':json.dumps(account),
+                    'account': json.dumps(account),
                     'domain': 'google.com',
                    }
         raise AssertionError(req_type)
@@ -296,12 +300,13 @@ def teardownReplayers():
 
 
 host_to_test = {
-    'graph.facebook.com' : FacebookReplayTestCase,
+    'graph.facebook.com': FacebookReplayTestCase,
     'www.google.com': GoogleReplayTestCase,
     'smtp.gmail.com': GoogleReplayTestCase,
     'mail.yahooapis.com': YahooReplayTestCase,
     'social.yahooapis.com': YahooReplayTestCase,
 }
+
 
 def queueForReplay(canned):
     if canned.protocol == "smtp":
@@ -320,6 +325,7 @@ def queueForReplay(canned):
     else:
         raise AssertionError(canned.protocol)
 
+
 def runOne(canned):
     testClass = host_to_test[canned.host]
     test = testClass()
@@ -331,6 +337,7 @@ def runOne(canned):
         test.checkResponse(canned, response)
     finally:
         teardownReplayers()
+
 
 def testAll():
     for canned in genCanned():

@@ -41,6 +41,7 @@ from linkdrop.lib.metrics import metrics
 
 log = logging.getLogger(__name__)
 
+
 def get_redirect_response(url, code=302, additional_headers=[]):
     """Raises a redirect exception to the specified URL
 
@@ -54,20 +55,21 @@ def get_redirect_response(url, code=302, additional_headers=[]):
     """
     exc = status_map[code]
     resp = exc(location=url)
-    for k,v in additional_headers:
+    for k, v in additional_headers:
         resp.headers.add(k, v)
     return resp
 
 ## {{{ http://code.activestate.com/recipes/52281/ (r1) PSF License
-import sgmllib, string
+import sgmllib
+import string
+
 
 class StrippingParser(sgmllib.SGMLParser):
-
     # These are the HTML tags that we will leave intact
     valid_tags = ('b', 'a', 'i', 'br', 'p')
 
-    from htmlentitydefs import entitydefs # replace entitydefs from sgmllib
-    entitydefs # make pyflakes happy
+    from htmlentitydefs import entitydefs  # replace entitydefs from sgmllib
+    entitydefs  # make pyflakes happy
 
     def __init__(self):
         sgmllib.SGMLParser.__init__(self)
@@ -82,7 +84,7 @@ class StrippingParser(sgmllib.SGMLParser):
         self.result = "%s&#%s;" % (self.result, name)
 
     def handle_entityref(self, name):
-        if self.entitydefs.has_key(name):
+        if name in self.entitydefs:
             x = ';'
         else:
             # this breaks unstandard entities that end with ';'
@@ -98,7 +100,7 @@ class StrippingParser(sgmllib.SGMLParser):
                     and string.lower(v[0:10]) != 'javascript'):
                     self.result = '%s %s="%s"' % (self.result, k, v)
             endTag = '</%s>' % tag
-            self.endTagList.insert(0,endTag)
+            self.endTagList.insert(0, endTag)
             self.result = self.result + '>'
 
     def unknown_endtag(self, tag):
@@ -137,9 +139,10 @@ def json_exception_response(func, *args, **kwargs):
             'result': None,
             'error': {
                 'name': e.__class__.__name__,
-                'message': str(e)
+                'message': str(e),
             }
         }
+
 
 @decorator
 def api_response(func, *args, **kwargs):
@@ -151,18 +154,19 @@ def api_response(func, *args, **kwargs):
         pylons.response.headers['Content-Type'] = 'text/plain'
         return pprint.pformat(data)
     elif format == 'xml':
+
         # a quick-dirty dict serializer
         def ser(d):
             r = ""
-            for k,v in d.items():
+            for k, v in d.items():
                 if isinstance(v, dict):
                     r += "<%s>%s</%s>" % (k, ser(v), k)
                 elif isinstance(v, list):
                     for i in v:
                         #print k,i
-                        r += ser({k:i})
+                        r += ser({k: i})
                 else:
-                    r += "<%s>%s</%s>" % (k, escape("%s"%v), k)
+                    r += "<%s>%s</%s>" % (k, escape("%s" % v), k)
             return r
         pylons.response.headers['Content-Type'] = 'text/xml'
         return ('<?xml version="1.0" encoding="UTF-8"?>'
@@ -170,6 +174,7 @@ def api_response(func, *args, **kwargs):
     pylons.response.headers['Content-Type'] = 'application/json'
     res = json.dumps(data)
     return res
+
 
 def api_entry(**kw):
     """Decorator to add tags to functions.
@@ -180,14 +185,17 @@ def api_entry(**kw):
         if not getattr(f, "__doc__") and 'doc' in kw:
             doc = kw['doc'] + "\n"
             if 'name' in kw:
-                doc = kw['name'] + "\n" + "="*len(kw['name']) +"\n\n" + doc
+                doc = kw['name'] + "\n" + "=" * len(kw['name']) + "\n\n" + doc
             args = []
             for m in kw.get('urlargs', []):
                 line = "  %(name)-20s %(type)-10s %(doc)s" % m
                 opts = []
-                if m['required']: opts.append("required")
-                if m['default']: opts.append("default=%s" % m['default'])
-                if m['allowed']: opts.append("options=%r" % m['allowed'])
+                if m['required']:
+                    opts.append("required")
+                if m['default']:
+                    opts.append("default=%s" % m['default'])
+                if m['allowed']:
+                    opts.append("options=%r" % m['allowed'])
                 if opts:
                     line = "%s (%s)" % (line, ','.join(opts),)
                 args.append(line)
@@ -196,9 +204,12 @@ def api_entry(**kw):
             for m in kw.get('queryargs', []):
                 line = "  %(name)-20s %(type)-10s %(doc)s" % m
                 opts = []
-                if m['required']: opts.append("required")
-                if m['default']: opts.append("default=%s" % m['default'])
-                if m['allowed']: opts.append("options=%r" % m['allowed'])
+                if m['required']:
+                    opts.append("required")
+                if m['default']:
+                    opts.append("default=%s" % m['default'])
+                if m['allowed']:
+                    opts.append("options=%r" % m['allowed'])
                 if opts:
                     line = "%s (%s)" % (line, ','.join(opts),)
                 args.append(line)
@@ -210,24 +221,28 @@ def api_entry(**kw):
                 for m in kw['bodyargs']:
                     line = "  %(name)-20s %(type)-10s %(doc)s" % m
                     opts = []
-                    if m['required']: opts.append("required")
-                    if m['default']: opts.append("default=%s" % m['default'])
-                    if m['allowed']: opts.append("options=%r" % m['allowed'])
+                    if m['required']:
+                        opts.append("required")
+                    if m['default']:
+                        opts.append("default=%s" % m['default'])
+                    if m['allowed']:
+                        opts.append("options=%r" % m['allowed'])
                     if opts:
                         line = "%s (%s)" % (line, ','.join(opts),)
                     args.append(line)
-                d = d+ ("**Request Body**: A JSON object with the "
+                d = d + ("**Request Body**: A JSON object with the "
                         "following fields:\n")
-                d = d+ "\n".join(args) + "\n\n"
+                d = d + "\n".join(args) + "\n\n"
             elif 'body' in kw:
-                d = d+ ("**Request Body**:  %(type)-10s %(doc)s\n\n"
+                d = d + ("**Request Body**:  %(type)-10s %(doc)s\n\n"
                         % kw['body'])
             if 'response' in kw:
-                d = d+ ("**Response Body**: %(type)-10s %(doc)s\n\n"
+                d = d + ("**Response Body**: %(type)-10s %(doc)s\n\n"
                         % kw['response'])
             f.__doc__ = doc + d
         return f
     return decorate
+
 
 def api_arg(name, type=None, required=False, default=None, allowed=None,
             doc=None):
@@ -237,11 +252,12 @@ def api_arg(name, type=None, required=False, default=None, allowed=None,
         'required': required,
         'default': default,
         'allowed': allowed,
-        'doc': doc or ''
+        'doc': doc or '',
     }
 
 
 if __name__ == '__main__':  # pragma: no cover
+
     @api_entry(
         name="contacts",
         body={'type': "json", 'doc': "A json object"},
@@ -273,23 +289,23 @@ http://portablecontacts.net/draft-spec.html
                     ['equals', 'contains', 'startswith', 'present'],
                     'Filter operation'),
             api_arg('filterValue', 'string', False, None, None,
-                    'A value to compare using filterOp (not used with present)'),
+                    'A value to compare using filterOp '
+                    '(not used with present)'),
             api_arg('startIndex', 'int', False, 0, None,
                     'The start index of the query, used for paging'),
             api_arg('count', 'int', False, 20, None,
                     'The number of results to return, used with paging'),
             api_arg('sortBy', 'string', False, 'ascending',
-                    ['ascending','descending'],
+                    ['ascending', 'descending'],
                     'A list of conversation ids'),
             api_arg('sortOrder', 'string', False, 'ascending',
-                    ['ascending','descending'], 'A list of conversation ids'),
+                    ['ascending', 'descending'], 'A list of conversation ids'),
             api_arg('fields', 'list', False, None, None,
                     'A list of fields to return'),
         ],
         response={'type': 'object',
                   'doc': ('An object that describes the API methods '
-                          'and parameters.')}
-    )
+                          'and parameters.')})
     def foo():
         pass
     print foo.__doc__

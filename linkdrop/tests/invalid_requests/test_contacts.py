@@ -13,10 +13,8 @@ from nose.tools import eq_
 class TestContactsInvalidParams(TestController):
     def getFullRequest(self, *except_for):
         account = {"oauth_token": "foo", "oauth_token_secret": "bar",
-                   "profile": {"emails": [
-                            {'value': 'me@example.com'}
-                            ],
-                            "displayName": "Me",
+                   "profile": {"emails": [{'value': 'me@example.com'}],
+                               "displayName": "Me",
                     },
                   }
         result = {'domain': 'google.com',
@@ -40,7 +38,7 @@ class TestContactsInvalidParams(TestController):
                                      domain=domain),
                                  params=request)
 
-        assert response.status_int==expected_http_code, response.status_int
+        assert response.status_int == expected_http_code, response.status_int
         try:
             got = json.loads(response.body)
         except ValueError:
@@ -75,4 +73,3 @@ class TestContactsInvalidParams(TestController):
     def testMissingOAuth(self):
         for service in testable_services:
             yield self.checkMissingOAuth, service, "oauth_token"
-

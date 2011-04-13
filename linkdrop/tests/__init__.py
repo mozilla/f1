@@ -35,6 +35,7 @@ for log_name in logging.getLogger().manager.loggerDict.keys():
 
 environ = {}
 
+
 # Note the base for our test cases is *not* a unittest.TestCase as some
 # nose features don't work with such classes.
 class TestController(object):

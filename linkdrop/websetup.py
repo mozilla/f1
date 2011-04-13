@@ -30,6 +30,7 @@ from linkdrop.config.environment import load_environment
 
 log = logging.getLogger(__name__)
 
+
 def setup_app(command, conf, vars):
     """Place any commands to setup linkdrop here"""
     # Don't reload the app if it was loaded under the testing environment

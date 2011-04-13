@@ -37,6 +37,7 @@ from linkdrop.lib.metrics import metrics
 
 log = logging.getLogger(__name__)
 
+
 class ContactsController(BaseController):
     """
 Contacts
@@ -45,8 +46,7 @@ Contacts
 A proxy for retrieving contacts from a service.
 
 """
-    __api_controller__ = True # for docs
-
+    __api_controller__ = True  # for docs
 
     @api_response
     @json_exception_response
@@ -82,18 +82,17 @@ Max results to be returned per request, used with startindex for paging.
 Name of the group to return.
 """),
         ],
-        response={'type': 'object', 'doc': 'Portable Contacts Collection'}
-    )
+        response={'type': 'object', 'doc': 'Portable Contacts Collection'})
     def get(self, domain):
         group = request.POST.get('group', None)
-        startIndex = int(request.POST.get('startindex','0'))
-        maxResults = int(request.POST.get('maxresults','25'))
+        startIndex = int(request.POST.get('startindex', '0'))
+        maxResults = int(request.POST.get('maxresults', '25'))
         account_data = request.POST.get('account', None)
         provider = get_provider(domain)
         if provider is None:
             error = {
                 'message': "'domain' is invalid",
-                'code': constants.INVALID_PARAMS
+                'code': constants.INVALID_PARAMS,
             }
             return {'result': None, 'error': error}
 
@@ -105,7 +104,7 @@ Name of the group to return.
             error = {'provider': domain,
                      'message': ("not logged in or no user account "
                                  "for that domain"),
-                     'status': 401
+                     'status': 401,
             }
             return {'result': None, 'error': error}
 
@@ -118,7 +117,7 @@ Name of the group to return.
             error = {'provider': domain,
                      'message': ("not logged in or no user account "
                                  "for that domain"),
-                     'status': 401
+                     'status': 401,
             }
             result = None
             metrics.track(request, 'contacts-oauth-keys-missing',
@@ -127,7 +126,7 @@ Name of the group to return.
             error = {'provider': domain,
                      'message': ("The service is temporarily unavailable "
                                  "- please try again later."),
-                     'status': 503
+                     'status': 503,
             }
             if e.debug_message:
                 error['debug_message'] = e.debug_message

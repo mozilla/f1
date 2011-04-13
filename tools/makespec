@@ -24,27 +24,37 @@ while (my $line = <$f>) {
   }
 }
 
-print STDERR Dumper (\%requires); use Data::Dumper;
-
 my $requires = <<"EOF";
 # Automatically added from setup.py by $0
 EOF
 
 # These are os-provided packages
 my %included = (
-  'coverage' => 1,
   'httplib2' => 1,
   'nose'     => 1,
 );
+
+my %excluded = (
+  'linkoauth' => 1,
+   #XXX: Not ready yet
+  'pylons'    => 1,
+);
+
 foreach my $req (sort keys %requires) {
+  next if exists $excluded{$req};
+
+  my $reqs;
+
   if (exists $included{$req}) {
-    $req = "python%{pyver}-$req";
+    $reqs = "python%{pyver}-$req";
   }
   else {
-    $req = $prefix . $req;
+    $reqs = $prefix . $req;
   }
 $requires .= <<"EOF";
-Requires: $req
+Requires:      $reqs
+BuildRequires: $reqs
+
 EOF
 }
 
