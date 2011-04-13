@@ -16,11 +16,11 @@ while (my $line = <$f>) {
   if ($line =~ />=|<=|==/) {
     $line =~ /(.*)(>=|<=|==)(.*)/;
     my ($name, $cmp, $version) = ($1, $2, $3);
-    $requires{"$name $cmp $version"} = 1;
+    $requires{"$name"} = "$cmp $version";
   }
   else
   {
-    $requires{$line} = 1;
+    $requires{$line} = "";
   }
 }
 
@@ -37,12 +37,12 @@ my %included = (
 my %excluded = (
   'linkoauth' => 1,
    #XXX: Not ready yet
-  'pylons'    => 1,
+  'pylonsx'    => 1,
 );
 
 foreach my $req (sort keys %requires) {
   next if exists $excluded{$req};
-
+  print STDERR "Inclindng $req\n";
   my $reqs;
 
   if (exists $included{$req}) {
@@ -52,8 +52,8 @@ foreach my $req (sort keys %requires) {
     $reqs = $prefix . $req;
   }
 $requires .= <<"EOF";
-Requires:      $reqs
-BuildRequires: $reqs
+Requires:      $reqs $requires{$req}
+BuildRequires: $reqs $requires{$req}
 
 EOF
 }
