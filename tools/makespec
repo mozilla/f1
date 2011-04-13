@@ -37,7 +37,7 @@ my %included = (
 my %excluded = (
   'linkoauth' => 1,
    #XXX: Not ready yet
-  'pylonsx'    => 1,
+  'pylons'    => 1,
 );
 
 foreach my $req (sort keys %requires) {
