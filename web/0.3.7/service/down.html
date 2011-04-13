@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+ <!-- ***** BEGIN LICENSE BLOCK *****
+   - Version: MPL 1.1
+   -
+   - The contents of this file are subject to the Mozilla Public License Version
+   - 1.1 (the "License"); you may not use this file except in compliance with
+   - the License. You may obtain a copy of the License at
+   - http://www.mozilla.org/MPL/
+   -
+   - Software distributed under the License is distributed on an "AS IS" basis,
+   - WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+   - for the specific language governing rights and limitations under the
+   - License.
+   -
+   - The Original Code is Raindrop.
+   -
+   - The Initial Developer of the Original Code is
+   - Mozilla Messaging, Inc..
+   - Portions created by the Initial Developer are Copyright (C) 2009
+   - the Initial Developer. All Rights Reserved.
+   -
+   - Contributor(s):
+   - -->
+
+<html>
+<head>
+  <title>F1 Down</title>
+  <link rel="icon" type="image/x-icon" href="data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%10%00%00%00%10%08%06%00%00%00%1F%F3%FFa%00%00%00%19tEXtSoftware%00Adobe%20ImageReadyq%C9e%3C%00%00%01wIDATx%DA%A4%93%BDJ%03A%10%C7%E7%92%0B%E8%F9Q%89D%5B_%C0%04%A2%12%0BE%B8%07%B8%07P%9B%A06Vi%03%5E%0A%1B!%D8(j%14%14%AC%C5%CE%C6%C6%26%9EF%B4%F2%0D%2CL%23%8A%92D%84%DB%F3%3F%7Bk%3C%97%10%12%5C%F81%BB%C3%CC%EC%CC%EC%8EA'%01ik%06%2C%82Y0%A6t%CF%A0%02N%C1M%D4%D8%A0c%F1%B3%B7%40%09%AC%80%18%B5_l%5C%06y%D0%60%85I%81%0C0%00%CE%81M%9D%17%07%5E%03%13%C0%01%F5%98%0C%10%88%12%B0%D5%BE%1Bl%E5%83%12%0E%9B%19D%BA%95%E5%F4%B6%B8y%D3%9CA%0E%18%D1%1B%DCt%9C%82%5C%9F%A40%19%97%3A%96%7C%8E%D8%B1O%CE%24%E1g%F5%D0%1Bi%8B%8C%83%8F%DF%ABV%87%A4%2C%DE%7F%A1%8D~%D44%1B%83%22)%95Q%94S!%95%90gc%EFM%EA%DCj%834%DB%A4%A9E%24w%CA%0A%DFw%F7%A5%A5%BBr%86i%EB%A1%A9%DFN%E13%0A%BF%069%D2J%3F%D3O%C5j%FD%8F%F1%DCx%82%E6%CF%5E%DB5%B2%C6%25T%F4%F4%5D%EF%5D%EE%8F%16%06)X%1F%0DKb%A9%97%0A_%83%B6%9F%FE%F9%8CB%DC%81%1D%40%3DRf_%FC%03%A4%12%F8%17Jv%CB%25%C8%F3%9E3H%80M%F0%09%3C%E0w%B8U%80%7D%E0%80%3A%EBx%98R%AA%07%CB%E0Q%8D%F3%12%7F%12m%9C%AF%D58%7B%D1F%7C%0B0%00%C2H%1A%E6%04%8D%0A%1E%00%00%00%00IEND%AEB%60%82" />
+  <style type="text/css">
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 12px;
+      background-color: #fff;
+    }
+  
+    .long #container {
+      position: absolute;
+      width: 300px;
+      top: 50%;
+      left: 50%;
+      margin-top: -45px;
+      margin-left: -150px;
+    }
+  
+    .logo {
+      width: 62px;
+      height: 56px;
+      margin: 10px auto;
+      display: block;
+      background-image: url("data:image/png,%89PNG%0D%0A%1A%0A%00%00%00%0DIHDR%00%00%00%3E%00%00%008%08%06%00%00%00%A5%98KY%00%00%00%19tEXtSoftware%00Adobe%20ImageReadyq%C9e%3C%00%00%07YIDATx%DA%EC%9B%09l%14e%14%C7%DF%ECv%B7%BB%DD%96%B6%B6P%A0P%20%BD8Rh%91%00E%10%C1%08%0D%204VE%B1%0AH%82%12C%90%D0%04%A2%98%10%10%05%83%20D%03%1AP%04)%0AF%0EQ%91%2B%C1%00%06%D3RJ%D3%22%F4%00%E4%90%A3%F4%A0%E7%DE%FE%BF%99%E9%01%5Dvg%F7%9B%96%8D%F4%25%3Fv%BB%3B%B3%DF%BC%EF%BD%EF%BD%F7%1D%08N%A7%93%1EG%D1%D0c*%9D%8A%3Fn%12%E0%EEK%E1%5BU%DA%88%06%C3A%2C%18%0C%12%40%14%08%96%BF%AF%03%E5%A0%04%E4%83R%90%03%CAx%1Bv%CE%F4Qq%0E%09%01%E9%60*%18%0F%9Epsm%24%E8%03%9E%04%D3%E5%CFj%C1q%F0%2B%F8%01%DCU%FB%01%05wQ%5D%D8%EAu%C4%EF%0A%E6%829%A0%9FJ%CFx%03%EC%04%1B%C0%3F%5EY%7C%96%D0!c%9C)%9B%0B%3ETQi%26%3D%C1%22%90'%BF%06v%40ps*%A1%2F%D8%0F6%83%DE%0A%EF%F1%05%0C%17%E7%1Ap%14%24)%BB%C7%D71%EE%B9%B8%19%0B%BE%03%BD%3A0%20%3F%25%8F%FF%B7%C0%EEG%91%CE%A6%81%03%1D%ACt%93%84%CBA%EF%9DvIgn%DC%25%03d%03%FD%23L%C5%2Cr%7D%0Et%E03u%15w%ED%EA%CC%BD%B7%3Fb%A5%5B%CB%3ApK%8E%FC%ED%E6%EA%08%5E%B4%03%18%FD%AC%10%FB%12%0Ci%2F%8B3%D7%DA%24Wb%FE%26%AC%60%DA%0AF%CB%95%A0%AA%E9l6%98%D4%8E%E9%8A%97d%B0Xi%3A%D3x%B4%B8D8X%D9%EAo%7Fe!%88k%FE%5B%851%CE%D2Fw%1E_%9C%11%AB%A5%BF%A6%E9iv%82%B6%CDwz%3CEW%83%40%01%FCu%24%9B%F8%2CQk%8C%9B%C0%DB%3C9'%3ET%A0%A5)%014%20L%A0%A1%91%1A%0AE%02bJ%26Gh%A8o%88%40%91P%3A%02%85h%CE%1D%07%CD%3Cn%A5%DB%0D%CE%E6%7BW%0C%D3%D1%F9*%07%ED(%B1%2Bm%92MtV%C9%B3%3D%AE%3C%FE2O%40%8B6%09t%3A%3D%90%C2%F4%D2%84A%8B%97u%A9%3A%97%D7%A6%F5%D6%D27H%96%93%0F%9A%C9%00%C7%D8%F2%B4%9Ef%C4I%8F%D8Eo%A1%8DE6%A5Vgu%C6j%5E%8B%A7%F3%F8%5E9%ACWv%CF%09K%B7%9D)%D5C%8F%0A%B3%93%FE%ADwRI%B5%83%EEY%89%8E%5D%B7S8*%84%EC%F1%81bG4%C9%20x%0B)_%1F%CC%04%EBA%A3%AF%8A%F7%C0%BFcxgA%DAV%3A%AF%2F%B0%D2%BE%CB6%AA%B1%3A%A9%BCQR%FC%9E%A5E%A1%10%9D%40%87%A7%18hD%B7%16%A5m%0E%A2%8D%85Vo%14%1F%24%2F%7C%14%FA%EA%EA%A9r%5D%EC%B3%24GhiH%84%14%B5N%DE%B4%D3%BB%A7%1Ej%04%1A%19%A5%A5Mc%0C%CD%D77%C9%AE2%2B%15V%DA%BD%0D-%23%DC)%EE)%9D%C5%F1%A6%98Y%89-%7D%BB%3C%D7%EC%F2%1A%9D%E0%A4y%03uth%B2%B1%8D%D2%0E%5C%B2%E1%9C%C5%97%B6%D3x%82%5B%12W9%05%B7%9D%DAW%0Ad9w%ECt%B6%DC%26Fq%3B%9E%EBj%ADCz%00%E8%F9%D3D%13M%E9%E3%FAQ%F6%5C%B2%D2%E9%DB6_%9A%8F%E5%09n%89%3C%8Ag%C6%EB)%CA(%0D%F0%EEx%CD%7F)%18%D1Y%203%BCv%C1%89%06%DA~%D1Bv%BC%EF%11%D4%12%04%CE%DD%B5S%BF.%1A%B1%D3%AC%E8%9B%95%B9%8D%DE%8C%ED%D6%D2%85G%F1%AE%3C%8A%BF%18%DB%92%B6z%05%B7%B8p%10Z%DD%F6l%10%9D%BAi%A5RD%F37%8F%D5%D1%F2%E1F%3A%8Fq%9C%0B%CF%D8%F1%9CI%BCng%B1%85%F2%EE%D8%7Cm%DE%C4%E3%EA%C1%BE%B6%3A2*%80%C6%F6l%F9y%E6%DE%25%D5v%FA%F3%A6%0DA%CE%26%A6%AF%AB5v%D9%CA6J%FF%ADF%7C%7FtZ%88X%C91k%7F%94%DB%E0%B1%E6v%23z%1E%8B%0B%BE%B6%FAz%A2%5ELc%16%E8%96y%A4%86%CEW%D8%E9%22%14%B7%B8%09%CEi1%3A%1A%17-y%C9%D6%BF%1B%E9B%A5%8D%C7%E1%04%1E%C5%D9%14%2F%C2%EBeQ%93%86f%F5%97%16C%0B%60%CD%DD%C5fE%F7%CD%1Fl%10%9F%B6%0A%B9%7D5%B36%DF%86%A6%85%C7%D5%D9B~%8C%B7-%BE%96%18%88q%2Cu%F8'g%EA%15%B9%EB%A8%1E%3A%9A%18%23y%E7%AE%123%C6%3E%97%B5%C5%C2%90%C7%E2%AC%D0O%F1%B6%C5%26k%97%C1%B5%0F%5C2%2B%B2%DC%FC%24%8384%1A%11%0C%D6%9F%AD%E7%B56%93%1A%9E%85%88%7Co%17%04%9E%C1%18%8D%0F%93%FAsKQ%03%EAq%87%C7%7B%E2%C34%94%11g%90%82%DBU%0B%15UX%D5X%98%B8%C2c%F1Ro%BB9kh%10%E94l%9C%3A(%FB%82%B2q%9A%99h%10%EF%11%87Fn%9D%1A%D6fr%98G%F1%D3%F2%1A%96IIKK%86%05%D3%84%18%C9%CD%0F%5E1%D3e%05%E3%94E%82W%13%24k%E7%DC%B2%D2%C9%EBf%8E%0Cv%9F%9C%E0q%F5K%E0%A4%12%D7%8A%0B%D3%D2%D2%E1%C1%A2%E5%98w%7F%5DX%AF%C8%25%DF%18%60%C4%BDR%FFo*%A8C%BEWe%FD%0D%9E%EA%2C%E6%9D%8F%FF%02%26x%EA%DE%5EHa%26%9D%14%C9%D9%18%3D%7C%A5%ED%2CL%83%AFW%8F%0E%A5%98%10-Ub(%B0%22ez%82%B19%E1%26E%04%D0%82d%93%D8y%C6%00%A9%A6O%EBc%40%80l%A0%B5gj%C5%0EU(%D9%9EV%5B%95%AC%C0l%03%1F%90%B4%8F%FDP%B9Vk%13%1F%94E%E6%BC%DBV%97)%8C%CD%B4%C6%F7%0E%A4%A1%DD%5C%AF%C0%2CHq%5D(%8E%89%D6%D3%DE%D2%06%BA%A8%AC%A0aE%C3%8Fj%AC%B9U%01v6b%91%BBKK*%AD%94%F1s9%CD%1B%12L_%15%D4%3E4%40e%FDQI%CBRC%A9%7Fx%00%3C%40%A0Z%ABdyV%A6%B2%8Ea%5C%AB%B5%8Bi%AD%AA%D1%81%AC%E0%C4%D8%B7H%F1BY%D0%DB%CF%AA%60%8F%B1%C5%ED%C1%80u%CD%FB%F0%D1%F2%A4%3ET%AD%1D%80H%A3FT%BC%1EZ7y%8AS%EEk%A6%AC%8Fb%95%17%20%F2D%BB-%8C%F1%D5%E2%CD%EF%AE%83%95%2C%DB%A8%A5xy%BD%83%DAA67)%AD%86%AB7%09%DB%99%7C%81M%BC%C8%3F%05%19%88%DE%F7f-%D0%83%C9%9Ba%D5%C8%1CP%EE%87%DBG%2C%00%CC%05%95%EAl!%B5m%A0%08%AC%F0C%C5%B3%C0%11%15%8F%82%B8%FCt%9C%9F%B9%F8%C7%F2%1A%BAW%E2%ED%89%88Q%E0y%3FS%FA%3D_n%F4%F6D%C4b%A0%F5%03%85Y%25%93%E5%8B%A5%15Z%FC%FEe40%C9%8Dk%08%1D%A44%5B%23%60%BB%B7%87x~D%E9%FE8%23%0B%04%3C%F0%D9%0D%B0%0E%A4%80e%A0%BA%1D%F7%BE%CD%E0%0B%90%0A%0E)%BAG%851%CEVa2Z%7D%91%2FO%04%B6P%CB9S%F6%D9%F7ri%FB%0AI%C73%D4%10%B6v%B6%07%AC!%E9p%AF*%A2%D4%D5W%C9%AF%C7H%3Ah%B3O%9E%0C%3C(%17H%3A%CB%FA)I%BB%AC3%C0%40%F2%FE%B00%2B%EB%CA%E4%CE%DD%AB%B4%1AS%3B%B8%F5%07%15%24%9D(%3C%A5%F0wY%07%B0%FD%E9%B5%24%1D%D3N%91%E3C%3C%08%93%176%F4%AD%2C%CA%26%EF%D5%E02%F8%1D%B0%05%90bO%0B%86%5Ck%CF%9D%FF'%A5S%F1N%C5%FF%D7%F2%9F%00%03%00%B4%1D%60%89V%C1%F3%1F%00%00%00%00IEND%AEB%60%82");
+    }
+  
+    .errorMsg {
+      text-align: center;
+      color: #00A0FF;
+    }
+
+    body.short {
+      width: 100%;
+      height: 113px;
+      margin: 0;
+      padding: 0;
+      line-height: 113px;
+      font-size: 11px;
+      font-family: "Lucida Grande", Verdana, sans-serif;
+      max-height: 113px;
+      overflow: hidden;
+      background-color: rgba(255,115,0,0.75);
+      border-bottom: 1px solid #777;
+    }
+
+    body.short .logo {
+        display: none;
+    }
+
+    body.short div.errorMsg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 0 10px;
+      width: 100%;
+      height: 113px;
+      min-height: 113px;
+      overflow: hidden;
+      line-height: 113px;
+      font-size: 14px;
+      text-align: center;
+      color: #FFFFFF;
+    }
+
+  </style>
+</head>
+<body class="long">
+  <div id="container">
+    <div class="logo">
+    </div>
+    <div class="errorMsg">
+      The F1 service is unavailable at the moment.
+    </div>
+  </div>
+
+  <script>
+    try {
+        if (window.innerHeight < 200) {
+            document.getElementsByTagName('body')[0].className = 'short';
+        }
+    } catch (e) {
+    }
+  </script>
+</body>
+</html>

@@ -28,7 +28,7 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-VERSION='0.3.5'
+VERSION='0.3.7'
 
 setup(
     name='linkdrop',
