@@ -61,8 +61,6 @@ from webob.exc import HTTPBadRequest
 from webob import Response
 
 
-
-
 random.seed()
 _RE_CODE = re.compile('[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}')
 
@@ -525,6 +523,7 @@ def get_url(url, method='GET', data=None, user=None, password=None, timeout=5,
     return res.getcode(), dict(res.headers), body
 
 from wsgiref.util import is_hop_by_hop
+
 
 def proxy(request, scheme, netloc, timeout=5):
     """Proxies and return the result from the other server.

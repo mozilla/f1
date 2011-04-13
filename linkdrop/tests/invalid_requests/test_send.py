@@ -4,7 +4,6 @@ import json
 
 from linkdrop.lib import constants
 
-#from linkdrop.tests import *
 from linkdrop.tests import TestController
 from linkdrop.tests import testable_services
 from linkdrop.tests import url
@@ -14,9 +13,7 @@ from nose.tools import eq_
 class TestSendInvalidParams(TestController):
     def getFullRequest(self, *except_for):
         account = {"oauth_token": "foo", "oauth_token_secret": "bar",
-                   "profile": {"emails": [
-                            {'value': 'me@example.com'}
-                            ],
+                   "profile": {"emails": [{'value': 'me@example.com'}],
                             "displayName": "Me",
                     },
                   }
@@ -38,7 +35,7 @@ class TestSendInvalidParams(TestController):
         response = self.app.post(url(controller='send', action='send'),
                                  params=request)
 
-        assert response.status_int==expected_http_code, response.status_int
+        assert response.status_int == expected_http_code, response.status_int
         try:
             got = json.loads(response.body)
         except ValueError:

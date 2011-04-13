@@ -51,7 +51,7 @@ Send
 The 'send' namespace is used to send updates to our supported services.
 
 """
-    __api_controller__ = True # for docs
+    __api_controller__ = True  # for docs
 
     @api_response
     @json_exception_response
@@ -71,7 +71,8 @@ Domain of service to share to (google.com for gmail, facebook.com, twitter.com)
 Message entered by user
 """),
             api_arg('username', 'string', False, None, None, """
-Optional username, required if more than one account is configured for a domain.
+Optional username, required if more than one account is configured for """
+                    """a domain.
 """),
             api_arg('userid', 'string', False, None, None, """
 Optional userid, required if more than one account is configured for a domain.
@@ -103,8 +104,7 @@ Site provided description of the shared item, not supported by all services.
             api_arg('name', 'string', False, None, None, """
 """),
         ],
-        response={'type': 'list', 'doc': 'raw data list'}
-    )
+        response={'type': 'list', 'doc': 'raw data list'})
     def send(self):
         result = {}
         error = None
@@ -121,14 +121,14 @@ Site provided description of the shared item, not supported by all services.
         if not domain:
             error = {
                 'message': "'domain' is not optional",
-                'code': constants.INVALID_PARAMS
+                'code': constants.INVALID_PARAMS,
             }
             return {'result': result, 'error': error}
         provider = get_provider(domain)
         if provider is None:
             error = {
                 'message': "'domain' is invalid",
-                'code': constants.INVALID_PARAMS
+                'code': constants.INVALID_PARAMS,
             }
             return {'result': result, 'error': error}
 
@@ -139,7 +139,7 @@ Site provided description of the shared item, not supported by all services.
             error = {'provider': domain,
                      'message': ("not logged in or no user "
                                  "account for that domain"),
-                     'status': 401
+                     'status': 401,
             }
             return {'result': result, 'error': error}
 
@@ -172,7 +172,7 @@ Site provided description of the shared item, not supported by all services.
             error = {'provider': domain,
                      'message': ("not logged in or no user account "
                                  "for that domain"),
-                     'status': 401
+                     'status': 401,
             }
 
             metrics.track(request, 'send-oauth-keys-missing', domain=domain)
@@ -182,7 +182,7 @@ Site provided description of the shared item, not supported by all services.
             error = {'provider': domain,
                      'message': ("The service is temporarily unavailable "
                                  "- please try again later."),
-                     'status': 503
+                     'status': 503,
             }
             if e.debug_message:
                 error['debug_message'] = e.debug_message
