@@ -22,7 +22,8 @@
 #
 
 import logging
-import urllib, json
+import urllib
+import json
 from datetime import datetime
 from uuid import uuid1
 import hashlib
@@ -40,6 +41,7 @@ from linkoauth.base import AccessException
 
 log = logging.getLogger(__name__)
 
+
 class AccountController(BaseController):
     """
 Accounts
@@ -48,7 +50,7 @@ Accounts
 OAuth authorization api.
 
 """
-    __api_controller__ = True # for docs
+    __api_controller__ = True  # for docs
 
     def _create_account(self, domain, userid, username):
         acct_hash = hashlib.sha1(
@@ -74,6 +76,7 @@ OAuth authorization api.
         service = get_provider(provider)
 
         auth = service.responder()
+        acct = dict()
         try:
             user = auth.verify(request, url, session)
             account = user['profile']['accounts'][0]
@@ -106,6 +109,6 @@ OAuth authorization api.
         raise resp.exception
 
     def _redirectException(self, e):
-        err = urllib.urlencode([('error',str(e))])
+        err = urllib.urlencode([('error', str(e))])
         url = config.get('oauth_failure').split('#')
         return redirect('%s?%s#%s' % (url[0], err, url[1]))
