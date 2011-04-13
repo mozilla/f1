@@ -36,7 +36,8 @@ class HttpReplayer(ProtocolReplayer):
         return httplib2.Response(resp), content
 
 
-from linkoauth.google_ import SMTP
+from linkoauth.backends.google_ import SMTP
+
 class SmtpReplayer(SMTP, ProtocolReplayer):
     to_playback = None
     def __init__(self, *args, **kw):
@@ -254,15 +255,15 @@ class GoogleReplayTestCase(ServiceReplayTestCase):
 
 
 def setupReplayers():
-    import linkoauth.facebook_
-    linkoauth.facebook_.HttpRequestor = HttpReplayer
-    import linkoauth.yahoo_
-    linkoauth.yahoo_.HttpRequestor = HttpReplayer
-    import linkoauth.google_
-    linkoauth.google_.SMTPRequestor = SmtpReplayer
-    linkoauth.google_.OAuth2Requestor = HttpReplayer
-    import linkoauth.base
-    linkoauth.base.HttpRequestor = HttpReplayer
+    from linkoauth.backends import facebook_
+    facebook_.HttpRequestor = HttpReplayer
+    from linkoauth.backends import yahoo_
+    yahoo_.HttpRequestor = HttpReplayer
+    from linkoauth.backends import google_
+    google_.SMTPRequestor = SmtpReplayer
+    google_.OAuth2Requestor = HttpReplayer
+    import linkoauth.oauth
+    linkoauth.oauth.HttpRequestor = HttpReplayer
     HttpReplayer.to_playback = []
     SmtpReplayer.to_playback = None
 
@@ -271,16 +272,17 @@ def teardownReplayers():
     assert not HttpReplayer.to_playback, HttpReplayer.to_playback
     assert not SmtpReplayer.to_playback, SmtpReplayer.to_playback
     import linkoauth.protocap
-    import linkoauth.facebook_
-    linkoauth.facebook_.HttpRequestor = linkoauth.protocap.HttpRequestor
-    import linkoauth.yahoo_
-    linkoauth.yahoo_.HttpRequestor = linkoauth.protocap.HttpRequestor
-    import linkoauth.protocap
-    import linkoauth.google_
-    linkoauth.google_.SMTPRequestor = linkoauth.google_.SMTPRequestorImpl
-    linkoauth.google_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
-    import linkoauth.base
-    linkoauth.base.HttpRequestor = linkoauth.protocap.HttpRequestor
+    from linkoauth.backends import facebook_
+    facebook_.HttpRequestor = linkoauth.protocap.HttpRequestor
+
+    from linkoauth.backends import yahoo_
+    yahoo_.HttpRequestor = linkoauth.protocap.HttpRequestor
+    from linkoauth import protocap
+    from linkoauth.backends import google_
+    google_.SMTPRequestor = google_.SMTPRequestorImpl
+    google_.OAuth2Requestor = protocap.OAuth2Requestor
+    from linkoauth import oauth
+    oauth.HttpRequestor = linkoauth.protocap.HttpRequestor
 
 
 host_to_test = {
