@@ -36,8 +36,10 @@ from pylons import config, request, response
 from pylons.controllers.util import abort, redirect
 from pylons.decorators.util import get_pylons
 
-from linkoauth import get_provider
+#from linkoauth import get_provider
 from linkoauth.base import OAuthKeysException, ServiceUnavailableException
+from linkdrop.controllers import services
+from linkoauth.errors import DomainNotRegisteredError
 
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
@@ -129,13 +131,6 @@ Site provided description of the shared item, not supported by all services.
                 'code': constants.INVALID_PARAMS
             }
             return {'result': result, 'error': error}
-        provider = get_provider(domain)
-        if provider is None:
-            error = {
-                'message': "'domain' is invalid",
-                'code': constants.INVALID_PARAMS
-            }
-            return {'result': result, 'error': error}
 
         if account_data:
             acct = json.loads(account_data)
@@ -160,9 +155,16 @@ Site provided description of the shared item, not supported by all services.
         acct_hash = hashlib.sha1("%s#%s" % ((username or '').encode('utf-8'), (userid or '').encode('utf-8'))).hexdigest()
         timer = metrics.start_timer(request, domain=domain, message_len=len(message),
                                     long_url=longurl, short_url=shorturl, acct_id=acct_hash)
-        # send the item.
+
+        # send the item
         try:
-            result, error = provider.api(acct).sendmessage(message, args)
+            result, error = services.sendmessage(domain, acct, message, args)
+        except DomainNotRegisteredError:
+            error = {
+                'message': "'domain' is invalid",
+                'code': constants.INVALID_PARAMS
+            }
+            return {'result': result, 'error': error}
         except OAuthKeysException, e:
             # XXX - I doubt we really want a full exception logged here?
             #log.exception('error providing item to %s: %s', domain, e)

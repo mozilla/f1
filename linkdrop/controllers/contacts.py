@@ -30,8 +30,9 @@ from pylons.controllers.util import abort, redirect
 from pylons.decorators import jsonify
 from pylons.decorators.util import get_pylons
 
-from linkoauth import get_provider
 from linkoauth.base import OAuthKeysException, ServiceUnavailableException
+from linkoauth.errors import DomainNotRegisteredError
+from linkdrop.controllers import services
 
 from linkdrop.lib.base import BaseController, render
 from linkdrop.lib.helpers import json_exception_response, api_response, api_entry, api_arg
@@ -94,15 +95,8 @@ Name of the group to return.
         startIndex = int(request.POST.get('startindex','0'))
         maxResults = int(request.POST.get('maxresults','25'))
         account_data = request.POST.get('account', None)
-        provider = get_provider(domain)
-        if provider is None:
-            error = {
-                'message': "'domain' is invalid",
-                'code': constants.INVALID_PARAMS
-            }
-            return {'result': None, 'error': error}
-
         acct = None
+
         if account_data:
             acct = json.loads(account_data)
         if not acct:
@@ -114,7 +108,16 @@ Name of the group to return.
             return {'result': None, 'error': error}
 
         try:
-            result, error = provider.api(acct).getcontacts(startIndex, maxResults, group)
+            #result, error = provider.api(acct).getcontacts(startIndex, maxResults, group)
+            result, error = services.getcontacts(domain, acct, startIndex,
+                                                 maxResults, group)
+        except DomainNotRegisteredError:
+            error = {
+                'message': "'domain' is invalid",
+                'code': constants.INVALID_PARAMS
+            }
+            return {'result': None, 'error': error}
+
         except OAuthKeysException, e:
             # more than likely we're missing oauth tokens for some reason.
             error = {'provider': domain,
