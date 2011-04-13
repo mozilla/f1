@@ -204,6 +204,17 @@ class FacebookReplayTestCase(ServiceReplayTestCase):
         raise AssertionError(req_type)
 
 
+class TwitterReplayTestCase(ServiceReplayTestCase):
+    def getDefaultRequest(self, req_type):
+        if req_type=="send" or req_type=="contacts":
+            return {'domain': 'twitter.com',
+                    'account': '{"oauth_token": "foo", "oauth_token_secret": "bar"}',
+                   }
+        if req_type=="auth":
+            return {'domain': 'twitter.com', 'username': 'foo', 'userid': 'bar'}
+        raise AssertionError(req_type)
+
+
 class YahooReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
         if req_type=="send" or req_type=="contacts":
@@ -261,6 +272,8 @@ def setupReplayers():
     import linkoauth.google_
     linkoauth.google_.SMTPRequestor = SmtpReplayer
     linkoauth.google_.OAuth2Requestor = HttpReplayer
+    import linkoauth.twitter_
+    linkoauth.twitter_.OAuth2Requestor = HttpReplayer
     import linkoauth.base
     linkoauth.base.HttpRequestor = HttpReplayer
     HttpReplayer.to_playback = []
@@ -279,6 +292,8 @@ def teardownReplayers():
     import linkoauth.google_
     linkoauth.google_.SMTPRequestor = linkoauth.google_.SMTPRequestorImpl
     linkoauth.google_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
+    import linkoauth.twitter_
+    linkoauth.twitter_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
     import linkoauth.base
     linkoauth.base.HttpRequestor = linkoauth.protocap.HttpRequestor
 
@@ -289,6 +304,8 @@ host_to_test = {
     'smtp.gmail.com': GoogleReplayTestCase,
     'mail.yahooapis.com': YahooReplayTestCase,
     'social.yahooapis.com': YahooReplayTestCase,
+    'api.twitter.com': TwitterReplayTestCase,
+    'twitter.com': TwitterReplayTestCase,
 }
 
 def queueForReplay(canned):
