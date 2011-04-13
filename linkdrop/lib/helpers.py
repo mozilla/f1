@@ -133,8 +133,6 @@ def json_exception_response(func, *args, **kwargs):
         raise
     except Exception, e:
         log.exception("%s(%s, %s) failed", func, args, kwargs)
-        #pylons = get_pylons(args)
-        #pylons.response.status_int = 500
         metrics.track(get_pylons(args).request, 'unhandled-exception',
                       function=func.__name__, error=e.__class__.__name__)
         return {
@@ -175,7 +173,6 @@ def api_response(func, *args, **kwargs):
                 + ser({'response': data}).encode('utf-8'))
     pylons.response.headers['Content-Type'] = 'application/json'
     res = json.dumps(data)
-    #import sys;print >> sys.stderr, res
     return res
 
 
@@ -186,7 +183,7 @@ def api_entry(**kw):
         if not hasattr(f, "__api"):
             f.__api = kw
         if not getattr(f, "__doc__") and 'doc' in kw:
-            doc = kw['doc']
+            doc = kw['doc'] + "\n"
             if 'name' in kw:
                 doc = kw['name'] + "\n" + "=" * len(kw['name']) + "\n\n" + doc
             args = []
@@ -202,8 +199,8 @@ def api_entry(**kw):
                 if opts:
                     line = "%s (%s)" % (line, ','.join(opts),)
                 args.append(line)
-            d = "URL Arguments\n-------------\n\n%s\n\n" % '\n'.join(args)
             args = []
+            d = "URL Arguments\n-------------\n\n%s\n\n" % '\n'.join(args)
             for m in kw.get('queryargs', []):
                 line = "  %(name)-20s %(type)-10s %(doc)s" % m
                 opts = []
@@ -219,6 +216,7 @@ def api_entry(**kw):
             d += ("Request Arguments\n-----------------\n\n%s\n\n"
                   % '\n'.join(args))
             if 'bodyargs' in kw:
+                args = []
                 assert 'body' not in kw, "can't specify body and bodyargs"
                 for m in kw['bodyargs']:
                     line = "  %(name)-20s %(type)-10s %(doc)s" % m
@@ -233,8 +231,8 @@ def api_entry(**kw):
                         line = "%s (%s)" % (line, ','.join(opts),)
                     args.append(line)
                 d = d + ("**Request Body**: A JSON object with the "
-                         "following fields:")
-                d = d + "\n".join(args)
+                        "following fields:\n")
+                d = d + "\n".join(args) + "\n\n"
             elif 'body' in kw:
                 d = d + ("**Request Body**:  %(type)-10s %(doc)s\n\n"
                         % kw['body'])
@@ -258,7 +256,7 @@ def api_arg(name, type=None, required=False, default=None, allowed=None,
     }
 
 
-if __name__ == '__main__':
+if __name__ == '__main__':  # pragma: no cover
 
     @api_entry(
         name="contacts",

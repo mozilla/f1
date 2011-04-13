@@ -76,6 +76,7 @@ OAuth authorization api.
         service = get_provider(provider)
 
         auth = service.responder()
+        acct = dict()
         try:
             user = auth.verify(request, url, session)
             account = user['profile']['accounts'][0]
