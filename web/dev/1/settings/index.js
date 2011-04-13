@@ -26,16 +26,20 @@
   opener: false, setTimeout: false, setInterval: false, document: false */
 "use strict";
 
+// Allow tests to plug into the page by notify them if this is a test.
+if (location.hash === '#test') {
+  parent.postMessage(JSON.stringify({topic: 'registerForTests'}),
+                     location.protocol + "//" + location.host);
+}
+
 define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
-         "dispatch", "storage", "accounts", "dotCompare", "blade/url",
-         "services", "placeholder", "jquery.colorFade", "jquery.textOverflow"],
+         "dispatch", "storage", "accounts", "blade/url",
+         "services", "placeholder", "jquery.textOverflow"],
 function (require,   $,        fn,         rdapi,   oauth,   jig,
-          dispatch,   storage,   accounts,   dotCompare,   url,
+          dispatch,   storage,   accounts,   url,
           services,   placeholder) {
   var store = storage(),
-  options = url.queryToObject(location.href.split('#')[1] || '') || {},
-  existingAccounts = {},
-  showNew = options.show === 'new';
+      existingAccounts = {};
 
   jig.addFn({
     domainType: function (account) {
@@ -103,172 +107,31 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             .append(html)
             .removeClass('hidden');
         }
-
-        //Flash the new items.
-        if (showNew) {
-          $(function () {
-            $("li.newItem").animate({ backgroundColor: '#ffff99' }, 200)
-              .delay(1000).animate({ backgroundColor: '#fafafa' }, 3000);
-          });
-        }
       });
     }
   );
 
   $(function () {
 
-    //If new items should be shown, refresh the location bar,
-    //so further reloads of the page do not trigger showNew
-    if (showNew) {
-      delete options.show;
-      location.replace(location.href.split('#')[0] + '#' + url.objectToQuery(options));
-    }
-
-    var shortenDom = $('#shortenForm'),
-        bitlyCheckboxDom = $('#bitlyCheckbox'),
-        node;
-
-
-    //Function placed inside this function to get access to DOM variables.
-    function getShortenData() {
-      var data = {};
-
-      // Clear any error messages from the form.
-      shortenDom.find('.error').addClass('hidden');
-
-      $.each(shortenDom[0].elements, function (i, node) {
-        var trimmed = $(node).val().trim();
-
-        if (node.getAttribute("placeholder") === trimmed) {
-          trimmed = "";
-        }
-
-        node.value = trimmed;
-
-        if (node.value) {
-          data[node.name] = node.value;
-        }
-      });
-
-      // Check for error conditions. Must have both API key and login to work.
-      if (data.login && data.apiKey) {
-        return data;
-      } else {
-        if (data.login && !data.apiKey) {
-          $('#bitlyApiKeyMissing').removeClass('hidden');
-        } else if (data.apiKey && !data.login) {
-          $('#bitlyLoginMissing').removeClass('hidden');
-        }
-      }
-
-      return null;
-    }
-
-    function clearShortenData() {
-      shortenDom.find('[name="login"]').val('');
-      shortenDom.find('[name="apiKey"]').val('');
-      shortenDom.find('[name="domain"]').val('');
-    }
-
-    //Function placed inside this function to get access to DOM variables.
-    function setShortenData(data) {
-      $.each(shortenDom[0].elements, function (i, node) {
-        var value = data[node.getAttribute('name')];
-        if (value) {
-          $(node).val(value);
-        }
-      });
-
-      placeholder(shortenDom[0]);
-    }
-
-    function showShortenForm() {
-      bitlyCheckboxDom[0].checked = true;
-      shortenDom.slideDown('100');
-    }
-
-    function hideShortenForm() {
-      bitlyCheckboxDom[0].checked = false;
-      shortenDom.slideUp('100', function () {
-        shortenDom.css({display: 'none'});
-      });
-    }
-
-    function resetShortenData() {
-      clearShortenData();
-      store.remove('shortenPrefs');
-      hideShortenForm();
-    }
-
-    // resize wrapper
-    $(window).bind("load resize", function () {
-      var h = $(window).height();
-      $("#wrapper").css({ "min-height" : (h) });
-    });
-
-    store.get('shortenPrefs', function (shortenPrefs) {
-      if (shortenPrefs) {
-        shortenPrefs = JSON.parse(shortenPrefs);
-        setShortenData(shortenPrefs);
-        showShortenForm();
-      } else {
-        hideShortenForm();
-      }
-    });
-
     $('body')
-      .delegate('#bitlyCheckbox', 'click', function (evt) {
-        if (bitlyCheckboxDom[0].checked) {
-          showShortenForm();
-        } else {
-          resetShortenData();
-        }
-      })
-      .delegate('#shortenForm', 'submit', function (evt) {
-        var data = getShortenData();
-        if (data) {
-          // Confirm that the API key + login name is valid.
-          $.ajax({
-            url: 'http://api.bitly.com/v3/validate',
-            type: 'GET',
-            data: {
-              format: 'json',
-              login: data.login,
-              x_login: data.login,
-              x_apiKey: data.apiKey,
-              apiKey: data.apiKey
-            },
-            dataType: 'json',
-            success: function (json) {
-              if (json.status_code === 200 && json.data.valid) {
-                store.set('shortenPrefs', JSON.stringify(data));
-              } else {
-                $('#bitlyNotValid').removeClass('hidden');
-                store.remove('shortenPrefs');
-              }
-            },
-            error: function (xhr, textStatus, errorThrown) {
-              $('#bitlyNotValid').removeClass('hidden');
-              store.remove('shortenPrefs');
-            }
-          });
-
-        } else {
-          resetShortenData();
-        }
-        evt.preventDefault();
-      })
-      //Wire up the close button
-      .delegate('.close', 'click', function (evt) {
-        window.close();
-      })
       //Handle button click for services in the settings.
-      .delegate('.auth', 'click', function (evt) {
+      .delegate('#addForm', 'submit', function (evt) {
+        evt.preventDefault();
+
         var node = evt.target,
-          domain = node.getAttribute('data-domain'),
-          selectionName = services.domains[domain].type;
+          domain = $('#available').val(),
+          selectionName;
+
+        // If the default option selected which has no domain value is
+        // used, just return without doing anything.
+        if (!domain) {
+          return;
+        }
+
+        selectionName = services.domains[domain].type;
 
         clearStatus();
+
         oauth(domain, existingAccounts[domain], function (success) {
           if (success) {
             //Make sure to bring the user back to this service if
@@ -300,69 +163,5 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     $(function () {
       $(".overflow").textOverflow(null, true);
     });
-
-    // tabs
-    // Only show settings if extension can actually handle setting of them.
-    // Same for advanced.
-    $('li[data-tab="settings"]').removeClass('hidden');
-    $('li[data-tab="advanced"]').removeClass('hidden');
-
-    $('body')
-      // Set up tab switching behavior.
-      .delegate("ul#tabs li", 'click', function (evt) {
-        var target = $(this),
-            tabDom = $('#' + target.attr('data-tab'));
-
-        // clear any status that was visible.
-        clearStatus();
-
-        // Show tab selected.
-        target.addClass("selected");
-        target.siblings().removeClass("selected");
-
-        // Show tab contents.
-        if (tabDom.is(':hidden')) {
-          tabDom.fadeIn(200);
-          tabDom.siblings().fadeOut(0);
-        }
-      });
-
-    //Callback handler for JSONP feed response from Google.
-    window.onFeedLoad = function (x, data) {
-      var title, link, i, entry;
-      if (data && data.feed && data.feed.entries) {
-        for (i = 0; (entry = data.feed.entries[i]); i++) {
-          if (entry.categories && entry.categories.indexOf('Sharing') !== -1) {
-            link = entry.link;
-            title = entry.title;
-            break;
-          }
-        }
-      }
-
-      if (link) {
-        $('#newsFooter .headline').removeClass('invisible');
-        $('#rssLink').attr('href', link).text(title);
-      }
-    };
-
-    //Fetch the feed. This is low priority, so done at the bottom.
-    node = document.createElement("script");
-    node.charset = "utf-8";
-    node.async = true;
-    node.src = 'https://www.google.com/uds/Gfeeds?v=1.0&callback=onFeedLoad&context=' +
-              '&output=json&' +
-              'q=http%3A%2F%2Fmozillalabs.com%2Fmessaging%2Ffeed%2F';
-    $('head')[0].appendChild(node);
-
-    // Make sure this window gets all events, particularly related to storage.
-    // This can go away if the settings work is done inside the share panel.
-    // Use a setTimeout because the opener could be reloading, for instance,
-    // after an account is added.
-    if (opener && !opener.closed && opener.require) {
-      setTimeout(function () {
-        opener.require('dispatch').trackWindow(window);
-      }, 1000);
-    }
   });
 });

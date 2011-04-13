@@ -36,10 +36,16 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
       testWindow, chrome,
       dataStore = (localStorage.chromeTestStore &&
                    JSON.parse(localStorage.chromeTestStore)) || {},
-      origin = location.protocol + "//" + location.host;
+      origin = location.protocol + "//" + location.host,
+      panelUrl = '../../1/share/panel/#test';
 
   // expose the data store for inspection in firebug
   window.dataStore = dataStore;
+
+  if (location.hash === '#settings') {
+    document.documentElement.className = 'settings';
+    panelUrl = '../../1/settings/#test';
+  }
 
 
   chrome = {
@@ -57,7 +63,7 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
     },
 
     loadPanel: function () {
-      testWindow.location = '../../1/share/panel/#test';
+      testWindow.location = panelUrl;
     },
 
     reloadPanel: function () {
