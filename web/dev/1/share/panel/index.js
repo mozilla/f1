@@ -222,6 +222,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   function callSendApi() {
     rdapi('send', {
       type: 'POST',
+      domain: sendData.domain,
       data: sendData,
       success: function (json) {
         // {'message': u'Status is a duplicate.', 'provider': u'twitter.com'}

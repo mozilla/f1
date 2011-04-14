@@ -22,7 +22,8 @@
  * */
 
 /*jslint plusplus: false, nomen: false, regexp: false */
-/*global define: false, document: false, hex_md5: false, localStorage: false, console: false */
+/*global define: false, document: false, hex_md5: false, localStorage: false,
+  console: false, setTimeout: false */
 "use strict";
 
 define([ 'require', 'jquery', 'blade/object', 'blade/jig', 'friendly', 'isoDate', 'md5'],
@@ -31,6 +32,7 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
     var rdapi,
         csrfHeader = 'X-CSRF',
         csrfRegExp = /csrf=([^\; ]+)/,
+        targetDomainHeader = 'X-Target-Domain',
         contacts = {},
         jigFunctions = {
             contact: function (identity) {
@@ -133,11 +135,14 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
             }
         };
 
-        if (csrfToken) {
-            options.beforeSend = function (xhr) {
+        options.beforeSend = function (xhr) {
+            if (options.domain) {
+                xhr.setRequestHeader(targetDomainHeader, options.domain);
+            }
+            if (csrfToken) {
                 xhr.setRequestHeader(csrfHeader, csrfToken);
-            };
-        }
+            }
+        };
 
         $.ajax(options);
     }
@@ -186,9 +191,28 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
                 }
             },
             error: function (xhr, textStatus, errorThrown) {
+                var retrySeconds = xhr.status === 503 &&
+                                   xhr.getResponseHeader('Retry-After'),
+                    html;
+
+                if (retrySeconds) {
+                    retrySeconds = parseInt(retrySeconds, 10);
+                    if (isNaN(retrySeconds)) {
+                        retrySeconds = null;
+                    }
+                }
+
                 if (options.emptyTemplate) {
-                    var html = jig(options.emptyTemplate, errorThrown, options);
+                    html = jig(options.emptyTemplate, errorThrown, options);
                     finishApiTemplating(html, options);
+                } else if (retrySeconds) {
+                    // TODO: Need to flesh this out a bit more, may need
+                    // to pause and show some UI before automatically retrying,
+                    // depending on the outcome of bug
+                    // https://bugzilla.mozilla.org/show_bug.cgi?id=642653
+                    setTimeout(function () {
+                        ajax(url, options);
+                    }, retrySeconds * 1000);
                 } else {
                     throw errorThrown;
                 }

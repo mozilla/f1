@@ -127,6 +127,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
 
       rdapi('contacts/' + acct.domain, {
         type: 'POST',
+        domain: acct.domain,
         data: {
           username: acct.username,
           userid: acct.userid,
