@@ -191,28 +191,9 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
                 }
             },
             error: function (xhr, textStatus, errorThrown) {
-                var retrySeconds = xhr.status === 503 &&
-                                   xhr.getResponseHeader('Retry-After'),
-                    html;
-
-                if (retrySeconds) {
-                    retrySeconds = parseInt(retrySeconds, 10);
-                    if (isNaN(retrySeconds)) {
-                        retrySeconds = null;
-                    }
-                }
-
                 if (options.emptyTemplate) {
-                    html = jig(options.emptyTemplate, errorThrown, options);
+                    var html = jig(options.emptyTemplate, errorThrown, options);
                     finishApiTemplating(html, options);
-                } else if (retrySeconds) {
-                    // TODO: Need to flesh this out a bit more, may need
-                    // to pause and show some UI before automatically retrying,
-                    // depending on the outcome of bug
-                    // https://bugzilla.mozilla.org/show_bug.cgi?id=642653
-                    setTimeout(function () {
-                        ajax(url, options);
-                    }, retrySeconds * 1000);
                 } else {
                     throw errorThrown;
                 }

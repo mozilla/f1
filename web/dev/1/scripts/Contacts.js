@@ -153,6 +153,9 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
         error: fn.bind(this, function (xhr, textStatus, errorThrown) {
           // does not matter what the error is, just eat it and hide
           // the UI showing a wait.
+          // If xhr.status === 503, could do a retry, and dispatch a
+          // 'serverErrorPossibleRetry', but wait for UX to be worked out
+          // in https://bugzilla.mozilla.org/show_bug.cgi?id=642653
           this.notifyCallbacks();
         })
       });
