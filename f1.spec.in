@@ -32,6 +32,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  python%{pyver}-devel python%{pyver}-setuptools
 BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /bin/sed, /usr/bin/awk, /usr/bin/make
 BuildRequires:  %{f1_name_prefix}python%{pyver}-paste-deploy, %{f1_name_prefix}python%{pyver}-paste-script
+Requires:       %{f1_name_prefix}python%{pyver}-paste-deploy, %{f1_name_prefix}python%{pyver}-paste-script
 
 Requires: 	python%{pyver}
 
