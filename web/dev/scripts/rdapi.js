@@ -30,8 +30,6 @@ define([ 'require', 'jquery', 'blade/object', 'blade/jig', 'friendly', 'isoDate'
 function (require,   $,        object,         jig,         friendly,   isoDate) {
 
     var rdapi,
-        csrfHeader = 'X-CSRF',
-        csrfRegExp = /csrf=([^\; ]+)/,
         targetDomainHeader = 'X-Target-Domain',
         contacts = {},
         jigFunctions = {
@@ -101,11 +99,6 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
         return options;
     }
 
-    function getCsrfToken() {
-        var token = csrfRegExp.exec(document.cookie);
-        return token && token[1] ? token[1] : null;
-    }
-
     function ajax(url, options) {
         options.url = config.baseUrl + config.apiPath + url;
 
@@ -118,8 +111,7 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
             }
         });
 
-        var oldSuccess = options.success,
-            csrfToken = getCsrfToken();
+        var oldSuccess = options.success;
 
         //Intercept any success calls to get a hold of contacts from
         //any API call that returns them. Also be sure to remember any
@@ -138,9 +130,6 @@ function (require,   $,        object,         jig,         friendly,   isoDate)
         options.beforeSend = function (xhr) {
             if (options.domain) {
                 xhr.setRequestHeader(targetDomainHeader, options.domain);
-            }
-            if (csrfToken) {
-                xhr.setRequestHeader(csrfHeader, csrfToken);
             }
         };
 
