@@ -1,7 +1,6 @@
 import sys
 import os
 import glob
-import unittest
 import httplib
 import httplib2
 import urllib
@@ -12,11 +11,15 @@ from pprint import pformat
 from nose.tools import eq_
 from nose import with_setup
 
-from linkdrop.tests import *
+from linkdrop.tests import TestController
+from linkdrop.tests import url
+
 
 def assert_dicts_equal(got, expected):
     if got != expected:
-        raise AssertionError("\n%s\n!=\n%s" % (pformat(got), pformat(expected)))
+        raise AssertionError("\n%s\n!=\n%s" % (pformat(got),
+                                               pformat(expected)))
+
 
 
 def assert_payloads_equal(got, expected):
@@ -40,6 +43,7 @@ class ProtocolReplayer(object):
 
     def save_capture(self, reason=""):
         pass
+
 
 class HttpReplayer(ProtocolReplayer):
     to_playback = []
@@ -73,6 +77,7 @@ class HttpReplayer(ProtocolReplayer):
                     eq_(hval, reqob[hname])
             # finally check the content (ie, the body) is as expected.
             assert_payloads_equal(gotob.get_payload(), reqob.get_payload())
+
         resp = httplib.HTTPResponse(socket.socket())
         resp.fp = fresp
         resp.begin()
@@ -81,8 +86,11 @@ class HttpReplayer(ProtocolReplayer):
 
 
 from linkoauth.google_ import SMTP
+
+
 class SmtpReplayer(SMTP, ProtocolReplayer):
     to_playback = None
+
     def __init__(self, *args, **kw):
         self.next_playback = self.to_playback.readline()
         SMTP.__init__(self, *args, **kw)
@@ -92,9 +100,9 @@ class SmtpReplayer(SMTP, ProtocolReplayer):
         pass
 
     def set_debuglevel(self, debuglevel):
-        pass # don't want the print statements during testing.
+        pass  # don't want the print statements during testing.
 
-    def connect(self, host='localhost', port = 0):
+    def connect(self, host='localhost', port=0):
         return self.getreply()
 
     def _get_next_comms(self):
@@ -103,7 +111,8 @@ class SmtpReplayer(SMTP, ProtocolReplayer):
         if line.startswith("E "):
             # a recorded exception - reconstitute it...
             exc_info = json.loads(line[2:])
-            module = sys.modules[exc_info['module']] if exc_info['module'] else __builtins__
+            module = (sys.modules[exc_info['module']]
+                      if exc_info['module'] else __builtins__)
             exc_class = getattr(module, exc_info['name'])
             raise exc_class(*tuple(exc_info['args']))
         if not line.startswith("< ") and not line.startswith("> "):
@@ -144,12 +153,14 @@ class CannedRequest(object):
     def __init__(self, path):
         meta_filename = os.path.join(path, "meta.json")
         self.path = path
-        self.protocol, self.host, self.req_type, self.comments = os.path.basename(path).split("-", 3)
+        (self.protocol, self.host,
+         self.req_type, self.comments) = os.path.basename(path).split("-", 3)
         with open(meta_filename) as f:
             self.meta = json.load(f)
 
     def __repr__(self):
         return "<canned request at '%s'>" % (self.path,)
+
 
 def genCanned(glob_pattern="*"):
     import linkdrop.tests.services
@@ -166,24 +177,27 @@ def genCanned(glob_pattern="*"):
 
 class ServiceReplayTestCase(TestController):
     def checkResponse(self, canned, response):
-        # First look for an optional 'expected-f1-response.json' which allows
-        # custom status and headers to be specified.
+        # First look for an optional 'expected-f1-response.json' which
+        # allows custom status and headers to be specified.
         try:
-            with open(os.path.join(canned.path, "expected-f1-response.json")) as f:
+            with open(os.path.join(canned.path,
+                                   "expected-f1-response.json")) as f:
                 expected = json.load(f)
         except IOError:
-            # No expected-f1-response - assume this means a 200 is expected and
-            # expected-f1-data.json has what we want.
+            # No expected-f1-response - assume this means a 200 is
+            # expected and expected-f1-data.json has what we want.
             pass
         else:
-            assert response.status_int==expected['status'], (response.status_int, expected['status'])
-            for exp_header_name, exp_header_val in expected.get('headers', {}).iteritems():
+            assert response.status_int == expected['status'], (
+                response.status_int, expected['status'])
+            for exp_header_name, exp_header_val in expected.get(
+                'headers', {}).iteritems():
                 got = response.headers.get(exp_header_name, None)
-                assert got==exp_header_val, (got, exp_header_val)
+                assert got == exp_header_val, (got, exp_header_val)
             return
 
         # No expected-f1-response.json - do the expected-f1-data thang...
-        assert response.status_int==200, response.status
+        assert response.status_int == 200, response.status
         try:
             got = json.loads(response.body)
         except ValueError:
@@ -202,36 +216,40 @@ class ServiceReplayTestCase(TestController):
             if sub is None:
                 continue
             for subname, subval in sub.items():
-                if subval=="*":
+                if subval == "*":
                     # indicates any value is acceptable.
-                    assert subname in got[top], "no attribute [%r][%r]" % (top, subname)
+                    assert subname in got[top], ("no attribute [%r][%r]"
+                                                 % (top, subname))
                     del got[top][subname]
                     del expected[top][subname]
         assert_dicts_equal(got, expected)
 
     def getResponse(self, canned, request):
         req_type = canned.req_type
-        if req_type=="send":
+        if req_type == "send":
             response = self.app.post(url(controller='send', action='send'),
                                     params=request)
-        elif req_type=="contacts":
+        elif req_type == "contacts":
             # send the 'contacts' request.
             domain = request.pop('domain')
-            response = self.app.post(url(controller='contacts', action='get', domain=domain),
+            response = self.app.post(url(controller='contacts',
+                                         action='get', domain=domain),
                                      params=request)
-        elif req_type=="auth":
-            # this is a little gross - we need to hit "authorize" direct, then
-            # assume we got redirected to the service, which then redirected us
-            # back to 'verify'
+        elif req_type == "auth":
+            # this is a little gross - we need to hit "authorize"
+            # direct, then assume we got redirected to the service,
+            # which then redirected us back to 'verify'
             request['end_point_auth_failure'] = "/failure"
             request['end_point_auth_success'] = "/success"
-            response = self.app.post(url(controller='account', action='authorize'),
+            response = self.app.post(url(controller='account',
+                                         action='authorize'),
                                      params=request)
             assert response.status_int == 302
             # and even more hacky...
             request['provider'] = request.pop('domain')
             request['code'] = "the_code"
-            response = self.app.get(url(controller='account', action='verify'),
+            response = self.app.get(url(controller='account',
+                                        action='verify'),
                                      params=request)
         else:
             raise AssertionError(req_type)
@@ -240,19 +258,32 @@ class ServiceReplayTestCase(TestController):
 
 class FacebookReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
-        if req_type=="send" or req_type=="contacts":
+        if req_type == "send" or req_type == "contacts":
             return {'domain': 'facebook.com',
                     'shareType': 'wall',
+                    'account': ('{"oauth_token": "foo", '
+                                '"oauth_token_secret": "bar"}'),
+                   }
+        if req_type == "auth":
+            return {'domain': 'facebook.com', 'username': 'foo',
+                    'userid': 'bar'}
+        raise AssertionError(req_type)
+
+
+class TwitterReplayTestCase(ServiceReplayTestCase):
+    def getDefaultRequest(self, req_type):
+        if req_type=="send" or req_type=="contacts":
+            return {'domain': 'twitter.com',
                     'account': '{"oauth_token": "foo", "oauth_token_secret": "bar"}',
                    }
         if req_type=="auth":
-            return {'domain': 'facebook.com', 'username': 'foo', 'userid': 'bar'}
+            return {'domain': 'twitter.com', 'username': 'foo', 'userid': 'bar'}
         raise AssertionError(req_type)
 
 
 class YahooReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
-        if req_type=="send" or req_type=="contacts":
+        if req_type == "send" or req_type == "contacts":
             account = {"oauth_token": "foo", "oauth_token_secret": "bar",
                        "profile": {
                        "verifiedEmail": "me@yahoo.com",
@@ -263,37 +294,33 @@ class YahooReplayTestCase(ServiceReplayTestCase):
                     'to': 'you@example.com',
                     'account': json.dumps(account),
                    }
-        if req_type=="auth":
+        if req_type == "auth":
             return {'domain': 'yahoo.com', 'username': 'foo', 'userid': 'bar'}
         raise AssertionError(req_type)
 
 
 class GoogleReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
-        if req_type=="send":
+        if req_type == "send":
             account = {"oauth_token": "foo", "oauth_token_secret": "bar",
-                       "profile": {"emails": [
-                                {'value': 'me@example.com'}
-                                ],
-                                "displayName": "Me",
+                       "profile": {"emails": [{'value': 'me@example.com'}],
+                                   "displayName": "Me",
                         },
                       }
             return {'domain': 'google.com',
-                    'account':json.dumps(account),
+                    'account': json.dumps(account),
                     'to': 'you@example.com',
                     }
-        if req_type=="contacts":
+        if req_type == "contacts":
             account = {"oauth_token": "foo", "oauth_token_secret": "bar",
-                       "profile": {"emails": [
-                                {'value': 'me@example.com'}
-                                ],
+                       "profile": {"emails": [{'value': 'me@example.com'}],
                                 "displayName": "Me",
                         },
                       }
             return {'username': 'me',
                     'userid': '123',
                     'keys': "1,2,3",
-                    'account':json.dumps(account),
+                    'account': json.dumps(account),
                     'domain': 'google.com',
                    }
         raise AssertionError(req_type)
@@ -307,6 +334,8 @@ def setupReplayers():
     import linkoauth.google_
     linkoauth.google_.SMTPRequestor = SmtpReplayer
     linkoauth.google_.OAuth2Requestor = HttpReplayer
+    import linkoauth.twitter_
+    linkoauth.twitter_.OAuth2Requestor = HttpReplayer
     import linkoauth.base
     linkoauth.base.HttpRequestor = HttpReplayer
     HttpReplayer.to_playback = []
@@ -325,17 +354,22 @@ def teardownReplayers():
     import linkoauth.google_
     linkoauth.google_.SMTPRequestor = linkoauth.google_.SMTPRequestorImpl
     linkoauth.google_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
+    import linkoauth.twitter_
+    linkoauth.twitter_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
     import linkoauth.base
     linkoauth.base.HttpRequestor = linkoauth.protocap.HttpRequestor
 
 
 host_to_test = {
-    'graph.facebook.com' : FacebookReplayTestCase,
+    'graph.facebook.com': FacebookReplayTestCase,
     'www.google.com': GoogleReplayTestCase,
     'smtp.gmail.com': GoogleReplayTestCase,
     'mail.yahooapis.com': YahooReplayTestCase,
     'social.yahooapis.com': YahooReplayTestCase,
+    'api.twitter.com': TwitterReplayTestCase,
+    'twitter.com': TwitterReplayTestCase,
 }
+
 
 def queueForReplay(canned):
     if canned.protocol == "smtp":
@@ -361,6 +395,7 @@ def queueForReplay(canned):
             i += 1
     else:
         raise AssertionError(canned.protocol)
+
 
 def runOne(canned):
     testClass = host_to_test[canned.host]

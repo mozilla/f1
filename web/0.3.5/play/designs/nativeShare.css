@@ -1,0 +1,581 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Raindrop.
+ *
+ * The Initial Developer of the Original Code is
+ * Mozilla Messaging, Inc..
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ * */
+ 
+* {
+  margin: 0;
+  padding: 0;
+  outline: none;
+  border: none;
+  border-collapse: collapse;
+  position: relative;
+  font-family: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  font-size: 100%;
+  vertical-align: top;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  list-style-type: none;
+}
+
+body {
+  font-size: 11px;
+  font-family: "lucida grande";
+  max-height: 128px;
+  overflow: hidden;
+  background-color: #fff;
+  background-position: bottom center;
+  background-repeat: no-repeat;
+  background-color: #fff;
+}
+
+button::-moz-focus-inner { 
+  border: 0; 
+}
+
+a {
+  text-decoration: none;
+  outline: none;
+}
+
+#tabs {
+  overflow: hidden;
+  border-bottom: 1px solid #515151;
+}
+
+#twitter, #facebook, #gmail, #settings {
+  /* background-image: -moz-linear-gradient(top, #d0d0d0 0%, #a8a8a8 100%); */
+  background-color: #a7a7a7;
+/*
+  border-top: 1px solid #515151;
+  -moz-box-shadow: 0 2px 0 -1px #e3e3e3 inset;
+*/
+}
+
+ul.nav {
+  -moz-box-shadow:0 2px 0 -1px #CDCDCD inset;
+  background-color:#A7A7A7;
+  display: block;
+  width: 100%;
+  padding: 0 10px;
+}
+
+ul.nav .username {
+  font-size: 11px;
+  line-height: 24px;
+  padding: 0 10px;
+  margin: 4px 10px;
+  border-left: 1px dotted #888;
+  display: inline-block;
+}
+
+ul.nav .username img {
+  border: 1px solid #fff;
+  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.25);
+  width: 23px;
+  height: 23px;
+  margin-right: 5px;
+}
+
+ul.nav .username .userId {
+  color: #000;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 #bbb;
+}
+
+ul.nav .navWrap {
+  width: 960px;
+/*
+  background-image: url("i/logo.gif");
+  background-repeat: no-repeat;
+  background-position: right center;
+*/
+  position: relative;
+  left: 50%;
+  margin-left: -480px;
+}
+
+ul.nav li {
+  width: auto;
+  display: inline-block;
+  float: left;
+  list-style-type: none;
+  margin: 3px 0;
+  font-size: 11px;
+  line-height: 24px;
+  background-image: -moz-linear-gradient(center top , #FDFDFD 0%, #AAAAAA 100%);
+  border-width: 1px;
+  border-style: solid;
+  border-color: #666;
+  -moz-box-shadow: 0 1px 0 #CDCDCD;
+}
+
+ul.nav li:hover {
+  background-color: rgba(255,255,255,0.5);
+}
+
+ul.nav li.ui-tabs-selected {
+  background-image: -moz-linear-gradient(center top , #bbb 0%, #aaa 100%); 
+  -moz-box-shadow: 0 0 3px #666 inset,0 1px 0 #CDCDCD;
+}
+
+ul.nav li:first-child {
+  z-index: 1;
+  -moz-border-radius: 3px 0 0 3px;
+}
+
+ul.nav li:nth-child(2) {
+  z-index: 2;
+  border-left: none;
+  border-right: none;
+}
+
+ul.nav li:nth-child(3) {
+  z-index: 1;
+  -moz-border-radius: 0 3px 3px 0;
+}
+
+ul.nav li a {
+  color: #fff;
+}
+
+ul.nav li a.icon {
+  width: 36px;
+  height: 24px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  display: block;
+}
+
+ul.nav li a.icon.twitter {
+  background-image: url("../share/i/twitterIcon.png");
+}
+
+ul.nav li a.icon.facebook {
+  background-image: url("../share/i/facebookIcon.png");
+}
+
+ul.nav li a.icon.gmail {
+  background-image: url("../share/i/gmailIcon.png");
+}
+
+ul.nav li a.icon.settings {
+  background-image: url("../share/i/settingsIcon.png");
+}
+
+ul.nav li.debug {
+  position: absolute;
+  right: 46px;
+  top: 0;
+  width: 60px;
+  text-align: center;
+}
+
+ul.nav li.debug span.name {
+  display: block;
+  padding: 0;
+  text-align: center;
+  font-weight: normal;
+  color: #fff;
+}
+
+ul.nav li.debug a.icon {
+  width: auto;
+}
+
+ul.nav li span.name {
+  display: none;
+}
+
+ul.nav li.ui-tabs-selected span.name {
+  display: none;
+}
+
+
+ul.nav li.settings,
+ul.nav li.settings.ui-tabs-selected {
+  position: absolute;
+  right: 0;
+  top: 0;
+  text-align: center;
+  -moz-border-radius: 3px;
+}
+
+ul.nav li.settings:hover span.name,
+ul.nav li.settings.ui-tabs-selected span.name {
+  opacity: 1;
+}
+
+ul.nav li.settings span.name {
+  display: none;
+}
+
+ul.nav li.ui-tabs-selected {
+
+}
+
+ul.nav li span.name {
+  opacity: 0.5;
+}
+
+ul.nav li.ui-tabs-selected a.icon,
+ul.nav li.ui-tabs-selected span.name {
+  opacity: 1;
+}
+
+ul.nav li span.name {
+  font-weight: bold;
+  color: #fff;
+}
+
+ul.nav li.ui-tabs-selected span.name {
+  color: #0a0a0a;
+}
+
+ul.nav span.name {
+  display: block;
+  padding-left: 24px;
+}
+
+ul.nav li.ui-tabs-selected.settings span.name {
+  display: none;
+}
+
+ul.nav li.ui-tabs-selected a.twitter,
+ul.nav li:hover a.twitter {
+  background-image: url("../share/i/twitterIconColor.png");
+}
+
+ul.nav li.ui-tabs-selected a.facebook,
+ul.nav li:hover a.facebook {
+  background-image: url("../share/i/facebookIconColor.png");
+}
+
+ul.nav li.ui-tabs-selected a.gmail,
+ul.nav li:hover a.gmail {
+  background-image: url(".../share/i/gmailIconColor.png");
+}
+
+ul.nav li.ui-tabs-selected a {
+  color: #0a0a0a;
+}
+
+div.user {
+  font-size: small;
+  width: 140px;
+  overflow: hidden;
+}
+
+div.user.inactive {
+  opacity: 0.5;
+  background: -moz-repeating-linear-gradient(top left -45deg, #aaa, #aaa 5px, #fff 5px, #fff 10px) #aaa no-repeat fixed;
+  -moz-border-radius: 1%;
+  cursor: pointer;
+}
+
+div.user .username {
+  color: #444;
+  font-weight: bold;
+}
+
+td.image {
+  width: 90px;
+}
+
+.thumbnail {
+  height: 71px;
+  padding: 4px;
+  border: 1px solid #999;
+  margin: 0 5px 0 0;
+  -moz-border-radius: 3px;
+  background-color: #ccc;
+}
+
+div.thumb {
+  border: 1px solid #aaa;
+  background-color: #fff;
+  height: 61px;
+  width: 90px;
+  display: inline-block;
+}
+
+ul.info {
+  display: inline-block;
+  width: 150px;
+  font-size: 11px;
+  padding: 0 5px 0 10px;
+}
+
+.info .description {
+  color: #000;
+  font-size: 10px;
+}
+
+.thumb .title {
+  color: #3B5998;
+  text-decoration: underline;
+  font-size: small;
+  cursor: pointer;
+}
+
+.thumb .description {
+  color: #808080;
+  font-size: x-small;
+}
+
+button {
+  padding: 2px 15px;
+  font-family: "helvetica neue", helvetica, arial, sans-serif;
+  font-size: 11px;
+  line-height:24px;
+  background-image: -moz-linear-gradient(top,#fdfdfd 0%,#aaa 100%);
+  border-width: 1px; 
+  border-style: solid;
+  border-color: #5C5C5C #888 #666;
+  -moz-border-radius: 3px;
+  margin-left: 5px;
+  cursor: pointer;
+}
+
+button.share {
+  -moz-border-radius: 0 3px 3px 0;
+  -moz-box-shadow: 0 1px 0 #cdcdcd;
+  border-left: none;
+  margin-left: 0;
+}
+
+/*
+button:hover, button:active {
+  border: 1px solid #999;
+}
+*/
+
+button:active {
+  -moz-box-shadow: 0 0 0 1px rgba(255,255,255,0.35) inset, 0 0 3px rgba(0,0,0,0.75) inset;
+}
+
+textarea, input[type="text"] {
+  -moz-box-shadow: 0 2px 2px -2px #555 inset, 0 1px 0 #cdcdcd;
+  border-width: 1px; 
+  border-style: solid;
+  border-color: #5c5c5c #929292 #929292;
+  font-family: "lucida grande"
+  font-size: 12px;
+  line-height: 18px;
+  padding: 3px;
+  margin: 0;
+  width: 100%;
+  -moz-border-radius: 3px;
+}
+
+textarea.message {
+  min-height: 71px;
+  -moz-border-radius: 3px 0 0 3px;
+  font-size: 14px;
+}
+
+textarea:focus, input[type="text"]:focus {
+
+}
+
+.inputs {
+  margin: 0 5px 0 0;
+}
+
+input[type="text"] {
+  height: 26px;
+  width: 238px;
+  display: block;
+}
+
+input[type="text"]#to {
+  margin-bottom: 5px;
+}
+
+.entry {
+  padding: 5px 0;
+  width: 960px;
+  left: 50%;
+  margin-left: -480px;
+  position: relative;
+  min-height: 71px;
+}
+
+.entry .urlConfirmation {
+  padding: 1px 5px;
+  -moz-border-radius: 10px;
+  background-image: -moz-linear-gradient(top, #fafafa 0%, #e6e6e6 100%);
+  border: 1px solid #bebebe;
+  color: green;
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  z-index: 1;
+  color: green;
+  font-size: 10px;
+  cursor: pointer;
+  display: none;
+}
+
+.entry .urlConfirmation span {
+  color: #333;
+}
+
+#settings .entry ul li {
+  display: inline-block;
+  float: left;
+}
+
+#settings .entry ul li button {
+  margin: 0 10px 0 0;
+  width: 128px;
+}
+
+.entry h1 {
+  margin: 0 0 10px 0;
+}
+
+/* START hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
+/* hbox and vbox classes */
+ 
+.hbox {
+	display: -webkit-box;
+	-webkit-box-orient: horizontal;
+	-webkit-box-align: stretch;
+ 
+	display: -moz-box;
+	-moz-box-orient: horizontal;
+	-moz-box-align: stretch;
+ 
+	display: box;
+	box-orient: horizontal;
+	box-align: stretch;
+}
+ 
+.hbox > * {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+	display: block;
+}
+ 
+.vbox {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-box-align: stretch;
+ 
+	display: -moz-box;
+	-moz-box-orient: vertical;
+	-moz-box-align: stretch;
+ 
+	display: box;
+	box-orient: vertical;
+	box-align: stretch;
+}
+ 
+.vbox > * {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+	display: block;
+}
+ 
+.spacer {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+ 
+.reverse {
+	-webkit-box-direction: reverse;
+	-moz-box-direction: reverse;
+	box-direction: reverse;
+}
+ 
+.boxFlex0 {
+	-webkit-box-flex: 0;
+	-moz-box-flex: 0;
+	box-flex: 0;
+}
+ 
+.boxFlex1, .boxFlex {
+	-webkit-box-flex: 1;
+	-moz-box-flex: 1;
+	box-flex: 1;
+}
+ 
+.boxFlex2 {
+	-webkit-box-flex: 2;
+	-moz-box-flex: 2;
+	box-flex: 2;
+}
+ 
+.boxGroup1 {
+	-webkit-box-flex-group: 1;
+	-moz-box-flex-group: 1;
+	box-flex-group: 1;
+}
+ 
+.boxGroup2 {
+	-webkit-box-flex-group: 2;
+	-moz-box-flex-group: 2;
+	box-flex-group: 2;
+}
+ 
+.start {
+	-webkit-box-pack: start;
+	-moz-box-pack: start;
+	box-pack: start;
+}
+ 
+.end {
+	-webkit-box-pack: end;
+	-moz-box-pack: end;
+	box-pack: end;
+}
+ 
+.center {
+	-webkit-box-pack: center;
+	-moz-box-pack: center;
+	box-pack: center;
+}
+/* END hbox/vbox normalization from http://alex.dojotoolkit.org/2009/08/css-3-progress/ */
+
+/* clearfix */
+
+.clearfix:after {
+	content: ".";
+	display: block;
+	clear: both;
+	visibility: hidden;
+	line-height: 0;
+	height: 0;
+}
+ 
+html[xmlns] .clearfix {
+	display: block;
+}
+ 
+* html .clearfix {
+	height: 1%;
+}

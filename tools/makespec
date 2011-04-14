@@ -16,23 +16,45 @@ while (my $line = <$f>) {
   if ($line =~ />=|<=|==/) {
     $line =~ /(.*)(>=|<=|==)(.*)/;
     my ($name, $cmp, $version) = ($1, $2, $3);
-    $requires{"$name $cmp $version"} = 1;
+    $requires{"$name"} = "$cmp $version";
   }
   else
   {
-    $requires{$line} = 1;
+    $requires{$line} = "";
   }
 }
-
-print STDERR Dumper (\%requires); use Data::Dumper;
 
 my $requires = <<"EOF";
 # Automatically added from setup.py by $0
 EOF
 
+# These are os-provided packages
+my %included = (
+  'httplib2' => 1,
+  'nose'     => 1,
+);
+
+my %excluded = (
+  'linkoauth' => 1,
+   #XXX: Not ready yet
+  'pylons'    => 1,
+);
+
 foreach my $req (sort keys %requires) {
+  next if exists $excluded{$req};
+  print STDERR "Inclindng $req\n";
+  my $reqs;
+
+  if (exists $included{$req}) {
+    $reqs = "python%{pyver}-$req";
+  }
+  else {
+    $reqs = $prefix . $req;
+  }
 $requires .= <<"EOF";
-Requires: $prefix$req
+Requires:      $reqs $requires{$req}
+BuildRequires: $reqs $requires{$req}
+
 EOF
 }
 

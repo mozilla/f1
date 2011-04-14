@@ -1,0 +1,20 @@
+HTTP/1.1 200 OK
+status: 200
+x-xss-protection: 1; mode=block
+content-location: https://twitter.com/oauth/request_token
+x-transaction: 1302661675-60570-10104
+set-cookie: k=58.160.65.179.1302661675451287; path=/; expires=Wed, 20-Apr-11 02:27:55 GMT; domain=.twitter.com, guest_id=12345; path=/; expires=Fri, 13 May 2011 02:27:55 GMT, _twitter_sess=twitter_session_id; domain=.twitter.com; path=/; HttpOnly
+expires: Tue, 31 Mar 1981 05:00:00 GMT
+vary: Accept-Encoding
+server: hi
+x-revision: DEV
+last-modified: Wed, 13 Apr 2011 02:27:55 GMT
+x-runtime: 0.01213
+pragma: no-cache
+cache-control: no-cache, no-store, must-revalidate, pre-check=0, post-check=0
+date: Wed, 13 Apr 2011 02:27:55 GMT
+x-frame-options: SAMEORIGIN
+content-type: text/html; charset=utf-8
+-content-encoding: gzip
+
+oauth_token=the_token&oauth_token_secret=the_secret&oauth_callback_confirmed=true

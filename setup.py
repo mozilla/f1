@@ -28,7 +28,7 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-VERSION='0.3.4'
+VERSION='0.3.7'
 
 setup(
     name='linkdrop',
@@ -42,6 +42,7 @@ setup(
         "docutils",
         "nose",
         "coverage",
+        "mock",
         "httplib2",
         "oauth2",
         "python-dateutil",

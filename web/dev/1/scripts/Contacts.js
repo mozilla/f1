@@ -164,7 +164,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
     },
 
     findContact: function (to) {
-      var contactId = to;
+      var contactId = null;
 
       (this.contacts || []).some(function (contact) {
         if (contact.displayName === to) {
@@ -205,18 +205,26 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
      *
      * @param {String} toText a comma-separated list of contacts.
      * @returns {String} a comma-separated list of ID-based contacts.
+     * Can throw an error if there is an invalid recipient.
      */
     convert: function (toText) {
       var newrecip = [],
           result = '',
-          recip;
+          recip, error;
 
       if (this.contacts) {
         recip = toText.split(',');
         recip.forEach(fn.bind(this, function (to) {
-          var contactId = this.findContact(to.trim());
-          if (contactId) {
-            newrecip.push(contactId);
+          to = to.trim();
+          if (to) {
+            var contactId = this.findContact(to);
+            if (contactId) {
+              newrecip.push(contactId);
+            } else {
+              error = new Error('Invalid Recipient');
+              error.recipient = to;
+              throw error;
+            }
           }
         }));
       }
