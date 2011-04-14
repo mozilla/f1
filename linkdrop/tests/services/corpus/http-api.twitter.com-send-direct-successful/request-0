@@ -1,0 +1,5 @@
+POST /1/direct_messages/new.json
+content-type: application/x-www-form-urlencoded
+user-agent: Python-httplib2/$Rev$
+
+oauth_nonce=80434363&oauth_timestamp=1302677241&text=for%20a%20nerd%20http%3A%2F%2Fbit.ly%2FeT3aUn&oauth_consumer_key=the_consumer_key&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&oauth_token=the_token&user=123456&oauth_signature=the_signature%3D

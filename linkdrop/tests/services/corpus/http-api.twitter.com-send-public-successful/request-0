@@ -1,0 +1,5 @@
+POST /1/statuses/update.json
+content-type: application/x-www-form-urlencoded
+user-agent: Python-httplib2/$Rev$
+
+status=nerdy%21%20http%3A%2F%2Fbit.ly%2FeT3aUn&oauth_body_hash=2jmj7l5rSw0yVb%2FvlWAYkK%2FYBwk%3D&oauth_nonce=63594112&oauth_timestamp=1302661687&oauth_consumer_key=12345&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&oauth_token=678&oauth_signature=xyzzy
