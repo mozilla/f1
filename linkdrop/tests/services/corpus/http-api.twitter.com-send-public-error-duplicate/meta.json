@@ -1,0 +1,5 @@
+{
+    "protocol": "http", 
+    "reason": "no reason", 
+    "uri": "https://api.twitter.com/1/statuses/update.json"
+}
