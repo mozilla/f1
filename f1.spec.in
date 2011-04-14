@@ -1,6 +1,23 @@
-%{!?pyver:  %global pyver %( %{__python} -V 2>&1 | awk '{print $2}' | cut -d. -f1-2 | sed -e's!\\.!!g' )}
+%define f1_prefix /opt/mozilla.org/f1
+%define f1_name_prefix mozilla-f1-
 
-Name:           mozilla-f1-python%{pyver}
+# build with --define 'use_python_version 2.6' to pick what python to build against if not the system default
+%{!?use_python_version: %global use_python_version %{nil}}
+
+%if "%{use_python_version}" != ""
+  %global pyver %( echo %{use_python_version} | sed -e's/\\.//g' )
+  %global python_version %{use_python_version}
+  %global pyver_sys %pyver
+%else
+  %global pyver %{nil}
+  %{!?python_version: %global python_version %(%{__python} -c "import sys; sys.stdout.write(sys.version[:3])")}
+  %global pyver_sys %( echo %{python_version} | sed -e's/\\.//g' )
+%endif
+
+%global python_sitelib /lib/python%{python_version}/site-packages
+%global python_sitearch /%{_lib}/python%{python_version}/site-packages
+
+Name:           %{f1_name_prefix}python%{pyver_sys}
 Version:        %%version%%
 Release:        1%{?dist}
 Summary:        Share Links Fast.
@@ -13,14 +30,13 @@ BuildArch:	    noarch
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  python%{pyver}-devel python%{pyver}-setuptools
-BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /bin/sed, /usr/bin/awk
-BuildRequires:  python%{pyver}-paste-deploy, python%{pyver}-paste-script
+BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /bin/sed, /usr/bin/awk, /usr/bin/make
+BuildRequires:  %{f1_name_prefix}python%{pyver}-paste-deploy, %{f1_name_prefix}python%{pyver}-paste-script
 
-#XXX Versions need to come from setup.oy
 Requires: 	python%{pyver}
-Requires:	mozilla-f1-python%{pyver}-twitter
-Requires:	mozilla-f1-python%{pyver}-gdata
-Requires:	mozilla-f1-python%{pyver}-oauth2
+
+%%buildrequires%%
+%%requires%%
 
 %description
 F1 is a browser extension that allows you to share links
@@ -32,13 +48,21 @@ and love. F1 is made by Mozilla Messaging.
 %setup -q -n linkdrop-%{version}
 
 %build
-CFLAGS="%{optflags}" %{__python} -c 'import setuptools; execfile("setup.py")' build
+export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
+CFLAGS="%{optflags}" %{__python}%{pyver} setup.py build
 
 %install
+export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
 rm -rf %{buildroot}
-%{__python} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --record=INSTALLED_FILES
+%{__python}%{pyver} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --prefix %{f1_prefix} --record=INSTALLED_FILES
 %{__install} -m 755 -d %{buildroot}%{_var}/www/f1
 rsync -a web/ %{buildroot}%{_var}/www/f1/
+
+#XXX: Not ready yet
+#%check
+#export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
+#%{__make} test NOSE="nosetests-%{python_version}" PYTHON="%{__python}%{pyver}"
+
 
 %clean
 rm -rf %{buildroot}

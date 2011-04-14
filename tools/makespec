@@ -1,0 +1,66 @@
+#!/usr/bin/env perl
+
+use strict;
+
+my $version = shift;
+my $requires = shift;
+
+my $prefix = "%{f1_name_prefix}python%{pyver}-";
+
+my %requires;
+open (my $f, $requires);
+while (my $line = <$f>) {
+  chomp $line;
+  $line =~ s/^python-//g;
+  $line = lc ($line);
+  if ($line =~ />=|<=|==/) {
+    $line =~ /(.*)(>=|<=|==)(.*)/;
+    my ($name, $cmp, $version) = ($1, $2, $3);
+    $requires{"$name"} = "$cmp $version";
+  }
+  else
+  {
+    $requires{$line} = "";
+  }
+}
+
+my $requires = <<"EOF";
+# Automatically added from setup.py by $0
+EOF
+
+# These are os-provided packages
+my %included = (
+  'httplib2' => 1,
+  'nose'     => 1,
+);
+
+my %excluded = (
+  'linkoauth' => 1,
+   #XXX: Not ready yet
+  'pylons'    => 1,
+);
+
+foreach my $req (sort keys %requires) {
+  next if exists $excluded{$req};
+  print STDERR "Inclindng $req\n";
+  my $reqs;
+
+  if (exists $included{$req}) {
+    $reqs = "python%{pyver}-$req";
+  }
+  else {
+    $reqs = $prefix . $req;
+  }
+$requires .= <<"EOF";
+Requires:      $reqs $requires{$req}
+BuildRequires: $reqs $requires{$req}
+
+EOF
+}
+
+while (<>) {
+    s/%%version%%/$version/g;
+    s/%%buildrequires%%//g;
+    s/%%requires%%/$requires/g;
+    print;
+}

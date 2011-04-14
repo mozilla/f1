@@ -28,7 +28,6 @@ from ConfigParser import ConfigParser
 from mako.lookup import TemplateLookup
 from pylons.configuration import PylonsConfig
 from pylons.error import handle_mako_error
-from paste.deploy.converters import asbool
 
 import linkdrop.lib.app_globals as app_globals
 from linkdrop.config.routing import make_map
@@ -39,7 +38,7 @@ def load_environment(global_conf, app_conf):
     object
     """
     config = PylonsConfig()
-    
+
     # Pylons paths
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     paths = dict(root=root,
@@ -63,7 +62,7 @@ def load_environment(global_conf, app_conf):
 
     import linkdrop.lib.helpers as h
     config['pylons.h'] = h
-    
+
     # Setup cache object as early as possible
     import pylons
     pylons.cache._push_object(config['pylons.app_globals'].cache)
@@ -78,5 +77,5 @@ def load_environment(global_conf, app_conf):
 
     # CONFIGURATION OPTIONS HERE (note: all config options will override
     # any Pylons config options)
-    
+
     return config

@@ -83,23 +83,21 @@ def _update_cmd(project, latest_tags=False, repo_type='git'):
         else:
             return 'git checkout -r "%s"' % get_latest_tag()
     else:
-
         # looking for an environ with a specific tag or rev
         rev = os.environ.get(_envname(project))
         if rev is not None:
             if not verify_tag(rev):
                 print('Unknown tag or revision: %s' % rev)
                 sys.exit(1)
-
             if repo_type == 'git':
                 return 'git checkout -r "%s"' % rev
             else:
                 return 'hg up -r "%s"' % rev
-
         if repo_type == 'git':
             return 'git checkout'
         else:
             return 'hg up'
+
 
 def build_app(name, latest_tags, deps):
     # building deps first

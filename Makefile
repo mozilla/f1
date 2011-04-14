@@ -1,20 +1,30 @@
+ifeq ($(OS),Windows_NT)
+BIN_DIR = Scripts
+else
+BIN_DIR = bin
+endif
+
 APPNAME = server-shared-send
 DEPS = mozilla:server-core,github:server-share-core
 VIRTUALENV = virtualenv
-NOSE = bin/nosetests
+NOSE = $(BIN_DIR)/nosetests
 NOSETESTS_ARGS = -s
 NOSETESTS_ARGS_C = -s --with-xunit --with-coverage --cover-package=linkdrop,linkoauth --cover-erase
 TESTS = linkdrop/tests deps/server-share-core/linkoauth/tests
-PYTHON = bin/python
+PYTHON = $(BIN_DIR)/python
 version = $(shell $(PYTHON) setup.py --version)
 tag = $(shell grep tag_build setup.cfg  | cut -d= -f2 | xargs echo )
-EZ = bin/easy_install
+
+# *sob* - just running easy_install on Windows prompts for UAC...
+ifeq ($(OS),Windows_NT)
+EZ = $(PYTHON) $(BIN_DIR)/easy_install-script.py
+else
+EZ = $(BIN_DIR)/easy_install
+endif
 COVEROPTS = --cover-html --cover-html-dir=html --with-coverage --cover-package=linkdrop
 COVERAGE := coverage
-PYLINT = bin/pylint
+PYLINT = $(BIN_DIR)/pylint
 PKGS = linkdrop
-
-version := 0.3.2
 
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
@@ -100,8 +110,8 @@ dist:   f1.spec
 rpm:	f1.spec
 	$(PYTHON) setup.py bdist_rpm
 
-f1.spec: f1.spec.in Makefile
-	@cat f1.spec.in | sed -e"s/%%version%%/$(version)$(tag)/g" > f1.spec
+f1.spec: f1.spec.in Makefile tools/makespec
+	tools/makespec $(version)$(tag) linkdrop.egg-info/requires.txt < f1.spec.in > f1.spec
 
 build:
 	$(VIRTUALENV) --no-site-packages --distribute .
