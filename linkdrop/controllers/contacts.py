@@ -89,8 +89,8 @@ Name of the group to return.
         startIndex = int(request.POST.get('startindex', '0'))
         maxResults = int(request.POST.get('maxresults', '25'))
         account_data = request.POST.get('account', None)
-        acct = None
 
+        acct = None
         if account_data:
             acct = json.loads(account_data)
         if not acct:

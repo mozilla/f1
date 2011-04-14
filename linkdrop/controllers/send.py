@@ -30,7 +30,6 @@ import hashlib
 
 from pylons import request
 
-#from linkoauth import get_provider
 from linkoauth.errors import (OAuthKeysException, ServiceUnavailableException,
                               DomainNotRegisteredError)
 from linkdrop.controllers import services
@@ -156,7 +155,6 @@ Site provided description of the shared item, not supported by all services.
                                     long_url=longurl,
                                     short_url=shorturl,
                                     acct_id=acct_hash)
-
         # send the item
         try:
             result, error = services.sendmessage(domain, acct, message, args)

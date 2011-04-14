@@ -289,7 +289,6 @@ def teardownReplayers():
     import linkoauth.protocap
     from linkoauth.backends import facebook_
     facebook_.HttpRequestor = linkoauth.protocap.HttpRequestor
-
     from linkoauth.backends import yahoo_
     yahoo_.HttpRequestor = linkoauth.protocap.HttpRequestor
     from linkoauth import protocap
