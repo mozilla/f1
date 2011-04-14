@@ -59,8 +59,10 @@ class HttpReplayer(ProtocolReplayer):
             eq_(path, reqpath)
             reqob = email.message_from_file(freq)
             if headers is not None:
-                gotheadersstr = "\r\n".join(["%s: %s" % (n, v) for n, v in headers.iteritems()])
-                gotob = email.message_from_string(gotheadersstr + "\r\n" + (body or ''))
+                gotheadersstr = "\r\n".join(
+                        ["%s: %s" % (n, v) for n, v in headers.iteritems()])
+                bodystr = gotheadersstr + "\r\n" + (body or '')
+                gotob = email.message_from_string(bodystr)
             else:
                 gotob = None
             if headers is not None:
@@ -273,11 +275,13 @@ class FacebookReplayTestCase(ServiceReplayTestCase):
 class TwitterReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
         if req_type=="send" or req_type=="contacts":
+            account = {"oauth_token": "foo", "oauth_token_secret": "bar"}
             return {'domain': 'twitter.com',
-                    'account': '{"oauth_token": "foo", "oauth_token_secret": "bar"}',
+                    'account': json.dumps(account),
                    }
         if req_type=="auth":
-            return {'domain': 'twitter.com', 'username': 'foo', 'userid': 'bar'}
+            return {'domain': 'twitter.com', 'username': 'foo',
+                    'userid': 'bar'}
         raise AssertionError(req_type)
 
 
@@ -421,6 +425,7 @@ for canned in genCanned():
     @with_setup(setupReplayers, teardownReplayers)
     def decoratedRunOne(canned=canned):
         runOne(canned)
-    name = "test_service_replay_" + os.path.basename(canned.path).replace("-", "_").replace(".", "_")
+    tail = os.path.basename(canned.path).replace("-", "_").replace(".", "_")
+    name = "test_service_replay_" + tail
     decoratedRunOne.__name__ = name
     globals()[name] = decoratedRunOne
