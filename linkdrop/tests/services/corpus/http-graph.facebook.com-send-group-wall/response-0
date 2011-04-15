@@ -1,0 +1,15 @@
+HTTP/1.1 200 OK
+status: 200
+x-cnection: close
+set-cookie: cur_max_lag=20; path=/; domain=.facebook.com; httponly, datr=uK6jTSIlIQ8KJyesmnZBU_42; expires=Thu, 11-Apr-2013 01:45:28 GMT; path=/; domain=.facebook.com; httponly, L=20; path=/; domain=.facebook.com; httponly, made_write_conn=1302572728; path=/; domain=.facebook.com, W=1302572728; path=/; domain=.facebook.com
+expires: Sat, 01 Jan 2000 00:00:00 GMT
+x-fb-server: 10.32.75.104
+content-length: 40
+x-fb-rev: 364572
+pragma: no-cache
+cache-control: private, no-cache, no-store, must-revalidate
+date: Tue, 12 Apr 2011 01:45:29 GMT
+p3p: CP="Facebook does not have a P3P policy. Learn why here: http://fb.me/p3p"
+content-type: text/javascript; charset=UTF-8
+
+{"id":"197108586994419_197126613659283"}

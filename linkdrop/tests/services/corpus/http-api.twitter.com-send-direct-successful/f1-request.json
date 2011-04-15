@@ -1,0 +1,10 @@
+{"domain": "twitter.com",
+ "shareType": "wall",
+ "message": "for a nerd",
+ "link": "http://slashdot.org/",
+ "shorturl": "http://bit.ly/eT3aUn",
+ "title": "Slashdot: News for nerds, stuff that matters",
+ "shareType": "direct",
+ "to": "123456",
+ "account": {"oauth_token": "foo", "oauth_token_secret": "bar", "username": "mytwitterid"}
+}
