@@ -63,7 +63,6 @@ function (object,         Contacts,     $,      accounts,   fn) {
       incorporate: function (contactsText) {
         var acct = this.svcAccount,
               newContacts = [],
-              storedContacts,
               contacts = contactsText.split(',');
 
         contacts.forEach(fn.bind(this, function (contact) {
@@ -83,50 +82,53 @@ function (object,         Contacts,     $,      accounts,   fn) {
 
         if (newContacts.length) {
           // update storage of manually entered contacts.
-          storedContacts = accounts.getData(acct.domain,
-                                            acct.userid,
-                                            acct.username,
-                                            'enteredContacts') || [];
+          accounts.getData(acct.domain, acct.userid, acct.username,
+            'enteredContacts', fn.bind(this, function (storedContacts) {
 
-          storedContacts = storedContacts.concat(newContacts);
-          accounts.setData(acct.domain, acct.userid, acct.username,
-                           'enteredContacts', storedContacts);
+            storedContacts = storedContacts || [];
 
-          // update the master merged list of contacts.
-          this.contacts = this.contacts.concat(newContacts);
-          this.toStore({
-            list: this.contacts
-          });
+            storedContacts = storedContacts.concat(newContacts);
+            accounts.setData(acct.domain, acct.userid, acct.username,
+                             'enteredContacts', storedContacts);
+
+            // update the master merged list of contacts.
+            this.contacts = this.contacts.concat(newContacts);
+            this.toStore({
+              list: this.contacts
+            });
+          }));
         }
       },
 
-      getFormattedContacts: function (entries) {
+      getFormattedContacts: function (entries, callback) {
         var data = [],
-            acct = this.svcAccount,
-            storedContacts = accounts.getData(acct.domain,
-                                              acct.userid,
-                                              acct.username,
-                                              'enteredContacts');
+            acct = this.svcAccount;
 
-        // convert server data to the right format.
-        entries.forEach(function (entry) {
-          if (entry.emails && entry.emails.length) {
-            entry.emails.forEach(function (email) {
-              var displayName = entry.displayName ? entry.displayName : email.value;
-              data.push({
-                displayName: displayName,
-                email: email.value
-              });
+        accounts.getData(acct.domain, acct.userid, acct.username,
+          'enteredContacts', fn.bind(this, function (storedContacts) {
+
+            // convert server data to the right format.
+            entries.forEach(function (entry) {
+              if (entry.emails && entry.emails.length) {
+                entry.emails.forEach(function (email) {
+                  var displayName = entry.displayName ?
+                                    entry.displayName : email.value;
+                  data.push({
+                    displayName: displayName,
+                    email: email.value
+                  });
+                });
+              }
             });
-          }
-        });
 
-        // add in any manually saved email addresses.
-        if (storedContacts) {
-          data = data.concat(storedContacts);
-        }
+            // add in any manually saved email addresses.
+            if (storedContacts) {
+              data = data.concat(storedContacts);
+            }
 
-        return data;
+            callback(data);
+          })
+        );
       }
     };
   });

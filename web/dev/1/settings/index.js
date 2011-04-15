@@ -33,9 +33,6 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           dispatch,   storage,   accounts,   dotCompare,   url,
           services,   placeholder) {
   var store = storage(),
-  shortenPrefs = store.shortenPrefs,
-  isGreaterThan072 = dotCompare(store.extensionVersion, "0.7.3") > -1,
-  isGreaterThan073 = dotCompare(store.extensionVersion, "0.7.4") > -1,
   options = url.queryToObject(location.href.split('#')[1] || '') || {},
   existingAccounts = {},
   showNew = options.show === 'new';
@@ -75,7 +72,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
 
         json.forEach(function (account) {
           // protect against old style account data
-          if (typeof(account.profile) === 'undefined') return;
+          if (typeof(account.profile) === 'undefined') {
+            return;
+          }
           html += jig('#accountTemplate', account.profile);
 
           // remember which accounts already have an entry
@@ -93,11 +92,9 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
         html = '';
         services.domainList.forEach(function (domain) {
           var data = services.domains[domain];
-          if (isGreaterThan073 || !existingAccounts[domain]) {
-            data.domain = domain;
-            data.enableSignOut = !data.forceLogin && existingAccounts[domain];
-            html += jig('#addTemplate', services.domains[domain]);
-          }
+          data.domain = domain;
+          data.enableSignOut = !data.forceLogin && existingAccounts[domain];
+          html += jig('#addTemplate', services.domains[domain]);
         });
 
         if (html) {
@@ -129,7 +126,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
 
     var shortenDom = $('#shortenForm'),
         bitlyCheckboxDom = $('#bitlyCheckbox'),
-        pref, node;
+        node;
 
 
     //Function placed inside this function to get access to DOM variables.
@@ -199,7 +196,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
 
     function resetShortenData() {
       clearShortenData();
-      delete store.shortenPrefs;
+      store.remove('shortenPrefs');
       hideShortenForm();
     }
 
@@ -209,13 +206,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
       $("#wrapper").css({ "min-height" : (h) });
     });
 
-    if (shortenPrefs) {
-      shortenPrefs = JSON.parse(shortenPrefs);
-      setShortenData(shortenPrefs);
-      showShortenForm();
-    } else {
-      hideShortenForm();
-    }
+    store.get('shortenPrefs', function (shortenPrefs) {
+      if (shortenPrefs) {
+        shortenPrefs = JSON.parse(shortenPrefs);
+        setShortenData(shortenPrefs);
+        showShortenForm();
+      } else {
+        hideShortenForm();
+      }
+    });
 
     $('body')
       .delegate('#bitlyCheckbox', 'click', function (evt) {
@@ -242,15 +241,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
             dataType: 'json',
             success: function (json) {
               if (json.status_code === 200 && json.data.valid) {
-                store.shortenPrefs = JSON.stringify(data);
+                store.set('shortenPrefs', JSON.stringify(data));
               } else {
                 $('#bitlyNotValid').removeClass('hidden');
-                delete store.shortenPrefs;
+                store.remove('shortenPrefs');
               }
             },
             error: function (xhr, textStatus, errorThrown) {
               $('#bitlyNotValid').removeClass('hidden');
-              delete store.shortenPrefs;
+              store.remove('shortenPrefs');
             }
           });
 
@@ -274,7 +273,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           if (success) {
             //Make sure to bring the user back to this service if
             //the auth is successful.
-            store.lastSelection = selectionName;
+            store.set('lastSelection', selectionName);
           } else {
             showStatus('statusOAuthFailed');
           }
@@ -295,30 +294,7 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
           accounts.clear();
         }
         evt.preventDefault();
-      })
-      .delegate('#settings [type="checkbox"]', 'click', function (evt) {
-        //Listen for changes in prefs and update localStorage, inform opener
-        //of changes.
-        var node = evt.target,
-            prefId = node.id,
-            value = node.checked;
-
-        store['prefs.' + prefId] = value;
-        if (opener && !opener.closed) {
-          dispatch.pub('prefChanged', {
-            name: prefId,
-            value: value
-          }, opener);
-        }
       });
-
-    //Set up state of the prefs.
-    pref = store['prefs.use_accel_key'];
-    pref = pref ? JSON.parse(pref) : false;
-    $('#use_accel_key')[0].checked = pref || false;
-    pref = store['prefs.bookmarking'];
-    pref = pref ? JSON.parse(pref) : false;
-    $('#bookmarking')[0].checked = pref || false;
 
     // create ellipsis for gecko
     $(function () {
@@ -328,12 +304,8 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
     // tabs
     // Only show settings if extension can actually handle setting of them.
     // Same for advanced.
-    if (isGreaterThan072) {
-      $('li[data-tab="settings"]').removeClass('hidden');
-    }
-    if (isGreaterThan073) {
-      $('li[data-tab="advanced"]').removeClass('hidden');
-    }
+    $('li[data-tab="settings"]').removeClass('hidden');
+    $('li[data-tab="advanced"]').removeClass('hidden');
 
     $('body')
       // Set up tab switching behavior.
@@ -382,5 +354,15 @@ function (require,   $,        fn,         rdapi,   oauth,   jig,
               '&output=json&' +
               'q=http%3A%2F%2Fmozillalabs.com%2Fmessaging%2Ffeed%2F';
     $('head')[0].appendChild(node);
+
+    // Make sure this window gets all events, particularly related to storage.
+    // This can go away if the settings work is done inside the share panel.
+    // Use a setTimeout because the opener could be reloading, for instance,
+    // after an account is added.
+    if (opener && !opener.closed && opener.require) {
+      setTimeout(function () {
+        opener.require('dispatch').trackWindow(window);
+      }, 1000);
+    }
   });
 });

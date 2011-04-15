@@ -23,8 +23,14 @@
 
 /*jslint plusplus: false, indent: 2, nomen: false */
 /*global require: false, define: false, location: true, window: false, alert: false,
-  document: false, setTimeout: false, localStorage: false */
+  document: false, setTimeout: false, localStorage: false, parent: false */
 "use strict";
+
+// Allow tests to plug into the page by notify them if this is a test.
+if (location.hash === '#test') {
+  parent.postMessage(JSON.stringify({topic: 'registerForTests'}),
+                     location.protocol + "//" + location.host);
+}
 
 require({
   paths: {
@@ -43,7 +49,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           DebugPanel,           AccountPanel,           dotCompare) {
 
   var actions = services.domains,
-    options, bodyDom, timer, pageInfo, sendData, showNew,
+    options, bodyDom, pageInfo, sendData, showNew,
     onFirstShareState = null,
     accountPanels = [],
     store = storage(),
@@ -55,7 +61,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       statusSharing: true,
       statusShared: true
     },
-    isGreaterThan076 = dotCompare(store.extensionVersion, "0.7.7") > -1,
     // If it has been more than a day,
     // refresh the UI, record a timestamp for it.
     refreshStamp = (new Date()).getTime(),
@@ -242,7 +247,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         } else if (json.error) {
           showStatus('statusError', json.error.message);
         } else {
-          store.lastSelection = actions[sendData.domain].type;
+          store.set('lastSelection', actions[sendData.domain].type);
           showStatusShared();
           //Be sure to delete sessionRestore data
           accountPanels.forEach(function (panel) {
@@ -282,53 +287,58 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
     sendData = data;
 
-    var svcData = accounts.getService(data.domain, data.userid, data.username),
-        svcConfig = services.domains[data.domain],
-        shortenPrefs = store.shortenPrefs,
-        shortenData;
+    // get any shortener prefs before trying to send.
+    store.get('shortenPrefs', function (shortenPrefs) {
 
-    sendData.account = JSON.stringify(svcData);
+      accounts.getService(data.domain, data.userid, data.username,
+        function (svcData) {
 
-    // hide the panel now, but only if the extension can show status
-    // itself (0.7.7 or greater)
-    updateChromeStatus(SHARE_START);
-    if (isGreaterThan076) {
-      hide();
-    }
+          var svcConfig = services.domains[data.domain],
+              shortenData;
 
-    //First see if a bitly URL is needed.
-    if (svcConfig.shorten && shortenPrefs) {
-      shortenData = {
-        format: 'json',
-        longUrl: sendData.link
-      };
+          sendData.account = JSON.stringify(svcData);
 
-      // Unpack the user prefs
-      shortenPrefs = JSON.parse(shortenPrefs);
+          // hide the panel now, but only if the extension can show status
+          // itself (0.7.7 or greater)
+          updateChromeStatus(SHARE_START);
+          hide();
 
-      if (shortenPrefs) {
-        object.mixin(shortenData, shortenPrefs, true);
-      }
+          //First see if a bitly URL is needed.
+          if (svcConfig.shorten && shortenPrefs) {
+            shortenData = {
+              format: 'json',
+              longUrl: sendData.link
+            };
 
-      // Make sure the server does not try to shorten.
-      delete sendData.shorten;
+            // Unpack the user prefs
+            shortenPrefs = JSON.parse(shortenPrefs);
 
-      $.ajax({
-        url: 'http://api.bitly.com/v3/shorten',
-        type: 'GET',
-        data: shortenData,
-        dataType: 'json',
-        success: function (json) {
-          sendData.shorturl = json.data.url;
-          callSendApi();
-        },
-        error: function (xhr, textStatus, errorThrown) {
-          showStatus('statusShortenerError', errorThrown);
+            if (shortenPrefs) {
+              object.mixin(shortenData, shortenPrefs, true);
+            }
+
+            // Make sure the server does not try to shorten.
+            delete sendData.shorten;
+
+            $.ajax({
+              url: 'http://api.bitly.com/v3/shorten',
+              type: 'GET',
+              data: shortenData,
+              dataType: 'json',
+              success: function (json) {
+                sendData.shorturl = json.data.url;
+                callSendApi();
+              },
+              error: function (xhr, textStatus, errorThrown) {
+                showStatus('statusShortenerError', errorThrown);
+              }
+            });
+          } else {
+            callSendApi();
+          }
         }
-      });
-    } else {
-      callSendApi();
-    }
+      );
+    });
   }
 
   /**
@@ -343,67 +353,106 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
     $('#shareui').removeClass('hidden');
 
-    //Figure out what accounts we do have
-    accounts.forEach(function (account) {
-      // protect against old style account data
-      if (typeof(account.profile) === 'undefined') {
-        return;
-      }
+    store.get('lastSelection', function (lastSelection) {
+      store.get('accountAdded', function (accountAdded) {
 
-      var domain = account.profile.accounts[0].domain,
-          data, PanelCtor;
+        var asyncCount = 0,
+            asyncConstructionDone = false,
+            accountPanel;
 
-      if (domain && actions[domain]) {
-        //Make sure to see if there is a match for last selection
-        if (actions[domain].type === store.lastSelection) {
-          lastSelectionMatch = i;
+        // Finishes account creation. Actually runs *after* the work done
+        // below this function. Need a function callback since AccountPanel
+        // construction is async.
+        function finishCreate() {
+          asyncCount -= 1;
+
+          // Could still be waiting for other async creations. If so, wait.
+          if (asyncCount > 0 || !asyncConstructionDone) {
+            return;
+          }
+
+          // add the account panels now
+          accountsDom.append(fragment);
+
+          //Add debug panel if it is allowed.
+          if (options.prefs.system === 'dev') {
+            debugPanel = new DebugPanel({}, accountsDom[0]);
+          }
+
+          checkBase64Preview();
+
+          //If no matching accounts match the last selection clear it.
+          if (lastSelectionMatch < 0 && !accountAdded && lastSelection) {
+            store.remove('lastSelection');
+            lastSelectionMatch = 0;
+          }
+
+          // which domain was last active?
+          $("#accounts").accordion({ active: lastSelectionMatch });
+
+          //Reset the just added state now that accounts have been configured one time.
+          if (accountAdded) {
+            store.remove('accountAdded');
+          }
+
+          //Inform extension the content size has changed, but use a delay,
+          //to allow any reflow/adjustments.
+          setTimeout(function () {
+            dispatch.pub('sizeToContent');
+          }, 100);
         }
 
-        data = actions[domain];
-        data.domain = domain;
+        //Figure out what accounts we do have
+        accounts.forEach(function (account) {
+          // protect against old style account data
+          if (typeof(account.profile) === 'undefined') {
+            return;
+          }
 
-        // Get the contructor function for the panel.
-        PanelCtor = require(panelOverlayMap[domain] || 'widgets/AccountPanel');
+          var domain = account.profile.accounts[0].domain,
+              data, PanelCtor;
 
-        accountPanels.push(new PanelCtor({
-          options: options,
-          account: account,
-          svc: data
-        }, fragment));
-      }
+          if (domain && actions[domain]) {
+            //Make sure to see if there is a match for last selection
+            if (actions[domain].type === lastSelection) {
+              lastSelectionMatch = i;
+            }
 
-      i++;
+            data = actions[domain];
+            data.domain = domain;
+
+            // Get the contructor function for the panel.
+            PanelCtor = require(panelOverlayMap[domain] || 'widgets/AccountPanel');
+
+            accountPanel = new PanelCtor({
+              options: options,
+              account: account,
+              svc: data
+            }, fragment);
+
+            // if an async creation, then wait until all are created before
+            // proceeding with UI construction.
+            if (accountPanel.asyncCreate) {
+              asyncCount += 1;
+              accountPanel.asyncCreate.then(finishCreate);
+            }
+
+            accountPanels.push(accountPanel);
+          }
+
+          i++;
+        });
+
+        asyncConstructionDone = true;
+
+        // The async creation could have finished if all the data values
+        // for the account panels were already cached. If so, then finish
+        // out the UI construction.
+        if (!asyncCount) {
+          finishCreate();
+        }
+      });
     });
-
-    // add the account panels now
-    accountsDom.append(fragment);
-
-    //Add debug panel if it is allowed.
-    if (options.prefs.system === 'dev') {
-      debugPanel = new DebugPanel({}, accountsDom[0]);
-    }
-
-    checkBase64Preview();
-
-    //If no matching accounts match the last selection clear it.
-    if (lastSelectionMatch < 0 && !store.accountAdded && store.lastSelection) {
-      delete store.lastSelection;
-      lastSelectionMatch = 0;
-    }
-
-    // which domain was last active?
-    $("#accounts").accordion({ active: lastSelectionMatch });
-
-    //Reset the just added state now that accounts have been configured one time.
-    if (store.accountAdded) {
-      delete store.accountAdded;
-    }
-
-    //Inform extension the content size has changed, but use a delay,
-    //to allow any reflow/adjustments.
-    setTimeout(function () {
-      dispatch.pub('sizeToContent');
-    }, 100);
   }
 
   function updateAccounts(accounts) {
@@ -441,32 +490,9 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       }
     } else {
       showStatus('statusSettings');
-
-      //Clean up storage
-      services.domainList.forEach(function (domain) {
-        delete store[services.domains[domain].type + 'Contacts'];
-      });
-
       dispatch.pub('sizeToContent');
     }
 
-  }
-
-  //For the "new items" link, only show it for x number of days after showing it.
-  //NOTE: when updating for newer releases, delete the old value from the
-  //storage.
-  delete store.newTimerV1;
-  delete store.newTimerV2;
-  timer = store.newTimerV3;
-  if (!timer) {
-    store.newTimerV3 = (new Date()).getTime();
-    showNew = true;
-  } else {
-    timer = JSON.parse(timer);
-    //If time since first seen is greater than three days, hide the new link.
-    if ((new Date()).getTime() - timer < (3 * 24 * 60 * 60 * 1000)) {
-      showNew = true;
-    }
   }
 
   // Set up initialization work for the first share state passing.

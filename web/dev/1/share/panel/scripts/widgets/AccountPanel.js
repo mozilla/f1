@@ -77,10 +77,11 @@ function (object,         Widget,         $,        template,
         shareTypeLabel: 'send to'
       },
 
-      onCreate: function () {
+      onCreate: function (onAsynCreateDone) {
         var profile = this.account.profile,
             name = profile.displayName,
-            userName, savedOptions;
+            userName,
+            onFinishCreate = this.makeCreateCallback();
 
         //Set up the svcAccount property
         this.svcAccount = profile.accounts[0];
@@ -94,58 +95,65 @@ function (object,         Widget,         $,        template,
 
         //Check for saved data. Only use if the URL
         //and the account match
-        savedOptions = store[this.storeId];
-        if (savedOptions) {
-          savedOptions = JSON.parse(savedOptions);
+        store.get(this.storeId, fn.bind(this, function (savedOptions) {
+          if (savedOptions) {
+            savedOptions = JSON.parse(savedOptions);
 
-          if (this.theGameHasChanged(savedOptions)) {
-            this.clearSavedData();
-            savedOptions = null;
-          } else {
-            //Mix in the savedOptions with options.
-            this.options = object.create(this.options, [savedOptions]);
+            if (this.theGameHasChanged(savedOptions)) {
+              this.clearSavedData();
+              savedOptions = null;
+            } else {
+              //Mix in the savedOptions with options.
+              this.options = object.create(this.options, [savedOptions]);
+            }
           }
-        }
 
-        //Set up the photo property
-        this.photo = profile.photos && profile.photos[0] && profile.photos[0].value;
+          //Set up the photo property
+          this.photo = profile.photos && profile.photos[0] && profile.photos[0].value;
 
-        //Set up nicer display name
-        // XXX for email services, we should show the email account, but we
-        // cannot rely on userid being a 'pretty' name we can display
-        userName = this.svcAccount.username;
-        if (userName && userName !== name) {
-          name = name + " (" + userName + ")";
-        }
-
-        this.displayName = name;
-
-        // Figure out what module will handle contacts.
-        this.contactsName = (this.svc.overlays &&
-                                this.svc.overlays[this.contactsName]) ||
-                                this.contactsName;
-
-        //Listen for options changes and update the account.
-        this.optionsChangedSub = dispatch.sub('optionsChanged', fn.bind(this, function (options) {
-          this.options = options;
-          this.optionsChanged();
-        }));
-
-        //Listen for updates to base64Preview
-        this.base64PreviewSub = dispatch.sub('base64Preview', fn.bind(this, function (dataUrl) {
-          $('[name="picture_base64"]', this.bodyNode).val(jigFuncs.rawBase64(dataUrl));
-        }));
-
-        // listen for successful send, and if so, update contacts list, if
-        // the send matches this account.
-        this.sendCompleteSub = dispatch.sub('sendComplete', fn.bind(this, function (data) {
-          var acct = this.svcAccount;
-          if (data.to && acct.domain === data.domain &&
-              acct.userid === data.userid &&
-              acct.username === data.username) {
-            this.contacts.incorporate(data.to);
+          //Set up nicer display name
+          // XXX for email services, we should show the email account, but we
+          // cannot rely on userid being a 'pretty' name we can display
+          userName = this.svcAccount.username;
+          if (userName && userName !== name) {
+            name = name + " (" + userName + ")";
           }
+
+          this.displayName = name;
+
+          // Figure out what module will handle contacts.
+          this.contactsName = (this.svc.overlays &&
+                                  this.svc.overlays[this.contactsName]) ||
+                                  this.contactsName;
+
+          //Listen for options changes and update the account.
+          this.optionsChangedSub = dispatch.sub('optionsChanged', fn.bind(this, function (options) {
+            this.options = options;
+            this.optionsChanged();
+          }));
+
+          //Listen for updates to base64Preview
+          this.base64PreviewSub = dispatch.sub('base64Preview', fn.bind(this, function (dataUrl) {
+            $('[name="picture_base64"]', this.bodyNode).val(jigFuncs.rawBase64(dataUrl));
+          }));
+
+          // listen for successful send, and if so, update contacts list, if
+          // the send matches this account.
+          this.sendCompleteSub = dispatch.sub('sendComplete', fn.bind(this, function (data) {
+            var acct = this.svcAccount;
+            if (data.to && acct.domain === data.domain &&
+                acct.userid === data.userid &&
+                acct.username === data.username) {
+              this.contacts.incorporate(data.to);
+            }
+          }));
+
+          // indicate async creation is done.
+          onFinishCreate.resolve();
         }));
+
+        // return onFinishCreate to indicate this is an async creation
+        return onFinishCreate;
       },
 
       destroy: function () {
@@ -242,7 +250,7 @@ function (object,         Widget,         $,        template,
 
       clearSavedData: function () {
         this.memStore = {};
-        delete store[this.storeId];
+        store.remove(this.storeId);
 
         //Also clear up the form data.
         var root = $(this.bodyNode);
@@ -258,7 +266,7 @@ function (object,         Widget,         $,        template,
 
       saveData: function () {
         var data = this.getFormData();
-        store[this.storeId] = JSON.stringify(data);
+        store.set(this.storeId, data);
       },
 
       validate: function (sendData) {

@@ -35,187 +35,29 @@ function (storage,   dispatch,   rdapi,   services) {
            (username && cache.username === username));
   }
 
-  function fromJson(value) {
-    if (value) {
-      value = JSON.parse(value);
+  function pubAccountsChanged() {
+    if (opener && !opener.closed) {
+      dispatch.pub('accountsChanged', null, opener);
     }
-    return value;
+    dispatch.pub('accountsChanged');
   }
 
-  var store = storage(), impl,
-    changeTypes = {
-      //localStorage is the most robust, since the change in localStorage
-      //can be listened to across windows.
+  // Listen for chrome storage changes, and if it is for
+  // serviceCache, translate that into a higher level message
+  // understood by the web modules.
+  dispatch.sub('storeNotifyChange', function (data) {
+    if (data.key === 'serviceCache') {
+      pubAccountsChanged();
+    }
+  });
 
-      'localStorage': {
+  dispatch.sub('storeNotifyRemoveAll', function (data) {
+    // If the storage has all been removed, then need to update
+    // since the serviceCache was also removed.
+    pubAccountsChanged();
+  });
 
-        accounts: function (ok, error) {
-          // accounts now simply provides existing accounts retreived during
-          // the oauth dances
-          var serviceCache = fromJson(store.serviceCache) || [];
-
-          //Call ok callback with current knowledge. If there is a change in the
-          //account info, then the changed event will be triggered later.
-          if (ok) {
-            ok(serviceCache);
-          }
-        },
-
-        update: function (account_data) {
-          // XXX TODO
-          // get the account and push it into localstore, don't overwrite, we
-          // get one account at a time here
-          // We write into serviceCache which will be used by api calls
-          // to send the auth keys
-          var serviceCache = fromJson(store.serviceCache) || [],
-              existing = false,
-              profile, p, a, acct;
-
-          // we store the entire object in serviceCache
-          if (serviceCache) {
-            for (a = 0; a < serviceCache.length; a++) {
-              if (isCacheMatch(serviceCache[a], account_data.domain,
-                               account_data.userid, account_data.username)) {
-                serviceCache[a] = account_data;
-                existing = true;
-                break;
-              }
-            }
-          }
-          if (!existing) {
-            serviceCache.push(account_data);
-          }
-          store.serviceCache = JSON.stringify(serviceCache);
-          impl.changed();
-        },
-
-        remove: function (domain, userid, username) {
-          var serviceCache = fromJson(store.serviceCache),
-              i, cache, a, p, s, svc;
-
-          if (serviceCache) {
-            for (i = 0; (cache = serviceCache[i]); i++) {
-              if (isCacheMatch(cache, domain, userid, username)) {
-                serviceCache.splice(i, 1);
-                break;
-              }
-            }
-            store.serviceCache = JSON.stringify(serviceCache);
-          }
-
-          // clear the contacts cache
-          svc = services.domains[domain];
-
-          // remove this clearCache call when 3.6 is removed.
-          svc.clearCache(store);
-
-          // Delete auxillary data.
-          impl.clearData(domain, userid, username);
-
-          impl.changed();
-        },
-
-        /**
-         * Set auxillary data related to an account. Deleted when the account
-         * is deleted.
-         */
-        setData: function (domain, userid, username, name, value) {
-          var key = [domain, userid, username].join('|') + 'Data',
-              data = fromJson(store[key]) || {};
-
-          if (value === undefined || value === null) {
-            delete data[name];
-          } else {
-            data[name] = value;
-          }
-
-          store[key] = JSON.stringify(data);
-
-          return value;
-        },
-
-        /**
-         * Get auxillary data related to an account.
-         */
-        getData: function (domain, userid, username, name) {
-          var key = [domain, userid, username].join('|') + 'Data',
-              data = fromJson(store[key]) || {};
-
-          return data ? data[name] : null;
-        },
-
-        /**
-         * Clears auxillary data related to an account. Deleted when the account
-         * is deleted.
-         */
-        clearData: function (domain, userid, username) {
-          var key = [domain, userid, username].join('|') + 'Data';
-          delete store[key];
-        },
-
-        getService: function (domain, userid, username) {
-          var serviceCache = fromJson(store.serviceCache),
-              i, cache;
-
-          if (serviceCache) {
-            for (i = 0; (cache = serviceCache[i]); i++) {
-              if (isCacheMatch(cache, domain, userid, username)) {
-                return cache;
-              }
-            }
-          }
-          return null;
-        },
-
-        changed: function () {
-          store.accountChanged = (new Date()).getTime();
-          //Force the onchange events to occur. Sometimes the storage
-          //events do not fire?
-          if (opener && !opener.closed) {
-            dispatch.pub('accountsChanged', null, opener);
-          }
-          dispatch.pub('accountsChanged');
-        },
-
-        onChange: function (action) {
-          //Listen to storage changes, and if a the accountChanged key
-          //changes, refresh.
-          var lastValue = store.accountChanged;
-          window.addEventListener('storage', function (evt) {
-            //Only refresh if the accounts were changed.
-            if (store.accountChanged !== lastValue) {
-              action();
-            }
-          }, false);
-          //Also use direct notification in case storage events fail.
-          dispatch.sub('accountsChanged', action);
-        }
-      },
-      //Some extensions mess with localStorage, so in that case, fall back to
-      //using dispatching.
-      'memory': {
-
-        accounts: function (ok, error) {
-        },
-
-        changed: function () {
-          //Use dispatching. Dispatch to current window, but also to an opener
-          //if available.
-          store.accountChanged = (new Date()).getTime();
-
-          if (opener) {
-            dispatch.pub('accountsChanged', null, opener);
-          }
-          dispatch.pub('accountsChanged');
-        },
-
-        onChange: function (action) {
-          dispatch.sub('accountsChanged', action);
-        }
-      }
-    };
-
-  impl = changeTypes[storage.type];
+  var store = storage();
 
   /**
    * Gets the accounts. Can use a cached value.
@@ -223,15 +65,46 @@ function (storage,   dispatch,   rdapi,   services) {
    * @param {Function} error function to call if an error.
    */
   function accounts(ok, error) {
-    return impl.accounts(ok, error);
+    store.get('serviceCache', function (data) {
+      if (ok) {
+        ok(data || []);
+      }
+    });
   }
 
   /**
    * Updates the accounts from a json account object.
    * @param {Object} cookie object to update from
    */
-  accounts.update = function (account_data) {
-    impl.update(account_data);
+  accounts.update = function (accountData) {
+    // get the account and push it into storage, don't overwrite, we
+    // get one account at a time here
+    // We write into serviceCache which will be used by api calls
+    // to send the auth keys
+
+    store.get('serviceCache', function (serviceCache) {
+
+      var existing = false,
+          a;
+
+      serviceCache = serviceCache || [];
+
+      // we store the entire object in serviceCache
+      if (serviceCache) {
+        for (a = 0; a < serviceCache.length; a++) {
+          if (isCacheMatch(serviceCache[a], accountData.domain,
+                           accountData.userid, accountData.username)) {
+            serviceCache[a] = accountData;
+            existing = true;
+            break;
+          }
+        }
+      }
+      if (!existing) {
+        serviceCache.push(accountData);
+      }
+      store.set('serviceCache', serviceCache);
+    });
   };
 
   /**
@@ -240,8 +113,24 @@ function (storage,   dispatch,   rdapi,   services) {
    * @param {string} userid
    * @param {string} username
    */
-  accounts.remove = function (account, userid, username) {
-    impl.remove(account, userid, username);
+  accounts.remove = function (domain, userid, username) {
+    store.get('serviceCache', function (serviceCache) {
+
+      var i, cache;
+
+      if (serviceCache) {
+        for (i = 0; (cache = serviceCache[i]); i++) {
+          if (isCacheMatch(cache, domain, userid, username)) {
+            serviceCache.splice(i, 1);
+            break;
+          }
+        }
+        store.set('serviceCache', serviceCache);
+      }
+
+      // Delete auxillary data.
+      accounts.clearData(domain, userid, username);
+    });
   };
 
   /**
@@ -249,9 +138,23 @@ function (storage,   dispatch,   rdapi,   services) {
    * @param {string} domain
    * @param {string} userid
    * @param {string} username
+   * @param {Function} callback the callback to call once date is retrieved.
    */
-  accounts.getService = function (account, userid, username) {
-    return impl.getService(account, userid, username);
+  accounts.getService = function (domain, userid, username, callback) {
+
+    store.get('serviceCache', function (serviceCache) {
+      var i, cache;
+
+      if (serviceCache) {
+        for (i = 0; (cache = serviceCache[i]); i++) {
+          if (isCacheMatch(cache, domain, userid, username)) {
+            callback(cache);
+            return;
+          }
+        }
+      }
+      callback(null);
+    });
   };
 
   /**
@@ -259,7 +162,7 @@ function (storage,   dispatch,   rdapi,   services) {
    * info is no longer valid/expired.
    */
   accounts.clear = function () {
-    delete store.serviceCache;
+    store.remove('serviceCache');
   };
 
   /**
@@ -267,9 +170,27 @@ function (storage,   dispatch,   rdapi,   services) {
    * @param {string} domain
    * @param {string} userid
    * @param {string} username
+   * @param {string} name the data key name
+   * @param {Object} value the data to store at that key name.
    */
-  accounts.setData = function (account, userid, username, name, value) {
-    return impl.setData(account, userid, username, name, value);
+  accounts.setData = function (domain, userid, username, name, value) {
+
+    var key = [domain, userid, username].join('|') + 'Data';
+
+    store.get('key', function (data) {
+      data = data || {};
+
+
+      if (value === undefined || value === null) {
+        delete data[name];
+      } else {
+        data[name] = value;
+      }
+
+      store.set(key, data);
+    });
+
+    return value;
   };
 
   /**
@@ -277,9 +198,17 @@ function (storage,   dispatch,   rdapi,   services) {
    * @param {string} domain
    * @param {string} userid
    * @param {string} username
+   * @param {string} name the key name for the auxillary data.
+   * @param {Function} callbac the callback to call when the data is retreived.
    */
-  accounts.getData = function (account, userid, username, name) {
-    return impl.getData(account, userid, username, name);
+  accounts.getData = function (domain, userid, username, name, callback) {
+    var key = [domain, userid, username].join('|') + 'Data';
+
+    store.get(key, function (data) {
+      data = data || {};
+
+      callback(data[name] || null);
+    });
   };
 
   /**
@@ -288,15 +217,9 @@ function (storage,   dispatch,   rdapi,   services) {
    * @param {string} userid
    * @param {string} username
    */
-  accounts.clearData = function (account, userid, username) {
-    return impl.clearData(account, userid, username);
-  };
-
-  /**
-   * Called when the cache of accounts has changed.
-   */
-  accounts.changed = function () {
-    return impl.changed();
+  accounts.clearData = function (domain, userid, username) {
+    var key = [domain, userid, username].join('|') + 'Data';
+    store.remove(key);
   };
 
   /**
@@ -311,7 +234,7 @@ function (storage,   dispatch,   rdapi,   services) {
    * Call it with no args to get the default behavior, page reload.
    */
   accounts.onChange = function (action) {
-    return impl.onChange(action || defaultAction);
+    dispatch.sub('accountsChanged', action || defaultAction);
   };
 
   return accounts;
