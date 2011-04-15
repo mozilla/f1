@@ -29,6 +29,7 @@ from nose import tools
 import hashlib
 import json
 
+
 class TestSendController(TestController):
     domain = 'example.com'
     username = 'USERNAME'
@@ -114,12 +115,12 @@ class TestSendController(TestController):
         shorturl = 'http://sh.ort/url'
         mock_shorten.return_value = shorturl
         res = self.real_send(self.controller)
-        mock_shorten.assert_called_once_with('http://'+longurl)
+        mock_shorten.assert_called_once_with('http://' + longurl)
         timer_args = send.metrics.start_timer.call_args_list
         tools.eq_(len(timer_args), 2)
         tools.eq_(timer_args[0], ((send.request,), dict(long_url=longurl)))
         tools.eq_(timer_args[1][0][0], send.request)
-        tools.eq_(timer_args[1][1]['long_url'], 'http://'+longurl)
+        tools.eq_(timer_args[1][1]['long_url'], 'http://' + longurl)
         tools.eq_(timer_args[1][1]['short_url'], shorturl)
         tools.eq_(timer_args[1][1]['acct_id'], self._acct_hash())
         mock_timer = send.metrics.start_timer()
@@ -133,6 +134,7 @@ class TestSendController(TestController):
 
     def test_send_oauthkeysexception(self):
         from linkoauth.base import OAuthKeysException
+
         def raise_oauthkeysexception(*args):
             raise OAuthKeysException('OAUTHKEYSEXCEPTION')
         mock_sendmessage = send.get_provider().api().sendmessage
@@ -152,6 +154,7 @@ class TestSendController(TestController):
     def test_send_serviceunavailexception(self):
         from linkoauth.base import ServiceUnavailableException
         debug_msg = 'DEBUG'
+
         def raise_servunavailexception(*args):
             e = ServiceUnavailableException('SERVUNAVAIL')
             e.debug_message = debug_msg

@@ -28,6 +28,7 @@ from mock import patch
 from nose import tools
 import json
 
+
 class TestContactsController(TestController):
     def setUp(self):
         self.req_patcher = patch('linkdrop.controllers.contacts.request')
@@ -71,6 +72,7 @@ class TestContactsController(TestController):
 
     def test_get_oauthkeysexception(self):
         from linkoauth.base import OAuthKeysException
+
         def raise_oauthkeysexception(*args):
             raise OAuthKeysException('OAUTHKEYSEXCEPTION')
         mock_getcontacts = contacts.get_provider().api().getcontacts
@@ -88,6 +90,7 @@ class TestContactsController(TestController):
 
     def test_get_serviceunavailexception(self):
         from linkoauth.base import ServiceUnavailableException
+
         def raise_servunavailexception(*args):
             raise ServiceUnavailableException('SERVUNAVAIL')
         mock_getcontacts = contacts.get_provider().api().getcontacts

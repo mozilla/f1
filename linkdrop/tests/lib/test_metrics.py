@@ -3,11 +3,13 @@ from linkdrop.tests import TestController
 from mock import Mock
 from nose import tools
 
+
 class TestMetricsConsumer(TestController):
     @tools.raises(NotImplementedError)
     def test_consume_raises_notimplemented(self):
         mc = metrics.MetricsConsumer()
         mc.consume('somedata')
+
 
 class TestMetricsCollector(TestController):
     def setUp(self):

@@ -27,8 +27,10 @@ from linkdrop.tests import TestController
 from mock import patch
 from nose import tools
 
+
 class MockException(Exception):
     pass
+
 
 class TestAccountController(TestController):
     def setUp(self):
@@ -103,6 +105,7 @@ class TestAccountController(TestController):
         mock_service = account.get_provider()
         mock_auth = mock_service.responder()
         errmsg = 'ACCESSEXCEPTION'
+
         def raise_access_exception(*args):
             from linkoauth.base import AccessException
             raise AccessException(errmsg)
@@ -112,7 +115,6 @@ class TestAccountController(TestController):
         tools.assert_raises(MockException, self.controller.verify)
         mock_redirect.assert_called_with(
             'http://example.com/foo?error=%s#bar' % errmsg)
-
 
     @patch.dict('linkdrop.controllers.account.config',
                 dict(oauth_failure='http://example.com/foo#bar'))
@@ -127,6 +129,7 @@ class TestAccountController(TestController):
         from linkdrop.controllers.account import HTTPException
         url = 'http://example.com/redirect'
         exc = HTTPException(url, None)
+
         def raise_http_exception(*args):
             raise exc
         mock_auth.verify.side_effect = raise_http_exception
