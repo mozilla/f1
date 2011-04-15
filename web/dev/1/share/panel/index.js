@@ -49,7 +49,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           DebugPanel,           AccountPanel,           dotCompare) {
 
   var actions = services.domains,
-    options, bodyDom, pageInfo, sendData, showNew,
+    options, bodyDom, pageInfo, sendData,
     onFirstShareState = null,
     accountPanels = [],
     store = storage(),
@@ -509,11 +509,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         $("#closeLink").addClass('hidden');
       }
 
-      //Show the new link if appropriate.
-      if (showNew) {
-        $('#newLink').removeClass('hidden');
-      }
-
       //Listen to sendMessage events from the AccountPanels
       dispatch.sub('sendMessage', function (data) {
         sendMessage(data);
@@ -536,6 +531,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         })
         .delegate('.statusResetErrorButton', 'click', function (evt) {
           location.reload();
+        })
+        .delegate('.settingsLink', 'click', function (evt) {
+          evt.preventDefault();
+          dispatch.pub('openPrefs');
         })
         .delegate('nav .close', 'click', close);
 
