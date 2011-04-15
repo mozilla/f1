@@ -99,6 +99,11 @@ define(['dispatch'], function (dispatch) {
     }
   });
 
+  dispatch.sub('storeNotifyRemoveAll', function (data) {
+    // Reset the internal store
+    internalStore = {};
+  });
+
   function storage() {
     return store;
   }
