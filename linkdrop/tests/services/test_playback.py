@@ -3,9 +3,15 @@ import os
 import glob
 import httplib
 import httplib2
+import urllib
 import json
 import socket
+import email
+import difflib
+from urlparse import parse_qsl
 from pprint import pformat
+from nose.tools import eq_
+from nose import with_setup
 
 from linkdrop.tests import TestController
 from linkdrop.tests import url
@@ -13,8 +19,42 @@ from linkdrop.tests import url
 
 def assert_dicts_equal(got, expected):
     if got != expected:
-        raise AssertionError("\n%s\n!=\n%s" % (pformat(got),
-                                               pformat(expected)))
+        diff = "\n".join(difflib.unified_diff(pformat(expected).splitlines(),
+                                              pformat(got).splitlines()))
+        raise AssertionError("dictionaries are different\n%s" % (diff,))
+
+
+def assert_dicts_with_oauth_equal(got, expected):
+    # oauth params are a PITA for various reasons - the playback responses
+    # generally don't include them - but even if they did they would not
+    # match as the signature is based on the content which we have probably
+    # redacted.  So we just nuke all OAuth tokens from 'expected'
+    for k in expected.keys():
+        if k.startswith("oauth_"):
+            del expected[k]
+
+    if got != expected:
+        diff = "\n".join(difflib.unified_diff(pformat(expected).splitlines(),
+                                              pformat(got).splitlines()))
+        raise AssertionError("dictionaries are different\n%s" % (diff,))
+
+
+def assert_messages_equal(got, expected):
+    gotpl = got.get_payload(decode=True)
+    expectedpl = expected.get_payload(decode=True)
+    if isinstance(gotpl, list):
+        assert isinstance(expectedpl, list)
+        eq_(len(gotpl), len(expectedpl))
+        for got_elt, expected_elt in zip(gotpl, expectedpl):
+            assert_messages_equal(got_elt, expected_elt)
+    else:
+        eq_(got.get_content_type(), expected.get_content_type())
+        if got.get_content_type() == "application/x-www-form-urlencoded":
+            got_items = dict(parse_qsl(gotpl))
+            expected_items = dict(parse_qsl(expectedpl))
+            assert_dicts_with_oauth_equal(got_items, expected_items)
+        else:
+            eq_(gotpl, expectedpl)
 
 
 # Somewhat analogous to a protocap.ProtocolCapturingBase object - but
@@ -31,11 +71,49 @@ class ProtocolReplayer(object):
 
 class HttpReplayer(ProtocolReplayer):
     to_playback = []
+    def request(self, uri, method="GET", body=None, headers=None, **kw):
+        freq, fresp = self.to_playback.pop(0)
+        if freq is not None:
+            # We have an 'expected request' file - check it is what
+            # is actually being requested.
+            reqmethod, reqpath = freq.readline().strip().split(" ", 1)
+            eq_(method, reqmethod)
+            proto, rest = urllib.splittype(uri)
+            host, path = urllib.splithost(rest)
+            eq_(path, reqpath)
+            reqob = email.message_from_string(freq.read().rstrip())
+            headers = headers or {}
+            if method == "POST":
+                for n in headers.keys():
+                    if n.lower() == "content-type":
+                        break
+                else:
+                    headers['Content-Type'] = "application/x-www-form-urlencoded"
+            # We may wind up with the oauth stuff creating an 'Authorization'
+            # header as unicode.  Force all headers back to a string and if
+            # any blow up as being non-ascii, we have a deeper problem...
+            gotheadersstr = "\r\n".join(
+                    ["%s: %s" % (n, v.encode("ascii")) for n, v in headers.iteritems()])
+            bodystr = gotheadersstr + "\r\n" + (body or '')
+            gotob = email.message_from_string(bodystr)
+            if headers:
+                if 'content-type' in gotob:
+                    eq_(gotob.get_content_type(), reqob.get_content_type())
+                else:
+                    assert 'content-type' not in reqob
+                # only check the headers specified - additional headers
+                # may have been added by httplib but we can ignore them.
+                for hname, hval in headers.iteritems():
+                    if hname.lower() in ["content-length", "content-type",
+                                         "authorization"]:
+                        continue
+                    # otherwise the header must match exactly.    
+                    eq_(hval, reqob[hname])
+            # finally check the content (ie, the body) is as expected.
+            assert_messages_equal(gotob, reqob)
 
-    def request(self, *args, **kw):
-        fp = self.to_playback.pop(0)
         resp = httplib.HTTPResponse(socket.socket())
-        resp.fp = fp
+        resp.fp = fresp
         resp.begin()
         content = resp.read()
         return httplib2.Response(resp), content
@@ -180,7 +258,8 @@ class ServiceReplayTestCase(TestController):
                     del expected[top][subname]
         assert_dicts_equal(got, expected)
 
-    def getResponse(self, req_type, request):
+    def getResponse(self, canned, request):
+        req_type = canned.req_type
         if req_type == "send":
             response = self.app.post(url(controller='send', action='send'),
                                     params=request)
@@ -215,11 +294,27 @@ class FacebookReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
         if req_type == "send" or req_type == "contacts":
             return {'domain': 'facebook.com',
+                    'shareType': 'wall',
                     'account': ('{"oauth_token": "foo", '
                                 '"oauth_token_secret": "bar"}'),
                    }
         if req_type == "auth":
             return {'domain': 'facebook.com', 'username': 'foo',
+                    'userid': 'bar'}
+        raise AssertionError(req_type)
+
+
+class TwitterReplayTestCase(ServiceReplayTestCase):
+    def getDefaultRequest(self, req_type):
+        if req_type == "send" or req_type == "contacts":
+            account = {"oauth_token": "foo", "oauth_token_secret": "bar",
+                       "username": "mytwitterid"}
+            return {'domain': 'twitter.com',
+                    'shareType': 'public',
+                    'account': json.dumps(account),
+                   }
+        if req_type == "auth":
+            return {'domain': 'twitter.com', 'username': 'foo',
                     'userid': 'bar'}
         raise AssertionError(req_type)
 
@@ -277,6 +372,8 @@ def setupReplayers():
     import linkoauth.google_
     linkoauth.google_.SMTPRequestor = SmtpReplayer
     linkoauth.google_.OAuth2Requestor = HttpReplayer
+    import linkoauth.twitter_
+    linkoauth.twitter_.OAuth2Requestor = HttpReplayer
     import linkoauth.base
     linkoauth.base.HttpRequestor = HttpReplayer
     HttpReplayer.to_playback = []
@@ -295,6 +392,8 @@ def teardownReplayers():
     import linkoauth.google_
     linkoauth.google_.SMTPRequestor = linkoauth.google_.SMTPRequestorImpl
     linkoauth.google_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
+    import linkoauth.twitter_
+    linkoauth.twitter_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
     import linkoauth.base
     linkoauth.base.HttpRequestor = linkoauth.protocap.HttpRequestor
 
@@ -305,6 +404,8 @@ host_to_test = {
     'smtp.gmail.com': GoogleReplayTestCase,
     'mail.yahooapis.com': YahooReplayTestCase,
     'social.yahooapis.com': YahooReplayTestCase,
+    'api.twitter.com': TwitterReplayTestCase,
+    'twitter.com': TwitterReplayTestCase,
 }
 
 
@@ -316,11 +417,19 @@ def queueForReplay(canned):
         # http playbacks can have multiple responses due to redirections...
         i = 0
         while True:
+            fname = os.path.join(canned.path, "request-%d" % (i,))
+            try:
+                freq = open(fname)
+            except IOError:
+                freq = None
             fname = os.path.join(canned.path, "response-%d" % (i,))
             try:
-                HttpReplayer.to_playback.append(open(fname))
+                fresp = open(fname)
             except IOError:
+                fresp = None
+            if freq is None and fresp is None:
                 break
+            HttpReplayer.to_playback.append((freq, fresp))
             i += 1
     else:
         raise AssertionError(canned.protocol)
@@ -329,16 +438,28 @@ def queueForReplay(canned):
 def runOne(canned):
     testClass = host_to_test[canned.host]
     test = testClass()
-    setupReplayers()
+    queueForReplay(canned)
     try:
-        queueForReplay(canned)
+        with open(os.path.join(canned.path, "f1-request.json")) as f:
+            request = json.load(f)
+        # and the handling of 'account' totally sucks - it is a string...
+        request['account'] = json.dumps(request['account'])
+    except IOError:
         request = test.getDefaultRequest(canned.req_type)
-        response = test.getResponse(canned.req_type, request)
-        test.checkResponse(canned, response)
-    finally:
-        teardownReplayers()
+    response = test.getResponse(canned, request)
+    test.checkResponse(canned, response)
 
-
-def testAll():
-    for canned in genCanned():
-        yield runOne, canned
+# *sob* - this used to use a nose "test generator", but that technique
+# doesn't work well with discovery and only running one of the tests in
+# the corpus.
+# So we hack up the global namespace.  This allows you to say, eg,
+# % nosetests ... linkdrop/tests/services/test_playback.py:test_service_replay_http_www_google_com_auth_successful
+# to just run one specific test from the corpus.
+for canned in genCanned():
+    @with_setup(setupReplayers, teardownReplayers)
+    def decoratedRunOne(canned=canned):
+        runOne(canned)
+    tail = os.path.basename(canned.path).replace("-", "_").replace(".", "_")
+    name = "test_service_replay_" + tail
+    decoratedRunOne.__name__ = name
+    globals()[name] = decoratedRunOne

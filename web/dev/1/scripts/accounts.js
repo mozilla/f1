@@ -35,16 +35,26 @@ function (storage,   dispatch,   rdapi,   services) {
            (username && cache.username === username));
   }
 
+  function pubAccountsChanged() {
+    if (opener && !opener.closed) {
+      dispatch.pub('accountsChanged', null, opener);
+    }
+    dispatch.pub('accountsChanged');
+  }
+
   // Listen for chrome storage changes, and if it is for
   // serviceCache, translate that into a higher level message
   // understood by the web modules.
   dispatch.sub('storeNotifyChange', function (data) {
     if (data.key === 'serviceCache') {
-      if (opener && !opener.closed) {
-        dispatch.pub('accountsChanged', null, opener);
-      }
-      dispatch.pub('accountsChanged');
+      pubAccountsChanged();
     }
+  });
+
+  dispatch.sub('storeNotifyRemoveAll', function (data) {
+    // If the storage has all been removed, then need to update
+    // since the serviceCache was also removed.
+    pubAccountsChanged();
   });
 
   var store = storage();

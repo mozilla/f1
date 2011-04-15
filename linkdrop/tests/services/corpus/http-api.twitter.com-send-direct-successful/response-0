@@ -1,0 +1,101 @@
+HTTP/1.1 200 OK
+status: 200
+set-cookie: k=58.160.65.179.1302677273813408; path=/; expires=Wed, 20-Apr-11 06:47:53 GMT; domain=.twitter.com, guest_id=1234; path=/; expires=Fri, 13 May 2011 06:47:54 GMT, lang=en; path=/, _twitter_sess=session_value; domain=.twitter.com; path=/; HttpOnly
+expires: Tue, 31 Mar 1981 05:00:00 GMT
+vary: Accept-Encoding
+x-transaction-mask: a6183ffa5f8ca943ff1b53b5644ef114
+server: hi
+x-revision: DEV
+last-modified: Wed, 13 Apr 2011 06:47:54 GMT
+x-runtime: 0.08226
+pragma: no-cache
+cache-control: no-cache, no-store, must-revalidate, pre-check=0, post-check=0
+date: Wed, 13 Apr 2011 06:47:54 GMT
+content-type: application/json; charset=utf-8
+
+{
+    "text":"for a nerd http:\/\/bit.ly\/eT3aUn",
+    "sender":{
+        "is_translator":false,
+        "profile_background_image_url":"http:\/\/a3.twimg.com\/a\/1302639708\/images\/themes\/theme1\/bg.png",
+        "friends_count":1,
+        "url":null,
+        "screen_name":"mytwitterid",
+        "default_profile":true,
+        "listed_count":0,
+        "description":null,
+        "contributors_enabled":false,
+        "lang":"en",
+        "statuses_count":68,
+        "time_zone":"Melbourne",
+        "profile_text_color":"333333",
+        "location":null,
+        "profile_sidebar_fill_color":"DDEEF6",
+        "id_str":"111111111",
+        "profile_background_tile":false,
+        "favourites_count":0,
+        "default_profile_image":true,
+        "followers_count":1,
+        "verified":false,
+        "created_at":"Wed Apr 28 07:35:46 +0000 2010",
+        "profile_link_color":"0084B4",
+        "following":false,
+        "notifications":false,
+        "profile_sidebar_border_color":"C0DEED",
+        "protected":false,
+        "follow_request_sent":false,
+        "name":"my name",
+        "profile_use_background_image":true,
+        "profile_image_url":"http:\/\/a0.twimg.com\/sticky\/default_profile_images\/default_profile_3_normal.png",
+        "id":111111111,
+        "show_all_inline_media":false,
+        "geo_enabled":false,
+        "utc_offset":36000,
+        "profile_background_color":"C0DEED"
+    },
+    "id_str":"2802052289",
+    "created_at":"Wed Apr 13 06:47:54 +0000 2011",
+    "recipient_id":333333333,
+    "sender_screen_name":"mytwitterid",
+    "sender_id":111111111,
+    "recipient":{
+        "is_translator":false,
+        "profile_background_image_url":"http:\/\/a3.twimg.com\/a\/22222222\/images\/themes\/theme1\/bg.png",
+        "friends_count":138,
+        "url":"http:\/\/me.com",
+        "screen_name":"mytwitterfollower",
+        "default_profile":true,
+        "listed_count":21,
+        "description":"",
+        "contributors_enabled":false,
+        "lang":"en",
+        "statuses_count":172,
+        "time_zone":"Melbourne",
+        "profile_text_color":"333333",
+        "location":"Melbourne",
+        "profile_sidebar_fill_color":"DDEEF6",
+        "id_str":"333333333",
+        "profile_background_tile":false,
+        "favourites_count":0,
+        "default_profile_image":false,
+        "followers_count":207,
+        "verified":false,
+        "created_at":"Sat Feb 21 05:55:31 +0000 2009",
+        "profile_link_color":"0084B4",
+        "following":true,
+        "notifications":false,
+        "profile_sidebar_border_color":"C0DEED",
+        "protected":false,
+        "follow_request_sent":false,
+        "name":"My Follower",
+        "profile_use_background_image":true,
+        "profile_image_url":"http:\/\/a1.twimg.com\/profile_images\/444444\/mypic.png",
+        "id":333333333,
+        "show_all_inline_media":true,
+        "geo_enabled":false,
+        "utc_offset":36000,
+        "profile_background_color":"C0DEED"
+    },
+    "recipient_screen_name":"mytwitterfollower",
+    "id":2802052289
+}

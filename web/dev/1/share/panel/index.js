@@ -227,6 +227,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   function callSendApi() {
     rdapi('send', {
       type: 'POST',
+      domain: sendData.domain,
       data: sendData,
       success: function (json) {
         // {'message': u'Status is a duplicate.', 'provider': u'twitter.com'}
@@ -269,7 +270,9 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           //var headerError = xhr.getResponseHeader('X-Error');
           reAuth();
         } else if (xhr.status === 503) {
-          showStatus('statusServerBusy');
+          dispatch.pub('serverErrorPossibleRetry', {
+            xhr: xhr
+          });
         } else if (xhr.status === 0) {
           showStatus('statusServerError');
         } else {
@@ -514,6 +517,13 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       //Listen to sendMessage events from the AccountPanels
       dispatch.sub('sendMessage', function (data) {
         sendMessage(data);
+      });
+
+      // Listen for 503 errors, could be a retry call, but for
+      // now, just show server error until better feedback is
+      // worked out in https://bugzilla.mozilla.org/show_bug.cgi?id=642653
+      dispatch.sub('serverErrorPossibleRetry', function (data) {
+        showStatus('statusServerBusy');
       });
 
       bodyDom = $('body');

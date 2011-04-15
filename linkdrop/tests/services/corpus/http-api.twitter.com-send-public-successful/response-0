@@ -1,0 +1,74 @@
+HTTP/1.1 200 OK
+status: 200
+x-transaction: 1302661698-34591-4129
+set-cookie: k=58.160.65.179.1302661698023708; path=/; expires=Wed, 20-Apr-11 02:28:18 GMT; domain=.twitter.com, guest_id=11111; path=/; expires=Fri, 13 May 2011 02:28:18 GMT, lang=en; path=/, _twitter_sess=some_session_id; domain=.twitter.com; path=/; HttpOnly
+expires: Tue, 31 Mar 1981 05:00:00 GMT
+vary: Accept-Encoding
+x-transaction-mask: a6183ffa5f8ca943ff1b53b5644ef114
+server: hi
+x-revision: DEV
+last-modified: Wed, 13 Apr 2011 02:28:18 GMT
+x-runtime: 0.07570
+etag: "5336c4db5eafb055f00feaddf322ef2c"
+pragma: no-cache
+cache-control: no-cache, no-store, must-revalidate, pre-check=0, post-check=0
+date: Wed, 13 Apr 2011 02:28:18 GMT
+content-type: application/json; charset=utf-8
+
+{"text":"nerdy! http:\/\/bit.ly\/eT3aUn",
+ "truncated":false,
+ "place":null,
+ "favorited":false,
+ "id_str":"12345",
+ "coordinates":null,
+ "retweet_count":0,
+ "source":"\u003Ca href=\"http:\/\/linkdrop.mozillamessaging.com\" rel=\"nofollow\"\u003EMozilla Linkdrop\u003C\/a\u003E",
+ "in_reply_to_screen_name":null,
+ "in_reply_to_status_id_str":null,
+ "geo":null,
+ "in_reply_to_status_id":null,
+ "created_at":"Wed Apr 13 02:28:18 +0000 2011",
+ "contributors":null,
+ "retweeted":false,
+ "in_reply_to_user_id_str":null,
+ "user":{
+    "follow_request_sent":false,
+    "profile_background_image_url":"http:\/\/a3.twimg.com\/a\/999\/images\/themes\/theme1\/bg.png",
+    "url":null,
+    "screen_name":"twitterusername",
+    "description":null,
+    "show_all_inline_media":false,
+    "contributors_enabled":false,
+    "lang":"en",
+    "geo_enabled":false,
+    "time_zone":"Melbourne",
+    "profile_text_color":"333333",
+    "location":null,
+    "is_translator":false,
+    "profile_sidebar_fill_color":"DDEEF6",
+    "id_str":"99999",
+    "listed_count":0,
+    "profile_background_tile":false,
+    "favourites_count":0,
+    "statuses_count":67,
+    "friends_count":1,
+    "followers_count":0,
+    "verified":false,
+    "created_at":"Wed Apr 28 07:35:46 +0000 2010",
+    "profile_link_color":"0084B4",
+    "following":false,
+    "notifications":false,
+    "profile_sidebar_border_color":"C0DEED",
+    "protected":false,
+    "default_profile_image":true,
+    "name":"my name",
+    "profile_use_background_image":true,
+    "profile_image_url":"http:\/\/a0.twimg.com\/sticky\/default_profile_images\/default_profile_3_normal.png",
+    "id":99999,
+    "default_profile":true,
+    "utc_offset":36000,
+    "profile_background_color":"C0DEED"
+  },
+ "id":12345,
+ "in_reply_to_user_id":null
+}

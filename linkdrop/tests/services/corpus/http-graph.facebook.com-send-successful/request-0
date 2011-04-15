@@ -1,22 +1,18 @@
-POST /me/feed?access_token=12345678
-content-length: 750
-content-type: multipart/form-data; boundary=----------$_BOUNDARY_306303591940714334766775036708974167977_$
+POST /me/feed?access_token=foo
+content-length: 486
+content-type: multipart/form-data; boundary=----------$_BOUNDARY_44622151192664055966921585685697383826_$
 user-agent: Python-httplib2/$Rev$
 
-------------$_BOUNDARY_306303591940714334766775036708974167977_$
-Content-Disposition: form-data; name="picture"
-
-http://www.theregister.co.uk/Design/graphics/icons/vulture_black_60_trans.png
-------------$_BOUNDARY_306303591940714334766775036708974167977_$
+------------$_BOUNDARY_44622151192664055966921585685697383826_$
 Content-Disposition: form-data; name="message"
 
-test
-------------$_BOUNDARY_306303591940714334766775036708974167977_$
+to my wall
+------------$_BOUNDARY_44622151192664055966921585685697383826_$
 Content-Disposition: form-data; name="link"
 
-http://www.theregister.co.uk/2002/11/13/gates_gives_100m_to_fight/
-------------$_BOUNDARY_306303591940714334766775036708974167977_$
+http://slashdot.org/
+------------$_BOUNDARY_44622151192664055966921585685697383826_$
 Content-Disposition: form-data; name="name"
 
-Gates gives $100m to fight HIV, $421m to fight Linux • The Register
-------------$_BOUNDARY_306303591940714334766775036708974167977_$--
+Slashdot: News for nerds, stuff that matters
+------------$_BOUNDARY_44622151192664055966921585685697383826_$--

@@ -77,18 +77,16 @@ define(['jquery'], function ($) {
         topic: topic,
         data: data
       }),
-      i, otherWin, len = wins.length;
+      i, otherWin;
 
       // Notify primary target.
       win.postMessage(text, origin);
 
       // notify other windows too, can go away if settings work is done
       // in share panel.
-      if (len) {
-        for (i = 0; i < len; i++) {
-          otherWin = wins[i];
-
-          if (!otherWin || otherWin.closed) {
+      if (wins.length) {
+        for (i = 0; (otherWin = wins[i]); i++) {
+          if (otherWin.closed) {
             wins.splice(i, 1);
             i -= 1;
           } else {

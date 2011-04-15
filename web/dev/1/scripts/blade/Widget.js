@@ -71,8 +71,7 @@ function (require,   object,     fn,     jig,     module) {
                 }
             },
 
-            // poor man deferred thingy for now. Not very robust or resistant
-            // to tampering, but all the code is friendly here. Swap out
+            // poor man deferred thingy for now. May want to swap out
             // with a real promise implementation at some point.
             makeCreateCallback: function () {
                 var p = {
