@@ -1,4 +1,4 @@
-GET /1/statuses/followers.json?oauth_body_hash=the_body_hash&screen_name=mytwitterid&oauth_nonce=25327564&oauth_timestamp=1302673762&oauth_consumer_key=the_key&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&oauth_token=the_token&oauth_signature=the_sig%3D
+GET /1/statuses/followers.json?screen_name=mytwitterid
 accept-encoding: gzip, deflate
 user-agent: Python-httplib2/$Rev$
 

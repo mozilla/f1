@@ -7,6 +7,8 @@ import urllib
 import json
 import socket
 import email
+import difflib
+from urlparse import parse_qsl
 from pprint import pformat
 from nose.tools import eq_
 from nose import with_setup
@@ -17,20 +19,42 @@ from linkdrop.tests import url
 
 def assert_dicts_equal(got, expected):
     if got != expected:
-        raise AssertionError("\n%s\n!=\n%s" % (pformat(got),
-                                               pformat(expected)))
+        diff = "\n".join(difflib.unified_diff(pformat(expected).splitlines(),
+                                              pformat(got).splitlines()))
+        raise AssertionError("dictionaries are different\n%s" % (diff,))
 
 
+def assert_dicts_with_oauth_equal(got, expected):
+    # oauth params are a PITA for various reasons - the playback responses
+    # generally don't include them - but even if they did they would not
+    # match as the signature is based on the content which we have probably
+    # redacted.  So we just nuke all OAuth tokens from 'expected'
+    for k in expected.keys():
+        if k.startswith("oauth_"):
+            del expected[k]
 
-def assert_payloads_equal(got, expected):
-    if isinstance(got, list):
-        eq_(len(got), len(expected))
-        # TODO: make recursive?  I doubt we need that though...
-        for i, (got_elt, expected_elt) in enumerate(zip(got, expected)):
-            eq_(got_elt.as_string(), expected_elt.as_string())
+    if got != expected:
+        diff = "\n".join(difflib.unified_diff(pformat(expected).splitlines(),
+                                              pformat(got).splitlines()))
+        raise AssertionError("dictionaries are different\n%s" % (diff,))
+
+
+def assert_messages_equal(got, expected):
+    gotpl = got.get_payload(decode=True)
+    expectedpl = expected.get_payload(decode=True)
+    if isinstance(gotpl, list):
+        assert isinstance(expectedpl, list)
+        eq_(len(gotpl), len(expectedpl))
+        for got_elt, expected_elt in zip(gotpl, expectedpl):
+            assert_messages_equal(got_elt, expected_elt)
     else:
-        assert isinstance(expected, list)
-        eq_(got, expected)
+        eq_(got.get_content_type(), expected.get_content_type())
+        if got.get_content_type() == "application/x-www-form-urlencoded":
+            got_items = dict(parse_qsl(gotpl))
+            expected_items = dict(parse_qsl(expectedpl))
+            assert_dicts_with_oauth_equal(got_items, expected_items)
+        else:
+            eq_(gotpl, expectedpl)
 
 
 # Somewhat analogous to a protocap.ProtocolCapturingBase object - but
@@ -57,15 +81,22 @@ class HttpReplayer(ProtocolReplayer):
             proto, rest = urllib.splittype(uri)
             host, path = urllib.splithost(rest)
             eq_(path, reqpath)
-            reqob = email.message_from_file(freq)
-            if headers is not None:
-                gotheadersstr = "\r\n".join(
-                        ["%s: %s" % (n, v) for n, v in headers.iteritems()])
-                bodystr = gotheadersstr + "\r\n" + (body or '')
-                gotob = email.message_from_string(bodystr)
-            else:
-                gotob = None
-            if headers is not None:
+            reqob = email.message_from_string(freq.read().rstrip())
+            headers = headers or {}
+            if method == "POST":
+                for n in headers.keys():
+                    if n.lower() == "content-type":
+                        break
+                else:
+                    headers['Content-Type'] = "application/x-www-form-urlencoded"
+            # We may wind up with the oauth stuff creating an 'Authorization'
+            # header as unicode.  Force all headers back to a string and if
+            # any blow up as being non-ascii, we have a deeper problem...
+            gotheadersstr = "\r\n".join(
+                    ["%s: %s" % (n, v.encode("ascii")) for n, v in headers.iteritems()])
+            bodystr = gotheadersstr + "\r\n" + (body or '')
+            gotob = email.message_from_string(bodystr)
+            if headers:
                 if 'content-type' in gotob:
                     eq_(gotob.get_content_type(), reqob.get_content_type())
                 else:
@@ -73,12 +104,13 @@ class HttpReplayer(ProtocolReplayer):
                 # only check the headers specified - additional headers
                 # may have been added by httplib but we can ignore them.
                 for hname, hval in headers.iteritems():
-                    if hname.lower() in ["content-length", "content-type"]:
+                    if hname.lower() in ["content-length", "content-type",
+                                         "authorization"]:
                         continue
                     # otherwise the header must match exactly.    
                     eq_(hval, reqob[hname])
             # finally check the content (ie, the body) is as expected.
-            assert_payloads_equal(gotob.get_payload(), reqob.get_payload())
+            assert_messages_equal(gotob, reqob)
 
         resp = httplib.HTTPResponse(socket.socket())
         resp.fp = fresp
@@ -274,12 +306,14 @@ class FacebookReplayTestCase(ServiceReplayTestCase):
 
 class TwitterReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
-        if req_type=="send" or req_type=="contacts":
-            account = {"oauth_token": "foo", "oauth_token_secret": "bar"}
+        if req_type == "send" or req_type == "contacts":
+            account = {"oauth_token": "foo", "oauth_token_secret": "bar",
+                       "username": "mytwitterid"}
             return {'domain': 'twitter.com',
+                    'shareType': 'public',
                     'account': json.dumps(account),
                    }
-        if req_type=="auth":
+        if req_type == "auth":
             return {'domain': 'twitter.com', 'username': 'foo',
                     'userid': 'bar'}
         raise AssertionError(req_type)

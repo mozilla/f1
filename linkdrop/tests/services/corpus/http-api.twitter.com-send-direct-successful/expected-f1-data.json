@@ -85,8 +85,8 @@
         },
         "sender_id": 111111111,
         "sender_screen_name": "mytwitterid",
-        "shorturl": null,
+        "shorturl": "http://bit.ly/eT3aUn",
         "text": "for a nerd http://bit.ly/eT3aUn",
-        "to": null
+        "to": "123456"
     }
 }
