@@ -35,7 +35,6 @@ my %included = (
 );
 
 my %excluded = (
-  'linkoauth' => 1,
    #XXX: Not ready yet
   'pylons'    => 1,
 );
