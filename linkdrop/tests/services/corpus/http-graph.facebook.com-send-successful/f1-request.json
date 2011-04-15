@@ -1,0 +1,7 @@
+{"domain": "facebook.com",
+ "shareType": "wall",
+ "message": "to my wall",
+ "link": "http://slashdot.org/",
+ "title": "Slashdot: News for nerds, stuff that matters",
+ "account": {"oauth_token": "foo", "oauth_token_secret": "bar"}
+}

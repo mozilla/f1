@@ -1,0 +1,18 @@
+POST /197108586994419/feed?access_token=foo
+content-length: 490
+content-type: multipart/form-data; boundary=----------$_BOUNDARY_175686444534009779909065571888283846774_$
+user-agent: Python-httplib2/$Rev$
+
+------------$_BOUNDARY_175686444534009779909065571888283846774_$
+Content-Disposition: form-data; name="message"
+
+group test
+------------$_BOUNDARY_175686444534009779909065571888283846774_$
+Content-Disposition: form-data; name="link"
+
+http://slashdot.org/
+------------$_BOUNDARY_175686444534009779909065571888283846774_$
+Content-Disposition: form-data; name="name"
+
+Slashdot: News for nerds, stuff that matters
+------------$_BOUNDARY_175686444534009779909065571888283846774_$--
