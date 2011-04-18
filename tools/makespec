@@ -35,8 +35,6 @@ my %included = (
 );
 
 my %excluded = (
-   #XXX: Not ready yet
-  'pylons'    => 1,
 );
 
 foreach my $req (sort keys %requires) {
