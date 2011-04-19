@@ -1,4 +1,4 @@
-GET /1/statuses/followers.json?screen_name=mytwitterid
+GET /1/statuses/followers.json?screen_name=mytwitterid&cursor=-1
 accept-encoding: gzip, deflate
 user-agent: Python-httplib2/$Rev$
 
