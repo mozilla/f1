@@ -26,6 +26,15 @@
   document: false, setTimeout: false, localStorage: false, parent: false */
 "use strict";
 
+/*
+ Refactor cleanup:
+
+ * lastSelectionMatch
+ * oauth failure in addAccount.js
+
+*/
+
+
 // Allow tests to plug into the page by notify them if this is a test.
 if (location.hash === '#test') {
   parent.postMessage(JSON.stringify({topic: 'registerForTests'}),
@@ -39,19 +48,17 @@ require({
 });
 
 define([ "require", "jquery", "blade/object", "blade/fn", "rdapi", "oauth",
-        "blade/jig", "blade/url", "placeholder", "AutoComplete", "dispatch", "accounts",
-         "storage", "services", "widgets/PageInfo",
-         "widgets/DebugPanel", "widgets/AccountPanel", "dotCompare",
-         "jquery-ui-1.8.7.min", "jquery.textOverflow"],
+        "blade/jig", "blade/url", "placeholder", "dispatch", "accounts",
+         "storage", "services", "widgets/AccountPanel", "widgets/TabButton",
+         "widgets/AddAccount", "jquery-ui-1.8.7.min", "jquery.textOverflow"],
 function (require,   $,        object,         fn,         rdapi,   oauth,
-          jig,         url,        placeholder,   AutoComplete,   dispatch,   accounts,
-          storage,   services,   PageInfo,
-          DebugPanel,           AccountPanel,           dotCompare) {
+          jig,         url,        placeholder,   dispatch,   accounts,
+          storage,   services,   AccountPanel,           TabButton,
+          AddAccount) {
 
   var actions = services.domains,
-    options, bodyDom, pageInfo, sendData, showNew,
     onFirstShareState = null,
-    accountPanels = [],
+    accountPanels = {},
     store = storage(),
     SHARE_DONE = 0,
     SHARE_START = 1,
@@ -65,7 +72,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     // refresh the UI, record a timestamp for it.
     refreshStamp = (new Date()).getTime(),
     //1 day.
-    refreshInterval = 1 * 24 * 60 * 60 * 1000;
+    refreshInterval = 1 * 24 * 60 * 60 * 1000,
+
+    options, bodyDom, sendData, showNew, tabButtonsDom,
+    servicePanelsDom;
 
   function checkBase64Preview() {
     //Ask extension to generate base64 data if none available.
@@ -216,9 +226,11 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   function reAuth() {
     //Save form state so their message can be recovered after
     //binding accounts.
-    accountPanels.forEach(function (panel) {
-      panel.saveData();
-    });
+    for (var prop in accountPanels) {
+      if (accountPanels.hasOwnProperty(prop)) {
+        accountPanels[prop].saveData();
+      }
+    }
     showStatus('statusAuth');
   }
 
@@ -231,8 +243,9 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
       data: sendData,
       success: function (json) {
         // {'message': u'Status is a duplicate.', 'provider': u'twitter.com'}
+        var code, prop;
         if (json.error && json.error.status) {
-          var code = json.error.status;
+          code = json.error.status;
           // XXX need to find out what error codes everyone uses
           // oauth+smtp will return a 535 on authentication failure
           if (code ===  401 || code === 535) {
@@ -250,9 +263,11 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           store.set('lastSelection', actions[sendData.domain].type);
           showStatusShared();
           //Be sure to delete sessionRestore data
-          accountPanels.forEach(function (panel) {
-            panel.clearSavedData();
-          });
+          for (prop in accountPanels) {
+            if (accountPanels.hasOwnProperty(prop)) {
+              accountPanels[prop].clearSavedData();
+            }
+          }
 
           // notify on successful send for components that want to do
           // work, like save any new contacts.
@@ -346,9 +361,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
    */
   function displayAccounts(accounts, panelOverlayMap) {
     var lastSelectionMatch = 0,
-        accountsDom = $('#accounts'),
+        tabsDom = $('#tabs'),
+        tabContentDom = $('#tabContent'),
+        tabFragment = document.createDocumentFragment(),
         fragment = document.createDocumentFragment(),
-        debugPanel,
         i = 0;
 
     $('#shareui').removeClass('hidden');
@@ -371,13 +387,28 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
             return;
           }
 
-          // add the account panels now
-          accountsDom.append(fragment);
+          var addButton, addAccountWidget;
 
-          //Add debug panel if it is allowed.
-          if (options.prefs.system === 'dev') {
-            debugPanel = new DebugPanel({}, accountsDom[0]);
-          }
+          // Add tab button for add account
+          addButton = new TabButton({
+            target: 'addAccount',
+            title: 'Add Account',
+            name: '+'
+          }, tabFragment);
+
+          // Add the AddAccount UI to the DOM/tab list.
+          addAccountWidget = new AddAccount({
+            id: 'addAccount'
+          }, fragment);
+
+          // add the tabs and tab contents now
+          tabsDom.append(tabFragment);
+          tabContentDom.append(fragment);
+
+
+          // Get a handle on the DOM elements used for tab selection.
+          tabButtonsDom = $('.widgets-TabButton');
+          servicePanelsDom = $('.widgets-AccountPanel');
 
           checkBase64Preview();
 
@@ -388,7 +419,9 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           }
 
           // which domain was last active?
-          $("#accounts").accordion({ active: lastSelectionMatch });
+          // TODO in new tabs world.
+          //$("#accounts").accordion({ active: lastSelectionMatch });
+          tabButtonsDom.eq(0).click();
 
           //Reset the just added state now that accounts have been configured one time.
           if (accountAdded) {
@@ -421,23 +454,27 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
             data = actions[domain];
             data.domain = domain;
 
-            // Get the contructor function for the panel.
-            PanelCtor = require(panelOverlayMap[domain] || 'widgets/AccountPanel');
+            if (accountPanels[domain]) {
+              accountPanels[domain].addAccount(account);
+            } else {
+              // Get the contructor function for the panel.
+              PanelCtor = require(panelOverlayMap[domain] || 'widgets/AccountPanel');
 
-            accountPanel = new PanelCtor({
-              options: options,
-              account: account,
-              svc: data
-            }, fragment);
+              accountPanel = new PanelCtor({
+                options: options,
+                accounts: [account],
+                svc: data
+              }, fragment);
 
-            // if an async creation, then wait until all are created before
-            // proceeding with UI construction.
-            if (accountPanel.asyncCreate) {
-              asyncCount += 1;
-              accountPanel.asyncCreate.then(finishCreate);
+              // if an async creation, then wait until all are created before
+              // proceeding with UI construction.
+              if (accountPanel.asyncCreate) {
+                asyncCount += 1;
+                accountPanel.asyncCreate.then(finishCreate);
+              }
+
+              accountPanels[domain] = accountPanel;
             }
-
-            accountPanels.push(accountPanel);
           }
 
           i++;
@@ -462,35 +499,32 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         //when requirejs is updated to 0.23.0 or later.
         processedDomains = {};
 
-    if ((accounts && accounts.length)) {
-      //Collect any UI overrides used for AccountPanel based on the services
-      //the user has configured.
-      accounts.forEach(function (account) {
-        // protect against old style account data
-        if (typeof(account.profile) === 'undefined') {
-          return;
-        }
+    accounts = accounts || [];
 
-        var domain = account.profile.accounts[0].domain,
-            overlays = actions[domain].overlays,
-            overlay = overlays && overlays['widgets/AccountPanel'];
-        if (overlay && !processedDomains[domain]) {
-          panelOverlays.push(overlay);
-          panelOverlayMap[domain] = overlay;
-          processedDomains[domain] = true;
-        }
-      });
-
-      if (panelOverlays.length) {
-        require(panelOverlays, function () {
-          displayAccounts(accounts, panelOverlayMap);
-        });
-      } else {
-        displayAccounts(accounts, panelOverlayMap);
+    //Collect any UI overrides used for AccountPanel based on the services
+    //the user has configured.
+    accounts.forEach(function (account) {
+      // protect against old style account data
+      if (typeof(account.profile) === 'undefined') {
+        return;
       }
+
+      var domain = account.profile.accounts[0].domain,
+          overlays = actions[domain].overlays,
+          overlay = overlays && overlays['widgets/AccountPanel'];
+      if (overlay && !processedDomains[domain]) {
+        panelOverlays.push(overlay);
+        panelOverlayMap[domain] = overlay;
+        processedDomains[domain] = true;
+      }
+    });
+
+    if (panelOverlays.length) {
+      require(panelOverlays, function () {
+        displayAccounts(accounts, panelOverlayMap);
+      });
     } else {
-      showStatus('statusSettings');
-      dispatch.pub('sizeToContent');
+      displayAccounts(accounts, panelOverlayMap);
     }
 
   }
@@ -528,6 +562,19 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
       bodyDom = $('body');
       bodyDom
+        .delegate('.widgets-TabButton', 'click', function (evt) {
+          evt.preventDefault();
+
+          //Switch Tabs
+          var node = evt.target,
+              target = node.href.split('#')[1];
+
+          tabButtonsDom.removeClass('selected');
+          $(node).addClass('selected');
+
+          servicePanelsDom.addClass('hidden');
+          $('#' + target).removeClass('hidden');
+        })
         .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
           cancelStatus();
         })
@@ -567,11 +614,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         showStatus('statusEnableLocalStorage');
         return;
       }
-
-      //Show the page info at the top.
-      pageInfo = new PageInfo({
-        options: options
-      }, $('.sharebox')[0], 'prepend');
 
       //Fetch the accounts.
       accounts(

@@ -22,7 +22,8 @@
  * */
 
 /*jslint indent: 2 */
-/*global define: false, window: false, console: false */
+/*global define: false, window: false, console: false, localStorage: false,
+  location: true */
 "use strict";
 
 define(['jquery', 'dispatch'], function ($, dispatch) {
@@ -102,6 +103,14 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
         });
       },
 
+      sizeToContent: function () {
+        var rect = testWindow.document.documentElement.getBoundingClientRect(),
+            iframe = $('#testFrame')[0];
+
+        iframe.style.width = rect.width + 'px';
+        iframe.style.height = rect.height + 'px';
+      },
+
       storeGet: function (key) {
         var value = dataStore[key];
         //JSON wants null.
@@ -131,15 +140,14 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
           value: null
         });
       }
-    },
-    prop;
+    };
 
     // register all events.
     testWindow.addEventListener('message', function (evt) {
       if (evt.origin === origin) {
         var message;
         try {
-          var message = JSON.parse(evt.data);
+          message = JSON.parse(evt.data);
         } catch (e) {
           console.error('Could not JSON parse: ' + evt.data);
         }

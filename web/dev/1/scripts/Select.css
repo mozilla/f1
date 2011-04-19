@@ -13,6 +13,7 @@
   height: 24px;
   cursor: pointer;
   background-color: white;
+  text-align: left;
 }
 
 .Select.open {

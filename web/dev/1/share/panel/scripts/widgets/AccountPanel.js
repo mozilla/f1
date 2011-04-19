@@ -77,8 +77,12 @@ function (object,         Widget,         $,        template,
         shareTypeLabel: 'send to'
       },
 
+      addAccount: function (account) {
+        this.accounts.push(account);
+      },
+
       onCreate: function (onAsynCreateDone) {
-        var profile = this.account.profile,
+        var profile = this.accounts[0].profile,
             name = profile.displayName,
             userName,
             onFinishCreate = this.makeCreateCallback();
