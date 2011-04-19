@@ -26,6 +26,8 @@ COVERAGE := coverage
 PYLINT = $(BIN_DIR)/pylint
 PKGS = linkdrop
 
+GIT_DESCRIBE := `git describe  | cut -d- -f2-3`
+
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
 endif
@@ -111,7 +113,7 @@ rpm:	f1.spec
 	$(PYTHON) setup.py bdist_rpm
 
 f1.spec: f1.spec.in Makefile tools/makespec
-	tools/makespec $(version)$(tag) linkdrop.egg-info/requires.txt < f1.spec.in > f1.spec
+	tools/makespec $(version)$(tag) linkdrop.egg-info/requires.txt $(GIT_DESCRIBE) < f1.spec.in > f1.spec
 
 build:
 	$(VIRTUALENV) --no-site-packages --distribute .
