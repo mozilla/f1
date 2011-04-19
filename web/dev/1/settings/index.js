@@ -26,12 +26,6 @@
   opener: false, setTimeout: false, setInterval: false, document: false */
 "use strict";
 
-// Allow tests to plug into the page by notify them if this is a test.
-if (location.hash === '#test') {
-  parent.postMessage(JSON.stringify({topic: 'registerForTests'}),
-                     location.protocol + "//" + location.host);
-}
-
 define([ "require", "jquery", "blade/fn", "rdapi", "oauth", "blade/jig",
          "dispatch", "storage", "accounts", "blade/url",
          "services", "placeholder", "jquery.textOverflow"],

@@ -32,11 +32,6 @@ function (object,         AccountPanel,     $) {
    */
   return object(AccountPanel, null, function (parent) {
     return {
-      onCreate: function () {
-        //Call Parent logic
-        parent(this, "onCreate", arguments);
-        this.strings.shareTypeLabel = 'visible to';
-      },
       onRender: function () {
         parent(this, "onRender", arguments);
         //Add styling to last item in "visible to" dropdown

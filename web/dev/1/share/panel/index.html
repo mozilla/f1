@@ -3,7 +3,26 @@
 <head>
     <title>Share</title>
     <link rel="stylesheet" type="text/css" href="/dev/1/share/panel/style.css">
-    <script data-main="/dev/1/share/panel/index.js" src="/dev/1/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+    <script src="/dev/1/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+    <script>
+      require({
+        baseUrl: '/dev/1/scripts',
+        paths: {
+          widgets: '../share/panel/scripts/widgets'
+        }
+      });
+
+      // Allow tests to plug into the page by notify them if this is a test.
+      if (location.hash === '#test') {
+        parent.postMessage(JSON.stringify({topic: 'registerForTests'}),
+                           location.protocol + "//" + location.host);
+
+        require({
+          priority: ['fakeStorage']
+        });
+      }
+      require(['/dev/1/share/panel/index.js']);
+    </script>
 </head>
 <body>
 

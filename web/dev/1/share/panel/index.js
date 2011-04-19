@@ -34,19 +34,6 @@
 
 */
 
-
-// Allow tests to plug into the page by notify them if this is a test.
-if (location.hash === '#test') {
-  parent.postMessage(JSON.stringify({topic: 'registerForTests'}),
-                     location.protocol + "//" + location.host);
-}
-
-require({
-  paths: {
-    widgets: '../share/panel/scripts/widgets'
-  }
-});
-
 define([ "require", "jquery", "blade/object", "blade/fn", "rdapi", "oauth",
         "blade/jig", "blade/url", "placeholder", "dispatch", "accounts",
          "storage", "services", "widgets/AccountPanel", "widgets/TabButton",
@@ -443,11 +430,12 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           }
 
           var domain = account.profile.accounts[0].domain,
+              type = actions[domain].type,
               data, PanelCtor;
 
           if (domain && actions[domain]) {
             //Make sure to see if there is a match for last selection
-            if (actions[domain].type === lastSelection) {
+            if (type === lastSelection) {
               lastSelectionMatch = i;
             }
 
@@ -457,6 +445,14 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
             if (accountPanels[domain]) {
               accountPanels[domain].addAccount(account);
             } else {
+
+              // Add a tab button for the service.
+              tabsDom.append(new TabButton({
+                target: type,
+                type: type,
+                title: actions[domain].name
+              }, tabFragment));
+
               // Get the contructor function for the panel.
               PanelCtor = require(panelOverlayMap[domain] || 'widgets/AccountPanel');
 

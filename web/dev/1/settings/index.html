@@ -9,7 +9,24 @@
   <link rel="dns-prefetch" href="https://www.google.com">
   <link rel="dns-prefetch" href="https://twitter.com">
 
-  <script data-main="/dev/1/settings/index.js" src="/dev/1/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+  <script src="/dev/1/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+  <script>
+    require({
+      baseUrl: '/dev/1/scripts'
+    });
+
+    // Allow tests to plug into the page by notify them if this is a test.
+    if (location.hash === '#test') {
+      parent.postMessage(JSON.stringify({topic: 'registerForTests'}),
+                         location.protocol + "//" + location.host);
+
+      require({
+        priority: ['fakeStorage']
+      });
+    }
+    require(['/dev/1/settings/index.js']);
+
+  </script>
 </head>
 <body>
 

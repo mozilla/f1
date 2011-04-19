@@ -42,10 +42,6 @@ function (object,         Widget,         $,        template,
       .delegate('.' + className + ' form.messageForm', 'submit', function (evt) {
         Widget.closest(module.id, evt, 'onSubmit');
       })
-      .delegate('.' + className + ' .shareType2', 'click', function (evt) {
-        Widget.closest(module.id, evt, 'selectSecondShareType');
-        evt.preventDefault();
-      })
       .delegate('.' + className + ' [name="to"]', 'blur', function (evt) {
         Widget.closest(module.id, evt, 'validateTo');
       });
@@ -73,19 +69,14 @@ function (object,         Widget,         $,        template,
       // The module name for the Contacts module
       contactsName: 'Contacts',
 
-      strings: {
-        shareTypeLabel: 'send to'
-      },
-
       addAccount: function (account) {
         this.accounts.push(account);
       },
 
       onCreate: function (onAsynCreateDone) {
         var profile = this.accounts[0].profile,
-            name = profile.displayName,
-            userName,
-            onFinishCreate = this.makeCreateCallback();
+            onFinishCreate = this.makeCreateCallback(),
+            name;
 
         //Set up the svcAccount property
         this.svcAccount = profile.accounts[0];
@@ -118,9 +109,9 @@ function (object,         Widget,         $,        template,
           //Set up nicer display name
           // XXX for email services, we should show the email account, but we
           // cannot rely on userid being a 'pretty' name we can display
-          userName = this.svcAccount.username;
-          if (userName && userName !== name) {
-            name = name + " (" + userName + ")";
+          name = this.svcAccount.username;
+          if (!name) {
+            name = profile.displayName;
           }
 
           this.displayName = name;
@@ -138,7 +129,7 @@ function (object,         Widget,         $,        template,
 
           //Listen for updates to base64Preview
           this.base64PreviewSub = dispatch.sub('base64Preview', fn.bind(this, function (dataUrl) {
-            $('[name="picture_base64"]', this.bodyNode).val(jigFuncs.rawBase64(dataUrl));
+            $('[name="picture_base64"]', this.node).val(jigFuncs.rawBase64(dataUrl));
           }));
 
           // listen for successful send, and if so, update contacts list, if
@@ -172,20 +163,11 @@ function (object,         Widget,         $,        template,
       },
 
       onRender: function () {
-        var i, tempNode, acNode;
-
-        //Get a handle on the accordion body
-        for (i = 0; (tempNode = this.node.childNodes[i]); i++) {
-          if (tempNode.nodeType === 1 &&
-              tempNode.className.indexOf(this.className) !== -1) {
-            this.bodyNode = tempNode;
-            break;
-          }
-        }
+        var acNode;
 
         // Hold onto nodes that are used frequently
-        this.toDom = $('[name="to"]', this.bodyNode);
-        this.shareButtonNode = $('button.share', this.bodyNode)[0];
+        this.toDom = $('[name="to"]', this.node);
+        this.shareButtonNode = $('button.share', this.node)[0];
 
         if (this.svc.shareTypes.length > 1) {
           //Insert a Select widget if it is desired.
@@ -198,7 +180,7 @@ function (object,         Widget,         $,        template,
                         value: item.type
                       };
                     })
-          }, $('.shareTypeSelectSection', this.bodyNode)[0]);
+          }, $('.shareTypeSelectSection', this.node)[0]);
 
           // Listen to changes in the Select
           this.selectChangeFunc = fn.bind(this, function (evt) {
@@ -215,7 +197,7 @@ function (object,         Widget,         $,        template,
         if (this.svc.textLimit) {
           this.startCounter();
         }
-        placeholder(this.bodyNode);
+        placeholder(this.node);
 
         // Set up autocomplete and contacts used for autocomplete.
         // Since contacts can have a different
@@ -257,7 +239,7 @@ function (object,         Widget,         $,        template,
         store.remove(this.storeId);
 
         //Also clear up the form data.
-        var root = $(this.bodyNode);
+        var root = $(this.node);
         this.toDom.val('');
         root.find('[name="subject"]').val('');
         root.find('[name="message"]').val('');
@@ -265,7 +247,7 @@ function (object,         Widget,         $,        template,
           root.find('.counter').html('');
         }
 
-        placeholder(this.bodyNode);
+        placeholder(this.node);
       },
 
       saveData: function () {
@@ -318,8 +300,8 @@ function (object,         Widget,         $,        template,
       startCounter: function () {
         //Set up text counter
         if (!this.counter) {
-          this.counter = new TextCounter($('textarea.message', this.bodyNode),
-                                         $('.counter', this.bodyNode),
+          this.counter = new TextCounter($('textarea.message', this.node),
+                                         $('.counter', this.node),
                                          this.svc.textLimit - this.urlSize);
         }
         this.updateCounter();
@@ -341,19 +323,19 @@ function (object,         Widget,         $,        template,
        * to show.
        */
       showStatus: function (className) {
-        $('.status.' + className, this.bodyNode).show();
+        $('.status.' + className, this.node).show();
       },
 
       /**
        * Hides all status messages that show up near the share button.
        */
       hideStatus: function () {
-        $('.status', this.bodyNode).hide();
+        $('.status', this.node).hide();
       },
 
       //The page options have changed, update the relevant HTML bits.
       optionsChanged: function () {
-        var root = $(this.bodyNode),
+        var root = $(this.node),
             opts = this.options,
             formLink = jigFuncs.link(opts),
             restoredData = this.memStore[formLink],
@@ -413,11 +395,11 @@ function (object,         Widget,         $,        template,
         }
 
         //Kick the placeholder logic to recompute, to avoid gray text issues.
-        placeholder(this.bodyNode);
+        placeholder(this.node);
       },
 
       getFormData: function () {
-        var dom = $('form', this.bodyNode),
+        var dom = $('form', this.node),
             data = {};
         //Make sure all form elements are trimmed and username exists.
         //Then collect the form values into the data object.
@@ -452,16 +434,12 @@ function (object,         Widget,         $,        template,
         this.changeShareType(this.svc.shareTypes[0]);
       },
 
-      selectSecondShareType: function () {
-        this.select.selectIndex(1);
-        this.changeShareType(this.svc.shareTypes[1]);
-      },
-
       changeShareType: function (shareType) {
-        var toSectionDom = $('.toSection', this.bodyNode),
-            shareTypeSectionDom = $('.shareTypeSelectSection', this.bodyNode),
-            shareType2Dom = $('.shareType2', this.bodyNode),
-            toInputDom = $('.toSection input', this.bodyNode);
+        var toSectionDom = $('.toSection', this.node),
+            shareTypeDom = $('.shareTypeSection', this.node),
+            actionsDom = $('.accountActions', this.node),
+            shareTypeSelectDom = $('.shareTypeSelectSection', this.node),
+            toInputDom = $('.toSection input', this.node);
 
         //If there is a special to value (like linkedin my connections), drop it in
         toInputDom.val(shareType.specialTo ? shareType.specialTo : '');
@@ -469,13 +447,15 @@ function (object,         Widget,         $,        template,
 
         if (shareType.showTo) {
           toSectionDom.removeClass('hiddenImportant');
-          shareTypeSectionDom.addClass('fixedSize');
-          shareType2Dom.addClass('hiddenImportant');
+          shareTypeDom.addClass('wide');
+          actionsDom.addClass('wide');
+          shareTypeSelectDom.addClass('fixedSize');
           toInputDom.focus();
         } else {
           toSectionDom.addClass('hiddenImportant');
-          shareTypeSectionDom.removeClass('fixedSize');
-          shareType2Dom.removeClass('hiddenImportant');
+          actionsDom.removeClass('wide');
+          shareTypeDom.removeClass('wide');
+          shareTypeSelectDom.removeClass('fixedSize');
         }
       },
 
@@ -486,6 +466,8 @@ function (object,         Widget,         $,        template,
         //Clear up any error status, make sure share button
         //is enabled.
         this.resetError();
+
+        dispatch.pub('sizeToContent');
       },
 
       onSubmit: function (evt) {

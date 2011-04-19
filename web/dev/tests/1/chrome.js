@@ -83,68 +83,12 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
   sub('registerForTests', function () {
 
     var subs = {
-      panelReady: function () {
-        targetPub('shareState', {
-          status: 0,
-          open: true,
-          options: {
-            version: '0.7.2',
-            title: 'Firefox web browser',
-            description: 'All about firefox',
-            medium: null,
-            source: null,
-            url: 'http://www.mozilla.com/en-US/firefox/fx/',
-            canonicalUrl: null,
-            shortUrl: null,
-            previews: [{
-              http_url: 'http://mozcom-cdn.mozilla.net/img/firefox-100.jpg'
-            }],
-            siteName: '',
-            prefs: {
-              system: 'dev',
-              bookmarking: true,
-              use_accel_key: true
-            }
-          }
-        });
-      },
-
       sizeToContent: function () {
         var rect = testWindow.document.documentElement.getBoundingClientRect(),
             iframe = $('#testFrame')[0];
 
         iframe.style.width = rect.width + 'px';
         iframe.style.height = rect.height + 'px';
-      },
-
-      storeGet: function (key) {
-        var value = dataStore[key];
-        //JSON wants null.
-        if (value === undefined) {
-          value = null;
-        }
-        targetPub('storeGetReturn', {
-          key: key,
-          value: value
-        });
-      },
-
-      storeSet: function (data) {
-        dataStore[data.key] = data.value;
-        chrome.saveStore();
-        targetPub('storeNotifyChange', {
-          key: data.key,
-          value: data.value
-        });
-      },
-
-      storeRemove: function (key) {
-        delete dataStore[key];
-        chrome.saveStore();
-        targetPub('storeNotifyChange', {
-          key: key,
-          value: null
-        });
       }
     };
 

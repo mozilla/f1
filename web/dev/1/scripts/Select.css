@@ -14,6 +14,7 @@
   cursor: pointer;
   background-color: white;
   text-align: left;
+  border-radius: 4px;
 }
 
 .Select.open {

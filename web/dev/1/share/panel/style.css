@@ -155,10 +155,10 @@ body {
   font-size: 11px;
   line-height: 110%;
   overflow: hidden;
-  max-width: 430px;
+  min-width: 425px;
   width: 100%;
   height: 100%;
-  min-height: 155px;
+  min-height: 120px;
   background-color: #505050;
 }
 
@@ -198,9 +198,9 @@ button {
   cursor: pointer;
   padding: 0 10px;
 
-  -webkit-border-radius: 2px;
-     -moz-border-radius: 2px;
-          border-radius: 2px;
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
 
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #fafafa), color-stop(100%, #ddd));
   background-image: -moz-linear-gradient(center top , #fafafa 0%, #ddd 100%);
@@ -233,6 +233,7 @@ h3 {
   display: block;
   width: 24px;
   height: 24px;
+  border: 1px solid transparent;
   font-size: 20px;
   line-height: 18px;
   text-decoration: none;
@@ -270,56 +271,8 @@ h3 {
     generic styles for account panels
 */
 
-.ui-accordion-header {
-  color: #535F6D;
-  display: block;
-  border-width: 1px 0;
-  border-color: #a6afb6;
-  border-style: solid;
-  margin-top: -1px;
-  outline: none;
-  padding: 10px;
-  cursor: pointer;
-  width: 100%;
-
-  -moz-user-select: none;
-
-  background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #d4dde5), color-stop(100%, #c6d1da));
-  background-image: -moz-linear-gradient(top, #d4dde5 0%, #c6d1da 100%);
-}
-
-.ui-accordion-header.ui-state-active {
-  background-image: none;
-  border-bottom: 1px solid transparent;
-  background-color: #E9EEF2;
-}
-
-.ui-accordion-content {
-  background-color: #e9eef2;
-}
-
 .share {
   float: right;
-}
-
-img.avatar {
-  border: 1px solid #FFFFFF;
-  height: 23px;
-  margin: 2px 10px 0 0;
-  width: 23px;
-
-  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
-     -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
-          box-shadow: 0 1px 1px rgba(0, 0, 0, 0.25);
-}
-
-.shareTypeSection {
-  padding: 2px 0 5px;
-  height: 52px;
-}
-
-.widgets-AccountPanel .addressing {
-  position: relative;
 }
 
 .hidden {
@@ -350,176 +303,161 @@ span.icon {
 }
 
 
+.icon {
+  background-repeat: no-repeat;
+}
 
-span.icon.settings {
+.icon.settings {
   background-image: url("/share/i/sprite.png");
   background-position: center 4px;
 }
 
-span.icon.twitter {
+.icon.twitter {
   background-image: url("/share/i/sprite.png");
-  background-position: center -37px;
+  background-position: center -33px;
 }
 
-span.icon.facebook {
+.icon.facebook {
   background-image: url("/share/i/sprite.png");
   background-position: center -70px;
 }
 
-span.icon.gmail {
+.icon.gmail {
   background-image: url("/share/i/sprite.png");
-  background-position: center -103px;
+  background-position: center -99px;
 }
 
-span.icon.yahoo {
+.icon.yahoo {
   background-image: url("/share/i/sprite.png");
   background-position: center -134px;
 }
 
-span.icon.googleapps {
+.icon.googleapps {
   background-image: url("/share/i/sprite.png");
   background-position: center -166px;
 }
 
-span.icon.linkedin {
+.icon.linkedin {
   background-image: url("/share/i/LinkedIn_Logo16px.png");
   background-position: center;
 }
 
-span.icon.debug {
+.icon.debug {
   background-image: url("/share/i/bug_b.png");
   background-position: center;
 }
 
-
-.ui-accordion-header span.arrow {
-  background-position: center -102px;
-}
-
-.ui-accordion-header.ui-state-active span.arrow {
-  background-position: center -120px;
-}
-
-.ui-accordion-header:not(.ui-state-active) .username {
-  opacity: 0.5;
-}
-
-.ui-accordion-header.ui-state-hover .username  {
-  opacity: 1.0;
-}
-
-.ui-accordion-content .padding {
-  padding: 0 10px 10px;
-}
-
-.ui-accordion-content textarea,
-.ui-accordion-content input[type="text"] {
-  width: 100%;
-  font-family: "Lucida Grande", Verdana, Sans-serif;
-  font-size: 11px;
-  padding: 2px;
-  margin: 2px 0;
-  border-width: 1px;
-  border-style: solid;
-  border-color: #A6AFB6;
-
-  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;
-     -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;
-          box-shadow: 0 1px 1px rgba(0,0,0,0.15) inset;
-}
-
-.placeholder {
-  color: #aaa;
-}
-
-.ui-accordion-content textarea:focus,
-.ui-accordion-content input[type="text"]:focus {
-  outline: none;
-
-  -webkit-box-shadow: 0 0 0 2px #C2ECFF inset;
-     -moz-box-shadow: 0 0 0 2px #C2ECFF inset;
-          box-shadow: 0 0 0 2px #C2ECFF inset;
-}
-
-button:focus {
-  outline: 0;
-}
-
-.account textarea {
-  width: 100%;
-  height: 80px;
-}
-
-.ui-accordion-content input[type="text"] {
-  height: 24px;
-}
-
-.ui-accordion-content .accountActions {
-  width: 100%;
-  margin: 8px 0 0 0;
-}
-
-.ui-accordion-content span.count {
-  line-height: 24px;
-  color: #535F6D;
-}
-.ui-accordion-content div.counter {
-  float: left;
-  line-height: 24px;
-  color: #535F6D;
-}
-
-.ui-accordion-content div.counter.TextCountOver {
-  color: #880000
-}
-
-.ui-accordion-content label {
-  display: block;
-  margin: 0 0 5px 0;
-}
-
 /* Generic AccountPanel styles */
 
-.shareTypeSection label {
-    color: #535F6D;
+.widgets-AccountPanel {
+  margin: 14px;
+}
+
+.widgets-AccountPanel .user {
+  width: 60px;
+  color: #e2e2e2;
+  text-align: center;
+}
+
+.widgets-AccountPanel .username {
+  display: block;
+}
+
+img.avatar {
+  border: 1px solid #383838;
+  height: 48px;
+  width: 48px;
+
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+}
+
+.widgets-AccountPanel .addressing {
+  width: 300px;
+  position: relative;
+  padding-left: 8px;
+}
+
+.widgets-AccountPanel textarea.message {
+  width: 100%;
+  height: 68px;
+  margin: 0 0 4px 0;
+  resize: none;
+}
+
+.widgets-AccountPanel .shareTypeSection {
+  float: left;
+  width: 100px;
+}
+
+.widgets-AccountPanel .shareTypeSection.wide {
+  float: none;
+  width: 100%;
 }
 
 .shareTypeSelectSection.fixedSize {
-    width: 100px;
+  width: 100px;
 }
 
 .shareTypeSelectSection.fixedSize select {
-    width: 100px;
-    margin: 2px 0 0 0;
+  width: 100px;
+  margin: 2px 0 0 0;
 }
 
 .toSection {
-    padding-left: 10px;
+  width: 150px;
+  padding-left: 10px;
 }
 
 body .toSection input[type="text"] {
-    width: 100%;
-}
-
-.shareType2 {
-    line-height: 64px;
-    padding: 0 0 0 10px;
-    text-decoration: none;
-    font-style: italic;
-    color: #535F6D;
+  width: 100%;
 }
 
 .lineSeparatorOption {
-    border-top: 1px solid #CCCCCC;
+  border-top: 1px solid #CCCCCC;
 }
 
 .widgets-AccountPanel .inputError[type="text"] {
   border: 1px solid red;
 }
 
+.widgets-AccountPanel .accountActions {
+  width: 190px;
+}
+
+.widgets-AccountPanel .accountActions.wide {
+  width: 100%;
+}
+
+.widgets-AccountPanel span.count {
+  line-height: 24px;
+  color: #535F6D;
+}
+
+.widgets-AccountPanel label {
+  display: block;
+  margin: 0 0 5px 0;
+}
+
+.widgets-AccountPanel .statusSection {
+  padding-right: 10px;
+  text-align: right;
+}
+
+.widgets-AccountPanel div.counter {
+  display: inline;
+  line-height: 24px;
+  color: #e2e2e2;
+}
+
+.widgets-AccountPanel div.counter.TextCountOver {
+  color: #880000
+}
+
 .widgets-AccountPanel div.status {
   display: none;
-  float: right;
+  float: left;
   position: relative;
   margin-right: 10px;
   line-height: 24px;
@@ -533,6 +471,44 @@ body .toSection input[type="text"] {
   color: red;
   background-color: transparent;
   box-shadow: none;
+}
+
+.widgets-AccountPanel textarea,
+.widgets-AccountPanel input[type="text"] {
+  width: 100%;
+  font-family: "Lucida Grande", Verdana, Sans-serif;
+  font-size: 11px;
+  padding: 2px;
+  border: 1px solid #383838;
+
+  -webkit-border-radius: 4px;
+     -moz-border-radius: 4px;
+          border-radius: 4px;
+
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.15) 0 1px;
+     -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.15) 0 1px;
+          box-shadow: 0 1px 1px rgba(0,0,0,0.15) 0 1px;
+}
+
+.widgets-AccountPanel .placeholder {
+  color: #aaa;
+}
+
+.widgets-AccountPanel textarea:focus,
+.widgets-AccountPanel input[type="text"]:focus {
+  outline: none;
+
+  -webkit-box-shadow: 0 0 0 2px #C2ECFF 0 1px;
+     -moz-box-shadow: 0 0 0 2px #C2ECFF 0 1px;
+          box-shadow: 0 0 0 2px #C2ECFF 0 1px;
+}
+
+.widgets-AccountPanel button:focus {
+  outline: 0;
+}
+
+.widgets-AccountPanel input[type="text"] {
+  height: 24px;
 }
 
 .widgets-AccountPanel button:focus {
