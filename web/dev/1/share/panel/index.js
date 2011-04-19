@@ -74,7 +74,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
     //1 day.
     refreshInterval = 1 * 24 * 60 * 60 * 1000,
 
-    options, bodyDom, sendData, showNew, tabButtonsDom,
+    options, bodyDom, sendData, tabButtonsDom,
     servicePanelsDom;
 
   function checkBase64Preview() {
@@ -543,11 +543,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         $("#closeLink").addClass('hidden');
       }
 
-      //Show the new link if appropriate.
-      if (showNew) {
-        $('#newLink').removeClass('hidden');
-      }
-
       //Listen to sendMessage events from the AccountPanels
       dispatch.sub('sendMessage', function (data) {
         sendMessage(data);
@@ -583,6 +578,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
         })
         .delegate('.statusResetErrorButton', 'click', function (evt) {
           location.reload();
+        })
+        .delegate('.settingsLink', 'click', function (evt) {
+          evt.preventDefault();
+          dispatch.pub('openPrefs');
         })
         .delegate('nav .close', 'click', close);
 
