@@ -19,7 +19,7 @@
 
 Name:           %{f1_name_prefix}python%{pyver_sys}
 Version:        %%version%%
-Release:        4%%git%%%{?dist}
+Release:        5%%git%%%{?dist}
 Summary:        Share Links Fast.
 
 Group:          Applications/Internet

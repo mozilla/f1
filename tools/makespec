@@ -8,7 +8,7 @@ my $version = shift;
 my $requires = shift;
 # The git revision
 my $git = shift;
-my ($git_cnt, $git_rev) = split('-', $git);
+my ($git_cnt, $git_rev) = (split('-', $git))[-2,-1];
 $git = $git_cnt . '.git.' . $git_rev;
 
 my $prefix = "%{f1_name_prefix}python%{pyver}-";

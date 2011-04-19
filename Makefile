@@ -26,7 +26,7 @@ COVERAGE := coverage
 PYLINT = $(BIN_DIR)/pylint
 PKGS = linkdrop
 
-GIT_DESCRIBE := `git describe  | cut -d- -f2-3`
+GIT_DESCRIBE := `git describe --long`
 
 ifeq ($(TOPSRCDIR),)
   export TOPSRCDIR = $(shell pwd)
