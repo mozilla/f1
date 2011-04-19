@@ -323,7 +323,7 @@ function (object,         Widget,         $,        template,
        * to show.
        */
       showStatus: function (className) {
-        $('.status.' + className, this.node).show();
+        $('.status.' + className, this.node)[0].style.display = 'inline';
       },
 
       /**

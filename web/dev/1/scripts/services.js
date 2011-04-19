@@ -105,10 +105,10 @@ function (object) {
         },
         shareTypes: [{
           type: 'public',
-          name: 'public'
+          name: 'Public timeline'
         }, {
           type: 'direct',
-          name: 'direct message',
+          name: 'Direct Message',
           showTo: true,
           toLabel: 'type in name of recipient'
         }],

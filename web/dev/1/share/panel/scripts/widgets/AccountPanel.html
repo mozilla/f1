@@ -1,4 +1,4 @@
-<div id="{svc.type}" class="{svc.type} {className}">
+<div id="{svc.type}" class="{svc.type} {className} servicePanel">
   <form name="{svc.type}Send" class="hbox messageForm" action="#">
     <div class="user inactive col">
       <input type="hidden" name="domain" value="{svcAccount.domain}" />
@@ -14,7 +14,7 @@
         <input type="hidden" name="medium" value="{options.medium}" />
         <input type="hidden" name="source" value="{options.source}" />
       {]}
-      <img class="avatar" src="{profilePic(account.photos)}">
+      <img class="avatar" src="{profilePic(accounts[0].profile.photos)}">
       <span class="username">{displayName}</span>
     </div>
     <div class="message boxFlex addressing">

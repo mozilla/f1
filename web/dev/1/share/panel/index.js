@@ -395,7 +395,7 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
           // Get a handle on the DOM elements used for tab selection.
           tabButtonsDom = $('.widgets-TabButton');
-          servicePanelsDom = $('.widgets-AccountPanel');
+          servicePanelsDom = $('.servicePanel');
 
           checkBase64Preview();
 
