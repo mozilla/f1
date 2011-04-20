@@ -1,0 +1,13 @@
+{
+    "error": null,
+    "result": {
+        "date": "Tue, 19 Apr 2011 05:24:44 GMT",
+        "from": null,
+        "location": "http://api.linkedin.com/v1/people/ppppppp/shares/sssssss",
+        "server": "Apache-Coyote/1.1",
+        "shorturl": null,
+        "status": "201",
+        "to": "anyone",
+        "vary": "Accept-Encoding"
+    }
+}

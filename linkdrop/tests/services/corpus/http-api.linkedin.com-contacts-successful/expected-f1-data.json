@@ -1,0 +1,27 @@
+{
+    "error": null,
+    "result": {
+        "entry": [
+            {
+                "accounts": [
+                    {
+                        "domain": "linkedin.com",
+                        "userid": "11111111",
+                        "username": ""
+                    }
+                ],
+                "displayName": "Jean Reilly",
+                "urls": [
+                    {
+                        "primary": true,
+                        "type": "profile",
+                        "value": "http://www.linkedin.com/profile?viewProfile=&key=999999&authToken=xxxx&authType=name&trk=api*xxx*xxx*"
+                    }
+                ]
+            }
+        ],
+        "itemsPerPage": 1,
+        "startIndex": 0,
+        "totalResults": 1
+    }
+}

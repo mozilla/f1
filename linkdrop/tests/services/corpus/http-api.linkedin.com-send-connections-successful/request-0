@@ -1,0 +1,7 @@
+POST /v1/people/~/shares
+x-li-format: json
+content-type: application/json
+authorization: OAuth realm="http://api.linkedin.com", oauth_body_hash="the_hash%3D", oauth_nonce="9999999", oauth_timestamp="1303197039", oauth_consumer_key="the_key", oauth_signature_method="HMAC-SHA1", oauth_version="1.0", oauth_token="the_token", oauth_signature="the_sig%3D"
+user-agent: Python-httplib2/$Rev$
+
+{"comment": "nerdy for my connections!", "content": {"submitted-image-url": "", "description": "", "submitted-url": "http://slashdot.org/", "title": ""}, "visibility": {"code": "connections-only"}}
