@@ -52,7 +52,7 @@ and love. F1 is made by Mozilla Messaging.
 %build
 export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
 CFLAGS="%{optflags}" %{__python}%{pyver} setup.py build
-make web
+make web PYTHON=%{__python}%{pyver}
 
 %install
 export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
