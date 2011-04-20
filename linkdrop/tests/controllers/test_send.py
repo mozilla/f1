@@ -37,20 +37,21 @@ class TestSendController(TestController):
 
     def setUp(self):
         self.req_patcher = patch('linkdrop.controllers.send.request')
-        self.gprov_patcher = patch(
-            'linkdrop.controllers.send.get_provider')
+        self.gserv_patcher = patch(
+            'linkdrop.controllers.send.get_services')
         self.metrics_patcher = patch(
             'linkdrop.controllers.send.metrics')
         self.req_patcher.start()
-        self.gprov_patcher.start()
+        self.gserv_patcher.start()
         self.metrics_patcher.start()
         send.request.POST = dict()
         self.controller = send.SendController()
         self.real_send = self.controller.send.undecorated.undecorated
+        self.mock_sendmessage = send.get_services().sendmessage
 
     def tearDown(self):
         self.req_patcher.stop()
-        self.gprov_patcher.stop()
+        self.gserv_patcher.stop()
         self.metrics_patcher.stop()
 
     def _setup_domain(self, domain=None):
@@ -77,8 +78,7 @@ class TestSendController(TestController):
             result = dict(result='success', domain=self.domain)
         self.result = result
         self.error = error
-        provider = send.get_provider()
-        provider.api().sendmessage.return_value = result, error
+        self.mock_sendmessage.return_value = result, error
 
     def test_send_no_domain(self):
         res = self.real_send(self.controller)
@@ -87,9 +87,13 @@ class TestSendController(TestController):
 
     def test_send_no_provider(self):
         self._setup_domain()
-        send.get_provider.return_value = None
+        self._setup_acct_data()
+        from linkoauth.errors import DomainNotRegisteredError
+
+        def raise_domainnotregisterederror(*args):
+            raise DomainNotRegisteredError
+        self.mock_sendmessage.side_effect = raise_domainnotregisterederror
         res = self.real_send(self.controller)
-        send.get_provider.assert_called_once_with(self.domain)
         tools.eq_(res['result'], dict())
         tools.eq_(res['error']['message'], "'domain' is invalid")
 
@@ -133,12 +137,11 @@ class TestSendController(TestController):
         tools.eq_(res['result']['shorturl'], shorturl)
 
     def test_send_oauthkeysexception(self):
-        from linkoauth.base import OAuthKeysException
+        from linkoauth.errors import OAuthKeysException
 
         def raise_oauthkeysexception(*args):
             raise OAuthKeysException('OAUTHKEYSEXCEPTION')
-        mock_sendmessage = send.get_provider().api().sendmessage
-        mock_sendmessage.side_effect = raise_oauthkeysexception
+        self.mock_sendmessage.side_effect = raise_oauthkeysexception
         self._setup_domain()
         self._setup_acct_data()
         res = self.real_send(self.controller)
@@ -152,15 +155,14 @@ class TestSendController(TestController):
         tools.eq_(res['error']['status'], 401)
 
     def test_send_serviceunavailexception(self):
-        from linkoauth.base import ServiceUnavailableException
+        from linkoauth.errors import ServiceUnavailableException
         debug_msg = 'DEBUG'
 
         def raise_servunavailexception(*args):
             e = ServiceUnavailableException('SERVUNAVAIL')
             e.debug_message = debug_msg
             raise e
-        mock_sendmessage = send.get_provider().api().sendmessage
-        mock_sendmessage.side_effect = raise_servunavailexception
+        self.mock_sendmessage.side_effect = raise_servunavailexception
         self._setup_domain()
         self._setup_acct_data()
         res = self.real_send(self.controller)
@@ -177,9 +179,8 @@ class TestSendController(TestController):
     def test_send_error(self):
         self._setup_domain()
         self._setup_acct_data()
-        mock_sendmessage = send.get_provider().api().sendmessage
         errmsg = 'ERROR'
-        mock_sendmessage.return_value = (dict(), errmsg)
+        self.mock_sendmessage.return_value = (dict(), errmsg)
         res = self.real_send(self.controller)
         mock_timer = send.metrics.start_timer()
         mock_timer.track.assert_called_with('send-error', error=errmsg)
@@ -191,8 +192,7 @@ class TestSendController(TestController):
         self._setup_acct_data()
         to_ = 'hueylewis@example.com'
         send.request.POST['to'] = to_
-        mock_sendmessage = send.get_provider().api().sendmessage
-        mock_sendmessage.return_value = (
+        self.mock_sendmessage.return_value = (
             dict(message='SUCCESS'), dict())
         res = self.real_send(self.controller)
         mock_timer = send.metrics.start_timer()

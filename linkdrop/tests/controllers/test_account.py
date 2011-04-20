@@ -36,16 +36,16 @@ class TestAccountController(TestController):
     def setUp(self):
         self.log_patcher = patch('linkdrop.controllers.account.log')
         self.req_patcher = patch('linkdrop.controllers.account.request')
-        self.gprov_patcher = patch('linkdrop.controllers.account.get_provider')
+        self.gserv_patcher = patch('linkdrop.controllers.account.get_services')
         self.log_patcher.start()
         self.req_patcher.start()
-        self.gprov_patcher.start()
+        self.gserv_patcher.start()
         self.controller = account.AccountController()
 
     def tearDown(self):
         self.log_patcher.stop()
         self.req_patcher.stop()
-        self.gprov_patcher.stop()
+        self.gserv_patcher.stop()
 
     def test_authorize(self):
         provider = 'example.com'
@@ -53,10 +53,10 @@ class TestAccountController(TestController):
         self.controller.authorize()
         logmsg = "authorize request for %r"
         account.log.info.assert_called_once_with(logmsg, provider)
-        account.get_provider.assert_called_once_with(provider)
-        mock_service = account.get_provider()
-        mock_service.responder().request_access.assert_called_once_with(
-            account.request, account.url, account.session)
+        account.get_services.assert_called_once()
+        mock_services = account.get_services()
+        mock_services.request_access.assert_called_once_with(
+            provider, account.request, account.url, account.session)
 
     @patch.dict('linkdrop.controllers.account.config',
                 dict(oauth_failure='http://example.com/foo#bar',
@@ -69,16 +69,16 @@ class TestAccountController(TestController):
         # first no oauth token -> verify failure
         provider = 'example.com'
         account.request.params = dict(provider=provider)
-        mock_service = account.get_provider()
-        mock_auth = mock_service.responder()
+        mock_services = account.get_services()
         mock_user = dict(profile={'accounts': (dict(),)},)
-        mock_auth.verify.return_value = mock_user
+        mock_services.verify.return_value = mock_user
         mock_resp = mock_get_redirect_response()
         mock_resp.exception = MockException()
         tools.assert_raises(MockException, self.controller.verify)
-        mock_auth.verify.assert_called_with(account.request,
-                                            account.url,
-                                            account.session)
+        mock_services.verify.assert_called_with(provider,
+                                                account.request,
+                                                account.url,
+                                                account.session)
         errmsg = 'error=Unable+to+get+OAUTH+access'
         mock_redirect.assert_called_with(
             'http://example.com/foo?%s#bar' % errmsg)
@@ -88,7 +88,7 @@ class TestAccountController(TestController):
                                                 'username': 'USERNAME'},)},
                          oauth_token=True,
                          oauth_token_secret=False)
-        mock_auth.verify.return_value = mock_user
+        mock_services.verify.return_value = mock_user
         mock_redirect.reset_mock()
         tools.assert_raises(MockException, self.controller.verify)
         tools.eq_(mock_redirect.call_count, 0)
@@ -102,14 +102,13 @@ class TestAccountController(TestController):
                                      mock_get_redirect_response):
         provider = 'example.com'
         account.request.params = dict(provider=provider)
-        mock_service = account.get_provider()
-        mock_auth = mock_service.responder()
+        mock_services = account.get_services()
         errmsg = 'ACCESSEXCEPTION'
 
         def raise_access_exception(*args):
-            from linkoauth.base import AccessException
+            from linkoauth.errors import AccessException
             raise AccessException(errmsg)
-        mock_auth.verify.side_effect = raise_access_exception
+        mock_services.verify.side_effect = raise_access_exception
         mock_resp = mock_get_redirect_response()
         mock_resp.exception = MockException()
         tools.assert_raises(MockException, self.controller.verify)
@@ -124,15 +123,14 @@ class TestAccountController(TestController):
                                    mock_get_redirect_response):
         provider = 'example.com'
         account.request.params = dict(provider=provider)
-        mock_service = account.get_provider()
-        mock_auth = mock_service.responder()
+        mock_services = account.get_services()
         from linkdrop.controllers.account import HTTPException
         url = 'http://example.com/redirect'
         exc = HTTPException(url, None)
 
         def raise_http_exception(*args):
             raise exc
-        mock_auth.verify.side_effect = raise_http_exception
+        mock_services.verify.side_effect = raise_http_exception
         tools.assert_raises(HTTPException, self.controller.verify)
         errmsg = "account verification for %s caused a redirection: %s"
         account.log.info.assert_called_with(errmsg, provider, exc)
