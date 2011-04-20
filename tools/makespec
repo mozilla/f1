@@ -2,8 +2,14 @@
 
 use strict;
 
+# The package version
 my $version = shift;
+# The list of requirements
 my $requires = shift;
+# The git revision
+my $git = shift;
+my ($git_cnt, $git_rev) = (split('-', $git))[-2,-1];
+$git = $git_cnt . '.git.' . $git_rev;
 
 my $prefix = "%{f1_name_prefix}python%{pyver}-";
 
@@ -35,8 +41,6 @@ my %included = (
 );
 
 my %excluded = (
-   #XXX: Not ready yet
-  'pylons'    => 1,
 );
 
 foreach my $req (sort keys %requires) {
@@ -61,5 +65,6 @@ while (<>) {
     s/%%version%%/$version/g;
     s/%%buildrequires%%//g;
     s/%%requires%%/$requires/g;
+    s/%%git%%/.$git/g;
     print;
 }
