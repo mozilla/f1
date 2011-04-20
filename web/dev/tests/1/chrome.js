@@ -50,6 +50,16 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
 
 
   chrome = {
+    sharePanelButton: function () {
+      location = '#';
+      location.reload(true);
+    },
+
+    settingsButton: function () {
+      location = '#settings';
+      location.reload(true);
+    },
+
     saveStore: function () {
       localStorage.chromeTestStore = JSON.stringify(dataStore);
     },
@@ -117,6 +127,11 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
   });
 
   window.addEventListener('load', function (evt) {
+
+    if (location.hash === '#settings') {
+      document.getElementById('title').innerHTML = 'Settings';
+    }
+
     testWindow = $('#testFrame')[0].contentWindow;
 
     // load the share panel
