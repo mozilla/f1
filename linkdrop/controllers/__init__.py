@@ -27,9 +27,15 @@
 from linkoauth import Services
 from pylons import config
 
-enabled = int(config.get('sstatus.ttl', '0'))
-servers = config['sstatus.servers'].split(',')
-domains = config['sstatus.domains'].split(',')
-ttl = int(config.get('sstatus.ttl', '60'))
+services = None
 
-services = Services(domains, servers, ttl, enabled)
+
+def get_services():
+    global services
+    if services is None:
+        enabled = int(config.get('sstatus.ttl', '0'))
+        servers = config['sstatus.servers'].split(',')
+        domains = config['sstatus.domains'].split(',')
+        ttl = int(config.get('sstatus.ttl', '60'))
+        services = Services(domains, servers, ttl, enabled)
+    return services

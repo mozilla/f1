@@ -19,6 +19,7 @@
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
+#   Rob Miller (rmiller@mozilla.com)
 #
 
 import logging
@@ -32,12 +33,11 @@ from pylons import config, request, session, url
 from pylons.controllers.util import redirect
 from pylons.controllers.core import HTTPException
 
+from linkoauth.errors import AccessException
+from linkdrop.controllers import get_services
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import get_redirect_response
 from linkdrop.lib.metrics import metrics
-
-from linkoauth import get_provider
-from linkoauth.base import AccessException
 
 log = logging.getLogger(__name__)
 
@@ -66,19 +66,19 @@ OAuth authorization api.
     def authorize(self, *args, **kw):
         provider = request.POST['domain']
         log.info("authorize request for %r", provider)
-        service = get_provider(provider)
-        return service.responder().request_access(request, url, session)
+        services = get_services(provider)
+        return services.request_access(provider, request, url, session)
 
     # this is not a rest api
     def verify(self, *args, **kw):
         provider = request.params.get('provider')
         log.info("verify request for %r", provider)
-        service = get_provider(provider)
 
-        auth = service.responder()
         acct = dict()
         try:
-            user = auth.verify(request, url, session)
+            services = get_services()
+            user = services.verify(provider, request, url, session)
+
             account = user['profile']['accounts'][0]
             if (not user.get('oauth_token')
                 and not user.get('oauth_token_secret')):

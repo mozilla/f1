@@ -19,6 +19,7 @@
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
+#   Rob Miller (rmiller@mozilla.com)
 #
 
 import logging
@@ -32,8 +33,8 @@ from pylons import request
 
 from linkoauth.errors import (OAuthKeysException, ServiceUnavailableException,
                               DomainNotRegisteredError)
-from linkdrop.controllers import services
 
+from linkdrop.controllers import get_services
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response
 from linkdrop.lib.helpers import api_entry, api_arg
@@ -157,7 +158,9 @@ Site provided description of the shared item, not supported by all services.
                                     acct_id=acct_hash)
         # send the item
         try:
-            result, error = services.sendmessage(domain, acct, message, args)
+            services = get_services()
+            result, error = services.sendmessage(domain, acct, message,
+                                                 args)
         except DomainNotRegisteredError:
             error = {
                 'message': "'domain' is invalid",
