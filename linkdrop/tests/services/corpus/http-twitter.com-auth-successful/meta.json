@@ -1,0 +1,5 @@
+{
+    "protocol": "http", 
+    "reason": "automatic success save", 
+    "uri": "https://twitter.com/oauth/request_token"
+}

@@ -19,7 +19,7 @@
 
 Name:           %{f1_name_prefix}python%{pyver_sys}
 Version:        %%version%%
-Release:        1%{?dist}
+Release:        6%%git%%%{?dist}
 Summary:        Share Links Fast.
 
 Group:          Applications/Internet
@@ -31,7 +31,9 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  python%{pyver}-devel python%{pyver}-setuptools
 BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /bin/sed, /usr/bin/awk, /usr/bin/make
+BuildRequires:  java
 BuildRequires:  %{f1_name_prefix}python%{pyver}-paste-deploy, %{f1_name_prefix}python%{pyver}-paste-script
+Requires:       %{f1_name_prefix}python%{pyver}-paste-deploy, %{f1_name_prefix}python%{pyver}-paste-script
 
 Requires: 	python%{pyver}
 
@@ -50,6 +52,7 @@ and love. F1 is made by Mozilla Messaging.
 %build
 export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
 CFLAGS="%{optflags}" %{__python}%{pyver} setup.py build
+make web PYTHON=%{__python}%{pyver}
 
 %install
 export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
@@ -57,6 +60,8 @@ rm -rf %{buildroot}
 %{__python}%{pyver} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --prefix %{f1_prefix} --record=INSTALLED_FILES
 %{__install} -m 755 -d %{buildroot}%{_var}/www/f1
 rsync -a web/ %{buildroot}%{_var}/www/f1/
+%{__install} -m 755 -d %{buildroot}%{_sysconfdir}/f1
+%{__install} -m 644 *.ini %{buildroot}%{_sysconfdir}/f1/
 
 #XXX: Not ready yet
 #%check
@@ -69,9 +74,14 @@ rm -rf %{buildroot}
 
 %files -f INSTALLED_FILES
 %{_var}/www/f1
+%config(noreplace) %{_sysconfdir}/f1/*ini
 %defattr(-,root,root,-)
 %doc README.md LICENSE PKG-INFO docs/
 
 %changelog
+* Wed Apr 20 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.7dev-6
+- Compile web content before packaging (make web)
+* Thu Apr 14 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.7dev-2
+- Include *.ini files
 * Fri Mar 18 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.2dev-1
 - Initial spec file

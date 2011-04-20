@@ -1,0 +1,18 @@
+HTTP/1.1 403 Forbidden
+status: 403
+content-length: 73
+x-transaction: 1302663623-42498-39072
+set-cookie: k=58.160.65.179.1302663623449661; path=/; expires=Wed, 20-Apr-11 03:00:23 GMT; domain=.twitter.com, guest_id=12345; path=/; expires=Fri, 13 May 2011 03:00:23 GMT, lang=en; path=/, _twitter_sess=twitter_session_id; domain=.twitter.com; path=/; HttpOnly
+expires: Tue, 31 Mar 1981 05:00:00 GMT
+vary: Accept-Encoding
+x-transaction-mask: a6183ffa5f8ca943ff1b53b5644ef114
+server: hi
+x-revision: DEV
+last-modified: Wed, 13 Apr 2011 03:00:23 GMT
+x-runtime: 0.03088
+pragma: no-cache
+cache-control: no-cache, no-store, must-revalidate, pre-check=0, post-check=0
+date: Wed, 13 Apr 2011 03:00:23 GMT
+content-type: application/json; charset=utf-8
+
+{"request":"\/1\/statuses\/update.json","error":"Status is a duplicate."}

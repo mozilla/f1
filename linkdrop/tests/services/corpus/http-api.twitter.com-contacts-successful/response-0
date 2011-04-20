@@ -1,0 +1,102 @@
+HTTP/1.1 200 OK
+vary: Accept-Encoding
+x-transaction-mask: a6183ffa5f8ca943ff1b53b5644ef114
+x-revision: DEV
+x-runtime: 0.02494
+etag: "bdd27e3cb2eee280c274599c40e6e074"-gzip
+cache-control: no-cache, no-store, must-revalidate, pre-check=0, post-check=0
+x-ratelimit-class: api_identified
+status: 200
+x-ratelimit-remaining: 348
+set-cookie: k=58.160.65.179.1302673789529686; path=/; expires=Wed, 20-Apr-11 05:49:49 GMT; domain=.twitter.com, guest_id=12345; path=/; expires=Fri, 13 May 2011 05:49:49 GMT, lang=en; path=/, _twitter_sess=twitter_session_value; domain=.twitter.com; path=/; HttpOnly
+expires: Tue, 31 Mar 1981 05:00:00 GMT
+last-modified: Wed, 13 Apr 2011 05:49:49 GMT
+pragma: no-cache
+date: Wed, 13 Apr 2011 05:49:49 GMT
+content-location: https://api.twitter.com/1/statuses/followers.json?oauth_body_hash=the_body_hash&screen_name=mytwitterid&oauth_nonce=25327564&oauth_timestamp=1302673762&oauth_consumer_key=the_key&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&oauth_token=the_token&oauth_signature=the_sig%3D
+x-transaction: 1302673789-50421-40553
+server: hi
+x-ratelimit-limit: 350
+content-type: application/json; charset=utf-8
+x-ratelimit-reset: 1302676561
+
+[
+    {
+        "follow_request_sent":false,
+        "profile_background_image_url":"http:\/\/a3.twimg.com\/a\/1302541726\/images\/themes\/theme1\/bg.png",
+        "url":"http:\/\/me.com",
+        "screen_name":"myfollower",
+        "description":"",
+        "status":{
+            "text":"RT @madeupstats: 0% of people suffer from pervidiphobia; a fear of responding to surveys.",
+            "truncated":false,
+            "place":null,
+            "favorited":false,
+            "id_str":"11111111111111111",
+            "coordinates":null,
+            "retweet_count":0,
+            "source":"web",
+            "in_reply_to_screen_name":null,
+            "in_reply_to_status_id_str":null,
+            "geo":null,
+            "in_reply_to_status_id":null,
+            "created_at":"Tue Apr 12 22:49:58 +0000 2011",
+            "contributors":null,
+            "retweeted":false,
+            "in_reply_to_user_id_str":null,
+            "retweeted_status":{
+                "text":"0% of people suffer from pervidiphobia; a fear of responding to surveys.",
+                "truncated":false,
+                "place":null,
+                "favorited":false,
+                "id_str":"2222222222222222",
+                "coordinates":null,
+                "retweet_count":0,
+                "source":"web",
+                "in_reply_to_screen_name":null,
+                "in_reply_to_status_id_str":null,
+                "geo":null,
+                "in_reply_to_status_id":null,
+                "created_at":"Tue Apr 12 12:11:23 +0000 2011",
+                "contributors":null,
+                "retweeted":false,
+                "in_reply_to_user_id_str":null,
+                "id":2222222222222222,
+                "in_reply_to_user_id":null
+            },
+            "id":11111111111111111,
+            "in_reply_to_user_id":null
+        },
+        "show_all_inline_media":true,
+        "contributors_enabled":false,
+        "lang":"en",
+        "geo_enabled":false,
+        "time_zone":"Melbourne",
+        "profile_text_color":"333333",
+        "location":"Melbourne",
+        "is_translator":false,
+        "profile_sidebar_fill_color":"DDEEF6",
+        "id_str":"3333333",
+        "listed_count":21,
+        "profile_background_tile":false,
+        "favourites_count":0,
+        "default_profile":true,
+        "statuses_count":172,
+        "friends_count":138,
+        "followers_count":207,
+        "verified":false,
+        "created_at":"Sat Feb 21 05:55:31 +0000 2009",
+        "profile_link_color":"0084B4",
+        "following":true,
+        "notifications":false,
+        "profile_sidebar_border_color":"C0DEED",
+        "protected":false,
+        "default_profile_image":false,
+        "name":"My Follower",
+        "profile_use_background_image":true,
+        "profile_image_url":"http:\/\/a1.twimg.com\/profile_images\/123456\/my_pic.png",
+        "id":3333333,
+        "utc_offset":36000,
+        "profile_background_color":"C0DEED"
+    }
+]

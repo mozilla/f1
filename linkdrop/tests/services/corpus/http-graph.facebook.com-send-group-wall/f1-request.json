@@ -1,0 +1,8 @@
+{"domain": "facebook.com",
+ "shareType": "groupWall",
+ "to": "197108586994419",
+ "message": "group test",
+ "link": "http://slashdot.org/",
+ "title": "Slashdot: News for nerds, stuff that matters",
+ "account": {"oauth_token": "foo", "oauth_token_secret": "bar"}
+}

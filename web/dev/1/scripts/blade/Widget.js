@@ -13,8 +13,8 @@
  * dojo._toDom()
  */
 
-define([ 'require', './object', './jig', 'module'],
-function (require,   object,     jig,     module) {
+define([ 'require', './object', './fn', './jig', 'module'],
+function (require,   object,     fn,     jig,     module) {
 
     var tempNode,
         baseAttrName = 'data-' + module.id.replace(/\//g, '-') + '-' +
@@ -35,29 +35,68 @@ function (require,   object,     jig,     module) {
             init: function (data, relNode, position) {
                 object.mixin(this, data, true);
 
+                var asyncCreate, onFinishCreate;
+
                 //Start widget lifecycle
                 if (this.onCreate) {
-                    this.onCreate();
+                    asyncCreate = this.onCreate();
                 }
 
-                if (this.template) {
-                    this.node = this.render();
-                    if (this.onRender) {
-                        this.onRender(relNode);
+                onFinishCreate = fn.bind(this, function () {
+                    if (this.template) {
+                        this.node = this.render();
+                        if (this.onRender) {
+                            this.onRender(relNode);
+                        }
                     }
-                }
 
-                if (relNode && this.node) {
-                    if (position === 'before') {
-                        relNode.parentNode.insertBefore(this.node, relNode);
-                    } else if (position === 'after') {
-                        relNode.parentNode.insertBefore(this.node, relNode.nextSibling);
-                    } else if (position === 'prepend' && relNode.firstChild) {
-                        relNode.insertBefore(this.node, relNode.firstChild);
-                    } else {
-                        relNode.appendChild(this.node);
+                    if (relNode && this.node) {
+                        if (position === 'before') {
+                            relNode.parentNode.insertBefore(this.node, relNode);
+                        } else if (position === 'after') {
+                            relNode.parentNode.insertBefore(this.node, relNode.nextSibling);
+                        } else if (position === 'prepend' && relNode.firstChild) {
+                            relNode.insertBefore(this.node, relNode.firstChild);
+                        } else {
+                            relNode.appendChild(this.node);
+                        }
                     }
+                });
+
+                if (asyncCreate) {
+                    asyncCreate.then(onFinishCreate);
+                    this.asyncCreate = asyncCreate;
+                } else {
+                    onFinishCreate();
                 }
+            },
+
+            // poor man deferred thingy for now. May want to swap out
+            // with a real promise implementation at some point.
+            makeCreateCallback: function () {
+                var p = {
+                    _callbacks: [],
+                    then: function (callback) {
+                        if ('value' in p) {
+                            callback(p.value);
+                        } else {
+                            p._callbacks.push(callback);
+                        }
+                    },
+                    resolve: function (value) {
+                        if ('value' in p) {
+                            throw new Error ('Async widget already resolved');
+                        } else {
+                            // Setting the value
+                            p.value = value;
+                            p._callbacks.forEach(function (callback) {
+                               callback(value);
+                            });
+                        }
+                    }
+                };
+
+                return p;
             },
 
             render: function (relativeNode) {

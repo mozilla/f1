@@ -557,6 +557,7 @@ button:focus {
   color: #535F6D;
 }
 .ui-accordion-content div.counter {
+  float: left;
   line-height: 24px;
   color: #535F6D;
 }
@@ -607,6 +608,28 @@ body .toSection input[type="text"] {
 
 .lineSeparatorOption {
     border-top: 1px solid #CCCCCC;
+}
+
+.widgets-AccountPanel .inputError[type="text"] {
+  border: 1px solid red;
+}
+
+.widgets-AccountPanel div.status {
+  display: none;
+  float: right;
+  position: relative;
+  margin-right: 10px;
+  line-height: 24px;
+  min-height: 0;
+  width: auto;
+  font-size: inherit;
+  z-index: 0;
+}
+
+.widgets-AccountPanel div.status.error {
+  color: red;
+  background-color: transparent;
+  box-shadow: none;
 }
 
 .widgets-AccountPanel button:focus {

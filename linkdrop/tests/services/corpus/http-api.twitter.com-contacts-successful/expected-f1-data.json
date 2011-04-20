@@ -1,0 +1,33 @@
+{
+    "error": null,
+    "result": {
+        "entry": [
+            {
+                "accounts": [
+                    {
+                        "domain": "twitter.com",
+                        "userid": 3333333,
+                        "username": "myfollower"
+                    }
+                ],
+                "displayName": "My Follower",
+                "photos": [
+                    {
+                        "type": "profile",
+                        "value": "http://a1.twimg.com/profile_images/123456/my_pic.png"
+                    }
+                ],
+                "published": "Sat Feb 21 05:55:31 +0000 2009",
+                "urls": [
+                    {
+                        "primary": false,
+                        "value": "http://me.com"
+                    }
+                ]
+            }
+        ],
+        "itemsPerPage": 1,
+        "startIndex": 0,
+        "totalResults": 1
+    }
+}

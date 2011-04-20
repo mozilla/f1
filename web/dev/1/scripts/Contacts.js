@@ -36,7 +36,10 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
       this.svcAccount = svcAccount;
 
       this.callbacks = [];
-      this.lastUpdated = this.fromStore().lastUpdated;
+      this.fromStore(fn.bind(this, function (data) {
+        this.lastUpdated = data;
+      }));
+
       // Time check is one day.
       this.timeCheck = 24 * 60 * 60 * 1000;
 
@@ -70,9 +73,11 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
     /**
      * Retrieves stored contacts. Should only be used internally or by subclasses.
      */
-    fromStore: function () {
+    fromStore: function (callback) {
       var acct = this.svcAccount;
-      return accounts.getData(acct.domain, acct.userid, acct.username, 'contacts') || {};
+      accounts.getData(acct.domain, acct.userid, acct.username, 'contacts', function (data) {
+        callback(data || {});
+      });
     },
 
     /**
@@ -112,49 +117,62 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
      */
     notify: function (callback) {
       this.callbacks.push(callback);
-      this.contacts = this.fromStore().list;
+      this.fromStore(fn.bind(this, function (data) {
 
-      if (!this.contacts || this.needFetch()) {
-        this.fetch();
-      } else {
-        this.notifyCallbacks();
-      }
+        this.contacts = data.list;
+
+        if (!this.contacts || this.needFetch()) {
+          this.fetch();
+        } else {
+          this.notifyCallbacks();
+        }
+      }));
     },
 
     fetch: function () {
-      var acct = this.svcAccount,
-          svcData = accounts.getService(acct.domain, acct.userid, acct.username);
+      var acct = this.svcAccount;
 
-      rdapi('contacts/' + acct.domain, {
-        type: 'POST',
-        data: {
-          username: acct.username,
-          userid: acct.userid,
-          startindex: 0,
-          maxresults: 500,
-          account: JSON.stringify(svcData)
-        },
-        //Only wait for 10 seconds, then give up.
-        timeout: 10000,
-        success: fn.bind(this, function (json) {
-          //Transform data to a form usable by the front end.
-          if (json && !json.error) {
-            var entries = json.result.entry;
+      accounts.getService(acct.domain, acct.userid,
+        acct.username, fn.bind(this, function (svcData) {
 
-            this.contacts = this.getFormattedContacts(entries);
-            this.lastUpdated = (new Date()).getTime();
+        rdapi('contacts/' + acct.domain, {
+          type: 'POST',
+          data: {
+            username: acct.username,
+            userid: acct.userid,
+            startindex: 0,
+            maxresults: 500,
+            account: JSON.stringify(svcData)
+          },
+          //Only wait for 10 seconds, then give up.
+          timeout: 10000,
+          success: fn.bind(this, function (json) {
+            //Transform data to a form usable by the front end.
+            if (json && !json.error) {
+              var entries = json.result.entry;
 
-            this.toStore({
-              list: this.contacts
-            });
-          }
-        }),
-        error: fn.bind(this, function (xhr, textStatus, errorThrown) {
-          // does not matter what the error is, just eat it and hide
-          // the UI showing a wait.
-          this.notifyCallbacks();
-        })
-      });
+              this.getFormattedContacts(entries,
+                fn.bind(this, function (contacts) {
+                  this.contacts = contacts;
+                  this.lastUpdated = (new Date()).getTime();
+
+                  this.toStore({
+                    list: this.contacts
+                  });
+                })
+              );
+            }
+          }),
+          error: fn.bind(this, function (xhr, textStatus, errorThrown) {
+            // does not matter what the error is, just eat it and hide
+            // the UI showing a wait.
+            // If xhr.status === 503, could do a retry, and dispatch a
+            // 'serverErrorPossibleRetry', but wait for UX to be worked out
+            // in https://bugzilla.mozilla.org/show_bug.cgi?id=642653
+            this.notifyCallbacks();
+          })
+        });
+      }));
     },
 
     notifyCallbacks: function () {
@@ -164,7 +182,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
     },
 
     findContact: function (to) {
-      var contactId = to;
+      var contactId = null;
 
       (this.contacts || []).some(function (contact) {
         if (contact.displayName === to) {
@@ -180,9 +198,11 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
     /**
      * Translates contact data from server into a format used on the client.
      * @param {Array} entries
-     * @returns {Array}
+     * @param {Function} callback called once contacts are formatted. Could
+     * involve asyn operations. The callback will receive an array of contacts.
+     *
      */
-    getFormattedContacts: function (entries) {
+    getFormattedContacts: function (entries, callback) {
       var data = [];
       entries.forEach(function (entry) {
         if (entry.accounts && entry.accounts.length) {
@@ -196,7 +216,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
           });
         }
       });
-      return data;
+      callback(data);
     },
 
     /**
@@ -205,18 +225,26 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
      *
      * @param {String} toText a comma-separated list of contacts.
      * @returns {String} a comma-separated list of ID-based contacts.
+     * Can throw an error if there is an invalid recipient.
      */
     convert: function (toText) {
       var newrecip = [],
           result = '',
-          recip;
+          recip, error;
 
       if (this.contacts) {
         recip = toText.split(',');
         recip.forEach(fn.bind(this, function (to) {
-          var contactId = this.findContact(to.trim());
-          if (contactId) {
-            newrecip.push(contactId);
+          to = to.trim();
+          if (to) {
+            var contactId = this.findContact(to);
+            if (contactId) {
+              newrecip.push(contactId);
+            } else {
+              error = new Error('Invalid Recipient');
+              error.recipient = to;
+              throw error;
+            }
           }
         }));
       }
