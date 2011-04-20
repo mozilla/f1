@@ -131,4 +131,4 @@ coverage:
 	$(NOSE) $(NOSETESTS_ARGS_C) $(TESTS)
 	$(COVERAGE) xml
 
-.PHONY: xpi clean dist rpm build test coverage
+.PHONY: xpi clean dist rpm build test coverage web $(static_dir)
