@@ -565,6 +565,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
 
           servicePanelsDom.addClass('hidden');
           $('#' + target).removeClass('hidden');
+
+          setTimeout(function () {
+            dispatch.pub('sizeToContent');
+          }, 15);
         })
         .delegate('#statusAuthButton, .statusErrorButton', 'click', function (evt) {
           cancelStatus();

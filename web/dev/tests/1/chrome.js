@@ -84,7 +84,7 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
 
     var subs = {
       sizeToContent: function () {
-        var rect = testWindow.document.documentElement.getBoundingClientRect(),
+        var rect = testWindow.document.getElementById('wrapper').getBoundingClientRect(),
             iframe = $('#testFrame')[0];
 
         iframe.style.width = rect.width + 'px';

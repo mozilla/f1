@@ -173,7 +173,7 @@ function (object) {
           name: 'pape_max_auth_age',
           value: 0
         }
-      }),
+      }) /*, Commenting out google apps, yahoo and linked in for now
       'googleapps.com': new EmailSvcBase('Google Apps', {
         shareTypes: [{
           type: 'direct',
@@ -238,7 +238,7 @@ function (object) {
           'widgets/AccountPanel': 'widgets/AccountPanelLinkedIn',
           'Contacts': 'ContactsLinkedIn'
         }
-      })
+      }) */
     },
     domainList: [],
 

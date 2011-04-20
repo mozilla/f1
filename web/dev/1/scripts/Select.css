@@ -30,6 +30,7 @@
 
 .Select.open ul {
   position: absolute;
+  top: -20px;
   background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #767676), color-stop(100%, #545454));
   background-image: -moz-linear-gradient(center top , #767676 0%, #545454 100%);
   border: 1px solid gray;

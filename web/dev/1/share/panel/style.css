@@ -170,9 +170,7 @@ noscript {
 }
 
 #wrapper {
-  width: 100%;
-  max-width: 400px;
-  min-height: 180px;
+  max-width: 430px;
   height: 100%;
 }
 
@@ -262,12 +260,17 @@ h3 {
 /* Service panel widgets */
 
 .widgets-AddAccount {
+  width: 360px;
+  height: 96px;
+  box-sizing: border-box;
+  margin: 14px;
   text-align: center;
 }
 
 .widgets-AddAccount .add {
-  margin: 60px 40px;
+  margin: 50px 70px 50px 60px;
 }
+
 .widgets-AddAccount .add label {
   display: block;
   float: left;
@@ -275,6 +278,31 @@ h3 {
   margin-right: 5px;
   line-height: 24px;
   color: #e2e2e2;
+}
+
+.widgets-AddAccount .add li {
+  background-repeat: no-repeat;
+  padding-left: 26px;
+}
+
+.widgets-AddAccount .add li[data-value=""] {
+  padding-left: 4px;
+}
+
+.widgets-AddAccount .add li[data-value="twitter.com"] {
+  background-image: url("/share/i/sprite.png");
+  background-position: 4px -33px;
+
+}
+
+.widgets-AddAccount .add li[data-value="facebook.com"] {
+  background-image: url("/share/i/sprite.png");
+  background-position: 4px -66px;
+}
+
+.widgets-AddAccount .add li[data-value="google.com"] {
+  background-image: url("/share/i/sprite.png");
+  background-position: 4px -99px;
 }
 
 
