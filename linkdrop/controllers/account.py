@@ -66,7 +66,7 @@ OAuth authorization api.
     def authorize(self, *args, **kw):
         provider = request.POST['domain']
         log.info("authorize request for %r", provider)
-        services = get_services(provider)
+        services = get_services()
         return services.request_access(provider, request, url, session)
 
     # this is not a rest api
