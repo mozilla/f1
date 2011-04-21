@@ -35,11 +35,7 @@ srcdir=$(TOPSRCDIR)/extensions/firefox-share/src/
 objdir=$(TOPSRCDIR)/extensions/firefox-share/dist/
 dist_dir=$(TOPSRCDIR)/dist
 stage_dir=$(objdir)/stage
-xpi_dir=$(TOPSRCDIR)/web/dev
-web_dir=$(TOPSRCDIR)/web/dev
-static_dir=$(TOPSRCDIR)/web/$(version)
-webbuild_dir=$(TOPSRCDIR)/tools/webbuild
-requirejs_dir=$(webbuild_dir)/requirejs
+xpi_dir=$(TOPSRCDIR)/xpi
 
 xpi_name := ffshare.xpi
 xpi_files := bootstrap.js chrome install.rdf modules
@@ -81,26 +77,8 @@ $(xpi_dir)/$(xpi_name): $(xpi_dir) $(stage_dir) $(dep_files)
 	cd $(stage_dir) && zip -9r $(xpi_name) $(xpi_files)
 	mv $(stage_dir)/$(xpi_name) $(xpi_dir)/$(xpi_name)
 
-web: $(static_dir)
-
-$(static_dir):
-	rsync -av $(web_dir)/ $(static_dir)/
-
-	perl -i -pe "s:VERSION='[^']+':VERSION='$(version)':" $(TOPSRCDIR)/setup.py
-	perl -i -pe 's:/[^/]+/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/staging.ini
-	perl -i -pe 's:/[^/]+/auth.html:/$(version)/auth.html:go' $(TOPSRCDIR)/production.ini
-
-	find $(static_dir) -name \*.html | xargs perl -i -pe 's:/dev/:/$(version)/:go'
-	perl -i -pe 's:/dev/:/$(version)/:go' $(static_dir)/scripts/oauth.js
-
-	cd $(static_dir) && $(requirejs_dir)/build/build.sh build.js
-	cd $(static_dir)/settings && $(requirejs_dir)/build/build.sh build.js
-	cd $(static_dir)/share && $(requirejs_dir)/build/build.sh build.js
-	cd $(static_dir)/share/panel && $(requirejs_dir)/build/build.sh build.js
-
 clean:
 	rm -rf $(objdir)
-	rm -rf $(static_dir)
 	rm -rf $(dist_dir)
 	rm -f f1.spec
 
@@ -131,4 +109,4 @@ coverage:
 	$(NOSE) $(NOSETESTS_ARGS_C) $(TESTS)
 	$(COVERAGE) xml
 
-.PHONY: xpi clean dist rpm build test coverage web $(static_dir)
+.PHONY: xpi clean dist rpm build test coverage

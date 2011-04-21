@@ -11,7 +11,7 @@ deps
 dist
 htmlcov
 include
-web/current
+web
 data
 env
 ShareCore.egg-info
