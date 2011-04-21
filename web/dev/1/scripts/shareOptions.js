@@ -51,14 +51,8 @@ define(['blade/url'], function (url) {
       }
     }
 
-    options.prefs = options.prefs || {};
-
     if (!options.title) {
       options.title = options.url;
-    }
-
-    if (!options.prefs.system) {
-      options.prefs.system = 'prod';
     }
 
     source = options.source;

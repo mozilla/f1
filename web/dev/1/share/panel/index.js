@@ -529,11 +529,6 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
   onFirstShareState = function () {
     // Wait until DOM ready to start the DOM work.
     $(function () {
-      //Set the type of system as a class on the UI to show/hide things in
-      //dev vs. production
-      if (options.prefs.system) {
-        $(document.documentElement).addClass(options.prefs.system);
-      }
       if (options.ui === 'sidebar') {
         $("#panelHeader").text('');
         $("#closeLink").addClass('hidden');
