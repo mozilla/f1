@@ -62,6 +62,7 @@ class TimedMetricsCollector(object):
 # more sophisticated or more options...
 import logging
 log = logging.getLogger('linkdrop-metrics')
+errlog = logging.getLogger('linkdrop')
 
 
 class F1MetricsConsumer(MetricsConsumer):
@@ -82,9 +83,20 @@ class F1MetricsCollector(MetricsCollector):
             remote_address = distinct_ob.environ['HTTP_X_FORWARDED_FOR']
         except KeyError:
             remote_address = distinct_ob.environ.get("REMOTE_ADDR")
-        return {
-            'remote_address': remote_address,
-        }
+        # discard the last octet of the IP address.  Will almost certainly
+        # need work for IPv6 :)
+        result = {}
+        if remote_address:
+            try:
+                remote_address = ".".join(remote_address.split(".", 3)[:-1]) \
+                                 + ".0"
+            except (ValueError, IndexError), exc:
+                errlog.error("failed to anonymize remote address %r: %s",
+                             remote_address, exc)
+            else:
+                result['remote_address'] = remote_address
+        return result
+
 
 # the object used by the code.
 metrics = F1MetricsCollector(F1MetricsConsumer())

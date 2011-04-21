@@ -1,0 +1,7 @@
+POST /v1/people/~/mailbox
+x-li-format: json
+content-type: application/json
+authorization: OAuth realm="http://api.linkedin.com", oauth_body_hash="the_hash%3D", oauth_nonce="999999", oauth_timestamp="1303197211", oauth_consumer_key="the_key", oauth_signature_method="HMAC-SHA1", oauth_version="1.0", oauth_token="the_token", oauth_signature="the_sig%3D"
+user-agent: Python-httplib2/$Rev$
+
+{"body": "nerdy just for you!\n\n*Slashdot: News for nerds, stuff that matters*\n\nhttp://slashdot.org/\n\n\n\n--\nshared via Mozilla F1 for Firefox -- http://f1.mozillamessaging.com/\n:: share links with the people that matter to you ::\n", "recipients": {"values": [{"person": {"_path": "/people/ppppp"}}]}, "subject": "A web link has been shared with you"}

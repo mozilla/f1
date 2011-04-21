@@ -19,7 +19,7 @@
 
 Name:           %{f1_name_prefix}python%{pyver_sys}
 Version:        %%version%%
-Release:        2%{?dist}
+Release:        6%%git%%%{?dist}
 Summary:        Share Links Fast.
 
 Group:          Applications/Internet
@@ -31,6 +31,7 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires:  python%{pyver}-devel python%{pyver}-setuptools
 BuildRequires:  /usr/bin/rsync, /usr/bin/cut, /bin/sed, /usr/bin/awk, /usr/bin/make
+BuildRequires:  java
 BuildRequires:  %{f1_name_prefix}python%{pyver}-paste-deploy, %{f1_name_prefix}python%{pyver}-paste-script
 Requires:       %{f1_name_prefix}python%{pyver}-paste-deploy, %{f1_name_prefix}python%{pyver}-paste-script
 
@@ -51,6 +52,7 @@ and love. F1 is made by Mozilla Messaging.
 %build
 export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
 CFLAGS="%{optflags}" %{__python}%{pyver} setup.py build
+make web PYTHON=%{__python}%{pyver}
 
 %install
 export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
@@ -77,6 +79,8 @@ rm -rf %{buildroot}
 %doc README.md LICENSE PKG-INFO docs/
 
 %changelog
+* Wed Apr 20 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.7dev-6
+- Compile web content before packaging (make web)
 * Thu Apr 14 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.7dev-2
 - Include *.ini files
 * Fri Mar 18 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.2dev-1

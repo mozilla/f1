@@ -129,36 +129,49 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
       }));
     },
 
-    fetch: function () {
+    fetch: function (pageData) {
       var acct = this.svcAccount;
 
       accounts.getService(acct.domain, acct.userid,
         acct.username, fn.bind(this, function (svcData) {
+        
+        var data = {
+          username: acct.username,
+          userid: acct.userid,
+          account: JSON.stringify(svcData)
+        };
+        if (pageData) {
+          data.pageData = JSON.stringify(pageData);
+        }
 
         rdapi('contacts/' + acct.domain, {
           type: 'POST',
-          data: {
-            username: acct.username,
-            userid: acct.userid,
-            startindex: 0,
-            maxresults: 500,
-            account: JSON.stringify(svcData)
-          },
+          data: data,
           //Only wait for 10 seconds, then give up.
           timeout: 10000,
           success: fn.bind(this, function (json) {
             //Transform data to a form usable by the front end.
             if (json && !json.error) {
               var entries = json.result.entry;
+              var nextPageData = json.result.pageData;
 
               this.getFormattedContacts(entries,
                 fn.bind(this, function (contacts) {
-                  this.contacts = contacts;
+                  if (!pageData) {
+                    this.contacts = contacts;
+                  } else {
+                    this.contacts.push.apply(this.contacts, contacts);
+                  }
                   this.lastUpdated = (new Date()).getTime();
 
                   this.toStore({
                     list: this.contacts
                   });
+                  if (nextPageData) {
+                    setTimeout(fn.bind(this, function(nextPageData) {
+                      this.fetch(nextPageData);
+                    }), 1, nextPageData);
+                  }
                 })
               );
             }

@@ -53,8 +53,16 @@ def assert_messages_equal(got, expected):
             got_items = dict(parse_qsl(gotpl))
             expected_items = dict(parse_qsl(expectedpl))
             assert_dicts_with_oauth_equal(got_items, expected_items)
+        elif got.get_content_type() == "application/json":
+            got_items = json.loads(gotpl)
+            expected_items = json.loads(expectedpl)
+            assert_dicts_equal(got_items, expected_items)
+        elif gotpl is None:
+            assert expectedpl is None
         else:
-            eq_(gotpl, expectedpl)
+            # rstrip the payloads as some of our corpus items have trailing
+            # newlines to stop git/hg/etc complaining...
+            eq_(gotpl.rstrip(), expectedpl.rstrip())
 
 
 # Somewhat analogous to a protocap.ProtocolCapturingBase object - but
@@ -94,7 +102,7 @@ class HttpReplayer(ProtocolReplayer):
             # any blow up as being non-ascii, we have a deeper problem...
             gotheadersstr = "\r\n".join(
                     ["%s: %s" % (n, v.encode("ascii")) for n, v in headers.iteritems()])
-            bodystr = gotheadersstr + "\r\n" + (body or '')
+            bodystr = gotheadersstr + "\r\n\r\n" + (body or '')
             gotob = email.message_from_string(bodystr)
             if headers:
                 if 'content-type' in gotob:
@@ -364,6 +372,28 @@ class GoogleReplayTestCase(ServiceReplayTestCase):
         raise AssertionError(req_type)
 
 
+class LinkedinReplayTestCase(ServiceReplayTestCase):
+    def getDefaultRequest(self, req_type):
+        # No 'send' - all send tests have an f1-request.json file...
+        if req_type == "contacts":
+            account = {"oauth_token": "foo", "oauth_token_secret": "bar",
+                       "profile": {"emails": [{'value': 'me@example.com'}],
+                                "displayName": "Me",
+                        },
+                      }
+            return {'username': 'me',
+                    'userid': '123',
+                    'keys': "1,2,3",
+                    'account': json.dumps(account),
+                    'domain': 'linkedin.com',
+                    'maxresults': 500,
+                   }
+        if req_type == "auth":
+            return {'domain': 'linkedin.com', 'username': 'foo',
+                    'userid': 'bar'}
+        raise AssertionError(req_type)
+
+
 def setupReplayers():
     import linkoauth.facebook_
     linkoauth.facebook_.HttpRequestor = HttpReplayer
@@ -374,6 +404,8 @@ def setupReplayers():
     linkoauth.google_.OAuth2Requestor = HttpReplayer
     import linkoauth.twitter_
     linkoauth.twitter_.OAuth2Requestor = HttpReplayer
+    import linkoauth.linkedin_
+    linkoauth.linkedin_.OAuth2Requestor = HttpReplayer
     import linkoauth.base
     linkoauth.base.HttpRequestor = HttpReplayer
     HttpReplayer.to_playback = []
@@ -394,6 +426,8 @@ def teardownReplayers():
     linkoauth.google_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
     import linkoauth.twitter_
     linkoauth.twitter_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
+    import linkoauth.linkedin_
+    linkoauth.linkedin_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
     import linkoauth.base
     linkoauth.base.HttpRequestor = linkoauth.protocap.HttpRequestor
 
@@ -406,6 +440,7 @@ host_to_test = {
     'social.yahooapis.com': YahooReplayTestCase,
     'api.twitter.com': TwitterReplayTestCase,
     'twitter.com': TwitterReplayTestCase,
+    'api.linkedin.com': LinkedinReplayTestCase,
 }
 
 
