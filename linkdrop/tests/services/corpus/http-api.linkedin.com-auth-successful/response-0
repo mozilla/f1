@@ -1,0 +1,10 @@
+HTTP/1.1 200 OK
+status: 200
+content-location: https://api.linkedin.com/uas/oauth/requestToken
+vary: Accept-Encoding
+server: Apache-Coyote/1.1
+-content-encoding: gzip
+date: Tue, 19 Apr 2011 04:19:01 GMT
+content-type: text/plain
+
+oauth_token=the_token&oauth_token_secret=the_secret&oauth_callback_confirmed=true&xoauth_request_auth_url=https%3A%2F%2Fapi.linkedin.com%2Fuas%2Foauth%2Fauthorize&oauth_expires_in=599
