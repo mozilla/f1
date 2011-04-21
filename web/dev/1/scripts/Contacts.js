@@ -140,7 +140,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
           userid: acct.userid,
           account: JSON.stringify(svcData)
         };
-        if (pageData !== undefined && pageData !== null) {
+        if (pageData) {
           data.pageData = JSON.stringify(pageData);
         }
 
@@ -157,7 +157,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
 
               this.getFormattedContacts(entries,
                 fn.bind(this, function (contacts) {
-                  if (pageData === undefined) {
+                  if (!pageData) {
                     this.contacts = contacts;
                   } else {
                     this.contacts.push.apply(this.contacts, contacts);
@@ -167,7 +167,7 @@ function ($,        object,         fn,         dispatch,   rdapi,   accounts) {
                   this.toStore({
                     list: this.contacts
                   });
-                  if (nextPageData !== undefined && nextPageData !== null) {
+                  if (nextPageData) {
                     setTimeout(fn.bind(this, function(nextPageData) {
                       this.fetch(nextPageData);
                     }), 1, nextPageData);
