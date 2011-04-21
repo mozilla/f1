@@ -261,14 +261,14 @@ h3 {
 
 .widgets-AddAccount {
   width: 360px;
-  height: 96px;
+  height: 56px;
   box-sizing: border-box;
   margin: 14px;
   text-align: center;
 }
 
 .widgets-AddAccount .add {
-  margin: 50px 70px 50px 60px;
+  margin: 50px 70px 0px 60px;
 }
 
 .widgets-AddAccount .add label {
@@ -433,6 +433,10 @@ img.avatar {
 .widgets-AccountPanel .shareTypeSection.wide {
   float: none;
   width: 100%;
+}
+
+.widgets-AccountPanel .shareTypeSection .Select.open ul {
+  top: -20px;
 }
 
 .shareTypeSelectSection.fixedSize {
