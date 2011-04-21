@@ -1,0 +1,35 @@
+HTTP/1.1 200 OK
+status: 200
+content-location: http://api.linkedin.com/v1/people/~/connections?count=500&oauth_body_hash=K%2BiMpCQsduglOsYkdIUQZQMtaDM%3D&oauth_nonce999999&oauth_timestamp=1303186697&oauth_consumer_key=the_key&oauth_signature_method=HMAC-SHA1&oauth_version=1.0&oauth_token=the_token&oauth_signature=the_sig%3D
+vary: x-li-format,Accept-Encoding
+server: Apache-Coyote/1.1
+-content-encoding: gzip
+date: Tue, 19 Apr 2011 04:19:09 GMT
+x-li-format: json
+content-type: application/json;charset=UTF-8
+
+{
+  "values": [{
+    "headline": "Banking Professional",
+    "id": "11111111",
+    "lastName": "Reilly",
+    "location": {
+      "name": "Vancouver, Canada Area",
+      "country": {"code": "ca"}
+    },
+    "siteStandardProfileRequest": {"url": "http://www.linkedin.com/profile?viewProfile=&key=999999&authToken=xxxx&authType=name&trk=api*xxx*xxx*"},
+    "apiStandardProfileRequest": {
+      "headers": {
+        "values": [{
+          "name": "x-li-auth-token",
+          "value": "name:TVgH"
+        }],
+        "_total": 1
+      },
+      "url": "http://api.linkedin.com/v1/people/11111111"
+    },
+    "industry": "Banking",
+    "firstName": "Jean"
+  }],
+  "_total": 1
+}
