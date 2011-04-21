@@ -26,6 +26,13 @@
   window: false */
 "use strict";
 
+/**
+ * This module sets up a localStorage storage provider, to allow dev/testing
+ * the UI without needing the chrome storage. It is only loaded if the
+ * page that includes it explicitly loads it, currently done by setting
+ * the URL fragment ID to #test.
+ */
+
 define(['dispatch'], function (dispatch) {
 
   var sub = dispatch.sub,
