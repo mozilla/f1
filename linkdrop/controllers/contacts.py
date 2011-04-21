@@ -86,9 +86,7 @@ Name of the group to return.
         ],
         response={'type': 'object', 'doc': 'Portable Contacts Collection'})
     def get(self, domain):
-        group = request.POST.get('group', None)
-        startIndex = int(request.POST.get('startindex', '0'))
-        maxResults = int(request.POST.get('maxresults', '25'))
+        page_data = request.POST.get('pageData', None)
         account_data = request.POST.get('account', None)
 
         acct = None
@@ -103,10 +101,10 @@ Name of the group to return.
             }
             return {'result': None, 'error': error}
 
+        page_data = page_data and json.loads(page_data) or {}
         try:
             services = get_services()
-            result, error = services.getcontacts(domain, acct, startIndex,
-                                                 maxResults, group)
+            result, error = services.getcontacts(domain, acct, page_data)
         except DomainNotRegisteredError:
             error = {
                 'message': "'domain' is invalid",

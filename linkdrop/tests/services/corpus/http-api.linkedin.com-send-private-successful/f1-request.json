@@ -1,0 +1,11 @@
+{"domain": "linkedin.com",
+ "shareType": "contact",
+ "to": "ppppp",
+ "message": "nerdy just for you!",
+ "link": "http://slashdot.org/",
+ "title": "Slashdot: News for nerds, stuff that matters",
+ "account": {"oauth_token": "foo", 
+             "oauth_token_secret": "bar", 
+             "username": "mylinkedinid",
+             "verifiedEmail": "me@somewhere.com"}
+}

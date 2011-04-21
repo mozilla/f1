@@ -1,0 +1,8 @@
+HTTP/1.1 201 Created
+status: 201
+content-length: 0
+vary: Accept-Encoding
+server: Apache-Coyote/1.1
+location: http://api.linkedin.com/v1/people/pppppppp/shares/ssssssss
+date: Tue, 19 Apr 2011 07:11:40 GMT
+

@@ -1,0 +1,5 @@
+{
+    "protocol": "http", 
+    "reason": "automatic success save", 
+    "uri": "https://api.linkedin.com/uas/oauth/requestToken"
+}
