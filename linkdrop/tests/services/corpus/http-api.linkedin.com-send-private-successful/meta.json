@@ -1,0 +1,5 @@
+{
+    "protocol": "http", 
+    "reason": "automatic success save", 
+    "uri": "http://api.linkedin.com/v1/people/~/mailbox"
+}

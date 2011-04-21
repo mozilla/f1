@@ -1,0 +1,8 @@
+{"domain": "linkedin.com",
+ "shareType": "public",
+ "to": "anyone",
+ "message": "nerdy for anyone",
+ "link": "http://slashdot.org/",
+ "title": "Slashdot: News for nerds, stuff that matters",
+ "account": {"oauth_token": "foo", "oauth_token_secret": "bar", "username": "mylinkedinid"}
+}

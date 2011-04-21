@@ -1,0 +1,5 @@
+GET /uas/oauth/requestToken
+accept-encoding: gzip, deflate
+authorization: OAuth realm="", oauth_body_hash="2jmj7l5rSw0yVb%2FvlWAYkK%2FYBwk%3D", oauth_nonce="9999999", oauth_timestamp="1303186687", oauth_consumer_key="the_key", oauth_signature_method="HMAC-SHA1", oauth_version="1.0", oauth_signature="the_sig%3D", oauth_callback="http%3A%2F%2Flinkdrop.caraveo.com%3A5000%2Fapi%2Faccount%2Fverify%3Fprovider%3Dlinkedin.com"
+user-agent: Python-httplib2/$Rev$
+
