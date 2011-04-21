@@ -20,7 +20,8 @@ x-ratelimit-limit: 350
 content-type: application/json; charset=utf-8
 x-ratelimit-reset: 1302676561
 
-[
+{
+    "users": [
     {
         "follow_request_sent":false,
         "profile_background_image_url":"http:\/\/a3.twimg.com\/a\/1302541726\/images\/themes\/theme1\/bg.png",
@@ -99,4 +100,9 @@ x-ratelimit-reset: 1302676561
         "utc_offset":36000,
         "profile_background_color":"C0DEED"
     }
-]
+    ],
+    "next_cursor":0,
+    "previous_cursor":0,
+    "next_cursor_str":"0",
+    "previous_cursor_str":"0"    
+}
