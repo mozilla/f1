@@ -84,9 +84,7 @@ Name of the group to return.
         ],
         response={'type': 'object', 'doc': 'Portable Contacts Collection'})
     def get(self, domain):
-        group = request.POST.get('group', None)
-        startIndex = int(request.POST.get('startindex', '0'))
-        maxResults = int(request.POST.get('maxresults', '25'))
+        page_data = request.POST.get('pageData', None)
         account_data = request.POST.get('account', None)
         provider = get_provider(domain)
         if provider is None:
@@ -108,10 +106,9 @@ Name of the group to return.
             }
             return {'result': None, 'error': error}
 
+        page_data = page_data and json.loads(page_data) or {}
         try:
-            result, error = provider.api(acct).getcontacts(startIndex,
-                                                           maxResults,
-                                                           group)
+            result, error = provider.api(acct).getcontacts(page_data)
         except OAuthKeysException, e:
             # more than likely we're missing oauth tokens for some reason.
             error = {'provider': domain,
