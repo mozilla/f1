@@ -1,5 +1,5 @@
 {
     "protocol": "http", 
     "reason": "automatic success save", 
-    "uri": "http://api.linkedin.com/v1/people/~/connections?count=500"
+    "uri": "http://api.linkedin.com/v1/people/~/connections?count=25"
 }

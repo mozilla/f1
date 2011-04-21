@@ -19,9 +19,6 @@
                     }
                 ]
             }
-        ],
-        "itemsPerPage": 1,
-        "startIndex": 0,
-        "totalResults": 1
+        ]
     }
 }
