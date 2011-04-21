@@ -168,10 +168,10 @@ function (require,   $,        object,         fn,         rdapi,   oauth,
           accounts(
             function (accts) {
               if (!accts || !accts.length) {
-                showStatus('statusSettings');
+                tabButtonsDom.eq(0).click();
               }
             }, function (err) {
-              showStatus('statusSettings');
+              tabButtonsDom.eq(0).click();
             }
           );
         }
