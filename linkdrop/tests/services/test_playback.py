@@ -287,7 +287,7 @@ class ServiceReplayTestCase(TestController):
             request['code'] = "the_code"
             response = self.app.get(url(controller='account',
                                         action='verify'),
-                                     params=request)
+                                    params=request)
         else:
             raise AssertionError(req_type)
         return response
