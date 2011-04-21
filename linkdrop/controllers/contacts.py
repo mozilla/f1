@@ -31,7 +31,7 @@ from linkoauth.base import OAuthKeysException, ServiceUnavailableException
 
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response
-from linkdrop.lib.helpers import api_entry, api_arg
+from linkdrop.lib.helpers import api_entry, api_arg, get_passthrough_headers
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 
@@ -108,10 +108,12 @@ Name of the group to return.
             }
             return {'result': None, 'error': error}
 
+        headers = get_passthrough_headers(request)
         try:
             result, error = provider.api(acct).getcontacts(startIndex,
                                                            maxResults,
-                                                           group)
+                                                           group,
+                                                           headers)
         except OAuthKeysException, e:
             # more than likely we're missing oauth tokens for some reason.
             error = {'provider': domain,

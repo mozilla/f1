@@ -266,17 +266,16 @@ class ServiceReplayTestCase(TestController):
                     del expected[top][subname]
         assert_dicts_equal(got, expected)
 
-    def getResponse(self, canned, request):
-        req_type = canned.req_type
+    def getResponse(self, req_type, request, headers=None):
         if req_type == "send":
             response = self.app.post(url(controller='send', action='send'),
-                                    params=request)
+                                    params=request, headers=headers)
         elif req_type == "contacts":
             # send the 'contacts' request.
             domain = request.pop('domain')
             response = self.app.post(url(controller='contacts',
                                          action='get', domain=domain),
-                                     params=request)
+                                     params=request, headers=headers)
         elif req_type == "auth":
             # this is a little gross - we need to hit "authorize"
             # direct, then assume we got redirected to the service,
@@ -285,14 +284,14 @@ class ServiceReplayTestCase(TestController):
             request['end_point_auth_success'] = "/success"
             response = self.app.post(url(controller='account',
                                          action='authorize'),
-                                     params=request)
+                                     params=request, headers=headers)
             assert response.status_int == 302
             # and even more hacky...
             request['provider'] = request.pop('domain')
             request['code'] = "the_code"
             response = self.app.get(url(controller='account',
                                         action='verify'),
-                                     params=request)
+                                     params=request, headers=headers)
         else:
             raise AssertionError(req_type)
         return response
@@ -374,7 +373,16 @@ class GoogleReplayTestCase(ServiceReplayTestCase):
 
 class LinkedinReplayTestCase(ServiceReplayTestCase):
     def getDefaultRequest(self, req_type):
-        # No 'send' - all send tests have an f1-request.json file...
+        if req_type == "send":
+            account = {"oauth_token": "foo", "oauth_token_secret": "bar",
+                       "profile": {"emails": [{'value': 'me@example.com'}],
+                                   "displayName": "Me",
+                        },
+                      }
+            return {'domain': 'linkedin.com',
+                    'account': json.dumps(account),
+                    'to': 'you@example.com',
+                    }
         if req_type == "contacts":
             account = {"oauth_token": "foo", "oauth_token_secret": "bar",
                        "profile": {"emails": [{'value': 'me@example.com'}],
@@ -394,22 +402,22 @@ class LinkedinReplayTestCase(ServiceReplayTestCase):
         raise AssertionError(req_type)
 
 
-def setupReplayers():
+def setupReplayers(httpReplayer=HttpReplayer, smtpReplayer=SmtpReplayer):
     import linkoauth.facebook_
-    linkoauth.facebook_.HttpRequestor = HttpReplayer
+    linkoauth.facebook_.HttpRequestor = httpReplayer
     import linkoauth.yahoo_
-    linkoauth.yahoo_.HttpRequestor = HttpReplayer
+    linkoauth.yahoo_.HttpRequestor = httpReplayer
     import linkoauth.google_
-    linkoauth.google_.SMTPRequestor = SmtpReplayer
-    linkoauth.google_.OAuth2Requestor = HttpReplayer
+    linkoauth.google_.SMTPRequestor = smtpReplayer
+    linkoauth.google_.OAuth2Requestor = httpReplayer
     import linkoauth.twitter_
-    linkoauth.twitter_.OAuth2Requestor = HttpReplayer
+    linkoauth.twitter_.OAuth2Requestor = httpReplayer
     import linkoauth.linkedin_
-    linkoauth.linkedin_.OAuth2Requestor = HttpReplayer
+    linkoauth.linkedin_.OAuth2Requestor = httpReplayer
     import linkoauth.base
-    linkoauth.base.HttpRequestor = HttpReplayer
-    HttpReplayer.to_playback = []
-    SmtpReplayer.to_playback = None
+    linkoauth.base.HttpRequestor = httpReplayer
+    httpReplayer.to_playback = []
+    smtpReplayer.to_playback = None
 
 
 def teardownReplayers():
@@ -432,15 +440,25 @@ def teardownReplayers():
     linkoauth.base.HttpRequestor = linkoauth.protocap.HttpRequestor
 
 
-host_to_test = {
-    'graph.facebook.com': FacebookReplayTestCase,
-    'www.google.com': GoogleReplayTestCase,
-    'smtp.gmail.com': GoogleReplayTestCase,
-    'mail.yahooapis.com': YahooReplayTestCase,
-    'social.yahooapis.com': YahooReplayTestCase,
-    'api.twitter.com': TwitterReplayTestCase,
+host_to_domain = {
+    'graph.facebook.com': 'facebook.com',
+    'www.google.com': 'google.com',
+    'smtp.gmail.com': 'google.com',
+    'mail.yahooapis.com': 'yahoo.com',
+    'social.yahooapis.com': 'yahoo.com',
+    'api.twitter.com': 'twitter.com',
+    'twitter.com': 'twitter.com',
+    'api.linkedin.com': 'linkedin.com',
+}
+
+
+domain_to_test = {
+    'facebook.com': FacebookReplayTestCase,
+    'google.com': GoogleReplayTestCase,
+    'googleapps.com': GoogleReplayTestCase,
+    'yahoo.com': YahooReplayTestCase,
     'twitter.com': TwitterReplayTestCase,
-    'api.linkedin.com': LinkedinReplayTestCase,
+    'linkedin.com': LinkedinReplayTestCase,
 }
 
 
@@ -471,7 +489,8 @@ def queueForReplay(canned):
 
 
 def runOne(canned):
-    testClass = host_to_test[canned.host]
+    provider = host_to_domain[canned.host]
+    testClass = domain_to_test[provider]
     test = testClass()
     queueForReplay(canned)
     try:
@@ -481,7 +500,7 @@ def runOne(canned):
         request['account'] = json.dumps(request['account'])
     except IOError:
         request = test.getDefaultRequest(canned.req_type)
-    response = test.getResponse(canned, request)
+    response = test.getResponse(canned.req_type, request)
     test.checkResponse(canned, response)
 
 # *sob* - this used to use a nose "test generator", but that technique

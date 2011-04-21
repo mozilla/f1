@@ -35,7 +35,7 @@ from linkoauth.base import OAuthKeysException, ServiceUnavailableException
 
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response
-from linkdrop.lib.helpers import api_entry, api_arg
+from linkdrop.lib.helpers import api_entry, api_arg, get_passthrough_headers
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 from linkdrop.lib.shortener import shorten_link
@@ -162,8 +162,10 @@ Site provided description of the shared item, not supported by all services.
                                     short_url=shorturl,
                                     acct_id=acct_hash)
         # send the item.
+        headers = get_passthrough_headers(request)
         try:
-            result, error = provider.api(acct).sendmessage(message, args)
+            result, error = provider.api(acct).sendmessage(message, args,
+                                                           headers)
         except OAuthKeysException, e:
             # XXX - I doubt we really want a full exception logged here?
             #log.exception('error providing item to %s: %s', domain, e)

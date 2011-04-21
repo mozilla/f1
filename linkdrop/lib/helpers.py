@@ -125,6 +125,18 @@ def safeHTML(s):
 ## end of http://code.activestate.com/recipes/52281/ }}}
 
 
+# Fetch all of the headers in the originating request which we want to pass
+# on to the services.
+_PASSTHROUGH_HEADERS = ["Accept-Language"]
+def get_passthrough_headers(request):
+    headers = {}
+    for name in _PASSTHROUGH_HEADERS:
+        val = request.headers.get(name, None)
+        if val is not None:
+            headers[name] = val
+    return headers
+
+
 @decorator
 def json_exception_response(func, *args, **kwargs):
     try:
