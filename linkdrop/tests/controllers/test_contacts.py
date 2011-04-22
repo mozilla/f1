@@ -28,15 +28,16 @@ from mock import patch
 from nose import tools
 import json
 
+
 class TestContactsController(TestController):
     def setUp(self):
         self.req_patcher = patch('linkdrop.controllers.contacts.request')
-        self.gprov_patcher = patch(
-            'linkdrop.controllers.contacts.get_provider')
+        self.gserv_patcher = patch(
+            'linkdrop.controllers.contacts.get_services')
         self.metrics_patcher = patch(
             'linkdrop.controllers.contacts.metrics')
         self.req_patcher.start()
-        self.gprov_patcher.start()
+        self.gserv_patcher.start()
         self.metrics_patcher.start()
         contacts.request.POST = dict()
         self.controller = contacts.ContactsController()
@@ -44,14 +45,8 @@ class TestContactsController(TestController):
 
     def tearDown(self):
         self.req_patcher.stop()
-        self.gprov_patcher.stop()
+        self.gserv_patcher.stop()
         self.metrics_patcher.stop()
-
-    def test_get_no_provider(self):
-        contacts.get_provider.return_value = None
-        res = self.real_get(self.controller, 'example.com')
-        tools.ok_(res['result'] is None)
-        tools.eq_(res['error']['message'], "'domain' is invalid")
 
     def test_get_no_acct(self):
         domain = 'example.com'
@@ -69,12 +64,25 @@ class TestContactsController(TestController):
                                 'userid': 'USERID'})
         contacts.request.POST['account'] = acct_json
 
+    def test_get_no_provider(self):
+        from linkoauth.errors import DomainNotRegisteredError
+
+        def raise_domainnotregisterederror(*args):
+            raise DomainNotRegisteredError
+        mock_services = contacts.get_services()
+        mock_services.getcontacts.side_effect = raise_domainnotregisterederror
+        self._setup_acct_data()
+        res = self.real_get(self.controller, 'example.com')
+        tools.ok_(res['result'] is None)
+        tools.eq_(res['error']['message'], "'domain' is invalid")
+
     def test_get_oauthkeysexception(self):
-        from linkoauth.base import OAuthKeysException
+        from linkoauth.errors import OAuthKeysException
+
         def raise_oauthkeysexception(*args):
             raise OAuthKeysException('OAUTHKEYSEXCEPTION')
-        mock_getcontacts = contacts.get_provider().api().getcontacts
-        mock_getcontacts.side_effect = raise_oauthkeysexception
+        mock_services = contacts.get_services()
+        mock_services.getcontacts.side_effect = raise_oauthkeysexception
         domain = 'example.com'
         self._setup_acct_data()
         res = self.real_get(self.controller, domain)
@@ -87,11 +95,12 @@ class TestContactsController(TestController):
         tools.ok_(res['error']['message'].startswith('not logged in'))
 
     def test_get_serviceunavailexception(self):
-        from linkoauth.base import ServiceUnavailableException
+        from linkoauth.errors import ServiceUnavailableException
+
         def raise_servunavailexception(*args):
             raise ServiceUnavailableException('SERVUNAVAIL')
-        mock_getcontacts = contacts.get_provider().api().getcontacts
-        mock_getcontacts.side_effect = raise_servunavailexception
+        mock_services = contacts.get_services()
+        mock_services.getcontacts.side_effect = raise_servunavailexception
         domain = 'example.com'
         self._setup_acct_data()
         res = self.real_get(self.controller, domain)
@@ -107,8 +116,8 @@ class TestContactsController(TestController):
     def test_get_success(self):
         domain = 'example.com'
         self._setup_acct_data()
-        mock_getcontacts = contacts.get_provider().api().getcontacts
-        mock_getcontacts.return_value = ('SUCCESS', None)
+        mock_services = contacts.get_services()
+        mock_services.getcontacts.return_value = ('SUCCESS', None)
         res = self.real_get(self.controller, domain)
         tools.eq_(res['result'], 'SUCCESS')
         tools.ok_(res['error'] is None)

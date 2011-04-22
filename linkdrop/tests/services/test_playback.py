@@ -79,6 +79,7 @@ class ProtocolReplayer(object):
 
 class HttpReplayer(ProtocolReplayer):
     to_playback = []
+
     def request(self, uri, method="GET", body=None, headers=None, **kw):
         freq, fresp = self.to_playback.pop(0)
         if freq is not None:
@@ -96,12 +97,14 @@ class HttpReplayer(ProtocolReplayer):
                     if n.lower() == "content-type":
                         break
                 else:
-                    headers['Content-Type'] = "application/x-www-form-urlencoded"
+                    headers['Content-Type'] = ("application/"
+                                               "x-www-form-urlencoded")
             # We may wind up with the oauth stuff creating an 'Authorization'
             # header as unicode.  Force all headers back to a string and if
             # any blow up as being non-ascii, we have a deeper problem...
             gotheadersstr = "\r\n".join(
-                    ["%s: %s" % (n, v.encode("ascii")) for n, v in headers.iteritems()])
+                    ["%s: %s" % (n, v.encode("ascii"))
+                     for n, v in headers.iteritems()])
             bodystr = gotheadersstr + "\r\n\r\n" + (body or '')
             gotob = email.message_from_string(bodystr)
             if headers:
@@ -115,7 +118,7 @@ class HttpReplayer(ProtocolReplayer):
                     if hname.lower() in ["content-length", "content-type",
                                          "authorization"]:
                         continue
-                    # otherwise the header must match exactly.    
+                    # otherwise the header must match exactly.
                     eq_(hval, reqob[hname])
             # finally check the content (ie, the body) is as expected.
             assert_messages_equal(gotob, reqob)
@@ -127,7 +130,7 @@ class HttpReplayer(ProtocolReplayer):
         return httplib2.Response(resp), content
 
 
-from linkoauth.google_ import SMTP
+from linkoauth.backends.google_ import SMTP
 
 
 class SmtpReplayer(SMTP, ProtocolReplayer):
@@ -292,7 +295,7 @@ class ServiceReplayTestCase(TestController):
             request['code'] = "the_code"
             response = self.app.get(url(controller='account',
                                         action='verify'),
-                                     params=request)
+                                    params=request)
         else:
             raise AssertionError(req_type)
         return response
@@ -395,19 +398,19 @@ class LinkedinReplayTestCase(ServiceReplayTestCase):
 
 
 def setupReplayers():
-    import linkoauth.facebook_
-    linkoauth.facebook_.HttpRequestor = HttpReplayer
-    import linkoauth.yahoo_
-    linkoauth.yahoo_.HttpRequestor = HttpReplayer
-    import linkoauth.google_
-    linkoauth.google_.SMTPRequestor = SmtpReplayer
-    linkoauth.google_.OAuth2Requestor = HttpReplayer
-    import linkoauth.twitter_
-    linkoauth.twitter_.OAuth2Requestor = HttpReplayer
-    import linkoauth.linkedin_
-    linkoauth.linkedin_.OAuth2Requestor = HttpReplayer
-    import linkoauth.base
-    linkoauth.base.HttpRequestor = HttpReplayer
+    from linkoauth.backends import facebook_
+    facebook_.HttpRequestor = HttpReplayer
+    from linkoauth.backends import yahoo_
+    yahoo_.HttpRequestor = HttpReplayer
+    from linkoauth.backends import google_
+    google_.SMTPRequestor = SmtpReplayer
+    google_.OAuth2Requestor = HttpReplayer
+    from linkoauth.backends import twitter_
+    twitter_.OAuth2Requestor = HttpReplayer
+    from linkoauth.backends import linkedin_
+    linkedin_.OAuth2Requestor = HttpReplayer
+    import linkoauth.oauth
+    linkoauth.oauth.HttpRequestor = HttpReplayer
     HttpReplayer.to_playback = []
     SmtpReplayer.to_playback = None
 
@@ -416,20 +419,19 @@ def teardownReplayers():
     assert not HttpReplayer.to_playback, HttpReplayer.to_playback
     assert not SmtpReplayer.to_playback, SmtpReplayer.to_playback
     import linkoauth.protocap
-    import linkoauth.facebook_
-    linkoauth.facebook_.HttpRequestor = linkoauth.protocap.HttpRequestor
-    import linkoauth.yahoo_
-    linkoauth.yahoo_.HttpRequestor = linkoauth.protocap.HttpRequestor
-    import linkoauth.protocap
-    import linkoauth.google_
-    linkoauth.google_.SMTPRequestor = linkoauth.google_.SMTPRequestorImpl
-    linkoauth.google_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
-    import linkoauth.twitter_
-    linkoauth.twitter_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
-    import linkoauth.linkedin_
-    linkoauth.linkedin_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
-    import linkoauth.base
-    linkoauth.base.HttpRequestor = linkoauth.protocap.HttpRequestor
+    from linkoauth.backends import facebook_
+    facebook_.HttpRequestor = linkoauth.protocap.HttpRequestor
+    from linkoauth.backends import yahoo_
+    yahoo_.HttpRequestor = linkoauth.protocap.HttpRequestor
+    from linkoauth.backends import google_
+    google_.SMTPRequestor = google_.SMTPRequestorImpl
+    google_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
+    from linkoauth.backends import twitter_
+    twitter_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
+    from  linkoauth.backends import linkedin_
+    linkedin_.OAuth2Requestor = linkoauth.protocap.OAuth2Requestor
+    from linkoauth import oauth
+    oauth.HttpRequestor = linkoauth.protocap.HttpRequestor
 
 
 host_to_test = {
@@ -491,6 +493,7 @@ def runOne(canned):
 # % nosetests ... linkdrop/tests/services/test_playback.py:test_service_replay_http_www_google_com_auth_successful
 # to just run one specific test from the corpus.
 for canned in genCanned():
+
     @with_setup(setupReplayers, teardownReplayers)
     def decoratedRunOne(canned=canned):
         runOne(canned)

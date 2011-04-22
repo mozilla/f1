@@ -16,8 +16,8 @@ import pylons.test
 
 __all__ = ['environ', 'url', 'TestController', 'testable_services']
 
-testable_services = ["google.com", "yahoo.com", "facebook.com", "twitter.com",
-                     "linkedin.com"]
+testable_services = ["google.com", "facebook.com", "twitter.com",
+                     "linkedin.com", "yahoo.com"]
 
 # Invoke websetup with the current config file
 SetupCommand('setup-app').run(
