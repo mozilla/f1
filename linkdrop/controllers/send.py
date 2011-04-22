@@ -19,6 +19,7 @@
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
+#   Rob Miller (rmiller@mozilla.com)
 #
 
 import logging
@@ -30,9 +31,10 @@ import hashlib
 
 from pylons import request
 
-from linkoauth import get_provider
-from linkoauth.base import OAuthKeysException, ServiceUnavailableException
+from linkoauth.errors import (OAuthKeysException, ServiceUnavailableException,
+                              DomainNotRegisteredError)
 
+from linkdrop.controllers import get_services
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response
 from linkdrop.lib.helpers import api_entry, api_arg
@@ -124,13 +126,6 @@ Site provided description of the shared item, not supported by all services.
                 'code': constants.INVALID_PARAMS,
             }
             return {'result': result, 'error': error}
-        provider = get_provider(domain)
-        if provider is None:
-            error = {
-                'message': "'domain' is invalid",
-                'code': constants.INVALID_PARAMS,
-            }
-            return {'result': result, 'error': error}
 
         if account_data:
             acct = json.loads(account_data)
@@ -161,9 +156,17 @@ Site provided description of the shared item, not supported by all services.
                                     long_url=longurl,
                                     short_url=shorturl,
                                     acct_id=acct_hash)
-        # send the item.
+        # send the item
         try:
-            result, error = provider.api(acct).sendmessage(message, args)
+            services = get_services()
+            result, error = services.sendmessage(domain, acct, message,
+                                                 args)
+        except DomainNotRegisteredError:
+            error = {
+                'message': "'domain' is invalid",
+                'code': constants.INVALID_PARAMS,
+            }
+            return {'result': result, 'error': error}
         except OAuthKeysException, e:
             # XXX - I doubt we really want a full exception logged here?
             #log.exception('error providing item to %s: %s', domain, e)

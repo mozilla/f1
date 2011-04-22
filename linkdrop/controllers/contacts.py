@@ -19,6 +19,7 @@
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
+#   Rob Miller (rmiller@mozilla.com)
 #
 
 import logging
@@ -26,9 +27,10 @@ import json
 
 from pylons import request
 
-from linkoauth import get_provider
-from linkoauth.base import OAuthKeysException, ServiceUnavailableException
+from linkoauth.errors import (OAuthKeysException, ServiceUnavailableException,
+                              DomainNotRegisteredError)
 
+from linkdrop.controllers import get_services
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response
 from linkdrop.lib.helpers import api_entry, api_arg
@@ -86,13 +88,6 @@ Name of the group to return.
     def get(self, domain):
         page_data = request.POST.get('pageData', None)
         account_data = request.POST.get('account', None)
-        provider = get_provider(domain)
-        if provider is None:
-            error = {
-                'message': "'domain' is invalid",
-                'code': constants.INVALID_PARAMS,
-            }
-            return {'result': None, 'error': error}
 
         acct = None
         if account_data:
@@ -108,7 +103,15 @@ Name of the group to return.
 
         page_data = page_data and json.loads(page_data) or {}
         try:
-            result, error = provider.api(acct).getcontacts(page_data)
+            services = get_services()
+            result, error = services.getcontacts(domain, acct, page_data)
+        except DomainNotRegisteredError:
+            error = {
+                'message': "'domain' is invalid",
+                'code': constants.INVALID_PARAMS,
+            }
+            return {'result': None, 'error': error}
+
         except OAuthKeysException, e:
             # more than likely we're missing oauth tokens for some reason.
             error = {'provider': domain,
