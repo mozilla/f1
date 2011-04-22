@@ -30,7 +30,9 @@ from linkdrop.controllers.contacts import ContactsController
 from linkdrop.controllers.docs import DocsController
 from linkdrop.controllers.error import ErrorController
 from linkdrop.controllers.send import SendController
+from routes.util import URLGenerator
 from services.baseapp import set_app, SyncServerApp
+from webob.dec import wsgify
 
 urls = [
     ('GET', '/error/{action}', 'error', 'error_action'),
@@ -39,6 +41,8 @@ urls = [
     ('GET', '/send', 'send', 'send'),
     ('GET', '/account/get', 'account', 'get'),
     ('GET', '/account/get/full', 'account', 'get', {'domain': 'full'}),
+    ('POST', '/account/authorize', 'account', 'authorize'),
+    (('GET', 'POST'), '/account/verify', 'account', 'verify'),
     ('GET', '/contacts/{domain}', 'contacts', 'get'),
     ]
 
@@ -58,5 +62,13 @@ class ShareServerApp(SyncServerApp):
             raise ValueError("A ShareServerApp's ``auth_class`` must be None.")
         super(ShareServerApp, self).__init__(urls, controllers, config,
                                              auth_class, *args, **kwargs)
+
+    @wsgify
+    def __call__(self, request, *args, **kwargs):
+        """Construct an URLGenerator"""
+        request.url = URLGenerator(self.mapper, request.environ)
+        superclass = super(ShareServerApp, self)
+        return superclass.__call__.undecorated(request, *args, **kwargs)
+
 
 make_app = set_app(urls, controllers, klass=ShareServerApp, auth_class=None)
