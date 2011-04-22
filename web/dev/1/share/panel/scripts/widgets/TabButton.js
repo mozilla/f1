@@ -21,22 +21,23 @@
  * Contributor(s):
  * */
 
-/*jslint indent: 2 */
-/*global define: false */
+/*jslint indent: 2, plusplus: false, nomen: false */
+/*global define: false, document: false */
 "use strict";
 
-define([ 'blade/object', './AccountPanel', 'jquery'],
-function (object,         AccountPanel,     $) {
-  /**
-   * Just overrides a text string.
-   */
-  return object(AccountPanel, null, function (parent) {
+define([ 'blade/object', 'blade/fn', 'blade/Widget', 'module', 'Select',
+         'services', 'jquery', 'text!./TabButton.html'],
+function (object,         fn,         Widget,         module,   Select,
+          services,   $,        template) {
+
+  var className = module.id.replace(/\//g, '-');
+
+
+  //Define the widget.
+  return object(Widget, null, function (parent) {
     return {
-      onRender: function () {
-        parent(this, "onRender", arguments);
-        //Add styling to last item in "visible to" dropdown
-        $('option[value="contact"]', this.bodyNode).addClass('lineSeparatorOption');
-      }
+      template: template,
+      className: className
     };
   });
 });

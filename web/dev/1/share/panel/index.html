@@ -1,37 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>F1: Popup</title>
+    <title>Share</title>
     <link rel="stylesheet" type="text/css" href="/dev/1/share/panel/style.css">
-    <script data-main="/dev/1/share/panel/index.js" src="/dev/1/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+    <script src="/dev/1/scripts/requireplugins-jquery.js" charset="utf-8"></script>
+    <script>
+      require({
+        baseUrl: '/dev/1/scripts',
+        paths: {
+          widgets: '../share/panel/scripts/widgets'
+        }
+      });
+
+      // Allow tests to plug into the page by notify them if this is a test.
+      if (location.hash === '#test') {
+        parent.postMessage(JSON.stringify({topic: 'registerForTests'}),
+                           location.protocol + "//" + location.host);
+
+        require({
+          priority: ['fakeStorage']
+        });
+      }
+      require(['/dev/1/share/panel/index.js']);
+    </script>
 </head>
 <body>
 
-<noscript>
+  <noscript>
     Please enable JavaScript to use F1. If you are using NoScript or another script
     blocking add-on, please allow "mozillamessaging.com" and try again.
-</noscript>
+  </noscript>
 
-<div id="wrapper">
-  <div id="shareui" class="hidden">
-    <header class="hbox">
-        <h1 id="panelHeader" class="boxFlex">Mozilla F1</h1>
-        <nav>
-            <ul>
-                <li id="newLink" class="hidden"><a href="/dev/1/settings/#show=new" class="settingsLink new" target="_blank">new accounts!</a></li>
-                <li><a href="/dev/1/settings/" class="configureToggle" target="f1.settings">settings</a></li>
-                <li id="closeLink"><span class="close"></span></li>
-            </ul>
-        </nav>
-    </header>
-
-    <div class="sharebox">
-
-      <div id="accounts">
-      </div>
-
+  <div id="wrapper" class="wrapper hbox">
+    <div id="tabs">
     </div>
-
+    <div id="tabContent">
+    </div>
   </div>
 
   <!-- Click blocker for status messages. Should be before status messages but
@@ -39,17 +43,6 @@
   <div id="clickBlock" class="hidden"></div>
 
   <!-- Start status messages -->
-
-  <div id="statusSettings" class="status hidden noConfig">
-    <table>
-      <tr>
-        <td>
-          <img src="/dev/1/share/i/f1-icon-grey.png"> <a target="_blank" class="settingsLink" href="/dev/1/settings/">click here to setup F1</a>
-        </td>
-      </tr>
-    </table>
-  </div>
-
   <div id="statusSharing" class="status hidden">
     <table>
       <tr>
@@ -186,23 +179,21 @@
       </tr>
     </table>
   </div>
-
   <!-- End status messages -->
 
-</div>
 
-<!-- Start templates -->
-<script id="sharedTemplate" type="text/template">
-      <table>
-        <tr>
-          <td>
-            Link shared from <span class="shareDomain">{domain}</span> to <a href="{href}" target="_blank">{service}</a>
-          </td>
-        </tr>
-      </table>
-</script>
-<!-- End templates -->
 
+  <!-- Start templates -->
+  <script id="sharedTemplate" type="text/template">
+        <table>
+          <tr>
+            <td>
+              Link shared from <span class="shareDomain">{domain}</span> to <a href="{href}" target="_blank">{service}</a>
+            </td>
+          </tr>
+        </table>
+  </script>
+  <!-- End templates -->
 
 </body>
 </html>
