@@ -63,7 +63,7 @@ setup(
     paster_plugins=['PasteScript', 'Pylons'],
     entry_points="""
     [paste.app_factory]
-    main = linkdrop.config.middleware:make_app
+    main = linkdrop.wsgiapp:make_app
     static = linkdrop.static:make_static
 
     [paste.filter_app_factory]
@@ -72,7 +72,7 @@ setup(
     profiler = linkdrop.debug:make_profile_middleware
 
     [paste.app_install]
-    main = pylons.util:PylonsInstaller
+    main = paste.script.appinstall:Installer
     """,
 )
 
