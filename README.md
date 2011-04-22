@@ -40,6 +40,9 @@ And it points to gcc-4.2, then change it to point to gcc-4.0 (warning affects al
 
 Info taken from [this web site](http://blog.coredumped.org/2009/09/snow-leopard-and-lxml.html)
 
+### Start the virtualenv
+
+    source bin/activate
 
 ### Running f1
 
