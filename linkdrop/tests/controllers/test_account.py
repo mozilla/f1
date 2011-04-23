@@ -99,11 +99,8 @@ class TestAccountController(TestController):
         self.request.config = dict(oauth_failure='http://example.com/foo#bar')
         mock_services = account.get_services()
         errmsg = 'ACCESSEXCEPTION'
-
-        def raise_access_exception(*args):
-            from linkoauth.errors import AccessException
-            raise AccessException(errmsg)
-        mock_services.verify.side_effect = raise_access_exception
+        from linkoauth.errors import AccessException
+        mock_services.verify.side_effect = AccessException(errmsg)
         mock_resp = mock_get_redirect_response()
         mock_resp.exception = MockException()
         tools.assert_raises(HTTPFound, self.controller.verify,
@@ -120,10 +117,7 @@ class TestAccountController(TestController):
         from linkdrop.controllers.account import HTTPException
         url = 'http://example.com/redirect'
         exc = HTTPException(url, None)
-
-        def raise_http_exception(*args):
-            raise exc
-        mock_services.verify.side_effect = raise_http_exception
+        mock_services.verify.side_effect = exc
         tools.assert_raises(HTTPException, self.controller.verify,
                             self.request)
         errmsg = "account verification for %s caused a redirection: %s"
