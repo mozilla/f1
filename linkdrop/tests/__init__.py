@@ -1,27 +1,35 @@
-"""Pylons application test package
+# ***** BEGIN LICENSE BLOCK *****
+# Version: MPL 1.1
+#
+# The contents of this file are subject to the Mozilla Public License Version
+# 1.1 (the "License"); you may not use this file except in compliance with
+# the License. You may obtain a copy of the License at
+# http://www.mozilla.org/MPL/
+#
+# Software distributed under the License is distributed on an "AS IS" basis,
+# WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+# for the specific language governing rights and limitations under the
+# License.
+#
+# The Original Code is Raindrop.
+#
+# The Initial Developer of the Original Code is
+# Mozilla Messaging, Inc..
+# Portions created by the Initial Developer are Copyright (C) 2009
+# the Initial Developer. All Rights Reserved.
+#
+# Contributor(s):
+#    Rob Miller <rmiller@mozilla.com>
+#
+# ***** END LICENSE BLOCK *****
 
-This package assumes the Pylons environment is already loaded, such as
-when this script is imported from the `nosetests --with-pylons=test.ini`
-command.
-
-This module initializes the application via ``websetup`` (`paster
-setup-app`) and provides the base testing objects.
-"""
-from paste.script.appinstall import SetupCommand
-from pylons import url
-from routes.util import URLGenerator
+from paste.deploy import loadapp
 from webtest import TestApp
 
-import pylons.test
-
-__all__ = ['environ', 'url', 'TestController', 'testable_services']
+__all__ = ['environ', 'TestController', 'testable_services']
 
 testable_services = ["google.com", "facebook.com", "twitter.com",
                      "linkedin.com", "yahoo.com"]
-
-# Invoke websetup with the current config file
-SetupCommand('setup-app').run(
-    [pylons.test.pylonsapp.application.wrap_app.app.config['__file__']])
 
 # oh, this is just insane - re-enable all 'linkdrop' child loggers
 # due to http://bugs.python.org/issue11424 and the fact we have a logger
@@ -40,7 +48,5 @@ environ = {}
 # nose features don't work with such classes.
 class TestController(object):
     def __init__(self, *args, **kwargs):
-        wsgiapp = pylons.test.pylonsapp
-        config = wsgiapp.config
-        self.app = TestApp(wsgiapp)
-        url._push_object(URLGenerator(config['routes.map'], environ))
+        app = loadapp('config:test.ini', relative_to='.')
+        self.app = TestApp(app)
