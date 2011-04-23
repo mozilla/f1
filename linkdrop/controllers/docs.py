@@ -21,7 +21,6 @@
 # Contributor(s):
 #
 
-import logging
 import imp
 import sys
 import inspect
@@ -30,9 +29,6 @@ from docutils import core
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response
 from linkdrop.lib.helpers import api_response, api_entry
-from pylons import config
-
-log = logging.getLogger(__name__)
 
 
 def reST_to_html_fragment(a_str):
@@ -109,9 +105,9 @@ Returns a json object containing documentation
         response={'type': 'object',
                   'doc': ('An object that describes the API '
                           'methods and parameters.')})
-    def index(self):
+    def index(self, request):
         # iterate through our routes and get the controller classes
-        mapper = config['routes.map']
+        mapper = self.app.config['routes.map']
         module_names = {}
         for m in mapper.matchlist:
             module_name = m.defaults.get('controller', None)
