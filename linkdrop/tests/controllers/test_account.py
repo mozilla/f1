@@ -39,14 +39,19 @@ class TestAccountController(TestController):
     def setUp(self):
         self.log_patcher = patch('linkdrop.controllers.account.log')
         self.gserv_patcher = patch('linkdrop.controllers.account.get_services')
+        self.httpf_patcher = patch('linkdrop.controllers.account.HTTPFound')
         self.log_patcher.start()
         self.gserv_patcher.start()
+        self.httpf_patcher.start()
+        # funky hoop we jump through so we can tell what location gets passed
+        account.HTTPFound.side_effect = HTTPFound
         self.request = Mock()
         self.controller = account.AccountController(self.app)
 
     def tearDown(self):
         self.log_patcher.stop()
         self.gserv_patcher.stop()
+        self.httpf_patcher.stop()
 
     def test_authorize(self):
         provider = 'example.com'
@@ -78,9 +83,9 @@ class TestAccountController(TestController):
         mock_services.verify.assert_called_with(
             provider, self.request, self.request.url,
             self.request.environ.get('beaker.session'))
-        #errmsg = 'error=Unable+to+get+OAUTH+access'
-        #mock_redirect.assert_called_with(
-        #    'http://example.com/foo?%s#bar' % errmsg)
+        errmsg = 'error=Unable+to+get+OAUTH+access'
+        account.HTTPFound.assert_called_with(
+            location='http://example.com/foo?%s#bar' % errmsg)
 
         # now with oauth token -> verify success
         mock_user = dict(profile={'accounts': ({'userid': 'USERID',
@@ -105,8 +110,8 @@ class TestAccountController(TestController):
         mock_resp.exception = MockException()
         tools.assert_raises(HTTPFound, self.controller.verify,
                             self.request)
-        #mock_redirect.assert_called_with(
-        #    'http://example.com/foo?error=%s#bar' % errmsg)
+        account.HTTPFound.assert_called_with(
+            location='http://example.com/foo?error=%s#bar' % errmsg)
 
     @patch('linkdrop.controllers.account.get_redirect_response')
     def test_verify_http_exception(self, mock_get_redirect_response):
