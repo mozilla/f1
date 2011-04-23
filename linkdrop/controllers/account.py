@@ -103,7 +103,7 @@ OAuth authorization api.
             raise
         except Exception, e:
             log.exception('failed to verify the %s account', provider)
-            self._redirectException(e)
+            self._redirectException(request, e)
         resp = get_redirect_response(request.config.get('oauth_success'))
         resp.set_cookie('account_tokens', urllib.quote(json.dumps(acct)))
         raise resp.exception
