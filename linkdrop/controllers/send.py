@@ -21,6 +21,7 @@
 # Contributor(s):
 #   Rob Miller (rmiller@mozilla.com)
 #
+# ***** END LICENSE BLOCK *****
 
 import logging
 import json
@@ -28,8 +29,6 @@ import copy
 from urlparse import urlparse
 from paste.deploy.converters import asbool
 import hashlib
-
-from pylons import request
 
 from linkoauth.errors import (OAuthKeysException, ServiceUnavailableException,
                               DomainNotRegisteredError)
@@ -107,7 +106,7 @@ Site provided description of the shared item, not supported by all services.
 """),
         ],
         response={'type': 'list', 'doc': 'raw data list'})
-    def send(self):
+    def send(self, request):
         result = {}
         error = None
         acct = None
