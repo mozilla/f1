@@ -19,15 +19,47 @@
 # the Initial Developer. All Rights Reserved.
 #
 # Contributor(s):
+#   Rob Miller (rmiller@mozilla.com)
 #
+# ***** END LICENSE BLOCK *****
 
 import cgi
 
 from paste.urlparser import PkgResourcesParser
-from pylons.middleware import error_document_template
 from webhelpers.html.builder import literal
-
 from linkdrop.lib.base import BaseController
+
+
+error_document_template = literal("""\
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+ <title>Server Error %(code)s</title>
+<!-- CSS Imports -->
+<link rel="stylesheet" href="%(prefix)s/error/style/black.css" type="text/css"
+      media="screen" />
+
+<!-- Favorite Icons -->
+<link rel="icon" href="%(prefix)s/error/img/favicon.ico" type="image/png" />
+
+<style type="text/css">
+        .red {
+            color:#FF0000;
+        }
+        .bold {
+            font-weight: bold;
+        }
+</style>
+</head>
+
+<body>
+    <div id="container">
+        %(message)s
+    </div>
+</body>
+</html>
+""")
 
 
 class ErrorController(BaseController):
