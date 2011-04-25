@@ -17,13 +17,13 @@ class TestContactsInvalidParams(TestController):
                                "displayName": "Me",
                     },
                   }
-        result = {'domain': 'google.com',
-                  'account': json.dumps(account),
-                  'to': 'you@example.com',
+        request = {'domain': 'google.com',
+                   'account': json.dumps(account),
+                   'to': 'you@example.com',
                 }
         for elt in except_for:
-            del result[elt]
-        return result
+            del request[elt]
+        return request
 
     def checkContacts(self, request,
                   expected_message=None,
