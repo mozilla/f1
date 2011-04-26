@@ -52,14 +52,11 @@ and love. F1 is made by Mozilla Messaging.
 %build
 export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
 CFLAGS="%{optflags}" %{__python}%{pyver} setup.py build
-make web PYTHON=%{__python}%{pyver}
 
 %install
 export PYTHONPATH=$(pwd):%{f1_prefix}%{python_sitelib}:%{f1_prefix}%{python_sitearch}
 rm -rf %{buildroot}
 %{__python}%{pyver} setup.py install --single-version-externally-managed -O1 --root=$RPM_BUILD_ROOT --prefix %{f1_prefix} --record=INSTALLED_FILES
-%{__install} -m 755 -d %{buildroot}%{_var}/www/f1
-rsync -a web/ %{buildroot}%{_var}/www/f1/
 %{__install} -m 755 -d %{buildroot}%{_sysconfdir}/f1
 %{__install} -m 644 *.ini %{buildroot}%{_sysconfdir}/f1/
 
@@ -73,12 +70,13 @@ rsync -a web/ %{buildroot}%{_var}/www/f1/
 rm -rf %{buildroot}
 
 %files -f INSTALLED_FILES
-%{_var}/www/f1
 %config(noreplace) %{_sysconfdir}/f1/*ini
 %defattr(-,root,root,-)
 %doc README.md LICENSE PKG-INFO docs/
 
 %changelog
+* Tue Apr 26 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.7dev-7
+- Remove web content, moved to mozilla-f1-web
 * Wed Apr 20 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.7dev-6
 - Compile web content before packaging (make web)
 * Thu Apr 14 2011 Philippe M. Chiasson <gozer@mozillamessaging.com> - 0.3.7dev-2
