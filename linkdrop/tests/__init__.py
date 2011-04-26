@@ -23,6 +23,7 @@
 #
 # ***** END LICENSE BLOCK *****
 
+from beaker.session import Session
 from linkdrop.wsgiapp import ShareServerApp
 from nose.tools import ok_
 from paste.deploy import loadapp
@@ -55,4 +56,6 @@ class TestController(object):
         outer_app = loadapp('config:test.ini', relative_to='.')
         self.app = outer_app.app.application
         ok_(self.app.__class__ is ShareServerApp)
-        self.test_app = TestApp(self.app)
+        session = Session(dict())
+        self.test_app = TestApp(self.app, extra_environ={'beaker.session':
+                                                         session})
