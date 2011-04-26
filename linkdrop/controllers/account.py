@@ -65,7 +65,8 @@ OAuth authorization api.
         log.info("authorize request for %r", provider)
         services = get_services(self.app.config)
         session = request.environ.get('beaker.session', {})
-        return services.request_access(provider, request, request.url, session)
+        return services.request_access(provider, request, request.urlgen,
+                                       session)
 
     # this is not a rest api
     def verify(self, request, *args, **kw):
@@ -76,7 +77,7 @@ OAuth authorization api.
         try:
             services = get_services(self.app.config)
             session = request.environ.get('beaker.session', {})
-            user = services.verify(provider, request, request.url, session)
+            user = services.verify(provider, request, request.urlgen, session)
 
             account = user['profile']['accounts'][0]
             if (not user.get('oauth_token')

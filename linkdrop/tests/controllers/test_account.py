@@ -62,7 +62,7 @@ class TestAccountController(TestController):
         account.get_services.assert_called_once()
         mock_services = account.get_services()
         mock_services.request_access.assert_called_once_with(
-            provider, self.request, self.request.url,
+            provider, self.request, self.request.urlgen,
             self.request.environ.get('beaker.session'))
 
     @patch('linkdrop.controllers.account.metrics')
@@ -81,7 +81,7 @@ class TestAccountController(TestController):
         tools.assert_raises(HTTPFound, self.controller.verify,
                             self.request)
         mock_services.verify.assert_called_with(
-            provider, self.request, self.request.url,
+            provider, self.request, self.request.urlgen,
             self.request.environ.get('beaker.session'))
         errmsg = 'error=Unable+to+get+OAUTH+access'
         account.HTTPFound.assert_called_with(
