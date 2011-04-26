@@ -17,7 +17,7 @@
 %global python_sitelib /lib/python%{python_version}/site-packages
 %global python_sitearch /%{_lib}/python%{python_version}/site-packages
 
-Name:           %{f1_name_prefix}python%{pyver_sys}
+Name:           %{f1_name_prefix}python%{pyver}
 Version:        %%version%%
 Release:        6%%git%%%{?dist}
 Summary:        Share Links Fast.
