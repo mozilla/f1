@@ -30,6 +30,7 @@ from linkdrop.controllers.contacts import ContactsController
 from linkdrop.controllers.docs import DocsController
 from linkdrop.controllers.error import ErrorController
 from linkdrop.controllers.send import SendController
+from linkoauth.util import setup_config
 from routes.util import URLGenerator
 from services.baseapp import set_app, SyncServerApp
 from webob.dec import wsgify
@@ -60,6 +61,7 @@ class ShareServerApp(SyncServerApp):
                  *args, **kwargs):
         if auth_class is not None:
             raise ValueError("A ShareServerApp's ``auth_class`` must be None.")
+        setup_config(config)
         super(ShareServerApp, self).__init__(urls, controllers, config,
                                              auth_class, *args, **kwargs)
 
