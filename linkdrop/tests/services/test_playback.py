@@ -12,9 +12,9 @@ from urlparse import parse_qsl
 from pprint import pformat
 from nose.tools import eq_
 from nose import with_setup
+from routes.util import URLGenerator
 
 from linkdrop.tests import TestController
-from linkdrop.tests import url
 
 
 def assert_dicts_equal(got, expected):
@@ -270,32 +270,33 @@ class ServiceReplayTestCase(TestController):
         assert_dicts_equal(got, expected)
 
     def getResponse(self, canned, request):
+        url = URLGenerator(self.app.mapper, dict(HTTP_HOST='localhost'))
         req_type = canned.req_type
         if req_type == "send":
-            response = self.app.post(url(controller='send', action='send'),
-                                    params=request)
+            response = self.test_app.post(url(
+                controller='send', action='send'), params=request)
         elif req_type == "contacts":
             # send the 'contacts' request.
             domain = request.pop('domain')
-            response = self.app.post(url(controller='contacts',
-                                         action='get', domain=domain),
-                                     params=request)
+            response = self.test_app.post(url(controller='contacts',
+                                              action='get', domain=domain),
+                                          params=request)
         elif req_type == "auth":
             # this is a little gross - we need to hit "authorize"
             # direct, then assume we got redirected to the service,
             # which then redirected us back to 'verify'
             request['end_point_auth_failure'] = "/failure"
             request['end_point_auth_success'] = "/success"
-            response = self.app.post(url(controller='account',
-                                         action='authorize'),
-                                     params=request)
+            response = self.test_app.post(url(controller='account',
+                                              action='authorize'),
+                                          params=request)
             assert response.status_int == 302
             # and even more hacky...
             request['provider'] = request.pop('domain')
             request['code'] = "the_code"
-            response = self.app.get(url(controller='account',
-                                        action='verify'),
-                                    params=request)
+            response = self.test_app.get(url(controller='account',
+                                             action='verify'),
+                                         params=request)
         else:
             raise AssertionError(req_type)
         return response

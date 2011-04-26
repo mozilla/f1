@@ -23,6 +23,8 @@
 #
 # ***** END LICENSE BLOCK *****
 
+from linkdrop.wsgiapp import ShareServerApp
+from nose.tools import ok_
 from paste.deploy import loadapp
 from webtest import TestApp
 
@@ -48,5 +50,9 @@ environ = {}
 # nose features don't work with such classes.
 class TestController(object):
     def __init__(self, *args, **kwargs):
-        app = loadapp('config:test.ini', relative_to='.')
-        self.app = TestApp(app)
+        # have to do a bit of digging to get to the app object that we actually
+        # care about :P
+        outer_app = loadapp('config:test.ini', relative_to='.')
+        self.app = outer_app.app.application
+        ok_(self.app.__class__ is ShareServerApp)
+        self.test_app = TestApp(self.app)

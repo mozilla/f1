@@ -6,8 +6,8 @@ from linkdrop.lib import constants
 
 from linkdrop.tests import TestController
 from linkdrop.tests import testable_services
-from linkdrop.tests import url
 from nose.tools import eq_
+from routes.util import URLGenerator
 
 
 class TestContactsInvalidParams(TestController):
@@ -34,10 +34,10 @@ class TestContactsInvalidParams(TestController):
         # you must give *something* to check!
         assert expected_message or expected_code or expected_status
         domain = request.pop('domain')
-        response = self.app.post(url(controller='contacts', action='get',
-                                     domain=domain),
-                                 params=request)
-
+        url = URLGenerator(self.app.mapper, dict(HTTP_HOST='localhost'))
+        response = self.test_app.post(url(controller='contacts', action='get',
+                                          domain=domain),
+                                      params=request)
         assert response.status_int == expected_http_code, response.status_int
         try:
             got = json.loads(response.body)
