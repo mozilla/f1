@@ -66,7 +66,7 @@ class ShareServerApp(SyncServerApp):
     @wsgify
     def __call__(self, request, *args, **kwargs):
         """Construct an URLGenerator"""
-        request.url = URLGenerator(self.mapper, request.environ)
+        request.urlgen = URLGenerator(self.mapper, request.environ)
         superclass = super(ShareServerApp, self)
         return superclass.__call__.undecorated(request, *args, **kwargs)
 
