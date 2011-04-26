@@ -38,12 +38,12 @@ urls = [
     ('GET', '/error/{action}', 'error', 'error_action'),
     ('GET', '/error/{action}/{id}', 'error', 'error_action'),
     ('GET', '/docs', 'docs', 'index'),
-    ('GET', '/send', 'send', 'send'),
+    ('POST', '/send', 'send', 'send'),
     ('GET', '/account/get', 'account', 'get'),
     ('GET', '/account/get/full', 'account', 'get', {'domain': 'full'}),
     ('POST', '/account/authorize', 'account', 'authorize'),
     (('GET', 'POST'), '/account/verify', 'account', 'verify'),
-    ('GET', '/contacts/{domain}', 'contacts', 'get'),
+    ('POST', '/contacts/{domain}', 'contacts', 'get'),
     ]
 
 controllers = {'account': AccountController,
