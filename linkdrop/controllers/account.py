@@ -63,7 +63,7 @@ OAuth authorization api.
     def authorize(self, request, *args, **kw):
         provider = request.POST['domain']
         log.info("authorize request for %r", provider)
-        services = get_services()
+        services = get_services(self.app.config)
         session = request.environ.get('beaker.session', {})
         return services.request_access(provider, request, request.url, session)
 
@@ -74,7 +74,7 @@ OAuth authorization api.
 
         acct = dict()
         try:
-            services = get_services()
+            services = get_services(self.app.config)
             session = request.environ.get('beaker.session', {})
             user = services.verify(provider, request, request.url, session)
 

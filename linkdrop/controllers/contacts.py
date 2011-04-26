@@ -99,7 +99,7 @@ Name of the group to return.
 
         page_data = page_data and json.loads(page_data) or {}
         try:
-            services = get_services()
+            services = get_services(self.app.config)
             result, error = services.getcontacts(domain, acct, page_data)
         except DomainNotRegisteredError:
             error = {

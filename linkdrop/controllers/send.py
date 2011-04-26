@@ -157,7 +157,7 @@ Site provided description of the shared item, not supported by all services.
                                     acct_id=acct_hash)
         # send the item
         try:
-            services = get_services()
+            services = get_services(self.app.config)
             result, error = services.sendmessage(domain, acct, message,
                                                  args)
         except DomainNotRegisteredError:
