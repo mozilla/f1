@@ -28,7 +28,6 @@ Application entry point.
 from linkdrop.controllers.account import AccountController
 from linkdrop.controllers.contacts import ContactsController
 from linkdrop.controllers.docs import DocsController
-from linkdrop.controllers.error import ErrorController
 from linkdrop.controllers.send import SendController
 from linkoauth.util import setup_config
 from routes.util import URLGenerator
@@ -36,8 +35,6 @@ from services.baseapp import set_app, SyncServerApp
 from webob.dec import wsgify
 
 urls = [
-    ('GET', '/error/{action}', 'error', 'error_action'),
-    ('GET', '/error/{action}/{id}', 'error', 'error_action'),
     ('GET', '/docs', 'docs', 'index'),
     ('POST', '/send', 'send', 'send'),
     ('GET', '/account/get', 'account', 'get'),
@@ -50,7 +47,6 @@ urls = [
 controllers = {'account': AccountController,
                'contacts': ContactsController,
                'docs': DocsController,
-               'error': ErrorController,
                'send': SendController,
                }
 
