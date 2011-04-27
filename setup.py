@@ -39,7 +39,10 @@ setup(
     author_email='linkdrop@googlegroups.com',
     url='http://f1.mozillamessaging.com/',
     install_requires=[
+        "PasteScript>=1.6.3",
+        "beaker",
         "services",
+        "decorator",
         "docutils",
         "nose",
         "coverage",
@@ -51,7 +54,6 @@ setup(
         "python-memcached",
         "linkoauth",
     ],
-    setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),
     include_package_data=True,
     test_suite='nose.collector',
