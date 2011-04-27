@@ -25,21 +25,12 @@ Some directory explanations:
 
     make build
 
-If you get this error on Mac OS X:
+If you are on OS X and you get errors or it does not work, see the OS X troubleshooting
+section below.
 
-    /Developer/SDKs/MacOSX10.4u.sdk/usr/include/stdarg.h:4:25: error: stdarg.h: No such file or directory
+### Start the virtualenv
 
-It could be because the default version of GCC is too high. If you do
-
-    ls -la /usr/bin/gcc
-
-And it points to gcc-4.2, then change it to point to gcc-4.0 (warning affects all gcc calls from then on):
-
-    sudo rm /usr/bin/gcc
-    sudo ln -s /usr/bin/gcc-4.0 /usr/bin/gcc
-
-Info taken from [this web site](http://blog.coredumped.org/2009/09/snow-leopard-and-lxml.html)
-
+    source bin/activate
 
 ### Running f1
 
@@ -49,6 +40,43 @@ Run the web server. 'reload' is useful for development, the webserver restarts o
 
 Then visit: [http://127.0.0.1:5000/](http://127.0.0.1:5000/) for an index of api examples
 
+## Troubleshooting OS X installs
+
+If the **make build** command produced errors or results in not being able to start
+up the server, use the following steps. It is suggested you re-clone F1 before
+doing the following steps, so that it starts out with a clean environment.
+
+1. Make sure XCode 3 is installed.
+
+2. Build your own version of Python:
+
+    sudo svn co http://svn.plone.org/svn/collective/buildout/python/
+    sudo chown -R $USER ./python
+    cd python
+    vi buildout.cfg: then remove any references to python 2.4 and 2.5
+    python bootstrap.py
+    ./bin/buildout
+    cd /usr/local/bin
+    sudo ln -s /opt/python/bin/virtualenv-2.6 virtualenv
+
+3. Now edit your .profile to make sure that if you have MacPorts installed, its PATH and MANPATH variables
+are last in the list for those environment variables.
+
+I also removed export PYTHONPATH=/Users/aaa/hg/raindrop/server/python:$PYTHONPATH
+and removed /Library/Frameworks/Python.framework/Versions/Current/bin from the $PATH variable.
+
+4. Build C libraries via Homebrew:
+
+Homebrew installs into /usr/local by default, and it is best if you chown the files in there to you:
+
+    sudo chown -R $USER /usr/local
+
+If installed things before in these directories, remove these directories: /usr/local/include and /usr/local/lib
+
+    ruby -e "$(curl -fsSLk https://gist.github.com/raw/323731/install_homebrew.rb)"
+    brew install memcached libmemcached
+
+Then try the **make build** command above and continue from there.
 
 ## Setting up a valid Google domain for OpenID+OAuth
 

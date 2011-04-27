@@ -30,13 +30,6 @@ define(['dispatch'], function (dispatch) {
       callbacks = {},
       store;
 
-  // Temporary workaround to allow separate tab of settings to still have
-  // access to the chrome storage. Not a good idea to do long term.
-  if (opener && !opener.closed && opener.require &&
-      (store = opener.require('storage'))) {
-    return store;
-  }
-
   store = {
     get: function (key, callback) {
       var keyCallbacks;

@@ -1,4 +1,4 @@
-GET /v1/people/~/connections?count=500
+GET /v1/people/~/connections?count=25
 x-li-format: json
 accept-encoding: gzip, deflate
 user-agent: Python-httplib2/$Rev$

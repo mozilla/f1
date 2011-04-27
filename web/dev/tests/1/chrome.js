@@ -22,7 +22,8 @@
  * */
 
 /*jslint indent: 2 */
-/*global define: false, window: false, console: false */
+/*global define: false, window: false, console: false, localStorage: false,
+  location: true */
 "use strict";
 
 define(['jquery', 'dispatch'], function ($, dispatch) {
@@ -36,13 +37,29 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
       testWindow, chrome,
       dataStore = (localStorage.chromeTestStore &&
                    JSON.parse(localStorage.chromeTestStore)) || {},
-      origin = location.protocol + "//" + location.host;
+      origin = location.protocol + "//" + location.host,
+      panelUrl = '../../1/share/panel/#test';
 
   // expose the data store for inspection in firebug
   window.dataStore = dataStore;
 
+  if (location.hash === '#settings') {
+    document.documentElement.className = 'settings';
+    panelUrl = '../../1/settings/#test';
+  }
+
 
   chrome = {
+    sharePanelButton: function () {
+      location = '#';
+      location.reload(true);
+    },
+
+    settingsButton: function () {
+      location = '#settings';
+      location.reload(true);
+    },
+
     saveStore: function () {
       localStorage.chromeTestStore = JSON.stringify(dataStore);
     },
@@ -57,7 +74,7 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
     },
 
     loadPanel: function () {
-      testWindow.location = '../../1/share/panel/#test';
+      testWindow.location = panelUrl;
     },
 
     reloadPanel: function () {
@@ -76,70 +93,21 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
   sub('registerForTests', function () {
 
     var subs = {
-      panelReady: function () {
-        targetPub('shareState', {
-          status: 0,
-          open: true,
-          options: {
-            version: '0.7.2',
-            title: 'Firefox web browser',
-            description: 'All about firefox',
-            medium: null,
-            source: null,
-            url: 'http://www.mozilla.com/en-US/firefox/fx/',
-            canonicalUrl: null,
-            shortUrl: null,
-            previews: [{
-              http_url: 'http://mozcom-cdn.mozilla.net/img/firefox-100.jpg'
-            }],
-            siteName: '',
-            prefs: {
-              system: 'dev',
-              bookmarking: true,
-              use_accel_key: true
-            }
-          }
-        });
-      },
+      sizeToContent: function () {
+        var rect = testWindow.document.getElementById('wrapper').getBoundingClientRect(),
+            iframe = $('#testFrame')[0];
 
-      storeGet: function (key) {
-        var value = dataStore[key];
-        //JSON wants null.
-        if (value === undefined) {
-          value = null;
-        }
-        targetPub('storeGetReturn', {
-          key: key,
-          value: value
-        });
-      },
-
-      storeSet: function (data) {
-        dataStore[data.key] = data.value;
-        chrome.saveStore();
-        targetPub('storeNotifyChange', {
-          key: data.key,
-          value: data.value
-        });
-      },
-
-      storeRemove: function (key) {
-        delete dataStore[key];
-        chrome.saveStore();
-        targetPub('storeNotifyChange', {
-          key: key,
-          value: null
-        });
+        iframe.style.width = rect.width + 'px';
+        iframe.style.height = rect.height + 'px';
       }
-    },
-    prop;
+    };
 
     // register all events.
     testWindow.addEventListener('message', function (evt) {
       if (evt.origin === origin) {
         var message;
         try {
-          var message = JSON.parse(evt.data);
+          message = JSON.parse(evt.data);
         } catch (e) {
           console.error('Could not JSON parse: ' + evt.data);
         }
@@ -159,6 +127,11 @@ define(['jquery', 'dispatch'], function ($, dispatch) {
   });
 
   window.addEventListener('load', function (evt) {
+
+    if (location.hash === '#settings') {
+      document.getElementById('title').innerHTML = 'Settings';
+    }
+
     testWindow = $('#testFrame')[0].contentWindow;
 
     // load the share panel

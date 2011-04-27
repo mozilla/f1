@@ -65,6 +65,7 @@ class TestHelpers(TestController):
         # first make sure HTTPException gets passed through
         from webob.exc import HTTPException
         http_exc = HTTPException('msg', 'wsgi_response')
+
         @helpers.json_exception_response
         def http_exception_raiser():
             raise http_exc
@@ -87,6 +88,7 @@ class TestHelpers(TestController):
     @patch('linkdrop.lib.helpers.get_pylons')
     def test_api_response(self, mock_get_pylons):
         data = {'foo': 'bar', 'baz': 'bawlp'}
+
         @helpers.api_response
         def sample_data():
             return data
@@ -117,6 +119,7 @@ class TestHelpers(TestController):
 
         # xml format / list
         data = ['foo', 'bar', 'baz', 'bawlp']
+
         @helpers.api_response
         def sample_data2():
             return data
@@ -145,8 +148,7 @@ class TestHelpers(TestController):
                                 'BodyArg2 Doc'),
                 ],
             response={'type': 'list', 'doc': 'callargs list'},
-            name='NAME'
-            )
+            name='NAME')
         def api_fn(arg1, arg2, kwarg1=None, kwarg2=None):
             return [(arg1, arg2), dict(kwarg1=kwarg1, kwarg2=kwarg2)]
         res = api_fn(1, 2, kwarg1='foo', kwarg2='bar')

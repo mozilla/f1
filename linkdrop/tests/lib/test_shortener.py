@@ -4,6 +4,7 @@ from mock import patch
 from nose import tools
 import json
 
+
 @patch('linkdrop.lib.shortener.log')
 @patch('linkdrop.lib.shortener.urllib')
 def test_shorten_link_bad_response(mock_urllib, mock_log):
@@ -18,6 +19,7 @@ def test_shorten_link_bad_response(mock_urllib, mock_log):
     mock_log.error.assert_called_once_with(
         "unexpected bitly response: %r", shortener_response)
 
+
 @patch('linkdrop.lib.shortener.urllib')
 def test_shorten_link(mock_urllib):
     longurl = 'http://example.com/long/long/really/no/i/mean/really/long/url'
@@ -29,4 +31,3 @@ def test_shorten_link(mock_urllib):
     mock_urllib.urlopen.assert_called_once()
     urlopen_arg = mock_urllib.urlopen.call_args[0][0]
     tools.ok_('longUrl=%s' % longurl in urlopen_arg)
-
