@@ -106,7 +106,7 @@ Returns a json object containing documentation
                           'methods and parameters.')})
     def index(self, request):
         # iterate through our routes and get the controller classes
-        mapper = self.app.config['routes.map']
+        mapper = self.app.mapper
         module_names = {}
         for m in mapper.matchlist:
             module_name = m.defaults.get('controller', None)
