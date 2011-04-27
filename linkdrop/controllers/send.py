@@ -37,7 +37,7 @@ from linkoauth.errors import (OAuthKeysException, ServiceUnavailableException,
 from linkdrop.controllers import get_services
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response
-from linkdrop.lib.helpers import api_entry, api_arg
+from linkdrop.lib.helpers import api_entry, api_arg, get_passthrough_headers
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 from linkdrop.lib.shortener import shorten_link
@@ -157,10 +157,11 @@ Site provided description of the shared item, not supported by all services.
                                     short_url=shorturl,
                                     acct_id=acct_hash)
         # send the item
+        headers = get_passthrough_headers(request)
         try:
             services = get_services()
             result, error = services.sendmessage(domain, acct, message,
-                                                 args)
+                                                 args, headers)
         except DomainNotRegisteredError:
             error = {
                 'message': "'domain' is invalid",
