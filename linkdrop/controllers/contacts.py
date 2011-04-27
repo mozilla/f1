@@ -22,10 +22,7 @@
 #   Rob Miller (rmiller@mozilla.com)
 #
 
-import logging
 import json
-
-from pylons import request
 
 from linkoauth.errors import (OAuthKeysException, ServiceUnavailableException,
                               DomainNotRegisteredError)
@@ -36,8 +33,6 @@ from linkdrop.lib.helpers import json_exception_response, api_response
 from linkdrop.lib.helpers import api_entry, api_arg, get_passthrough_headers
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
-
-log = logging.getLogger(__name__)
 
 
 class ContactsController(BaseController):
@@ -85,7 +80,8 @@ Name of the group to return.
 """),
         ],
         response={'type': 'object', 'doc': 'Portable Contacts Collection'})
-    def get(self, domain):
+    def get(self, request):
+        domain = str(request.sync_info['domain'])
         page_data = request.POST.get('pageData', None)
         account_data = request.POST.get('account', None)
 
@@ -104,7 +100,7 @@ Name of the group to return.
         headers = get_passthrough_headers(request)
         page_data = page_data and json.loads(page_data) or {}
         try:
-            services = get_services()
+            services = get_services(self.app.config)
             result, error = services.getcontacts(domain, acct, page_data,
                                                  headers)
         except DomainNotRegisteredError:

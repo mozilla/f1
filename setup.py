@@ -28,17 +28,21 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-VERSION='0.3.7'
+VERSION = '0.3.7'
 
 setup(
     name='linkdrop',
     version=VERSION,
-    description='F1 is a browser extension that allows you to share links in a fast and fun way.',
+    description=('F1 is a browser extension that allows you to share links '
+                 'in a fast and fun way.'),
     author='Mozilla Messaging',
     author_email='linkdrop@googlegroups.com',
     url='http://f1.mozillamessaging.com/',
     install_requires=[
-        "Pylons>=1.0",
+        "PasteScript>=1.6.3",
+        "beaker",
+        "services",
+        "decorator",
         "docutils",
         "nose",
         "coverage",
@@ -50,7 +54,6 @@ setup(
         "python-memcached",
         "linkoauth",
     ],
-    setup_requires=["PasteScript>=1.6.3"],
     packages=find_packages(exclude=['ez_setup']),
     include_package_data=True,
     test_suite='nose.collector',
@@ -60,10 +63,10 @@ setup(
             ('templates/**.mako', 'mako', {'input_encoding': 'utf-8'}),
             ('public/**', 'ignore', None)]},
     zip_safe=False,
-    paster_plugins=['PasteScript', 'Pylons'],
+    paster_plugins=['PasteScript'],
     entry_points="""
     [paste.app_factory]
-    main = linkdrop.config.middleware:make_app
+    main = linkdrop.wsgiapp:make_app
     static = linkdrop.static:make_static
 
     [paste.filter_app_factory]
@@ -72,11 +75,12 @@ setup(
     profiler = linkdrop.debug:make_profile_middleware
 
     [paste.app_install]
-    main = pylons.util:PylonsInstaller
+    main = paste.script.appinstall:Installer
     """,
 )
 
-import os, stat
+import os
+import stat
 basedir = os.path.join(os.getcwd(), "web")
 realdir = VERSION
 linkdir = os.path.join(basedir, "current")
@@ -90,7 +94,7 @@ try:
         else:
             os.unlink(linkdir)
 except OSError, e:
-    if e.errno != 2: # file does not exist
+    if e.errno != 2:  # file does not exist
         raise
 
 # Check what the symlink might already point to
@@ -100,7 +104,7 @@ if hasattr(os, "readlink"):
         lver = os.readlink(linkdir)
     except OSError, e:
         lver = None
-        if e.errno != 2: # file does not exist
+        if e.errno != 2:  # file does not exist
             raise
 
     if lver != VERSION:

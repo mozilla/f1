@@ -24,6 +24,7 @@
 
 from linkdrop.controllers import send
 from linkdrop.tests import TestController
+from mock import Mock
 from mock import patch
 from nose import tools
 import hashlib
@@ -36,21 +37,19 @@ class TestSendController(TestController):
     userid = 'USERID'
 
     def setUp(self):
-        self.req_patcher = patch('linkdrop.controllers.send.request')
         self.gserv_patcher = patch(
             'linkdrop.controllers.send.get_services')
         self.metrics_patcher = patch(
             'linkdrop.controllers.send.metrics')
-        self.req_patcher.start()
         self.gserv_patcher.start()
         self.metrics_patcher.start()
-        send.request.POST = dict()
-        self.controller = send.SendController()
+        self.request = Mock()
+        self.request.POST = dict()
+        self.controller = send.SendController(self.app)
         self.real_send = self.controller.send.undecorated.undecorated
         self.mock_sendmessage = send.get_services().sendmessage
 
     def tearDown(self):
-        self.req_patcher.stop()
         self.gserv_patcher.stop()
         self.metrics_patcher.stop()
 
@@ -59,14 +58,14 @@ class TestSendController(TestController):
             domain = self.domain
         else:
             self.domain = domain
-        send.request.POST['domain'] = domain
+        self.request.POST['domain'] = domain
 
     def _setup_acct_data(self):
-        send.request.POST['username'] = self.username
-        send.request.POST['userid'] = self.userid
+        self.request.POST['username'] = self.username
+        self.request.POST['userid'] = self.userid
         acct_json = json.dumps({'username': self.username,
                                 'userid': self.userid})
-        send.request.POST['account'] = acct_json
+        self.request.POST['account'] = acct_json
 
     def _acct_hash(self):
         return hashlib.sha1(
@@ -81,7 +80,7 @@ class TestSendController(TestController):
         self.mock_sendmessage.return_value = result, error
 
     def test_send_no_domain(self):
-        res = self.real_send(self.controller)
+        res = self.real_send(self.controller, self.request)
         tools.eq_(res['result'], dict())
         tools.eq_(res['error']['message'], "'domain' is not optional")
 
@@ -89,18 +88,15 @@ class TestSendController(TestController):
         self._setup_domain()
         self._setup_acct_data()
         from linkoauth.errors import DomainNotRegisteredError
-
-        def raise_domainnotregisterederror(*args):
-            raise DomainNotRegisteredError
-        self.mock_sendmessage.side_effect = raise_domainnotregisterederror
-        res = self.real_send(self.controller)
+        self.mock_sendmessage.side_effect = DomainNotRegisteredError
+        res = self.real_send(self.controller, self.request)
         tools.eq_(res['result'], dict())
         tools.eq_(res['error']['message'], "'domain' is invalid")
 
     def test_send_no_acct(self):
         self._setup_domain()
-        res = self.real_send(self.controller)
-        send.metrics.track.assert_called_with(send.request, 'send-noaccount',
+        res = self.real_send(self.controller, self.request)
+        send.metrics.track.assert_called_with(self.request, 'send-noaccount',
                                               domain=self.domain)
         tools.eq_(res['result'], dict())
         tools.ok_(res['error']['message'].startswith(
@@ -113,17 +109,18 @@ class TestSendController(TestController):
         self._setup_domain()
         self._setup_acct_data()
         self._setup_provider()
-        send.request.POST['shorten'] = True
+        self.request.POST['shorten'] = True
         longurl = 'www.mozilla.org/path/to/something'
-        send.request.POST['link'] = longurl
+        self.request.POST['link'] = longurl
         shorturl = 'http://sh.ort/url'
         mock_shorten.return_value = shorturl
-        res = self.real_send(self.controller)
-        mock_shorten.assert_called_once_with('http://' + longurl)
+        res = self.real_send(self.controller, self.request)
+        mock_shorten.assert_called_once_with(self.request.config,
+                                             'http://' + longurl)
         timer_args = send.metrics.start_timer.call_args_list
         tools.eq_(len(timer_args), 2)
-        tools.eq_(timer_args[0], ((send.request,), dict(long_url=longurl)))
-        tools.eq_(timer_args[1][0][0], send.request)
+        tools.eq_(timer_args[0], ((self.request,), dict(long_url=longurl)))
+        tools.eq_(timer_args[1][0][0], self.request)
         tools.eq_(timer_args[1][1]['long_url'], 'http://' + longurl)
         tools.eq_(timer_args[1][1]['short_url'], shorturl)
         tools.eq_(timer_args[1][1]['acct_id'], self._acct_hash())
@@ -144,8 +141,8 @@ class TestSendController(TestController):
         self.mock_sendmessage.side_effect = raise_oauthkeysexception
         self._setup_domain()
         self._setup_acct_data()
-        res = self.real_send(self.controller)
-        send.metrics.track.assert_called_with(send.request,
+        res = self.real_send(self.controller, self.request)
+        send.metrics.track.assert_called_with(self.request,
                                               'send-oauth-keys-missing',
                                               domain=self.domain)
         tools.eq_(res['result'], dict())
@@ -157,16 +154,13 @@ class TestSendController(TestController):
     def test_send_serviceunavailexception(self):
         from linkoauth.errors import ServiceUnavailableException
         debug_msg = 'DEBUG'
-
-        def raise_servunavailexception(*args):
-            e = ServiceUnavailableException('SERVUNAVAIL')
-            e.debug_message = debug_msg
-            raise e
-        self.mock_sendmessage.side_effect = raise_servunavailexception
+        e = ServiceUnavailableException('SERVUNAVAIL')
+        e.debug_message = debug_msg
+        self.mock_sendmessage.side_effect = e
         self._setup_domain()
         self._setup_acct_data()
-        res = self.real_send(self.controller)
-        send.metrics.track.assert_called_with(send.request,
+        res = self.real_send(self.controller, self.request)
+        send.metrics.track.assert_called_with(self.request,
                                               'send-service-unavailable',
                                               domain=self.domain)
         tools.eq_(res['result'], dict())
@@ -181,7 +175,7 @@ class TestSendController(TestController):
         self._setup_acct_data()
         errmsg = 'ERROR'
         self.mock_sendmessage.return_value = (dict(), errmsg)
-        res = self.real_send(self.controller)
+        res = self.real_send(self.controller, self.request)
         mock_timer = send.metrics.start_timer()
         mock_timer.track.assert_called_with('send-error', error=errmsg)
         tools.eq_(res['result'], dict())
@@ -191,10 +185,10 @@ class TestSendController(TestController):
         self._setup_domain()
         self._setup_acct_data()
         to_ = 'hueylewis@example.com'
-        send.request.POST['to'] = to_
+        self.request.POST['to'] = to_
         self.mock_sendmessage.return_value = (
             dict(message='SUCCESS'), dict())
-        res = self.real_send(self.controller)
+        res = self.real_send(self.controller, self.request)
         mock_timer = send.metrics.start_timer()
         mock_timer.track.assert_called_with('send-success')
         tools.eq_(res['result']['message'], 'SUCCESS')

@@ -26,13 +26,11 @@
 Consists of functions to typically be used within templates, but also
 available to Controllers. This module is available to templates as 'h'.
 """
-from pylons.decorators.util import get_pylons
-from pylons.controllers.core import HTTPException
 from decorator import decorator
 import pprint
 from xml.sax.saxutils import escape
 import json
-from webob.exc import status_map
+from webob.exc import HTTPException, status_map
 
 import logging
 
@@ -139,13 +137,14 @@ def get_passthrough_headers(request):
 
 @decorator
 def json_exception_response(func, *args, **kwargs):
+    request = args[1]
     try:
         return func(*args, **kwargs)
     except HTTPException:
         raise
     except Exception, e:
         log.exception("%s(%s, %s) failed", func, args, kwargs)
-        metrics.track(get_pylons(args).request, 'unhandled-exception',
+        metrics.track(request, 'unhandled-exception',
                       function=func.__name__, error=e.__class__.__name__)
         return {
             'result': None,
@@ -158,12 +157,12 @@ def json_exception_response(func, *args, **kwargs):
 
 @decorator
 def api_response(func, *args, **kwargs):
-    pylons = get_pylons(args)
+    request = args[1]
     data = func(*args, **kwargs)
-    format = pylons.request.params.get('format', 'json')
+    format = request.params.get('format', 'json')
 
     if format == 'test':
-        pylons.response.headers['Content-Type'] = 'text/plain'
+        request.response.headers['Content-Type'] = 'text/plain'
         return pprint.pformat(data)
     elif format == 'xml':
 
@@ -180,10 +179,10 @@ def api_response(func, *args, **kwargs):
                 else:
                     r += "<%s>%s</%s>" % (k, escape("%s" % v), k)
             return r
-        pylons.response.headers['Content-Type'] = 'text/xml'
+        request.response.headers['Content-Type'] = 'text/xml'
         return ('<?xml version="1.0" encoding="UTF-8"?>'
                 + ser({'response': data}).encode('utf-8'))
-    pylons.response.headers['Content-Type'] = 'application/json'
+    request.response.headers['Content-Type'] = 'application/json'
     res = json.dumps(data)
     return res
 

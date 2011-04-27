@@ -25,12 +25,11 @@
 # object once Pylons gets removed
 
 from linkoauth import Services
-from pylons import config
 
 services = None
 
 
-def get_services():
+def get_services(config):
     global services
     if services is None:
         enabled = int(config.get('sstatus.ttl', '0'))
