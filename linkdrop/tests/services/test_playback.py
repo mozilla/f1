@@ -272,14 +272,15 @@ class ServiceReplayTestCase(TestController):
     def getResponse(self, req_type, request, headers=None):
         url = URLGenerator(self.app.mapper, dict(HTTP_HOST='localhost'))
         if req_type == "send":
-            response = self.app.post(url(controller='send', action='send'),
-                                     params=request, headers=headers)
+            response = self.test_app.post(url(controller='send',
+                                              action='send'),
+                                          params=request, headers=headers)
         elif req_type == "contacts":
             # send the 'contacts' request.
             domain = request.pop('domain')
-            response = self.app.post(url(controller='contacts',
-                                         action='get', domain=domain),
-                                     params=request, headers=headers)
+            response = self.test_app.post(url(controller='contacts',
+                                              action='get', domain=domain),
+                                          params=request, headers=headers)
         elif req_type == "auth":
             # this is a little gross - we need to hit "authorize"
             # direct, then assume we got redirected to the service,
