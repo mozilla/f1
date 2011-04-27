@@ -59,8 +59,7 @@ def import_module(partname, fqname, parent):
 
 
 def getmodule(module_name):
-    # XXX this should be generic and be able to discover controllers that
-    # are loaded into a pylons app
+    # XXX this should be generic and be able to auto-discover our controllers
     import linkdrop.controllers
     fqname = "linkdrop.controllers." + module_name
     try:
