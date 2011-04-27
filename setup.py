@@ -38,7 +38,7 @@ setup(
     author_email='linkdrop@googlegroups.com',
     url='http://f1.mozillamessaging.com/',
     install_requires=[
-        "Pylons>=1.0",
+        "services",
         "docutils",
         "nose",
         "coverage",
@@ -60,7 +60,7 @@ setup(
             ('templates/**.mako', 'mako', {'input_encoding': 'utf-8'}),
             ('public/**', 'ignore', None)]},
     zip_safe=False,
-    paster_plugins=['PasteScript', 'Pylons'],
+    paster_plugins=['PasteScript'],
     entry_points="""
     [paste.app_factory]
     main = linkdrop.wsgiapp:make_app
