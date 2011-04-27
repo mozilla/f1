@@ -28,12 +28,13 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
-VERSION='0.3.7'
+VERSION = '0.3.7'
 
 setup(
     name='linkdrop',
     version=VERSION,
-    description='F1 is a browser extension that allows you to share links in a fast and fun way.',
+    description=('F1 is a browser extension that allows you to share links '
+                 'in a fast and fun way.'),
     author='Mozilla Messaging',
     author_email='linkdrop@googlegroups.com',
     url='http://f1.mozillamessaging.com/',
@@ -76,7 +77,8 @@ setup(
     """,
 )
 
-import os, stat
+import os
+import stat
 basedir = os.path.join(os.getcwd(), "web")
 realdir = VERSION
 linkdir = os.path.join(basedir, "current")
@@ -90,7 +92,7 @@ try:
         else:
             os.unlink(linkdir)
 except OSError, e:
-    if e.errno != 2: # file does not exist
+    if e.errno != 2:  # file does not exist
         raise
 
 # Check what the symlink might already point to
@@ -100,7 +102,7 @@ if hasattr(os, "readlink"):
         lver = os.readlink(linkdir)
     except OSError, e:
         lver = None
-        if e.errno != 2: # file does not exist
+        if e.errno != 2:  # file does not exist
             raise
 
     if lver != VERSION:
