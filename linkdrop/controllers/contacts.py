@@ -30,7 +30,7 @@ from linkoauth.errors import (OAuthKeysException, ServiceUnavailableException,
 from linkdrop.controllers import get_services
 from linkdrop.lib.base import BaseController
 from linkdrop.lib.helpers import json_exception_response, api_response
-from linkdrop.lib.helpers import api_entry, api_arg
+from linkdrop.lib.helpers import api_entry, api_arg, get_passthrough_headers
 from linkdrop.lib import constants
 from linkdrop.lib.metrics import metrics
 
@@ -97,10 +97,12 @@ Name of the group to return.
             }
             return {'result': None, 'error': error}
 
+        headers = get_passthrough_headers(request)
         page_data = page_data and json.loads(page_data) or {}
         try:
-            services = get_services(self.app.config)
-            result, error = services.getcontacts(domain, acct, page_data)
+            services = get_services(self.app_config)
+            result, error = services.getcontacts(domain, acct, page_data,
+                                                 headers)
         except DomainNotRegisteredError:
             error = {
                 'message': "'domain' is invalid",
