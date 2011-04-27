@@ -143,7 +143,7 @@ Site provided description of the shared item, not supported by all services.
             u = urlparse(longurl)
             if not u.scheme:
                 longurl = 'http://' + longurl
-            shorturl = shorten_link(longurl)
+            shorturl = shorten_link(request.config, longurl)
             link_timer.track('link-shorten', short_url=shorturl)
             args['shorturl'] = shorturl
 

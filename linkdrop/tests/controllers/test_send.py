@@ -115,7 +115,8 @@ class TestSendController(TestController):
         shorturl = 'http://sh.ort/url'
         mock_shorten.return_value = shorturl
         res = self.real_send(self.controller, self.request)
-        mock_shorten.assert_called_once_with('http://' + longurl)
+        mock_shorten.assert_called_once_with(self.request.config,
+                                             'http://' + longurl)
         timer_args = send.metrics.start_timer.call_args_list
         tools.eq_(len(timer_args), 2)
         tools.eq_(timer_args[0], ((self.request,), dict(long_url=longurl)))
