@@ -24,7 +24,7 @@
 # Test that some request headers make it all the way to the service.
 # Currently the only such header is "Accept-Language"
 
-from linkoauth import get_providers
+from linkdrop.tests import testable_services
 
 from test_playback import (HttpReplayer, setupReplayers, teardownReplayers,
                            domain_to_test)
@@ -72,7 +72,7 @@ def check_with_headers(provider, req_type, exp_language, headers=None):
     response = test.getResponse(req_type, request, headers)
 
 def test_all():
-    for provider in get_providers():
+    for provider in testable_services:
         if provider in ["google.com", "googleapps.com"]:
             # these use SMTP which doesn't attempt to pass on the header.
             continue
