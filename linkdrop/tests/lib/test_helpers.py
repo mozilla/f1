@@ -65,18 +65,20 @@ class TestHelpers(TestController):
         # first make sure HTTPException gets passed through
         from webob.exc import HTTPException
         http_exc = HTTPException('msg', 'wsgi_response')
+        request = Mock()
 
         @helpers.json_exception_response
-        def http_exception_raiser():
+        def http_exception_raiser(self, request):
             raise http_exc
-        tools.assert_raises(HTTPException, http_exception_raiser)
+        tools.assert_raises(HTTPException, http_exception_raiser, None,
+                            request)
 
         # then make sure other exceptions get converted to JSON
         @helpers.json_exception_response
-        def other_exception_raiser():
+        def other_exception_raiser(self, request):
             exc = Exception('EXCEPTION')
             raise exc
-        res = other_exception_raiser()
+        res = other_exception_raiser(None, request)
         tools.ok_(res['result'] is None)
         tools.eq_(res['error']['name'], 'Exception')
         tools.eq_(res['error']['message'], 'EXCEPTION')
@@ -85,33 +87,33 @@ class TestHelpers(TestController):
         tools.eq_(track_args[1]['function'], 'other_exception_raiser')
         tools.eq_(track_args[1]['error'], 'Exception')
 
-    @patch('linkdrop.lib.helpers.get_pylons')
-    def test_api_response(self, mock_get_pylons):
+    def test_api_response(self):
         data = {'foo': 'bar', 'baz': 'bawlp'}
 
         @helpers.api_response
-        def sample_data():
+        def sample_data(self, request):
             return data
-        request = mock_get_pylons().request
-        response = mock_get_pylons().response
+        request = Mock()
+        response = request.response  # another Mock
+
         # json format
         request.params = dict()
         response.headers = dict()
-        res = sample_data()
+        res = sample_data(None, request)
         tools.eq_(res, json.dumps(data))
         tools.eq_(response.headers['Content-Type'], 'application/json')
 
         # "test" format (i.e. pprinted output)
         request.params['format'] = 'test'
         response.headers = dict()
-        res = sample_data()
+        res = sample_data(None, request)
         tools.eq_(res, pprint.pformat(data))
         tools.eq_(response.headers['Content-Type'], 'text/plain')
 
         # xml format / dict
         request.params['format'] = 'xml'
         response.headers = dict()
-        res = sample_data()
+        res = sample_data(None, request)
         xml = ('<?xml version="1.0" encoding="UTF-8"?><response>'
                '<foo>bar</foo><baz>bawlp</baz></response>')
         tools.eq_(res, xml)
@@ -121,11 +123,11 @@ class TestHelpers(TestController):
         data = ['foo', 'bar', 'baz', 'bawlp']
 
         @helpers.api_response
-        def sample_data2():
+        def sample_data2(self, request):
             return data
         request.params['format'] = 'xml'
         response.headers = dict()
-        res = sample_data()
+        res = sample_data(None, request)
         xml = ('<?xml version="1.0" encoding="UTF-8"?><response>foo</response>'
                '<response>bar</response><response>baz</response><response>'
                'bawlp</response>')
