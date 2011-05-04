@@ -102,4 +102,4 @@ adding to your /etc/hosts file:
 Update development.ini and add your key/secret for the google configuration,
 restart paster.
 
-Then in the web browser, hit f1 with http://your.host.com.
+Then in the web browser, hit ShareServer with http://your.host.com.
