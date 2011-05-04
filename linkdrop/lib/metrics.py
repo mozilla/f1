@@ -77,7 +77,7 @@ class F1MetricsConsumer(MetricsConsumer):
 
 class F1MetricsCollector(MetricsCollector):
     def _distinct_object_to_attrs(self, distinct_ob):
-        # distinct_ob is expected to be a pylons 'request' object
+        # distinct_ob is expected to be a webob 'request' object
         # a proxy is used in production, so prefer HTTP_X_FORWARDED_FOR
         try:
             remote_address = distinct_ob.environ['HTTP_X_FORWARDED_FOR']

@@ -21,6 +21,7 @@
 # Contributor(s):
 #   Rob Miller (rmiller@mozilla.com)
 #
+# ***** END LICENSE BLOCK *****
 
 import logging
 import json
@@ -28,8 +29,6 @@ import copy
 from urlparse import urlparse
 from paste.deploy.converters import asbool
 import hashlib
-
-from pylons import request
 
 from linkoauth.errors import (OAuthKeysException, ServiceUnavailableException,
                               DomainNotRegisteredError)
@@ -107,7 +106,7 @@ Site provided description of the shared item, not supported by all services.
 """),
         ],
         response={'type': 'list', 'doc': 'raw data list'})
-    def send(self):
+    def send(self, request):
         result = {}
         error = None
         acct = None
@@ -144,7 +143,7 @@ Site provided description of the shared item, not supported by all services.
             u = urlparse(longurl)
             if not u.scheme:
                 longurl = 'http://' + longurl
-            shorturl = shorten_link(longurl)
+            shorturl = shorten_link(request.config, longurl)
             link_timer.track('link-shorten', short_url=shorturl)
             args['shorturl'] = shorturl
 
@@ -159,7 +158,7 @@ Site provided description of the shared item, not supported by all services.
         # send the item
         headers = get_passthrough_headers(request)
         try:
-            services = get_services()
+            services = get_services(self.app.config)
             result, error = services.sendmessage(domain, acct, message,
                                                  args, headers)
         except DomainNotRegisteredError:
