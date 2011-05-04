@@ -31,7 +31,7 @@ except ImportError:
 VERSION = '0.3.7'
 
 setup(
-    name='linkdrop',
+    name='ShareServer',
     version=VERSION,
     description=('F1 is a browser extension that allows you to share links '
                  'in a fast and fun way.'),
