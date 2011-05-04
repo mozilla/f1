@@ -1,3 +1,3 @@
 import logging
 
-log = logging.getLogger('share')
+log = logging.getLogger('shareserver')
