@@ -5,7 +5,7 @@ BIN_DIR = bin
 endif
 
 APPNAME = server-shared-send
-DEPS = mozilla:server-core,github:server-share-core
+DEPS = mozilla:server-core,github:server-share-core,github:client-share-web
 VIRTUALENV = virtualenv
 NOSE = $(BIN_DIR)/nosetests
 NOSETESTS_ARGS = -s
