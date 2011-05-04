@@ -39,7 +39,7 @@
         </table>
     </div>
     <div class="footer" style="font-size:12px;color:#444;">
-        shared via <a target="_blank" style="color:#006AAA;font-weight:bold;text-decoration:none;" title="Share links with the people that matter to you" href="http://f1.mozillamessaging.com/">Mozilla F1</a> for Firefox  &mdash; <span style="color:#666;">"share links with the people that matter to you"</span>
+        shared via <a target="_blank" style="color:#006AAA;font-weight:bold;text-decoration:none;" title="Share links with the people that matter to you" href="http://f1.mozillamessaging.com/">Firefox Share</a> &mdash; <span style="color:#666;">"share links with the people that matter to you"</span>
     </div>
 </body>
 </html>
