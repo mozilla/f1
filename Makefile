@@ -6,6 +6,7 @@ endif
 
 APPNAME = server-shared-send
 DEPS = mozilla:server-core,github:server-share-core,github:client-share-web
+DEV_DEPS = github:server-core,github:server-share-core,github:client-share-web
 VIRTUALENV = virtualenv
 NOSE = $(BIN_DIR)/nosetests
 NOSETESTS_ARGS = -s
@@ -118,6 +119,15 @@ f1.spec: f1.spec.in Makefile tools/makespec
 build:
 	$(VIRTUALENV) --no-site-packages --distribute .
 	$(PYTHON) build.py $(APPNAME) $(DEPS)
+	$(EZ) nose
+	$(EZ) WebTest
+	$(EZ) Funkload
+	$(EZ) pylint
+	$(EZ) coverage
+
+dev:
+	$(VIRTUALENV) --no-site-packages --distribute .
+	$(PYTHON) build.py $(APPNAME) $(DEV_DEPS)
 	$(EZ) nose
 	$(EZ) WebTest
 	$(EZ) Funkload
