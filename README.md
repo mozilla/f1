@@ -1,3 +1,24 @@
+WARNING: THIS REPOSITORY IS DEPRECATED!
+
+The "F1" project, a way to share links implemented as a Firefox extension, has
+been converted to (and thus superseded by) Firefox's "Share" feature.  The
+web app portion of this project is now available in the following repositories:
+
+- https://github.com/mozilla/server-share
+- https://github.com/mozilla/server-share-core
+- https://github.com/mozilla/client-share-web
+
+The browser extension portion of this project has been rolled into Firefox
+itself.
+
+ACTIVE DEVELOPMENT IS NO LONGER HAPPENING IN THIS REPOSITORY.
+
+Thanks!
+
+
+
+
+
 # f1
 
 A link sharing service that consists of a Firefox extension and a web service.
