@@ -73,7 +73,10 @@ class StaticURLParser(object):
         return fa(environ, start_response)
 
     def make_app(self, filename):
-        return fileapp.FileApp(filename)
+        kwargs = {}
+        if filename.endswith('.webapp'):
+            kwargs['content_type'] = 'application/x-web-app-manifest+json'
+        return fileapp.FileApp(filename, **kwargs)
 
     def add_slash(self, environ, start_response):
         """
