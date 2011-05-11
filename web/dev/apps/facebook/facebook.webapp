@@ -1,0 +1,18 @@
+{
+    "name":"Facebook via F1",
+    "developer": {
+        "name":"Mozilla Labs Demo",
+        "url":"http://mozillalabs.com"
+    },
+    "description":"Connects your browser's Firefox Share to Facebook",
+    "icons":{
+        "32":"/apps/facebook/facebook.png"
+    },
+    "experimental": {
+      "services": [
+        { 
+          "link.send": "/apps/facebook/"
+        }
+      ]
+    }
+}
